@@ -1,0 +1,1793 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>43 · 视觉工具选择 RL 智能体 — 中英对照精读</title>
+<link rel="stylesheet" href="../assets/style.css?v=6">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="back" href="../index.html">← 首页</a>
+  <div class="tb-title"><span class="num">43</span>视觉工具选择 RL 智能体</div>
+  <div class="tb-controls">
+    <a class="tb-link" href="https://arxiv.org/abs/2505.20289" target="_blank" rel="noopener">arXiv</a>
+    <label class="sync"><input type="checkbox" id="syncToggle"> 滚动同步</label>
+  </div>
+</header>
+<main class="reader">
+  <section class="pane pane-en">
+    <div class="pane-head">ENGLISH 原文 (arXiv HTML)</div>
+    <div class="pane-body" id="enBody">
+<article class="ltx_document ltx_authors_1line">
+<h1 class="ltx_title ltx_title_document">VisualToolAgent (VisTA): A Reinforcement Learning Framework for Visual Tool Selection</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Zeyi HuangYuyang Ji
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Anirudh Sundara Rajan
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Zefan Cai
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Wen Xiao
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Haohan Wang
+</span><span class="ltx_author_notes"><span class="ltx_author_notes_content">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_contact_name">Affiliation: </span>UIUC
+</span></span></span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Junjie Hu
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Yong Jae Lee
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">University of Wisconsin-Madison   Microsoft
+</span></span></div>
+
+<div id="abstract1" class="ltx_abstract"><h6 class="ltx_title ltx_title_abstract">Abstract</h6>
+    
+<p id="abstract1.1" class="ltx_p">We introduce <span id="abstract1.1.1" class="ltx_text ltx_font_bold">VisTA</span>, a new reinforcement learning framework that empowers visual agents to dynamically explore, select, and combine tools from a diverse library based on empirical performance. Existing methods for tool-augmented reasoning either rely on training-free prompting or large-scale fine-tuning; both lack active tool exploration and typically assume limited tool diversity, and fine-tuning methods additionally demand extensive human supervision. In contrast, VisTA leverages end-to-end reinforcement learning to iteratively refine sophisticated, query-specific tool selection strategies, using task outcomes as feedback signals. Through Group Relative Policy Optimization (GRPO) <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib1" title="" class="ltx_ref">1</a>]</cite>, our framework enables an agent to autonomously discover effective tool-selection pathways without requiring explicit reasoning supervision. Experiments on the ChartQA, Geometry3K, and BlindTest benchmarks demonstrate that VisTA achieves substantial performance gains over training-free baselines, especially on out-of-distribution examples. These results highlight VisTA’s ability to enhance generalization, adaptively utilize diverse tools, and pave the way for flexible, experience-driven visual reasoning systems. Project website: <a href="https://oodbag.github.io/vista_web/" title="" class="ltx_ref ltx_href">https://oodbag.github.io/vista_web/</a>.</p>
+  
+</div>
+<section id="S1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">1 </span>Introduction</h2>
+
+<div id="S1.p1" class="ltx_para">
+<p id="S1.p1.1" class="ltx_p">Recent advances in Large Language Models (LLMs) <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib2" title="" class="ltx_ref">2</a>, <a href="#bib.bib3" title="" class="ltx_ref">3</a>, <a href="#bib.bib4" title="" class="ltx_ref">4</a>]</cite> and Vision Language Models (VLMs) <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib5" title="" class="ltx_ref">5</a>, <a href="#bib.bib6" title="" class="ltx_ref">6</a>, <a href="#bib.bib7" title="" class="ltx_ref">7</a>]</cite> have unlocked impressive capabilities across tasks such as mathematical problem solving, code generation, and visual question-answering. However, these models are still inherently limited by the static nature of their architectures and the fixed information stored in their weights.
+To overcome these constraints, recent work explores augmenting LLMs and VLMs with external tools <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib8" title="" class="ltx_ref">8</a>, <a href="#bib.bib9" title="" class="ltx_ref">9</a>, <a href="#bib.bib10" title="" class="ltx_ref">10</a>, <a href="#bib.bib11" title="" class="ltx_ref">11</a>, <a href="#bib.bib12" title="" class="ltx_ref">12</a>, <a href="#bib.bib13" title="" class="ltx_ref">13</a>, <a href="#bib.bib14" title="" class="ltx_ref">14</a>]</cite>, dramatically expanding their functionality. Tool augmentation enables access to expert knowledge sources and dynamic computation, such as invoking a Python interpreter for self-verification, thereby enhancing reasoning performance on complex tasks.</p>
+</div>
+<div id="S1.p2" class="ltx_para">
+<p id="S1.p2.1" class="ltx_p">However, the current paradigm for tool integration faces significant limitations in both LLMs and VLMs. Current approaches typically either rely on large-scale fine-tuning with human supervision to teach LLMs how to invoke tools <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib15" title="" class="ltx_ref">15</a>, <a href="#bib.bib16" title="" class="ltx_ref">16</a>]</cite> or depend purely on the LLMs’ internal world knowledge in a training-free manner <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib9" title="" class="ltx_ref">9</a>, <a href="#bib.bib17" title="" class="ltx_ref">17</a>, <a href="#bib.bib12" title="" class="ltx_ref">12</a>]</cite>.
+These methods often rely on tool demonstrations <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib15" title="" class="ltx_ref">15</a>, <a href="#bib.bib16" title="" class="ltx_ref">16</a>]</cite> or detailed tool descriptions to instruct LLMs on their usage <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib12" title="" class="ltx_ref">12</a>, <a href="#bib.bib17" title="" class="ltx_ref">17</a>]</cite>. As a result, they lack the ability to automatically explore, select, or adapt tool choices based on the specific characteristics of each query, particularly when multiple tools of the same type with varying capabilities are available which is common in real world settings.
+The challenge is particularly pronounced when integrating tools with unknown, partially documented capabilities or inconsistently performing capabilities, where actual performance may differ from descriptions. When retrieving tools from diverse sources, the LLMs lack comprehensive knowledge of their strengths and weaknesses. Without a mechanism for experiential learning, the system cannot determine optimal tool selection or discover synergistic tool combinations that might emerge through collaborative deployment.</p>
+</div>
+<figure id="S1.F1" class="ltx_figure"><img src="https://arxiv.org/html/2505.20289v2/teaser.png" id="S1.F1.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:429/209;" width="429" height="209" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 1: </span><span id="S1.F1.3" class="ltx_text ltx_font_bold">Overview of VisTA</span>. (Left) Our method trains an agent to autonomously discover effective combinations of visual tools without human supervision. (Right) By decoupling the agent from the reasoner, the learned policy can be seamlessly integrated with a wide range of reasoning models.</figcaption>
+</figure>
+<div id="S1.p3" class="ltx_para">
+<p id="S1.p3.1" class="ltx_p">In realistic applications, tools vary substantially in functionality and applicability across different problem domains. Within each tool category, individual implementations exhibit varying capabilities that make them differentially effective across contexts. This presents a sophisticated decision-making challenge ideally suited for reinforcement learning (RL) <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib18" title="" class="ltx_ref">18</a>]</cite>.
+RL’s intrinsic exploration-exploitation mechanism enables agents to systematically assess and adaptively identify the most effective tools based on empirical performance rather than pre-specified rules. Through iterative interactions with its environment, an RL agent can learn adaptive strategies that dynamically adjust tool combination based on specific queries, or even potentially discover non-obvious tool utility patterns that may not be apparent from tool descriptions alone.</p>
+</div>
+<div id="S1.p4" class="ltx_para">
+<p id="S1.p4.1" class="ltx_p">Therefore, we introduce a new RL framework, VisualToolAgent (VisTA), that trains autonomous agents to intelligently select optimal tools from multiple available options. Unlike training-free <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib9" title="" class="ltx_ref">9</a>, <a href="#bib.bib17" title="" class="ltx_ref">17</a>, <a href="#bib.bib12" title="" class="ltx_ref">12</a>]</cite> and fine-tuning approaches <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib15" title="" class="ltx_ref">15</a>, <a href="#bib.bib16" title="" class="ltx_ref">16</a>]</cite>, our RL-based method inherently supports exploration-exploitation mechanisms, allowing agents to systematically experiment with various tool combinations through iterative interactions.</p>
+</div>
+<div id="S1.p5" class="ltx_para">
+<p id="S1.p5.1" class="ltx_p">In this work, we focus on the visual reasoning task. Our framework consists of an autonomous agent that learns through end-to-end RL training to dynamically select optimal tools for guiding a fixed VLM in solving complex visual reasoning problems. As a bonus, our framework allows the VLM itself to remain frozen during RL training, which means that the agent’s learned selection strategies can be transferred to different reasoning models without retraining, a critical advantage for deployment flexibility. Our framework employs the Group Relative Policy Optimization (GRPO) <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib1" title="" class="ltx_ref">1</a>]</cite> algorithm to enable our agent to autonomously discover effective tool-selection pathways entirely from scratch, without explicit reasoning examples. For a detailed look at how the agent performs inference and selects tools in practice, see the examples in Fig <a href="#S4.F6" title="Figure 6 ‣ 4.10 Visualizations ‣ 4 Experiments ‣ VisualToolAgent (VisTA): A Reinforcement Learning Framework for Visual Tool Selection" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a>, <a href="#S4.F7" title="Figure 7 ‣ 4.10 Visualizations ‣ 4 Experiments ‣ VisualToolAgent (VisTA): A Reinforcement Learning Framework for Visual Tool Selection" class="ltx_ref"><span class="ltx_text ltx_ref_tag">7</span></a>.</p>
+</div>
+<div id="S1.p6" class="ltx_para">
+<p id="S1.p6.1" class="ltx_p">We evaluate our method on ChartQA <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib19" title="" class="ltx_ref">19</a>]</cite>, a challenging benchmark for visual reasoning that requires models to interpret numerical data, textual labels, and complex visual structures, such as precisely estimating bar heights in charts. We also test on Geometry3K <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib20" title="" class="ltx_ref">20</a>]</cite>, which assesses fine-grained diagram understanding and logical reasoning. This task requires models to accurately parse visual elements (e.g., figures, labels) and align them with textual question conditions to perform math-based reasoning.
+Our experimental results demonstrate that our RL-based approach significantly outperforms training-free methods. The performance gap widens further when testing on Out-of-Distribution (OoD) variants, a robust version that introduces perturbations to the standard dataset. This demonstrates our method’s superior ability to generalize to novel scenarios and maintain performance under challenging visual conditions.</p>
+</div>
+</section>
+<section id="S2" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">2 </span>Related Work</h2>
+
+<div id="S2.p1" class="ltx_para">
+<p id="S2.p1.1" class="ltx_p"><span id="S2.p1.1.1" class="ltx_text ltx_font_bold">Tool-Augmented Reasoning.</span> LLMs have shown significantly improved reasoning capabilities when augmented with external tools such as search engines <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib21" title="" class="ltx_ref">21</a>]</cite>, calculators <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib22" title="" class="ltx_ref">22</a>]</cite>, and Python interpreters <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib8" title="" class="ltx_ref">8</a>, <a href="#bib.bib10" title="" class="ltx_ref">10</a>]</cite>. Programming-based approaches <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib8" title="" class="ltx_ref">8</a>, <a href="#bib.bib10" title="" class="ltx_ref">10</a>]</cite>, for example, integrate Python interpreters to simplify intermediate steps and validate final outputs, enhancing accuracy on mathematical tasks.
+Similar strategies have been adopted in the visual domain. Recent VLM methods <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib13" title="" class="ltx_ref">13</a>, <a href="#bib.bib14" title="" class="ltx_ref">14</a>, <a href="#bib.bib12" title="" class="ltx_ref">12</a>]</cite> generate Python code to invoke specialized vision modules, decomposing complex visual tasks into simpler sub-tasks, each addressable by dedicated vision tools.
+However, existing approaches often rely on human demonstrations or annotations <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib15" title="" class="ltx_ref">15</a>, <a href="#bib.bib16" title="" class="ltx_ref">16</a>]</cite>, or operate in a training-free manner using only the model’s internal knowledge <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib17" title="" class="ltx_ref">17</a>, <a href="#bib.bib12" title="" class="ltx_ref">12</a>]</cite>. These methods typically offer limited tool diversity and depend heavily on explicit tool descriptions <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib15" title="" class="ltx_ref">15</a>, <a href="#bib.bib12" title="" class="ltx_ref">12</a>, <a href="#bib.bib16" title="" class="ltx_ref">16</a>, <a href="#bib.bib17" title="" class="ltx_ref">17</a>]</cite>, lacking the capacity to autonomously explore or adapt tool use to specific queries.
+In contrast, our proposed VisTA framework enables VLMs to autonomously explore and select tools based on empirical performance, without human-designed priors. By training an agent with RL, VisTA discovers context-dependent tool selection policies that adaptively tailor tool usage to the nuanced requirements of each visual reasoning task.</p>
+</div>
+<div id="S2.p2" class="ltx_para">
+<p id="S2.p2.1" class="ltx_p"><span id="S2.p2.1.1" class="ltx_text ltx_font_bold">Reinforcement Learning for Enhanced Reasoning.</span> RL has shown strong potential in enhancing complex reasoning abilities and enabling inference scaling. Models like OpenAI’s o1 <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib23" title="" class="ltx_ref">23</a>]</cite> and DeepSeek-R1 <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib24" title="" class="ltx_ref">24</a>]</cite> have achieved notable success in tasks such as mathematical problem solving by leveraging long chain-of-thought (CoT) <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib25" title="" class="ltx_ref">25</a>]</cite> reasoning. These models excel at strategies like mistake correction, step decomposition, and iterative refinement, resulting in more structured and extended reasoning. Recently, several studies <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib26" title="" class="ltx_ref">26</a>, <a href="#bib.bib27" title="" class="ltx_ref">27</a>]</cite> have adapted the DeepSeek-R1 framework to visual reasoning, training models to generate CoT-based outputs directly from visual inputs.
+While these approaches focus on finetuning the reasoning model itself to perform end-to-end visual inference, our work takes an orthogonal perspective. Instead of modifying or retraining the reasoning model, we propose to train an autonomous agent that reasons about which tools to select to best assist a <em id="S2.p2.1.2" class="ltx_emph ltx_font_italic">frozen</em> reasoning model in solving a given query. By learning to select supportive tools based on each query, our agent enhances performance without altering the model’s internal parameters (thereby preserving generalization to other tasks). This design also ensures broad compatibility across different visual reasoning models and offers a flexible, modular strategy for improving multimodal reasoning systems. ReTool <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib28" title="" class="ltx_ref">28</a>]</cite> is a concurrent work that uses RL to teach LLMs to invoke code execution tools for text-based reasoning. In contrast, our work tackles the challenging setting of visual reasoning with diverse tool choices, requiring agents to adaptively select the most effective tools.</p>
+</div>
+<div id="S2.p3" class="ltx_para">
+<p id="S2.p3.1" class="ltx_p"><span id="S2.p3.1.1" class="ltx_text ltx_font_bold">Visual Reasoning Tasks.</span> Some visual reasoning tasks, such as depth estimation and spatial reasoning <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib29" title="" class="ltx_ref">29</a>]</cite>, can be effectively solved using straightforward, specialized tools like depth estimators or object detectors. In contrast, we target more complex and cognitively demanding tasks, where optimal tool selection is query-dependent and may not be obvious.
+Chart understanding <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib19" title="" class="ltx_ref">19</a>, <a href="#bib.bib30" title="" class="ltx_ref">30</a>]</cite> is a challenging task and a strong indicator of visual reasoning capabilities. It requires models to process numerical data, textual labels, and complex visual structures, not only identifying visual elements but also performing precise interpretation and measurement, such as accurately estimating bar heights in bar charts.
+Geometry questions <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib20" title="" class="ltx_ref">20</a>, <a href="#bib.bib30" title="" class="ltx_ref">30</a>, <a href="#bib.bib31" title="" class="ltx_ref">31</a>]</cite> pose a similarly demanding challenge, requiring fine-grained diagram understanding followed by text-based reasoning grounded in visual details. It evaluates the multi-modal logical reasoning abilities of VLMs by asking them to decode visual elements in diagrams, such as characters and geometric figures, and align them with conditions specified in textual questions for mathematical problem solving.
+Our method achieves strong performance on both types of benchmarks, demonstrating the effectiveness of learning to select tools adaptively for chart and geometry reasoning tasks.</p>
+</div>
+</section>
+<section id="S3" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">3 </span>Method</h2>
+
+<div id="S3.p1" class="ltx_para">
+<p id="S3.p1.1" class="ltx_p">In this section, we present VisTA, a reinforcement learning (RL) framework for tool-augmented visual reasoning. In contrast to previous methods that rely on training-free or fine-tuned strategies, VisTA empowers an agent to learn how to select tools through trial-and-error interaction, without requiring manual supervision. By harnessing the exploration-exploitation dynamics of RL, the agent adaptively chooses from a wide array of tools based on performance feedback. Notably, the core reasoning model is kept fixed, allowing the learned tool-selection policy to transfer across different reasoning backbones without the need for additional training.</p>
+</div>
+<figure id="S3.F2" class="ltx_figure"><img src="https://arxiv.org/html/2505.20289v2/tapo_train.png" id="S3.F2.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:381/251;" width="381" height="251" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 2: </span><span id="S3.F2.5" class="ltx_text ltx_font_bold">Policy Optimization.</span> Given a user query, the agent selects tools from a pre-defined set of external tools. The tools are applied to the image, and their outputs and the query are fed to a frozen reasoner model. Both the <em id="S3.F2.6" class="ltx_emph ltx_font_italic">Direct Path</em> (query+image) and the <em id="S3.F2.7" class="ltx_emph ltx_font_italic">Tool-Augmented Path</em> (query+tools+image) are evaluated to compute a reward signal, which is used to update the agent’s tool-selection policy.</figcaption>
+</figure>
+<section id="S3.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">3.1 </span>Problem Formulation</h3>
+
+<div id="S3.SS1.p1" class="ltx_para">
+<p id="S3.SS1.p1.1" class="ltx_p">Let <math id="S3.SS1.p1.m1" class="ltx_Math" alttext="(q,I)" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">(</mo><mi>q</mi><mo>,</mo><mi>I</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(q,I)</annotation></semantics></math> denote a visual-language query, consisting of an image <math id="S3.SS1.p1.m2" class="ltx_Math" alttext="I" display="inline" intent=":literal"><semantics><mi>I</mi><annotation encoding="application/x-tex">I</annotation></semantics></math> and an associated text query <math id="S3.SS1.p1.m3" class="ltx_Math" alttext="q" display="inline" intent=":literal"><semantics><mi>q</mi><annotation encoding="application/x-tex">q</annotation></semantics></math>, sampled from a task distribution <math id="S3.SS1.p1.m4" class="ltx_Math" alttext="\mathcal{D}" display="inline" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒟</mi><annotation encoding="application/x-tex">\mathcal{D}</annotation></semantics></math>. We consider a setting with a <span id="S3.SS1.p1.1.1" class="ltx_text ltx_font_italic">frozen</span> visual-language model (the <em id="S3.SS1.p1.1.2" class="ltx_emph ltx_font_italic">reasoner</em>) <math id="S3.SS1.p1.m5" class="ltx_Math" alttext="f_{\theta}" display="inline" intent=":literal"><semantics><msub><mi>f</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">f_{\theta}</annotation></semantics></math> and a library of external tools <math id="S3.SS1.p1.m6" class="ltx_Math" alttext="\mathcal{T}=\{T_{1},\ldots,T_{M}\}" display="inline" intent=":literal"><semantics><mrow><mi class="ltx_font_mathcaligraphic">𝒯</mi><mo>=</mo><mrow><mo stretchy="false">{</mo><msub><mi>T</mi><mn>1</mn></msub><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msub><mi>T</mi><mi>M</mi></msub><mo stretchy="false">}</mo></mrow></mrow><annotation encoding="application/x-tex">\mathcal{T}=\{T_{1},\ldots,T_{M}\}</annotation></semantics></math>, where <math id="S3.SS1.p1.m7" class="ltx_Math" alttext="M" display="inline" intent=":literal"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math> is the total number of available tools. These tools include diverse specialized vision modules; e.g., in chart understanding tasks, we utilize chart-to-SVG converters, chart-to-table extractors, and chart-to-caption generators.</p>
+</div>
+<div id="S3.SS1.p2" class="ltx_para">
+<p id="S3.SS1.p2.1" class="ltx_p">We define the agent’s observation or <em id="S3.SS1.p2.1.1" class="ltx_emph ltx_font_italic">state</em> as <math id="S3.SS1.p2.m1" class="ltx_Math" alttext="s=(q,I)" display="inline" intent=":literal"><semantics><mrow><mi>s</mi><mo>=</mo><mrow><mo stretchy="false">(</mo><mi>q</mi><mo>,</mo><mi>I</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">s=(q,I)</annotation></semantics></math>, encompassing both the image and its corresponding query. Our objective is to learn a <em id="S3.SS1.p2.1.2" class="ltx_emph ltx_font_italic">selection policy</em> <math id="S3.SS1.p2.m2" class="ltx_Math" alttext="\pi_{\phi}(t\mid s)" display="inline" intent=":literal"><semantics><mrow><msub><mi>π</mi><mi>ϕ</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>t</mi><mo fence="true" lspace="0em" rspace="0em">∣</mo><mi>s</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\pi_{\phi}(t\mid s)</annotation></semantics></math>, implemented as a vision-language model (the <em id="S3.SS1.p2.1.3" class="ltx_emph ltx_font_italic">agent</em>), that determines which tools to deploy for a given query. Formally, the selection policy maps the state <math id="S3.SS1.p2.m3" class="ltx_Math" alttext="s" display="inline" intent=":literal"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math> to a sequence of selected tools <math id="S3.SS1.p2.m4" class="ltx_Math" alttext="t=\langle T^{(1)},\ldots,T^{(K)}\rangle" display="inline" intent=":literal"><semantics><mrow><mi>t</mi><mo>=</mo><mrow><mo stretchy="false">⟨</mo><mrow><msup><mi>T</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msup><mi>T</mi><mrow><mo stretchy="false">(</mo><mi>K</mi><mo stretchy="false">)</mo></mrow></msup></mrow><mo stretchy="false">⟩</mo></mrow></mrow><annotation encoding="application/x-tex">t=\langle T^{(1)},\ldots,T^{(K)}\rangle</annotation></semantics></math>, where <math id="S3.SS1.p2.m5" class="ltx_Math" alttext="T^{(i)}\in\mathcal{T}" display="inline" intent=":literal"><semantics><mrow><msup><mi>T</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>∈</mo><mi class="ltx_font_mathcaligraphic">𝒯</mi></mrow><annotation encoding="application/x-tex">T^{(i)}\in\mathcal{T}</annotation></semantics></math> and <math id="S3.SS1.p2.m6" class="ltx_Math" alttext="K\leq M" display="inline" intent=":literal"><semantics><mrow><mi>K</mi><mo>≤</mo><mi>M</mi></mrow><annotation encoding="application/x-tex">K\leq M</annotation></semantics></math>. Here, <math id="S3.SS1.p2.m7" class="ltx_Math" alttext="K" display="inline" intent=":literal"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math> represents the number of tools selected for the specific query, which adaptively varies based on task complexity.</p>
+</div>
+</section>
+<section id="S3.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">3.2 </span>VisTA Framework</h3>
+
+<div id="S3.SS2.p1" class="ltx_para">
+<p id="S3.SS2.p1.1" class="ltx_p">Our VisTA framework implements an end-to-end pipeline to learn a policy for dynamic tool selection in visual reasoning tasks (Figure <a href="#S3.F2" title="Figure 2 ‣ 3 Method ‣ VisualToolAgent (VisTA): A Reinforcement Learning Framework for Visual Tool Selection" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a>), leveraging reinforcement learning to enable systematic exploration of tool combinations. The pipeline operates as follows:</p>
+</div>
+<div id="S3.SS2.p2" class="ltx_para">
+<ol id="S3.I1" class="ltx_enumerate ltx_leftmargin_flush">
+<li id="S3.I1.i1" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">1.</span> 
+<div id="S3.I1.i1.p1" class="ltx_para">
+<p id="S3.I1.i1.p1.1" class="ltx_p">The vision-language agent observes the state <math id="S3.I1.i1.p1.m1" class="ltx_Math" alttext="s=(q,I)" display="inline" intent=":literal"><semantics><mrow><mi>s</mi><mo>=</mo><mrow><mo stretchy="false">(</mo><mi>q</mi><mo>,</mo><mi>I</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">s=(q,I)</annotation></semantics></math> and selects a sequence of tools <math id="S3.I1.i1.p1.m2" class="ltx_Math" alttext="t=\langle T^{(1)},\ldots,\\
+T^{(K)}\rangle" display="inline" intent=":literal"><semantics><mrow><mi>t</mi><mo>=</mo><mrow><mo stretchy="false">⟨</mo><mrow><msup><mi>T</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msup><mi>T</mi><mrow><mo stretchy="false">(</mo><mi>K</mi><mo stretchy="false">)</mo></mrow></msup></mrow><mo stretchy="false">⟩</mo></mrow></mrow><annotation encoding="application/x-tex">t=\langle T^{(1)},\ldots,\\
+T^{(K)}\rangle</annotation></semantics></math> via a policy <math id="S3.I1.i1.p1.m3" class="ltx_Math" alttext="\pi_{\phi}(t\mid s)" display="inline" intent=":literal"><semantics><mrow><msub><mi>π</mi><mi>ϕ</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>t</mi><mo fence="true" lspace="0em" rspace="0em">∣</mo><mi>s</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\pi_{\phi}(t\mid s)</annotation></semantics></math>.</p>
+</div></li>
+<li id="S3.I1.i2" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">2.</span> 
+<div id="S3.I1.i2.p1" class="ltx_para">
+<p id="S3.I1.i2.p1.1" class="ltx_p">Each selected tool is executed on the image to produce outputs <math id="S3.I1.i2.p1.m1" class="ltx_Math" alttext="o^{(i)}=T^{(i)}(I)" display="inline" intent=":literal"><semantics><mrow><msup><mi>o</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mrow><msup><mi>T</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>I</mi><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">o^{(i)}=T^{(i)}(I)</annotation></semantics></math> for <math id="S3.I1.i2.p1.m2" class="ltx_Math" alttext="i\in\{1,\ldots,K\}" display="inline" intent=":literal"><semantics><mrow><mi>i</mi><mo>∈</mo><mrow><mo stretchy="false">{</mo><mrow><mn>1</mn><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><mi>K</mi></mrow><mo stretchy="false">}</mo></mrow></mrow><annotation encoding="application/x-tex">i\in\{1,\ldots,K\}</annotation></semantics></math>.</p>
+</div></li>
+<li id="S3.I1.i3" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">3.</span> 
+<div id="S3.I1.i3.p1" class="ltx_para">
+<p id="S3.I1.i3.p1.1" class="ltx_p">These outputs are combined with the original inputs to form an augmented prompt.</p>
+</div></li>
+<li id="S3.I1.i4" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">4.</span> 
+<div id="S3.I1.i4.p1" class="ltx_para">
+<p id="S3.I1.i4.p1.1" class="ltx_p">The frozen reasoner <math id="S3.I1.i4.p1.m1" class="ltx_Math" alttext="f_{\theta}" display="inline" intent=":literal"><semantics><msub><mi>f</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">f_{\theta}</annotation></semantics></math> processes the augmented prompt to produce the final answer <math id="S3.I1.i4.p1.m2" class="ltx_Math" alttext="y^{\text{img+tools}}=f_{\theta}(q,I,\{o^{(1)},\ldots,o^{(K)}\})" display="inline" intent=":literal"><semantics><mrow><msup><mi>y</mi><mtext>img+tools</mtext></msup><mo>=</mo><mrow><msub><mi>f</mi><mi>θ</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>q</mi><mo>,</mo><mi>I</mi><mo>,</mo><mrow><mo stretchy="false">{</mo><msup><mi>o</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msup><mi>o</mi><mrow><mo stretchy="false">(</mo><mi>K</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">}</mo></mrow><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">y^{\text{img+tools}}=f_{\theta}(q,I,\{o^{(1)},\ldots,o^{(K)}\})</annotation></semantics></math>.</p>
+</div></li>
+</ol>
+</div>
+<div id="S3.SS2.p3" class="ltx_para">
+<p id="S3.SS2.p3.1" class="ltx_p">During training, we also compute a baseline prediction <math id="S3.SS2.p3.m1" class="ltx_Math" alttext="y^{\text{img}}=f_{\theta}(q,I)" display="inline" intent=":literal"><semantics><mrow><msup><mi>y</mi><mtext>img</mtext></msup><mo>=</mo><mrow><msub><mi>f</mi><mi>θ</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>q</mi><mo>,</mo><mi>I</mi><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">y^{\text{img}}=f_{\theta}(q,I)</annotation></semantics></math> using only the original query and image, which enables us to measure the impact of selected tools on reasoning performance, as will be detailed in our reward formulation in the following section.</p>
+</div>
+</section>
+<section id="S3.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">3.3 </span>Policy Optimization</h3>
+
+<div id="S3.SS3.p1" class="ltx_para">
+<p id="S3.SS3.p1.1" class="ltx_p">To train the agent to discover effective tool combinations through systematic exploration, we build upon the GRPO algorithm <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib1" title="" class="ltx_ref">1</a>]</cite>. The key difference is that, to adapt it for visual tool selection, we design a novel task-specific reward function.</p>
+</div>
+<div id="S3.SS3.p2" class="ltx_para">
+<p id="S3.SS3.p2.1" class="ltx_p">Given a context, a particular tool may be helpful, harmful, or neutral from the reasoner’s perspective. We reward the agent if the selected tool enables the reasoner to answer the question correctly. If the tool does not lead to a correct answer, the reward depends on the reasoner’s performance without the tool-augmented input. Specifically, if the reasoner also fails without the tool, the reward is set to 0, since the tool had no effect on the outcome. However, if the reasoner could have answered correctly on its own, we assign a reward of -0.5, penalizing the negative influence on the final answer.</p>
+</div>
+<div id="S3.SS3.p3" class="ltx_para">
+<p id="S3.SS3.p3.1" class="ltx_p">More formally, at each training step, given an input state <math id="S3.SS3.p3.m1" class="ltx_Math" alttext="s=(q,I)" display="inline" intent=":literal"><semantics><mrow><mi>s</mi><mo>=</mo><mrow><mo stretchy="false">(</mo><mi>q</mi><mo>,</mo><mi>I</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">s=(q,I)</annotation></semantics></math>, we sample <math id="S3.SS3.p3.m2" class="ltx_Math" alttext="G" display="inline" intent=":literal"><semantics><mi>G</mi><annotation encoding="application/x-tex">G</annotation></semantics></math> tool selection candidates <math id="S3.SS3.p3.m3" class="ltx_Math" alttext="\{t_{j}\}_{j=1}^{G}" display="inline" intent=":literal"><semantics><msubsup><mrow><mo stretchy="false">{</mo><msub><mi>t</mi><mi>j</mi></msub><mo stretchy="false">}</mo></mrow><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>G</mi></msubsup><annotation encoding="application/x-tex">\{t_{j}\}_{j=1}^{G}</annotation></semantics></math> from the current policy <math id="S3.SS3.p3.m4" class="ltx_Math" alttext="\pi_{\phi}" display="inline" intent=":literal"><semantics><msub><mi>π</mi><mi>ϕ</mi></msub><annotation encoding="application/x-tex">\pi_{\phi}</annotation></semantics></math>. For each candidate <math id="S3.SS3.p3.m5" class="ltx_Math" alttext="t_{j}" display="inline" intent=":literal"><semantics><msub><mi>t</mi><mi>j</mi></msub><annotation encoding="application/x-tex">t_{j}</annotation></semantics></math>, we compute a tool-aware reward <math id="S3.SS3.p3.m6" class="ltx_Math" alttext="r_{j}" display="inline" intent=":literal"><semantics><msub><mi>r</mi><mi>j</mi></msub><annotation encoding="application/x-tex">r_{j}</annotation></semantics></math> by comparing the reasoner’s predictions with and without tools:</p>
+<table id="S3.Ex1" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S3.Ex1.m1" class="ltx_Math" alttext="r_{j}=\begin{cases}+1&amp;\text{if }y^{\text{img}}\neq y^{\ast}\text{ and }y^{\text{img+tools}}_{j}=y^{\ast}\quad(\text{tools help})\\
+-0.5&amp;\text{if }y^{\text{img}}=y^{\ast}\text{ and }y^{\text{img+tools}}_{j}\neq y^{\ast}\quad(\text{tools hurt})\\
+0&amp;\text{if }y^{\text{img}}\neq y^{\ast}\text{ and }y^{\text{img+tools}}_{j}\neq y^{\ast}\quad(\text{no change})\\
++1&amp;\text{if }y^{\text{img}}=y^{\ast}\text{ and }y^{\text{img+tools}}_{j}=y^{\ast}\quad(\text{tools neutral})\end{cases}" display="block" intent=":literal"><semantics><mrow><msub><mi>r</mi><mi>j</mi></msub><mo>=</mo><mrow><mo>{</mo><mtable columnspacing="5pt" displaystyle="true" rowspacing="0pt"><mtr><mtd class="ltx_align_left" columnalign="left"><mrow><mo>+</mo><mn>1</mn></mrow></mtd><mtd class="ltx_align_left" columnalign="left"><mrow><mrow><mrow><mtext>if </mtext><mo lspace="0em" rspace="0em">​</mo><msup><mi>y</mi><mtext>img</mtext></msup></mrow><mo>≠</mo><mrow><msup><mi>y</mi><mo>∗</mo></msup><mo lspace="0em" rspace="0em">​</mo><mtext> and </mtext><mo lspace="0em" rspace="0em">​</mo><msubsup><mi>y</mi><mi>j</mi><mtext>img+tools</mtext></msubsup></mrow><mo>=</mo><msup><mi>y</mi><mo>∗</mo></msup></mrow><mspace style="width:1em;" width="1em"></mspace><mrow><mo stretchy="false">(</mo><mtext>tools help</mtext><mo stretchy="false">)</mo></mrow></mrow></mtd></mtr><mtr><mtd class="ltx_align_left" columnalign="left"><mrow><mo>−</mo><mn>0.5</mn></mrow></mtd><mtd class="ltx_align_left" columnalign="left"><mrow><mrow><mrow><mtext>if </mtext><mo lspace="0em" rspace="0em">​</mo><msup><mi>y</mi><mtext>img</mtext></msup></mrow><mo>=</mo><mrow><msup><mi>y</mi><mo>∗</mo></msup><mo lspace="0em" rspace="0em">​</mo><mtext> and </mtext><mo lspace="0em" rspace="0em">​</mo><msubsup><mi>y</mi><mi>j</mi><mtext>img+tools</mtext></msubsup></mrow><mo>≠</mo><msup><mi>y</mi><mo>∗</mo></msup></mrow><mspace style="width:1em;" width="1em"></mspace><mrow><mo stretchy="false">(</mo><mtext>tools hurt</mtext><mo stretchy="false">)</mo></mrow></mrow></mtd></mtr><mtr><mtd class="ltx_align_left" columnalign="left"><mn>0</mn></mtd><mtd class="ltx_align_left" columnalign="left"><mrow><mrow><mrow><mtext>if </mtext><mo lspace="0em" rspace="0em">​</mo><msup><mi>y</mi><mtext>img</mtext></msup></mrow><mo>≠</mo><mrow><msup><mi>y</mi><mo>∗</mo></msup><mo lspace="0em" rspace="0em">​</mo><mtext> and </mtext><mo lspace="0em" rspace="0em">​</mo><msubsup><mi>y</mi><mi>j</mi><mtext>img+tools</mtext></msubsup></mrow><mo>≠</mo><msup><mi>y</mi><mo>∗</mo></msup></mrow><mspace style="width:1em;" width="1em"></mspace><mrow><mo stretchy="false">(</mo><mtext>no change</mtext><mo stretchy="false">)</mo></mrow></mrow></mtd></mtr><mtr><mtd class="ltx_align_left" columnalign="left"><mrow><mo>+</mo><mn>1</mn></mrow></mtd><mtd class="ltx_align_left" columnalign="left"><mrow><mrow><mrow><mtext>if </mtext><mo lspace="0em" rspace="0em">​</mo><msup><mi>y</mi><mtext>img</mtext></msup></mrow><mo>=</mo><mrow><msup><mi>y</mi><mo>∗</mo></msup><mo lspace="0em" rspace="0em">​</mo><mtext> and </mtext><mo lspace="0em" rspace="0em">​</mo><msubsup><mi>y</mi><mi>j</mi><mtext>img+tools</mtext></msubsup></mrow><mo>=</mo><msup><mi>y</mi><mo>∗</mo></msup></mrow><mspace style="width:1em;" width="1em"></mspace><mrow><mo stretchy="false">(</mo><mtext>tools neutral</mtext><mo stretchy="false">)</mo></mrow></mrow></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">r_{j}=\begin{cases}+1&amp;\text{if }y^{\text{img}}\neq y^{\ast}\text{ and }y^{\text{img+tools}}_{j}=y^{\ast}\quad(\text{tools help})\\
+-0.5&amp;\text{if }y^{\text{img}}=y^{\ast}\text{ and }y^{\text{img+tools}}_{j}\neq y^{\ast}\quad(\text{tools hurt})\\
+0&amp;\text{if }y^{\text{img}}\neq y^{\ast}\text{ and }y^{\text{img+tools}}_{j}\neq y^{\ast}\quad(\text{no change})\\
++1&amp;\text{if }y^{\text{img}}=y^{\ast}\text{ and }y^{\text{img+tools}}_{j}=y^{\ast}\quad(\text{tools neutral})\end{cases}</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td></tr></tbody>
+</table>
+<p id="S3.SS3.p3.2" class="ltx_p">where <math id="S3.SS3.p3.m7" class="ltx_Math" alttext="y^{\text{img}}" display="inline" intent=":literal"><semantics><msup><mi>y</mi><mtext>img</mtext></msup><annotation encoding="application/x-tex">y^{\text{img}}</annotation></semantics></math> is the prediction from the reasoner using only the question, <math id="S3.SS3.p3.m8" class="ltx_Math" alttext="y^{\text{img+tools}}_{j}" display="inline" intent=":literal"><semantics><msubsup><mi>y</mi><mi>j</mi><mtext>img+tools</mtext></msubsup><annotation encoding="application/x-tex">y^{\text{img+tools}}_{j}</annotation></semantics></math> is the prediction with selected tools from <math id="S3.SS3.p3.m9" class="ltx_Math" alttext="t_{j}" display="inline" intent=":literal"><semantics><msub><mi>t</mi><mi>j</mi></msub><annotation encoding="application/x-tex">t_{j}</annotation></semantics></math>, and <math id="S3.SS3.p3.m10" class="ltx_Math" alttext="y^{\ast}" display="inline" intent=":literal"><semantics><msup><mi>y</mi><mo>∗</mo></msup><annotation encoding="application/x-tex">y^{\ast}</annotation></semantics></math> is the ground truth. This reward design incentivizes tool selections that lead to correct predictions when the image alone is insufficient, while penalizing those that hurt performance. We then calculate each candidate’s group-relative advantage as <math id="S3.SS3.p3.m11" class="ltx_Math" alttext="A_{j}=\frac{r_{j}-\text{mean}(\{r_{1},\dots,r_{G}\})}{\text{std}(\{r_{1},\dots,r_{G}\})}" display="inline" intent=":literal"><semantics><mrow><msub><mi>A</mi><mi>j</mi></msub><mo>=</mo><mfrac><mrow><msub><mi>r</mi><mi>j</mi></msub><mo>−</mo><mrow><mtext>mean</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mo stretchy="false">{</mo><msub><mi>r</mi><mn>1</mn></msub><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msub><mi>r</mi><mi>G</mi></msub><mo stretchy="false">}</mo></mrow><mo stretchy="false">)</mo></mrow></mrow></mrow><mrow><mtext>std</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mo stretchy="false">{</mo><msub><mi>r</mi><mn>1</mn></msub><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msub><mi>r</mi><mi>G</mi></msub><mo stretchy="false">}</mo></mrow><mo stretchy="false">)</mo></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">A_{j}=\frac{r_{j}-\text{mean}(\{r_{1},\dots,r_{G}\})}{\text{std}(\{r_{1},\dots,r_{G}\})}</annotation></semantics></math>. This normalization contextualizes each tool selection’s performance relative to other candidates, enabling the agent to distinguish which tool combinations performed better for a specific query regardless of absolute reward values. Finally, the policy <math id="S3.SS3.p3.m12" class="ltx_Math" alttext="\pi_{\phi}" display="inline" intent=":literal"><semantics><msub><mi>π</mi><mi>ϕ</mi></msub><annotation encoding="application/x-tex">\pi_{\phi}</annotation></semantics></math> is updated by maximizing the following:</p>
+<table id="S3.Ex2" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S3.Ex2.m1" class="ltx_math_unparsed" alttext="\mathcal{J}_{\text{VisTA}}(\phi)=\mathbb{E}_{s\sim\mathcal{D}}\mathbb{E}_{\{t_{j}\}_{j=1}^{G}\sim\pi_{\phi_{\text{old}}}(\cdot|s)}\left[\frac{1}{G}\sum_{j=1}^{G}\min\left(r_{j}^{\text{ratio}}A_{j},\text{clip}(r_{j}^{\text{ratio}},1\pm\epsilon)A_{j}\right)-\beta\mathbb{D}_{\text{KL}}(\pi_{\phi}\|\pi_{\text{ref}})\right]" display="block" intent=":literal"><semantics><mrow><msub><mi class="ltx_font_mathcaligraphic">𝒥</mi><mtext>VisTA</mtext></msub><mrow><mo stretchy="false">(</mo><mi>ϕ</mi><mo stretchy="false">)</mo></mrow><mo>=</mo><msub><mi>𝔼</mi><mrow><mi>s</mi><mo>∼</mo><mi class="ltx_font_mathcaligraphic">𝒟</mi></mrow></msub><msub><mi>𝔼</mi><mrow><mo stretchy="false">{</mo><mi>t</mi><msub><mrow></mrow><mi>j</mi></msub><mo stretchy="false">}</mo><msub><mrow></mrow><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow></msub><msup><mrow></mrow><mi>G</mi></msup><mo>∼</mo><mi>π</mi><msub><mrow></mrow><msub><mi>ϕ</mi><mtext>old</mtext></msub></msub><mo stretchy="false">(</mo><mo lspace="0em" rspace="0em">⋅</mo><mo fence="false" rspace="0.167em" stretchy="false">|</mo><mi>s</mi><mo stretchy="false">)</mo></mrow></msub><mrow><mo>[</mo><mfrac><mn>1</mn><mi>G</mi></mfrac><munderover><mo movablelimits="false">∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>G</mi></munderover><mi>min</mi><mrow><mo>(</mo><msubsup><mi>r</mi><mi>j</mi><mtext>ratio</mtext></msubsup><msub><mi>A</mi><mi>j</mi></msub><mo>,</mo><mtext>clip</mtext><mrow><mo stretchy="false">(</mo><msubsup><mi>r</mi><mi>j</mi><mtext>ratio</mtext></msubsup><mo>,</mo><mn>1</mn><mo>±</mo><mi>ϵ</mi><mo stretchy="false">)</mo></mrow><msub><mi>A</mi><mi>j</mi></msub><mo>)</mo></mrow><mo>−</mo><mi>β</mi><msub><mi>𝔻</mi><mtext>KL</mtext></msub><mrow><mo stretchy="false">(</mo><msub><mi>π</mi><mi>ϕ</mi></msub><mo lspace="0em" rspace="0.167em">∥</mo><msub><mi>π</mi><mtext>ref</mtext></msub><mo stretchy="false">)</mo></mrow><mo>]</mo></mrow></mrow><annotation encoding="application/x-tex">\mathcal{J}_{\text{VisTA}}(\phi)=\mathbb{E}_{s\sim\mathcal{D}}\mathbb{E}_{\{t_{j}\}_{j=1}^{G}\sim\pi_{\phi_{\text{old}}}(\cdot|s)}\left[\frac{1}{G}\sum_{j=1}^{G}\min\left(r_{j}^{\text{ratio}}A_{j},\text{clip}(r_{j}^{\text{ratio}},1\pm\epsilon)A_{j}\right)-\beta\mathbb{D}_{\text{KL}}(\pi_{\phi}\|\pi_{\text{ref}})\right]</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td></tr></tbody>
+</table>
+</div>
+<div id="S3.SS3.p4" class="ltx_para">
+<p id="S3.SS3.p4.1" class="ltx_p">where <math id="S3.SS3.p4.m1" class="ltx_Math" alttext="r_{j}^{\text{ratio}}=\frac{\pi_{\phi}(t_{j}|s)}{\pi_{\phi_{\text{old}}}(t_{j}|s)}" display="inline" intent=":literal"><semantics><mrow><msubsup><mi>r</mi><mi>j</mi><mtext>ratio</mtext></msubsup><mo>=</mo><mfrac><mrow><msub><mi>π</mi><mi>ϕ</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>t</mi><mi>j</mi></msub><mo lspace="0em" rspace="0em">|</mo><mi>s</mi><mo stretchy="false">)</mo></mrow></mrow><mrow><msub><mi>π</mi><msub><mi>ϕ</mi><mtext>old</mtext></msub></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>t</mi><mi>j</mi></msub><mo lspace="0em" rspace="0em">|</mo><mi>s</mi><mo stretchy="false">)</mo></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">r_{j}^{\text{ratio}}=\frac{\pi_{\phi}(t_{j}|s)}{\pi_{\phi_{\text{old}}}(t_{j}|s)}</annotation></semantics></math>, <math id="S3.SS3.p4.m2" class="ltx_Math" alttext="\pi_{\phi_{\text{old}}}" display="inline" intent=":literal"><semantics><msub><mi>π</mi><msub><mi>ϕ</mi><mtext>old</mtext></msub></msub><annotation encoding="application/x-tex">\pi_{\phi_{\text{old}}}</annotation></semantics></math> is the previous policy, and <math id="S3.SS3.p4.m3" class="ltx_Math" alttext="\pi_{\text{ref}}" display="inline" intent=":literal"><semantics><msub><mi>π</mi><mtext>ref</mtext></msub><annotation encoding="application/x-tex">\pi_{\text{ref}}</annotation></semantics></math> is a fixed reference policy.
+This objective balances exploration and exploitation through ratio clipping and KL regularization. The ratio term prevents large policy updates, while the KL divergence term maintains stability by keeping the policy close to a reference distribution. Through this optimization, tools that consistently improve reasoning performance receive higher selection probabilities, allowing the agent to discover effective tool combinations based on empirical evidence rather than predefined rules.</p>
+</div>
+</section>
+<section id="S3.SS4" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">3.4 </span>Tool Selection Prompting</h3>
+
+<div id="S3.SS4.p1" class="ltx_para">
+<p id="S3.SS4.p1.1" class="ltx_p">We design a structured prompt template to guide the agent’s tool selection process. For chart understanding tasks, this template presents 9 tools (indexed 0-8) organized across three functional categories:
+<span id="S3.SS4.p1.1.1" class="ltx_text ltx_font_typewriter" style="font-size:90%;">‘‘You are an expert agent tasked with selecting tools to solve chart reasoning tasks. You have access to 9 tools indexed from 0 to 8, each belonging to one of three functional types: type1, type2, 
+<br class="ltx_break">and type3...
+Function: 0: type1 (A), 1: type1 (B), 2: type1 (C), 3: type2 (D), 4: type2 
+<br class="ltx_break">(E) ...
+Given a chart and a query {Question}, select the index number(s) of tools that are most helpful. Output only selected indices as a comma-separated list within &lt;answer&gt; tags."</span></p>
+</div>
+<div id="S3.SS4.p2" class="ltx_para ltx_noindent">
+<p id="S3.SS4.p2.1" class="ltx_p">This prompt structure provides only minimal tool categorization without detailed function descriptions or usage demonstrations that training-free methods typically rely on. Instead, our framework incentivizes the agent to empirically discover and adaptively select the most effective tools through reinforcement learning. This approach is particularly valuable when integrating tools with unknown, partially documented, or inconsistently performing capabilities.</p>
+</div>
+</section>
+</section>
+<section id="S4" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">4 </span>Experiments</h2>
+
+<div id="S4.p1" class="ltx_para">
+<p id="S4.p1.1" class="ltx_p">We evaluate our VisTA framework on visual reasoning benchmarks, comparing to training-free baselines, alternative RL-based methods. We also analyze VisTA’s tool selection strategies and distribution, and agent behavior dynamics over training.</p>
+</div>
+<section id="S4.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.1 </span>Experimental Setup</h3>
+
+<figure id="S4.T1" class="ltx_table">
+<table id="S4.T1.2" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<tbody class="ltx_tbody">
+<tr id="S4.T1.2.1" class="ltx_tr">
+<th id="S4.T1.2.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_tt"><span id="S4.T1.2.1.1.1" class="ltx_text" style="font-size:70%;">Method</span></th>
+<td id="S4.T1.2.1.2" class="ltx_td ltx_align_center ltx_border_tt"><span id="S4.T1.2.1.2.1" class="ltx_text" style="font-size:70%;">Agent Model</span></td>
+<td id="S4.T1.2.1.3" class="ltx_td ltx_align_center ltx_border_tt"><span id="S4.T1.2.1.3.1" class="ltx_text" style="font-size:70%;">Reasoning Model</span></td>
+<td id="S4.T1.2.1.4" class="ltx_td ltx_align_center ltx_border_tt"><span id="S4.T1.2.1.4.1" class="ltx_text" style="font-size:70%;">ChartQA</span></td>
+<td id="S4.T1.2.1.5" class="ltx_td ltx_align_center ltx_border_tt"><span id="S4.T1.2.1.5.1" class="ltx_text" style="font-size:70%;">ChartQA(OoD)</span></td>
+<td id="S4.T1.2.1.6" class="ltx_td ltx_align_center ltx_border_tt"><span id="S4.T1.2.1.6.1" class="ltx_text" style="font-size:70%;">Geometry3K</span></td></tr>
+<tr id="S4.T1.2.2" class="ltx_tr">
+<th id="S4.T1.2.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t"><span id="S4.T1.2.2.1.1" class="ltx_text" style="font-size:70%;">Training-Free</span></th>
+<td id="S4.T1.2.2.2" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T1.2.2.2.1" class="ltx_text" style="font-size:70%;">-</span></td>
+<td id="S4.T1.2.2.3" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T1.2.2.3.1" class="ltx_text" style="font-size:70%;">QwenVL 7B</span></td>
+<td id="S4.T1.2.2.4" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T1.2.2.4.1" class="ltx_text" style="font-size:70%;">76.4</span></td>
+<td id="S4.T1.2.2.5" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T1.2.2.5.1" class="ltx_text" style="font-size:70%;">62.3</span></td>
+<td id="S4.T1.2.2.6" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T1.2.2.6.1" class="ltx_text" style="font-size:70%;">54.0</span></td></tr>
+<tr id="S4.T1.2.3" class="ltx_tr">
+<th id="S4.T1.2.3.1" class="ltx_td ltx_align_left ltx_th ltx_th_row"><span id="S4.T1.2.3.1.1" class="ltx_text" style="font-size:70%;">Training-Free</span></th>
+<td id="S4.T1.2.3.2" class="ltx_td ltx_align_center"><span id="S4.T1.2.3.2.1" class="ltx_text" style="font-size:70%;">QwenVL 7B</span></td>
+<td id="S4.T1.2.3.3" class="ltx_td ltx_align_center"><span id="S4.T1.2.3.3.1" class="ltx_text" style="font-size:70%;">QwenVL 7B</span></td>
+<td id="S4.T1.2.3.4" class="ltx_td ltx_align_center"><span id="S4.T1.2.3.4.1" class="ltx_text" style="font-size:70%;">76.1</span></td>
+<td id="S4.T1.2.3.5" class="ltx_td ltx_align_center"><span id="S4.T1.2.3.5.1" class="ltx_text" style="font-size:70%;">66.8</span></td>
+<td id="S4.T1.2.3.6" class="ltx_td ltx_align_center"><span id="S4.T1.2.3.6.1" class="ltx_text" style="font-size:70%;">51.3</span></td></tr>
+<tr id="S4.T1.2.4" class="ltx_tr">
+<th id="S4.T1.2.4.1" class="ltx_td ltx_align_left ltx_th ltx_th_row"><span id="S4.T1.2.4.1.1" class="ltx_text" style="font-size:70%;">Training-Free</span></th>
+<td id="S4.T1.2.4.2" class="ltx_td ltx_align_center"><span id="S4.T1.2.4.2.1" class="ltx_text" style="font-size:70%;">GPT4o</span></td>
+<td id="S4.T1.2.4.3" class="ltx_td ltx_align_center"><span id="S4.T1.2.4.3.1" class="ltx_text" style="font-size:70%;">QwenVL 7B</span></td>
+<td id="S4.T1.2.4.4" class="ltx_td ltx_align_center"><span id="S4.T1.2.4.4.1" class="ltx_text" style="font-size:70%;">73.0</span></td>
+<td id="S4.T1.2.4.5" class="ltx_td ltx_align_center"><span id="S4.T1.2.4.5.1" class="ltx_text" style="font-size:70%;">66.4</span></td>
+<td id="S4.T1.2.4.6" class="ltx_td ltx_align_center"><span id="S4.T1.2.4.6.1" class="ltx_text" style="font-size:70%;">51.5</span></td></tr>
+<tr id="S4.T1.2.5" class="ltx_tr">
+<th id="S4.T1.2.5.1" class="ltx_td ltx_align_left ltx_th ltx_th_row"><span id="S4.T1.2.5.1.1" class="ltx_text" style="font-size:70%;">RL</span></th>
+<td id="S4.T1.2.5.2" class="ltx_td ltx_align_center"><span id="S4.T1.2.5.2.1" class="ltx_text" style="font-size:70%;">-</span></td>
+<td id="S4.T1.2.5.3" class="ltx_td ltx_align_center"><span id="S4.T1.2.5.3.1" class="ltx_text" style="font-size:70%;">QwenVL 7B</span></td>
+<td id="S4.T1.2.5.4" class="ltx_td ltx_align_center"><span id="S4.T1.2.5.4.1" class="ltx_text" style="font-size:70%;">77.5</span></td>
+<td id="S4.T1.2.5.5" class="ltx_td ltx_align_center"><span id="S4.T1.2.5.5.1" class="ltx_text" style="font-size:70%;">64.3</span></td>
+<td id="S4.T1.2.5.6" class="ltx_td ltx_align_center"><span id="S4.T1.2.5.6.1" class="ltx_text" style="font-size:70%;">41.0</span></td></tr>
+<tr id="S4.T1.2.6" class="ltx_tr" style="--ltx-bg-color:#CEF8D1;">
+<th id="S4.T1.2.6.1" class="ltx_td ltx_align_left ltx_th ltx_th_row"><span id="S4.T1.2.6.1.1" class="ltx_text" style="font-size:70%;--ltx-bg-color:#CEF8D1;">Ours</span></th>
+<td id="S4.T1.2.6.2" class="ltx_td ltx_align_center"><span id="S4.T1.2.6.2.1" class="ltx_text" style="font-size:70%;--ltx-bg-color:#CEF8D1;">QwenVL 7B</span></td>
+<td id="S4.T1.2.6.3" class="ltx_td ltx_align_center"><span id="S4.T1.2.6.3.1" class="ltx_text" style="font-size:70%;--ltx-bg-color:#CEF8D1;">QwenVL 7B</span></td>
+<td id="S4.T1.2.6.4" class="ltx_td ltx_align_center"><span id="S4.T1.2.6.4.1" class="ltx_text" style="font-size:70%;--ltx-bg-color:#CEF8D1;">79.4</span></td>
+<td id="S4.T1.2.6.5" class="ltx_td ltx_align_center"><span id="S4.T1.2.6.5.1" class="ltx_text" style="font-size:70%;--ltx-bg-color:#CEF8D1;">73.2</span></td>
+<td id="S4.T1.2.6.6" class="ltx_td ltx_align_center"><span id="S4.T1.2.6.6.1" class="ltx_text" style="font-size:70%;--ltx-bg-color:#CEF8D1;">55.6</span></td></tr>
+<tr id="S4.T1.2.7" class="ltx_tr">
+<th id="S4.T1.2.7.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t"><span id="S4.T1.2.7.1.1" class="ltx_text" style="font-size:70%;">Training-Free</span></th>
+<td id="S4.T1.2.7.2" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T1.2.7.2.1" class="ltx_text" style="font-size:70%;">-</span></td>
+<td id="S4.T1.2.7.3" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T1.2.7.3.1" class="ltx_text" style="font-size:70%;">GPT4o</span></td>
+<td id="S4.T1.2.7.4" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T1.2.7.4.1" class="ltx_text" style="font-size:70%;">84.3</span></td>
+<td id="S4.T1.2.7.5" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T1.2.7.5.1" class="ltx_text" style="font-size:70%;">50.1</span></td>
+<td id="S4.T1.2.7.6" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T1.2.7.6.1" class="ltx_text" style="font-size:70%;">50.1</span></td></tr>
+<tr id="S4.T1.2.8" class="ltx_tr">
+<th id="S4.T1.2.8.1" class="ltx_td ltx_align_left ltx_th ltx_th_row"><span id="S4.T1.2.8.1.1" class="ltx_text" style="font-size:70%;">Training-Free</span></th>
+<td id="S4.T1.2.8.2" class="ltx_td ltx_align_center"><span id="S4.T1.2.8.2.1" class="ltx_text" style="font-size:70%;">QwenVL 7B</span></td>
+<td id="S4.T1.2.8.3" class="ltx_td ltx_align_center"><span id="S4.T1.2.8.3.1" class="ltx_text" style="font-size:70%;">GPT4o</span></td>
+<td id="S4.T1.2.8.4" class="ltx_td ltx_align_center"><span id="S4.T1.2.8.4.1" class="ltx_text" style="font-size:70%;">82.3</span></td>
+<td id="S4.T1.2.8.5" class="ltx_td ltx_align_center"><span id="S4.T1.2.8.5.1" class="ltx_text" style="font-size:70%;">67.1</span></td>
+<td id="S4.T1.2.8.6" class="ltx_td ltx_align_center"><span id="S4.T1.2.8.6.1" class="ltx_text" style="font-size:70%;">48.7</span></td></tr>
+<tr id="S4.T1.2.9" class="ltx_tr">
+<th id="S4.T1.2.9.1" class="ltx_td ltx_align_left ltx_th ltx_th_row"><span id="S4.T1.2.9.1.1" class="ltx_text" style="font-size:70%;">Training-Free</span></th>
+<td id="S4.T1.2.9.2" class="ltx_td ltx_align_center"><span id="S4.T1.2.9.2.1" class="ltx_text" style="font-size:70%;">GPT4o</span></td>
+<td id="S4.T1.2.9.3" class="ltx_td ltx_align_center"><span id="S4.T1.2.9.3.1" class="ltx_text" style="font-size:70%;">GPT4o</span></td>
+<td id="S4.T1.2.9.4" class="ltx_td ltx_align_center"><span id="S4.T1.2.9.4.1" class="ltx_text" style="font-size:70%;">84.6</span></td>
+<td id="S4.T1.2.9.5" class="ltx_td ltx_align_center"><span id="S4.T1.2.9.5.1" class="ltx_text" style="font-size:70%;">73.3</span></td>
+<td id="S4.T1.2.9.6" class="ltx_td ltx_align_center"><span id="S4.T1.2.9.6.1" class="ltx_text" style="font-size:70%;">49.5</span></td></tr>
+<tr id="S4.T1.2.10" class="ltx_tr" style="--ltx-bg-color:#CEF8D1;">
+<th id="S4.T1.2.10.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb"><span id="S4.T1.2.10.1.1" class="ltx_text" style="font-size:70%;--ltx-bg-color:#CEF8D1;">Ours</span></th>
+<td id="S4.T1.2.10.2" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T1.2.10.2.1" class="ltx_text" style="font-size:70%;--ltx-bg-color:#CEF8D1;">QwenVL 7B</span></td>
+<td id="S4.T1.2.10.3" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T1.2.10.3.1" class="ltx_text" style="font-size:70%;--ltx-bg-color:#CEF8D1;">GPT4o</span></td>
+<td id="S4.T1.2.10.4" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T1.2.10.4.1" class="ltx_text" style="font-size:70%;--ltx-bg-color:#CEF8D1;">88.9</span></td>
+<td id="S4.T1.2.10.5" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T1.2.10.5.1" class="ltx_text" style="font-size:70%;--ltx-bg-color:#CEF8D1;">76.8</span></td>
+<td id="S4.T1.2.10.6" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T1.2.10.6.1" class="ltx_text" style="font-size:70%;--ltx-bg-color:#CEF8D1;">52.4</span></td></tr>
+</tbody>
+</table>
+<figcaption class="ltx_caption ltx_centering" style="font-size:70%;"><span class="ltx_tag ltx_tag_table">Table 1: </span><span id="S4.T1.6" class="ltx_text ltx_font_bold">Main Results.</span> These results highlight VisTA’s ability to support complex, multi-modal reasoning where tools provide complementary visual understanding, and its flexibility and compatibility with stronger reasoning models like GPT-4o at deployment time.</figcaption>
+</figure>
+<div id="S4.SS1.p1" class="ltx_para">
+<p id="S4.SS1.p1.1" class="ltx_p">We conduct experiments on two main datasets: ChartQA <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib19" title="" class="ltx_ref">19</a>]</cite> and Geometry3K <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib20" title="" class="ltx_ref">20</a>]</cite>. Both datasets provide paired visual inputs and questions, but differ in their reasoning styles and evaluation protocols. We train our VisTA agent using the training sets of both datasets, and evaluate on their respective test sets. For ChartQA, in addition to the original test set, we construct an out-of-distribution (OoD) variant by manually removing textual labels from the charts. This setting is designed to assess the model’s reliance on textual cues versus its ability to reason visually. As a result, we evaluate on three test sets in total: ChartQA (in-domain), ChartQA-OoD (perturbed version), and Geometry3K. ChartQA adopts an open-ended answer format, so we report relaxed accuracy (within 5% of the gold answer) as the evaluation metric, which credits semantically correct answers. In contrast, Geometry3K is a multiple-choice benchmark and uses standard accuracy to measure exact match with the correct option.</p>
+</div>
+<div id="S4.SS1.p2" class="ltx_para">
+<p id="S4.SS1.p2.1" class="ltx_p">For both ChartQA and Geometry3K, we randomly sample  800 examples for training and evaluate on their full test sets. We train our method using 8 NVIDIA A100 GPU, with a batch size of 8 and 4 answer generations per query to encourage diverse tool interactions. We use the AdamW<cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib32" title="" class="ltx_ref">32</a>]</cite> optimizer with a learning rate of <math id="S4.SS1.p2.m1" class="ltx_Math" alttext="5\times 10^{-5}" display="inline" intent=":literal"><semantics><mrow><mn>5</mn><mo lspace="0.222em" rspace="0.222em">×</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>5</mn></mrow></msup></mrow><annotation encoding="application/x-tex">5\times 10^{-5}</annotation></semantics></math>. The agent is trained for 100 iterations. During inference, we use only the Tool-Augmented prediction path.</p>
+</div>
+<div id="S4.SS1.p3" class="ltx_para">
+<p id="S4.SS1.p3.1" class="ltx_p">We curate benchmark-specific tool pools tailored to the reasoning demands of each domain. For ChartQA, we construct a pool of 9 tools grouped into three functional types: chart-to-SVG, chart-to-table, and chart-to-caption, with 3 tools per type. chart-to-table tools (T0: UniChart <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib33" title="" class="ltx_ref">33</a>]</cite>, T1: DePlot <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib34" title="" class="ltx_ref">34</a>]</cite>, T2: ChartMoE <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib35" title="" class="ltx_ref">35</a>]</cite>) convert charts into structured format tables, chart-to-SVG tools (T3: OpenCV <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib36" title="" class="ltx_ref">36</a>]</cite>, T4: ChartDet <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib37" title="" class="ltx_ref">37</a>]</cite>, T5: ChartQCR <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib38" title="" class="ltx_ref">38</a>]</cite>) extract geometry elements (bar, line, pie), and color from charts, and captioning modules (T6: ChartAssistant <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib39" title="" class="ltx_ref">39</a>]</cite>, T7: ChartVLM <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib40" title="" class="ltx_ref">40</a>]</cite>, T8: QwenVL-32B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib41" title="" class="ltx_ref">41</a>]</cite>) summarize visual content at a global level. For Geometry3K, we use a smaller pool of 4 tools categorized into two types: symbolic parsers and specialist geometry solvers, with 2 tools in each category. Symbolic parsers extract entities and relations (e.g., angles, labels), while the specialist models take in the question and diagram to generate a sequence of steps which to solve the problem. For the symbolic parser, we use T0: DiagramFormalizer <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib42" title="" class="ltx_ref">42</a>]</cite> and T1: Inter-GPS <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib20" title="" class="ltx_ref">20</a>]</cite>. For our specialist solvers, we use T2: G-LLaVA 13B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib43" title="" class="ltx_ref">43</a>]</cite> and T3: MultiMath <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib44" title="" class="ltx_ref">44</a>]</cite>. Each tool within a type is implemented independently, allowing the agent to learn fine-grained preferences among tools with overlapping but distinct capabilities.</p>
+</div>
+</section>
+<section id="S4.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.2 </span>Main Results</h3>
+
+<div id="S4.SS2.p1" class="ltx_para">
+<p id="S4.SS2.p1.1" class="ltx_p">We first evaluate our VisTA framework across three visual reasoning benchmarks—ChartQA, ChartQA-OoD, and Geometry3K, comparing against training-free baselines, alternative RL-based approaches, and state-of-the-art VLMs <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib45" title="" class="ltx_ref">45</a>, <a href="#bib.bib46" title="" class="ltx_ref">46</a>, <a href="#bib.bib47" title="" class="ltx_ref">47</a>, <a href="#bib.bib48" title="" class="ltx_ref">48</a>, <a href="#bib.bib49" title="" class="ltx_ref">49</a>, <a href="#bib.bib7" title="" class="ltx_ref">7</a>, <a href="#bib.bib50" title="" class="ltx_ref">50</a>, <a href="#bib.bib51" title="" class="ltx_ref">51</a>, <a href="#bib.bib52" title="" class="ltx_ref">52</a>, <a href="#bib.bib53" title="" class="ltx_ref">53</a>]</cite>.</p>
+</div>
+<div id="S4.SS2.p2" class="ltx_para">
+<p id="S4.SS2.p2.1" class="ltx_p">Table <a href="#S4.T1" title="Table 1 ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ VisualToolAgent (VisTA): A Reinforcement Learning Framework for Visual Tool Selection" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a> summarizes the results. For tool selection, we use QwenVL-7B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib41" title="" class="ltx_ref">41</a>]</cite> as the agent and keep the reasoning model (QwenVL-7B or GPT4o) frozen during training. When both the agent and reasoner use QwenVL 7B, our method consistently outperforms baselines across all benchmarks. On ChartQA, VisTA achieves 79.4% accuracy, improving over the best training-free baseline (76.4%) by 3.0 points. On Geometry3K benchmark, which requires fine-grained diagram understanding and multi-step symbolic reasoning, VisTA achieves 55.6%, outperforming the best training-free baseline (54.0%). This result highlights VisTA’s ability to support complex, multi-modal reasoning where tools provide complementary visual understanding.</p>
+</div>
+<div id="S4.SS2.p3" class="ltx_para">
+<p id="S4.SS2.p3.1" class="ltx_p">A key strength of our method is its transferability. Without any retraining, the tool-selection policy learned with QwenVL 7B can be paired with GPT-4o as the reasoner.</p>
+</div>
+<figure id="S4.T2" class="ltx_table">
+<table id="S4.T2.2" class="ltx_tabular ltx_centering ltx_align_middle">
+<tbody class="ltx_tbody">
+<tr id="S4.T2.2.1" class="ltx_tr">
+<td id="S4.T2.2.1.1" class="ltx_td ltx_align_left ltx_border_tt" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.1.1.1" class="ltx_text" style="font-size:80%;">Method</span></td>
+<td id="S4.T2.2.1.2" class="ltx_td ltx_align_center ltx_border_tt" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.1.2.1" class="ltx_text" style="font-size:80%;">ChartQA</span></td>
+<td id="S4.T2.2.1.3" class="ltx_td ltx_align_center ltx_border_tt" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.1.3.1" class="ltx_text" style="font-size:80%;">Geometry3K</span></td></tr>
+<tr id="S4.T2.2.2" class="ltx_tr" style="--ltx-bg-color:#CEF8D1;">
+<td id="S4.T2.2.2.1" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.2.1.1" class="ltx_text" style="font-size:80%;--ltx-bg-color:#CEF8D1;">Ours</span></td>
+<td id="S4.T2.2.2.2" class="ltx_td ltx_align_center ltx_border_t" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.2.2.1" class="ltx_text" style="font-size:80%;--ltx-bg-color:#CEF8D1;">88.9</span></td>
+<td id="S4.T2.2.2.3" class="ltx_td ltx_align_center ltx_border_t" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.2.3.1" class="ltx_text" style="font-size:80%;--ltx-bg-color:#CEF8D1;">55.6</span></td></tr>
+<tr id="S4.T2.2.3" class="ltx_tr">
+<td id="S4.T2.2.3.1" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.3.1.1" class="ltx_text" style="font-size:80%;">Intern2VL-8B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib49" title="" class="ltx_ref">49</a>]</cite></span></td>
+<td id="S4.T2.2.3.2" class="ltx_td ltx_align_center ltx_border_t" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.3.2.1" class="ltx_text" style="font-size:80%;">83.3</span></td>
+<td id="S4.T2.2.3.3" class="ltx_td ltx_align_center ltx_border_t" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.3.3.1" class="ltx_text" style="font-size:80%;">26.5</span></td></tr>
+<tr id="S4.T2.2.4" class="ltx_tr">
+<td id="S4.T2.2.4.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.4.1.1" class="ltx_text" style="font-size:80%;">Intern2VL-8B-ShortCoT <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib49" title="" class="ltx_ref">49</a>]</cite></span></td>
+<td id="S4.T2.2.4.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.4.2.1" class="ltx_text" style="font-size:80%;">–</span></td>
+<td id="S4.T2.2.4.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.4.3.1" class="ltx_text" style="font-size:80%;">29.7</span></td></tr>
+<tr id="S4.T2.2.5" class="ltx_tr">
+<td id="S4.T2.2.5.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.5.1.1" class="ltx_text" style="font-size:80%;">Geo-Intern2VL-8B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib49" title="" class="ltx_ref">49</a>]</cite></span></td>
+<td id="S4.T2.2.5.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.5.2.1" class="ltx_text" style="font-size:80%;">–</span></td>
+<td id="S4.T2.2.5.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.5.3.1" class="ltx_text" style="font-size:80%;">30.7</span></td></tr>
+<tr id="S4.T2.2.6" class="ltx_tr">
+<td id="S4.T2.2.6.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.6.1.1" class="ltx_text" style="font-size:80%;">G-LLAVA-7B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib43" title="" class="ltx_ref">43</a>]</cite></span></td>
+<td id="S4.T2.2.6.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.6.2.1" class="ltx_text" style="font-size:80%;">–</span></td>
+<td id="S4.T2.2.6.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.6.3.1" class="ltx_text" style="font-size:80%;">22.4</span></td></tr>
+<tr id="S4.T2.2.7" class="ltx_tr">
+<td id="S4.T2.2.7.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.7.1.1" class="ltx_text" style="font-size:80%;">Math-LLAVA-13B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib54" title="" class="ltx_ref">54</a>]</cite></span></td>
+<td id="S4.T2.2.7.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.7.2.1" class="ltx_text" style="font-size:80%;">–</span></td>
+<td id="S4.T2.2.7.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.7.3.1" class="ltx_text" style="font-size:80%;">33.1</span></td></tr>
+<tr id="S4.T2.2.8" class="ltx_tr">
+<td id="S4.T2.2.8.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.8.1.1" class="ltx_text" style="font-size:80%;">QvQ-72B-Preview</span></td>
+<td id="S4.T2.2.8.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.8.2.1" class="ltx_text" style="font-size:80%;">–</span></td>
+<td id="S4.T2.2.8.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.8.3.1" class="ltx_text" style="font-size:80%;">29.4</span></td></tr>
+<tr id="S4.T2.2.9" class="ltx_tr">
+<td id="S4.T2.2.9.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.9.1.1" class="ltx_text" style="font-size:80%;">RedStar-Geo-8B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib55" title="" class="ltx_ref">55</a>]</cite></span></td>
+<td id="S4.T2.2.9.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.9.2.1" class="ltx_text" style="font-size:80%;">–</span></td>
+<td id="S4.T2.2.9.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.9.3.1" class="ltx_text" style="font-size:80%;">33.6</span></td></tr>
+<tr id="S4.T2.2.10" class="ltx_tr">
+<td id="S4.T2.2.10.1" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.10.1.1" class="ltx_text" style="font-size:80%;">GPT4v <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib4" title="" class="ltx_ref">4</a>]</cite></span></td>
+<td id="S4.T2.2.10.2" class="ltx_td ltx_align_center ltx_border_t" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.10.2.1" class="ltx_text" style="font-size:80%;">78.1</span></td>
+<td id="S4.T2.2.10.3" class="ltx_td ltx_align_center ltx_border_t" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.10.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.11" class="ltx_tr">
+<td id="S4.T2.2.11.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.11.1.1" class="ltx_text" style="font-size:80%;">GPT4o-0513 <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib7" title="" class="ltx_ref">7</a>]</cite></span></td>
+<td id="S4.T2.2.11.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.11.2.1" class="ltx_text" style="font-size:80%;">85.7</span></td>
+<td id="S4.T2.2.11.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.11.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.12" class="ltx_tr">
+<td id="S4.T2.2.12.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.12.1.1" class="ltx_text" style="font-size:80%;">Gemini 1.5 Flash <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib45" title="" class="ltx_ref">45</a>]</cite></span></td>
+<td id="S4.T2.2.12.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.12.2.1" class="ltx_text" style="font-size:80%;">85.4</span></td>
+<td id="S4.T2.2.12.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.12.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.13" class="ltx_tr">
+<td id="S4.T2.2.13.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.13.1.1" class="ltx_text" style="font-size:80%;">Gemini 1.5 Pro <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib45" title="" class="ltx_ref">45</a>]</cite></span></td>
+<td id="S4.T2.2.13.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.13.2.1" class="ltx_text" style="font-size:80%;">87.2</span></td>
+<td id="S4.T2.2.13.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.13.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.14" class="ltx_tr">
+<td id="S4.T2.2.14.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.14.1.1" class="ltx_text" style="font-size:80%;">Claude-3 Haiku <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib46" title="" class="ltx_ref">46</a>]</cite></span></td>
+<td id="S4.T2.2.14.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.14.2.1" class="ltx_text" style="font-size:80%;">81.7</span></td>
+<td id="S4.T2.2.14.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.14.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.15" class="ltx_tr">
+<td id="S4.T2.2.15.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.15.1.1" class="ltx_text" style="font-size:80%;">Claude-3 Opus <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib46" title="" class="ltx_ref">46</a>]</cite></span></td>
+<td id="S4.T2.2.15.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.15.2.1" class="ltx_text" style="font-size:80%;">80.8</span></td>
+<td id="S4.T2.2.15.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.15.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.16" class="ltx_tr">
+<td id="S4.T2.2.16.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.16.1.1" class="ltx_text" style="font-size:80%;">Claude-3.5 Sonnet <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib46" title="" class="ltx_ref">46</a>]</cite></span></td>
+<td id="S4.T2.2.16.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.16.2.1" class="ltx_text" style="font-size:80%;">90.8</span></td>
+<td id="S4.T2.2.16.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.16.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.17" class="ltx_tr">
+<td id="S4.T2.2.17.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.17.1.1" class="ltx_text" style="font-size:80%;">PaliGemma-mix-3B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib47" title="" class="ltx_ref">47</a>]</cite></span></td>
+<td id="S4.T2.2.17.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.17.2.1" class="ltx_text" style="font-size:80%;">33.7</span></td>
+<td id="S4.T2.2.17.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.17.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.18" class="ltx_tr">
+<td id="S4.T2.2.18.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.18.1.1" class="ltx_text" style="font-size:80%;">Phi3.5-Vision-4B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib48" title="" class="ltx_ref">48</a>]</cite></span></td>
+<td id="S4.T2.2.18.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.18.2.1" class="ltx_text" style="font-size:80%;">81.8</span></td>
+<td id="S4.T2.2.18.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.18.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.19" class="ltx_tr">
+<td id="S4.T2.2.19.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.19.1.1" class="ltx_text" style="font-size:80%;">InternVL2-Llama-3-76B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib49" title="" class="ltx_ref">49</a>]</cite></span></td>
+<td id="S4.T2.2.19.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.19.2.1" class="ltx_text" style="font-size:80%;">88.4</span></td>
+<td id="S4.T2.2.19.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.19.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.20" class="ltx_tr">
+<td id="S4.T2.2.20.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.20.1.1" class="ltx_text" style="font-size:80%;">Pixtral-12B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib52" title="" class="ltx_ref">52</a>]</cite></span></td>
+<td id="S4.T2.2.20.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.20.2.1" class="ltx_text" style="font-size:80%;">81.8</span></td>
+<td id="S4.T2.2.20.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.20.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.21" class="ltx_tr">
+<td id="S4.T2.2.21.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.21.1.1" class="ltx_text" style="font-size:80%;">Llama-3.2V-11B-Instruct <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib50" title="" class="ltx_ref">50</a>]</cite></span></td>
+<td id="S4.T2.2.21.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.21.2.1" class="ltx_text" style="font-size:80%;">83.4</span></td>
+<td id="S4.T2.2.21.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.21.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.22" class="ltx_tr">
+<td id="S4.T2.2.22.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.22.1.1" class="ltx_text" style="font-size:80%;">Llama-3.2V-90B-Instruct <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib50" title="" class="ltx_ref">50</a>]</cite></span></td>
+<td id="S4.T2.2.22.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.22.2.1" class="ltx_text" style="font-size:80%;">85.5</span></td>
+<td id="S4.T2.2.22.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.22.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.23" class="ltx_tr">
+<td id="S4.T2.2.23.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.23.1.1" class="ltx_text" style="font-size:80%;">LLaVA-1.5-7B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib56" title="" class="ltx_ref">56</a>]</cite></span></td>
+<td id="S4.T2.2.23.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.23.2.1" class="ltx_text" style="font-size:80%;">17.8</span></td>
+<td id="S4.T2.2.23.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.23.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.24" class="ltx_tr">
+<td id="S4.T2.2.24.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.24.1.1" class="ltx_text" style="font-size:80%;">LLaVA-1.5-13B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib56" title="" class="ltx_ref">56</a>]</cite></span></td>
+<td id="S4.T2.2.24.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.24.2.1" class="ltx_text" style="font-size:80%;">18.2</span></td>
+<td id="S4.T2.2.24.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.24.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.25" class="ltx_tr">
+<td id="S4.T2.2.25.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.25.1.1" class="ltx_text" style="font-size:80%;">xGen-MM-interleave-4B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib57" title="" class="ltx_ref">57</a>]</cite></span></td>
+<td id="S4.T2.2.25.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.25.2.1" class="ltx_text" style="font-size:80%;">60.0</span></td>
+<td id="S4.T2.2.25.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.25.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.26" class="ltx_tr">
+<td id="S4.T2.2.26.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.26.1.1" class="ltx_text" style="font-size:80%;">Cambrian-1-8B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib51" title="" class="ltx_ref">51</a>]</cite></span></td>
+<td id="S4.T2.2.26.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.26.2.1" class="ltx_text" style="font-size:80%;">73.3</span></td>
+<td id="S4.T2.2.26.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.26.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.27" class="ltx_tr">
+<td id="S4.T2.2.27.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.27.1.1" class="ltx_text" style="font-size:80%;">Cambrian-1-34B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib51" title="" class="ltx_ref">51</a>]</cite></span></td>
+<td id="S4.T2.2.27.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.27.2.1" class="ltx_text" style="font-size:80%;">75.6</span></td>
+<td id="S4.T2.2.27.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.27.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.28" class="ltx_tr">
+<td id="S4.T2.2.28.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.28.1.1" class="ltx_text" style="font-size:80%;">LLaVA OneVision-7B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib58" title="" class="ltx_ref">58</a>]</cite></span></td>
+<td id="S4.T2.2.28.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.28.2.1" class="ltx_text" style="font-size:80%;">80.0</span></td>
+<td id="S4.T2.2.28.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.28.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.29" class="ltx_tr">
+<td id="S4.T2.2.29.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.29.1.1" class="ltx_text" style="font-size:80%;">LLaVA OneVision-72B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib58" title="" class="ltx_ref">58</a>]</cite></span></td>
+<td id="S4.T2.2.29.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.29.2.1" class="ltx_text" style="font-size:80%;">83.7</span></td>
+<td id="S4.T2.2.29.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.29.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.30" class="ltx_tr">
+<td id="S4.T2.2.30.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.30.1.1" class="ltx_text" style="font-size:80%;">MolmoE-1B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib53" title="" class="ltx_ref">53</a>]</cite></span></td>
+<td id="S4.T2.2.30.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.30.2.1" class="ltx_text" style="font-size:80%;">78.0</span></td>
+<td id="S4.T2.2.30.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.30.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.31" class="ltx_tr">
+<td id="S4.T2.2.31.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.31.1.1" class="ltx_text" style="font-size:80%;">Molmo-7B-O <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib53" title="" class="ltx_ref">53</a>]</cite></span></td>
+<td id="S4.T2.2.31.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.31.2.1" class="ltx_text" style="font-size:80%;">80.4</span></td>
+<td id="S4.T2.2.31.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.31.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.32" class="ltx_tr">
+<td id="S4.T2.2.32.1" class="ltx_td ltx_align_left" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.32.1.1" class="ltx_text" style="font-size:80%;">Molmo-7B-D <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib53" title="" class="ltx_ref">53</a>]</cite></span></td>
+<td id="S4.T2.2.32.2" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.32.2.1" class="ltx_text" style="font-size:80%;">84.1</span></td>
+<td id="S4.T2.2.32.3" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.32.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+<tr id="S4.T2.2.33" class="ltx_tr">
+<td id="S4.T2.2.33.1" class="ltx_td ltx_align_left ltx_border_bb" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.33.1.1" class="ltx_text" style="font-size:80%;">Molmo-72B <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib53" title="" class="ltx_ref">53</a>]</cite></span></td>
+<td id="S4.T2.2.33.2" class="ltx_td ltx_align_center ltx_border_bb" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.33.2.1" class="ltx_text" style="font-size:80%;">87.3</span></td>
+<td id="S4.T2.2.33.3" class="ltx_td ltx_align_center ltx_border_bb" style="padding-left:2.0pt;padding-right:2.0pt;"><span id="S4.T2.2.33.3.1" class="ltx_text" style="font-size:80%;">–</span></td></tr>
+</tbody>
+</table>
+<figcaption class="ltx_caption ltx_centering" style="font-size:80%;"><span class="ltx_tag ltx_tag_table">Table 2: </span><span id="S4.T2.6" class="ltx_text ltx_font_bold">Comparison to state-of-the-art VLMs.</span> For our approach, the agent model is QwenVL 7B, and the reasoners are GPT4o for ChartQA, and QwenVL 7B for Geometry3K.</figcaption>
+</figure>
+<div id="S4.SS2.p4" class="ltx_para">
+<p id="S4.SS2.p4.1" class="ltx_p">In this setting, we achieve 88.9% on ChartQA and 76.8% on ChartQA-OoD, surpassing the best training-free GPT-4o baseline by 3.5 points on both, and also achieve 52.4% on Geometry3K, outperforming the best baseline (49.5%) by 2.9 points.
+This demonstrates VisTA’s flexibility and compatibility with stronger reasoning models at deployment time. We also compare against an RL baseline where the reasoner is directly trained using GRPO <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib24" title="" class="ltx_ref">24</a>]</cite> to generate chain-of-thought reasoning in a <span id="S4.SS2.p4.1.1" class="ltx_text ltx_font_typewriter">&lt;think&gt;</span> block followed by a final <span id="S4.SS2.p4.1.2" class="ltx_text ltx_font_typewriter">&lt;answer&gt;</span> block, without using tools. VisTA outperforms this RL-trained reasoner by 1.9 points on ChartQA and a substantial 8.9 points on ChartQA-OoD, showing that tool-augmented reasoning offers greater gains than direct model optimization.</p>
+</div>
+<div id="S4.SS2.p5" class="ltx_para">
+<p id="S4.SS2.p5.1" class="ltx_p">The advantage of our method over the baselines is even more pronounced on ChartQA-OoD, where VisTA reaches 73.2%, a 6.4-point gain over the best baseline (66.8%). This result demonstrates that by learning to select visual tools via RL, our VisTA agent framework is able to reason better visually than other baselines, which may rely more on textual cues.</p>
+</div>
+<div id="S4.SS2.p6" class="ltx_para">
+<p id="S4.SS2.p6.1" class="ltx_p">Finally, Table <a href="#S4.T2" title="Table 2 ‣ 4.2 Main Results ‣ 4 Experiments ‣ VisualToolAgent (VisTA): A Reinforcement Learning Framework for Visual Tool Selection" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> shows the comparison to state-of-the-art VLMs. VisTA achieves the best performance on Geometry3K, significantly outperforming all prior methods. On ChartQA, VisTA ranks second overall, only slightly behind Claude-3.5 Sonnet (90.8 vs. 88.9), and surpasses other strong baselines such as Molmo-72B, Gemini 1.5 Pro, and InternVL2-Llama-3. This demonstrates that our approach is both highly effective on complex chart reasoning tasks and substantially more capable on geometric benchmarks.</p>
+</div>
+</section>
+<section id="S4.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.3 </span>Tool Selection Analysis</h3>
+
+<figure id="S4.F3" class="ltx_figure"><img src="https://arxiv.org/html/2505.20289v2/each_tool_and_learn_policy_2_replace.png" id="S4.F3.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:286/142;" width="286" height="142" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 3: </span>Comparison of ChartQA accuracy across individual tools (T0–T8), the no-tool baseline (No), our RL-based selection policy (Ours), and a pseudo-upper bound (Upper).</figcaption>
+</figure>
+<div id="S4.SS3.p1" class="ltx_para">
+<p id="S4.SS3.p1.1" class="ltx_p">To evaluate whether our tool selection policy effectively learns to combine and select the most appropriate tools for each query, we compare its performance against using individual tools in isolation. Specifically, we feed each tool’s output along with the original input to the frozen reasoner and record its accuracy on the ChartQA benchmark. We also compute a pseudo-upper bound of 88.0% by treating a query as correct if any single tool enables the reasoner to produce the correct answer. This serves as a loose upper limit on what could be achieved with perfect single-tool selection, though it does not account for the benefits of combining multiple tools.</p>
+</div>
+<div id="S4.SS3.p2" class="ltx_para">
+<p id="S4.SS3.p2.1" class="ltx_p">Fig. <a href="#S4.F3" title="Figure 3 ‣ 4.3 Tool Selection Analysis ‣ 4 Experiments ‣ VisualToolAgent (VisTA): A Reinforcement Learning Framework for Visual Tool Selection" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a> shows the performance of each tool individually (T0–T8), as well as the no-tool baseline (76.4%). While certain tools, such as T2 (78.3%) and T1 (78.0%), improve upon the no-tool baseline, the large gap to the pseudo-upper bound (88.0%) suggests that no single tool consistently performs best across all queries. Different tools appear to be optimal for different subsets of the data. Ideally, a well-trained policy should learn to select the most effective tool(s) for each specific query, achieving performance that surpasses any static tool choice. Our method achieves 79.4% accuracy, outperforming all individual tools. This suggests that the policy learns to go beyond fixed tool usage and adapt its selection based on query-specific context. Our policy also closes some gap between the best individual tool and the pseudo-upper bound, indicating progress toward optimal tool selection without explicit supervision.</p>
+</div>
+</section>
+<section id="S4.SS4" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.4 </span>Agent Behavior Evolution During RL Training</h3>
+
+<div id="S4.SS4.p1" class="ltx_para">
+<p id="S4.SS4.p1.1" class="ltx_p">To analyze whether the agent is learning to prefer more effective tools, we track the correlation between tool usage frequency and individual tool performance over training. Specifically, every 10 iterations, we compute the Pearson correlation coefficient between the usage counts of each tool and their corresponding standalone accuracy (as reported in Fig. <a href="#S4.F3" title="Figure 3 ‣ 4.3 Tool Selection Analysis ‣ 4 Experiments ‣ VisualToolAgent (VisTA): A Reinforcement Learning Framework for Visual Tool Selection" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a>).</p>
+</div>
+<figure id="S4.F4" class="ltx_figure"><img src="https://arxiv.org/html/2505.20289v2/tool_correlation_2_replace.png" id="S4.F4.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:286/153;" width="286" height="153" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 4: </span>Pearson correlation between tool usage frequency and individual tool performance.</figcaption>
+</figure>
+<div id="S4.SS4.p2" class="ltx_para">
+<p id="S4.SS4.p2.1" class="ltx_p">Figure <a href="#S4.F4" title="Figure 4 ‣ 4.4 Agent Behavior Evolution During RL Training ‣ 4 Experiments ‣ VisualToolAgent (VisTA): A Reinforcement Learning Framework for Visual Tool Selection" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a> shows the evolution of this correlation across training iterations. Despite some initial fluctuations, we observe a clear upward trend, with the correlation increasing from near zero to over 0.8 as training progresses. This indicates that the agent is gradually aligning its tool selection strategy with the relative utility of each tool—favoring those that contribute more to the reasoner’s accuracy. These results suggest that our RL-based policy does not rely on fixed heuristics but instead learns to discriminate among tools based on their empirical contribution to task success. The emergence of this alignment over time provides further evidence that the agent is effectively adapting its behavior through reinforcement feedback.</p>
+</div>
+</section>
+<section id="S4.SS5" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.5 </span>Tools Selection Distribution</h3>
+
+<div id="S4.SS5.p1" class="ltx_para">
+<p id="S4.SS5.p1.1" class="ltx_p">Figure <a href="#S4.F5" title="Figure 5 ‣ 4.5 Tools Selection Distribution ‣ 4 Experiments ‣ VisualToolAgent (VisTA): A Reinforcement Learning Framework for Visual Tool Selection" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a> illustrates the tool selection distribution on the test set for our RL-trained agent, as well as for the training-free baselines using QwenVL-7B and GPT-4o. Our method clearly shows a strong preference for Tool 1 and Tool 2, both are chart-to-table tools, which are among the most effective tools based on individual performance (see Fig. <a href="#S4.F3" title="Figure 3 ‣ 4.3 Tool Selection Analysis ‣ 4 Experiments ‣ VisualToolAgent (VisTA): A Reinforcement Learning Framework for Visual Tool Selection" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a>). In contrast, low-performing tools such as Tool 3 (chart-to-SVG) and Tool 6 (caption module), are selected far less frequently, suggesting that the learned policy has effectively adapted to favor high-utility tools based on empirical feedback.</p>
+</div>
+<div id="S4.SS5.p2" class="ltx_para">
+<p id="S4.SS5.p2.1" class="ltx_p">The QwenVL-7B baseline, which operates in a training-free manner without reinforcement feedback, exhibits a more balanced selection pattern that resembles a near-normal distribution. This indicates that it lacks strong preferences and does not consistently prioritize the most effective tools. Meanwhile, GPT-4o tends to select more tools per query, rarely opts for no tool, and distributes its selections across a broader set of tools. However, this broader usage still lacks clear alignment with tool effectiveness, showing no strong correlation between selection frequency and tool performance.</p>
+</div>
+<div id="S4.SS5.p3" class="ltx_para">
+<p id="S4.SS5.p3.1" class="ltx_p">These differences highlight the benefit of learning a tool selection strategy through RL. Unlike training-free approaches that rely solely on static prompt understanding, our agent adapts its behavior based on downstream task outcomes, leading to more effective tool use.</p>
+</div>
+<figure id="S4.F5" class="ltx_figure"><img src="https://arxiv.org/html/2505.20289v2/tool_dis_3_replace.png" id="S4.F5.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:333/116;" width="333" height="116" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 5: </span>Tool selection frequency across our RL-trained agent, QwenVL-7B, and GPT-4o. Our method strongly favors effective tools (Tools 1 and 2) and avoids less useful ones, while QwenVL-7B shows a uniform distribution and GPT-4o selects broadly without clear alignment to tool performance.</figcaption>
+</figure>
+</section>
+<section id="S4.SS6" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.6 </span>Comparison with Random and All Selection Strategies</h3>
+
+<div id="S4.SS6.p1" class="ltx_para">
+<p id="S4.SS6.p1.1" class="ltx_p">To further evaluate the effectiveness of our learned tool selection policy, we compare it with two alternative tool selection strategies:
+All Tools: In this baseline, all nine tool outputs are simultaneously provided to the reasoning model alongside the original image, creating a comprehensive but potentially overwhelming input.
+Random Tools: This baseline randomly selects a fixed number of tools for each query. Since our policy selects approximately 1.2 tools per query on average, we randomly sample 2 tools per query for a fair comparison.</p>
+</div>
+<div id="S4.SS6.p2" class="ltx_para">
+<p id="S4.SS6.p2.1" class="ltx_p">Table <a href="#S4.T3" title="Table 3 ‣ 4.6 Comparison with Random and All Selection Strategies ‣ 4 Experiments ‣ VisualToolAgent (VisTA): A Reinforcement Learning Framework for Visual Tool Selection" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a> presents the comparative results across different reasoning models (QwenVL-7B and GPT-4o). Our selective approach consistently outperforms both baselines, demonstrating that strategic tool selection provides substantial benefits over both comprehensive and random approaches.</p>
+</div>
+<figure id="S4.T3" class="ltx_table">
+<table id="S4.T3.2" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S4.T3.2.1" class="ltx_tr">
+<th id="S4.T3.2.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt"><span id="S4.T3.2.1.1.1" class="ltx_text" style="font-size:70%;">Reasoning Model</span></th>
+<th id="S4.T3.2.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S4.T3.2.1.2.1" class="ltx_text" style="font-size:70%;">All Tools</span></th>
+<th id="S4.T3.2.1.3" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S4.T3.2.1.3.1" class="ltx_text" style="font-size:70%;">Random Tools</span></th>
+<th id="S4.T3.2.1.4" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S4.T3.2.1.4.1" class="ltx_text" style="font-size:70%;">Ours</span></th></tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S4.T3.2.2" class="ltx_tr">
+<th id="S4.T3.2.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t"><span id="S4.T3.2.2.1.1" class="ltx_text" style="font-size:70%;">QwenVL-7B</span></th>
+<td id="S4.T3.2.2.2" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T3.2.2.2.1" class="ltx_text" style="font-size:70%;">74.6</span></td>
+<td id="S4.T3.2.2.3" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T3.2.2.3.1" class="ltx_text" style="font-size:70%;">75.8</span></td>
+<td id="S4.T3.2.2.4" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T3.2.2.4.1" class="ltx_text ltx_font_bold" style="font-size:70%;">79.4</span></td></tr>
+<tr id="S4.T3.2.3" class="ltx_tr">
+<th id="S4.T3.2.3.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb"><span id="S4.T3.2.3.1.1" class="ltx_text" style="font-size:70%;">GPT-4o</span></th>
+<td id="S4.T3.2.3.2" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T3.2.3.2.1" class="ltx_text" style="font-size:70%;">81.3</span></td>
+<td id="S4.T3.2.3.3" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T3.2.3.3.1" class="ltx_text" style="font-size:70%;">83.5</span></td>
+<td id="S4.T3.2.3.4" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T3.2.3.4.1" class="ltx_text ltx_font_bold" style="font-size:70%;">88.1</span></td></tr>
+</tbody>
+</table>
+<figcaption class="ltx_caption ltx_centering" style="font-size:70%;"><span class="ltx_tag ltx_tag_table">Table 3: </span>Performance comparison of different tool selection strategies.</figcaption>
+</figure>
+<div id="S4.SS6.p3" class="ltx_para">
+<p id="S4.SS6.p3.1" class="ltx_p">The performance gap between our method and the All Tools baseline (4.8 and 6.8 percentage points for QwenVL-7B and GPT-4o, respectively) reveals that simply providing more tool outputs can be counterproductive. This suggests that extraneous information may confuse the reasoning model, highlighting the importance of selective augmentation. Similarly, our method outperforms the Random Tools baseline by 3.6 and 4.6 points, highlighting that effective reasoning depends on tool choice, not just quantity.</p>
+</div>
+</section>
+<section id="S4.SS7" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.7 </span>Evaluation on MathVerse Geometry Benchmark</h3>
+
+<div id="S4.SS7.p1" class="ltx_para">
+<p id="S4.SS7.p1.1" class="ltx_p">We evaluate our method on the MathVerse <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib31" title="" class="ltx_ref">31</a>]</cite> benchmark, a recent dataset designed to assess visual reasoning in geometry problems. Since our toolset focuses on 2D plane geometry, we report results on the corresponding subset of MathVerse in Table <a href="#S4.T4" title="Table 4 ‣ 4.7 Evaluation on MathVerse Geometry Benchmark ‣ 4 Experiments ‣ VisualToolAgent (VisTA): A Reinforcement Learning Framework for Visual Tool Selection" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>, which includes 2,550 samples out of the full 3,940.</p>
+</div>
+<div id="S4.SS7.p2" class="ltx_para">
+<p id="S4.SS7.p2.1" class="ltx_p">Importantly, we do not retrain the agent on MathVerse. Instead, we directly apply the agent trained on Geometry3K <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib20" title="" class="ltx_ref">20</a>]</cite> to assess its zero-shot generalization capability to a new benchmark. As shown in Table <a href="#S4.T4" title="Table 4 ‣ 4.7 Evaluation on MathVerse Geometry Benchmark ‣ 4 Experiments ‣ VisualToolAgent (VisTA): A Reinforcement Learning Framework for Visual Tool Selection" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>, our method outperforms all training-free baselines, including setups where GPT-4o is directly prompted with tool outputs.</p>
+</div>
+<div id="S4.SS7.p3" class="ltx_para">
+<p id="S4.SS7.p3.1" class="ltx_p">Additionally, we compare our method with several recent state-of-the-art (SOTA) VLMs, including GPT-o1, Claude-3.5 Sonnet, and Gemini-2.0-Flash. Our method achieves the best performance across all configurations, including a strong result of 73.1 when combined with GPT-o1 as the reasoner—surpassing the best prior SOTA accuracy of 67.7. These results demonstrate the robustness and generalizability of our tool selection policy, even when applied to more structurally diverse and challenging geometry benchmarks.</p>
+</div>
+<figure id="S4.T4" class="ltx_table">
+<table id="S4.T4.2" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S4.T4.2.1" class="ltx_tr">
+<th id="S4.T4.2.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt"><span id="S4.T4.2.1.1.1" class="ltx_text" style="font-size:80%;">Method</span></th>
+<th id="S4.T4.2.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S4.T4.2.1.2.1" class="ltx_text" style="font-size:80%;">Agent Model</span></th>
+<th id="S4.T4.2.1.3" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S4.T4.2.1.3.1" class="ltx_text" style="font-size:80%;">Reasoning Model</span></th>
+<th id="S4.T4.2.1.4" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S4.T4.2.1.4.1" class="ltx_text" style="font-size:80%;">MathVerse</span></th></tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S4.T4.2.2" class="ltx_tr">
+<th id="S4.T4.2.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t"><span id="S4.T4.2.2.1.1" class="ltx_text" style="font-size:80%;">Training-Free</span></th>
+<td id="S4.T4.2.2.2" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T4.2.2.2.1" class="ltx_text" style="font-size:80%;">-</span></td>
+<td id="S4.T4.2.2.3" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T4.2.2.3.1" class="ltx_text" style="font-size:80%;">GPT4o</span></td>
+<td id="S4.T4.2.2.4" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T4.2.2.4.1" class="ltx_text" style="font-size:80%;">50.2</span></td></tr>
+<tr id="S4.T4.2.3" class="ltx_tr">
+<th id="S4.T4.2.3.1" class="ltx_td ltx_align_left ltx_th ltx_th_row"><span id="S4.T4.2.3.1.1" class="ltx_text" style="font-size:80%;">Training-Free</span></th>
+<td id="S4.T4.2.3.2" class="ltx_td ltx_align_center"><span id="S4.T4.2.3.2.1" class="ltx_text" style="font-size:80%;">QwenVL 7B</span></td>
+<td id="S4.T4.2.3.3" class="ltx_td ltx_align_center"><span id="S4.T4.2.3.3.1" class="ltx_text" style="font-size:80%;">GPT4o</span></td>
+<td id="S4.T4.2.3.4" class="ltx_td ltx_align_center"><span id="S4.T4.2.3.4.1" class="ltx_text" style="font-size:80%;">51.4</span></td></tr>
+<tr id="S4.T4.2.4" class="ltx_tr">
+<th id="S4.T4.2.4.1" class="ltx_td ltx_align_left ltx_th ltx_th_row"><span id="S4.T4.2.4.1.1" class="ltx_text" style="font-size:80%;">Training-Free</span></th>
+<td id="S4.T4.2.4.2" class="ltx_td ltx_align_center"><span id="S4.T4.2.4.2.1" class="ltx_text" style="font-size:80%;">GPT4o</span></td>
+<td id="S4.T4.2.4.3" class="ltx_td ltx_align_center"><span id="S4.T4.2.4.3.1" class="ltx_text" style="font-size:80%;">GPT4o</span></td>
+<td id="S4.T4.2.4.4" class="ltx_td ltx_align_center"><span id="S4.T4.2.4.4.1" class="ltx_text" style="font-size:80%;">53.6</span></td></tr>
+<tr id="S4.T4.2.5" class="ltx_tr" style="--ltx-bg-color:#CEF8D1;">
+<th id="S4.T4.2.5.1" class="ltx_td ltx_align_left ltx_th ltx_th_row"><span id="S4.T4.2.5.1.1" class="ltx_text" style="font-size:80%;--ltx-bg-color:#CEF8D1;">Ours</span></th>
+<td id="S4.T4.2.5.2" class="ltx_td ltx_align_center"><span id="S4.T4.2.5.2.1" class="ltx_text" style="font-size:80%;--ltx-bg-color:#CEF8D1;">QwenVL 7B</span></td>
+<td id="S4.T4.2.5.3" class="ltx_td ltx_align_center"><span id="S4.T4.2.5.3.1" class="ltx_text" style="font-size:80%;--ltx-bg-color:#CEF8D1;">GPT4o</span></td>
+<td id="S4.T4.2.5.4" class="ltx_td ltx_align_center"><span id="S4.T4.2.5.4.1" class="ltx_text" style="font-size:80%;--ltx-bg-color:#CEF8D1;">56.1</span></td></tr>
+<tr id="S4.T4.2.6" class="ltx_tr">
+<th id="S4.T4.2.6.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t"><span id="S4.T4.2.6.1.1" class="ltx_text" style="font-size:80%;">Training-Free</span></th>
+<td id="S4.T4.2.6.2" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T4.2.6.2.1" class="ltx_text" style="font-size:80%;">-</span></td>
+<td id="S4.T4.2.6.3" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T4.2.6.3.1" class="ltx_text" style="font-size:80%;">Claude-3.5-Sonnet</span></td>
+<td id="S4.T4.2.6.4" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T4.2.6.4.1" class="ltx_text" style="font-size:80%;">58.2</span></td></tr>
+<tr id="S4.T4.2.7" class="ltx_tr">
+<th id="S4.T4.2.7.1" class="ltx_td ltx_align_left ltx_th ltx_th_row"><span id="S4.T4.2.7.1.1" class="ltx_text" style="font-size:80%;">Training-Free</span></th>
+<td id="S4.T4.2.7.2" class="ltx_td ltx_align_center"><span id="S4.T4.2.7.2.1" class="ltx_text" style="font-size:80%;">-</span></td>
+<td id="S4.T4.2.7.3" class="ltx_td ltx_align_center"><span id="S4.T4.2.7.3.1" class="ltx_text" style="font-size:80%;">Gemini-2.0-Flash</span></td>
+<td id="S4.T4.2.7.4" class="ltx_td ltx_align_center"><span id="S4.T4.2.7.4.1" class="ltx_text" style="font-size:80%;">65.6</span></td></tr>
+<tr id="S4.T4.2.8" class="ltx_tr">
+<th id="S4.T4.2.8.1" class="ltx_td ltx_align_left ltx_th ltx_th_row"><span id="S4.T4.2.8.1.1" class="ltx_text" style="font-size:80%;">Training-Free</span></th>
+<td id="S4.T4.2.8.2" class="ltx_td ltx_align_center"><span id="S4.T4.2.8.2.1" class="ltx_text" style="font-size:80%;">-</span></td>
+<td id="S4.T4.2.8.3" class="ltx_td ltx_align_center"><span id="S4.T4.2.8.3.1" class="ltx_text" style="font-size:80%;">GPT-o1</span></td>
+<td id="S4.T4.2.8.4" class="ltx_td ltx_align_center"><span id="S4.T4.2.8.4.1" class="ltx_text" style="font-size:80%;">67.7</span></td></tr>
+<tr id="S4.T4.2.9" class="ltx_tr" style="--ltx-bg-color:#CEF8D1;">
+<th id="S4.T4.2.9.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb"><span id="S4.T4.2.9.1.1" class="ltx_text" style="font-size:80%;--ltx-bg-color:#CEF8D1;">Ours</span></th>
+<td id="S4.T4.2.9.2" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T4.2.9.2.1" class="ltx_text" style="font-size:80%;--ltx-bg-color:#CEF8D1;">QwenVL 7B</span></td>
+<td id="S4.T4.2.9.3" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T4.2.9.3.1" class="ltx_text" style="font-size:80%;--ltx-bg-color:#CEF8D1;">GPT-o1</span></td>
+<td id="S4.T4.2.9.4" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T4.2.9.4.1" class="ltx_text" style="font-size:80%;--ltx-bg-color:#CEF8D1;">73.1</span></td></tr>
+</tbody>
+</table>
+<figcaption class="ltx_caption ltx_centering" style="font-size:80%;"><span class="ltx_tag ltx_tag_table">Table 4: </span>Results on the plane geometry subset of the MathVerse benchmark. Our method achieves the best performance, demonstrating its effectiveness on structurally diverse geometry reasoning tasks.</figcaption>
+</figure>
+</section>
+<section id="S4.SS8" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.8 </span>Results on BlindTest Benchmark</h3>
+
+<div id="S4.SS8.p1" class="ltx_para">
+<p id="S4.SS8.p1.1" class="ltx_p">Finally, to assess the generalizability of our framework, we evaluate on BlindTest <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib59" title="" class="ltx_ref">59</a>]</cite>, which targets low-level vision tasks requiring fine-grained spatial understanding where even state-of-the-art VLMs like GPT-4o <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib7" title="" class="ltx_ref">7</a>]</cite> and Gemini 1.5 Pro <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib45" title="" class="ltx_ref">45</a>]</cite> underperform. Following our previous training setup, we train a QwenVL-7B agent to select from six tools, grouped into three categories, with each category responsible for detecting a specific geometric element: lines, circles, or rectangles. Each category includes two tools to offer complementary perspectives. As shown in Table <a href="#S4.T5" title="Table 5 ‣ 4.8 Results on BlindTest Benchmark ‣ 4 Experiments ‣ VisualToolAgent (VisTA): A Reinforcement Learning Framework for Visual Tool Selection" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a>, our method achieves higher accuracy than both training-free baselines, highlighting the advantage of learned tool selection in scenarios that demand fine-grained visual reasoning.</p>
+</div>
+<figure id="S4.T5" class="ltx_table">
+<table id="S4.T5.2" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S4.T5.2.1" class="ltx_tr">
+<th id="S4.T5.2.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt"><span id="S4.T5.2.1.1.1" class="ltx_text" style="font-size:70%;">Method</span></th>
+<th id="S4.T5.2.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S4.T5.2.1.2.1" class="ltx_text" style="font-size:70%;">Agent Model</span></th>
+<th id="S4.T5.2.1.3" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S4.T5.2.1.3.1" class="ltx_text" style="font-size:70%;">Reasoning Model</span></th>
+<th id="S4.T5.2.1.4" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S4.T5.2.1.4.1" class="ltx_text" style="font-size:70%;">BlindTest</span></th></tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S4.T5.2.2" class="ltx_tr">
+<th id="S4.T5.2.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t"><span id="S4.T5.2.2.1.1" class="ltx_text" style="font-size:70%;">Training-Free</span></th>
+<td id="S4.T5.2.2.2" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T5.2.2.2.1" class="ltx_text" style="font-size:70%;">-</span></td>
+<td id="S4.T5.2.2.3" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T5.2.2.3.1" class="ltx_text" style="font-size:70%;">GPT4o</span></td>
+<td id="S4.T5.2.2.4" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T5.2.2.4.1" class="ltx_text" style="font-size:70%;">48.5</span></td></tr>
+<tr id="S4.T5.2.3" class="ltx_tr">
+<th id="S4.T5.2.3.1" class="ltx_td ltx_align_left ltx_th ltx_th_row"><span id="S4.T5.2.3.1.1" class="ltx_text" style="font-size:70%;">Training-Free</span></th>
+<td id="S4.T5.2.3.2" class="ltx_td ltx_align_center"><span id="S4.T5.2.3.2.1" class="ltx_text" style="font-size:70%;">GPT4o</span></td>
+<td id="S4.T5.2.3.3" class="ltx_td ltx_align_center"><span id="S4.T5.2.3.3.1" class="ltx_text" style="font-size:70%;">GPT4o</span></td>
+<td id="S4.T5.2.3.4" class="ltx_td ltx_align_center"><span id="S4.T5.2.3.4.1" class="ltx_text" style="font-size:70%;">51.8</span></td></tr>
+<tr id="S4.T5.2.4" class="ltx_tr" style="--ltx-bg-color:#CEF8D1;">
+<th id="S4.T5.2.4.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb"><span id="S4.T5.2.4.1.1" class="ltx_text" style="font-size:70%;--ltx-bg-color:#CEF8D1;">Ours</span></th>
+<td id="S4.T5.2.4.2" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T5.2.4.2.1" class="ltx_text" style="font-size:70%;--ltx-bg-color:#CEF8D1;">QwenVL 7B</span></td>
+<td id="S4.T5.2.4.3" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T5.2.4.3.1" class="ltx_text" style="font-size:70%;--ltx-bg-color:#CEF8D1;">GPT4o</span></td>
+<td id="S4.T5.2.4.4" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T5.2.4.4.1" class="ltx_text ltx_font_bold" style="font-size:70%;--ltx-bg-color:#CEF8D1;">53.4</span></td></tr>
+</tbody>
+</table>
+<figcaption class="ltx_caption ltx_centering" style="font-size:70%;"><span class="ltx_tag ltx_tag_table">Table 5: </span>Performance of different tool selection strategies on BlindTest.</figcaption>
+</figure>
+</section>
+<section id="S4.SS9" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.9 </span>Comparison with Visual Sketchpad on Geometry3K</h3>
+
+<div id="S4.SS9.p1" class="ltx_para">
+<p id="S4.SS9.p1.1" class="ltx_p">To further benchmark our method, we compare against Visual Sketchpad <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib12" title="" class="ltx_ref">12</a>]</cite>, a recent state-of-the-art system on Geometry3K. Visual Sketchpad enables VLMs to draw with lines, boxes, marks, which better facilitates visual perception and reasoning. For a fair comparison, we follow their evaluation protocol and test our method on the same curated subset of Geometry3K<sup id="S4.SS9.p1.1.1" class="ltx_sup">*</sup>, which is smaller than the official test set. As shown in Table<a href="#S4.T6" title="Table 6 ‣ 4.9 Comparison with Visual Sketchpad on Geometry3K ‣ 4 Experiments ‣ VisualToolAgent (VisTA): A Reinforcement Learning Framework for Visual Tool Selection" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a>, our method still outperforms Visual Sketchpad. This result highlights the strength of our learned tool selection policy in driving effective visual reasoning.</p>
+</div>
+<figure id="S4.T6" class="ltx_table">
+<table id="S4.T6.2" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S4.T6.2.1" class="ltx_tr">
+<th id="S4.T6.2.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt"><span id="S4.T6.2.1.1.1" class="ltx_text" style="font-size:80%;">Method</span></th>
+<th id="S4.T6.2.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S4.T6.2.1.2.1" class="ltx_text" style="font-size:80%;">Agent Model</span></th>
+<th id="S4.T6.2.1.3" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S4.T6.2.1.3.1" class="ltx_text" style="font-size:80%;">Reasoning Model</span></th>
+<th id="S4.T6.2.1.4" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="S4.T6.2.1.4.1" class="ltx_text" style="font-size:80%;">Geometry3K<sup id="S4.T6.2.1.4.1.1" class="ltx_sup">*</sup></span></th></tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S4.T6.2.2" class="ltx_tr">
+<th id="S4.T6.2.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t"><span id="S4.T6.2.2.1.1" class="ltx_text" style="font-size:80%;">Visual Sketchpad <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib12" title="" class="ltx_ref">12</a>]</cite></span></th>
+<td id="S4.T6.2.2.2" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T6.2.2.2.1" class="ltx_text" style="font-size:80%;">-</span></td>
+<td id="S4.T6.2.2.3" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T6.2.2.3.1" class="ltx_text" style="font-size:80%;">GPT4o</span></td>
+<td id="S4.T6.2.2.4" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T6.2.2.4.1" class="ltx_text" style="font-size:80%;">66.7</span></td></tr>
+<tr id="S4.T6.2.3" class="ltx_tr" style="--ltx-bg-color:#CEF8D1;">
+<th id="S4.T6.2.3.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb"><span id="S4.T6.2.3.1.1" class="ltx_text" style="font-size:80%;--ltx-bg-color:#CEF8D1;">Ours</span></th>
+<td id="S4.T6.2.3.2" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T6.2.3.2.1" class="ltx_text" style="font-size:80%;--ltx-bg-color:#CEF8D1;">QwenVL 7B</span></td>
+<td id="S4.T6.2.3.3" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T6.2.3.3.1" class="ltx_text" style="font-size:80%;--ltx-bg-color:#CEF8D1;">GPT4o</span></td>
+<td id="S4.T6.2.3.4" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T6.2.3.4.1" class="ltx_text ltx_font_bold" style="font-size:80%;--ltx-bg-color:#CEF8D1;">68.8</span></td></tr>
+</tbody>
+</table>
+<figcaption class="ltx_caption ltx_centering" style="font-size:80%;"><span class="ltx_tag ltx_tag_table">Table 6: </span>Comparison with Visual Sketchpad on a Geometry3K<sup id="S4.T6.9" class="ltx_sup">*</sup> test subset. We follow their evaluation protocol using the same curated set. <sup id="S4.T6.10" class="ltx_sup">*</sup>Indicates the smaller subset used by Visual Sketchpad. Our method achieves higher accuracy, demonstrating the strength of our tool selection policy.</figcaption>
+</figure>
+</section>
+<section id="S4.SS10" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.10 </span>Visualizations</h3>
+
+<div id="S4.SS10.p1" class="ltx_para">
+<p id="S4.SS10.p1.1" class="ltx_p">In this section, we provide qualitative examples showing how our agent selects appropriate tools according to the query.</p>
+</div>
+<figure id="S4.F6" class="ltx_figure"><img src="https://arxiv.org/html/2505.20289v2/geom_viz.png" id="S4.F6.g1" class="ltx_graphics ltx_centering ltx_img_square" style="aspect-ratio:238/232;" width="238" height="232" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 6: </span><span id="S4.F6.3" class="ltx_text ltx_font_bold">Tool Selection for a Geometry Question</span>. Our agent selects the formal diagram parser, Inter-GPS, which accurately extracts essential details from the diagram and represents them in a formal structure. Leveraging this representation, the reasoner is able to determine the correct answer.</figcaption>
+</figure>
+<div id="S4.SS10.p2" class="ltx_para">
+<p id="S4.SS10.p2.1" class="ltx_p">From the Geometry3k dataset, we present an example in Figure <a href="#S4.F6" title="Figure 6 ‣ 4.10 Visualizations ‣ 4 Experiments ‣ VisualToolAgent (VisTA): A Reinforcement Learning Framework for Visual Tool Selection" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a>. Based on the context, our agent selects the Inter-GPS tool, which represents the objects in the diagram and their relationships using formal language. This structured information is then used by the Reasoner model to correctly answer the question.</p>
+</div>
+<figure id="S4.F7" class="ltx_figure"><img src="https://arxiv.org/html/2505.20289v2/chart_viz.png" id="S4.F7.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:381/278;" width="381" height="278" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 7: </span><span id="S4.F7.3" class="ltx_text ltx_font_bold">Tool Selection for a Chart Question</span>. An example demonstrating a case where the agent calls a set of complementary tools. This question requires understanding both numeric values (extracted from the table) and color information (extracted from the SVG). The reasoner combines this information to arrive at the correct answer.</figcaption>
+</figure>
+<div id="S4.SS10.p3" class="ltx_para">
+<p id="S4.SS10.p3.1" class="ltx_p">Figure <a href="#S4.F7" title="Figure 7 ‣ 4.10 Visualizations ‣ 4 Experiments ‣ VisualToolAgent (VisTA): A Reinforcement Learning Framework for Visual Tool Selection" class="ltx_ref"><span class="ltx_text ltx_ref_tag">7</span></a> presents a qualitative example of chart understanding. The question is complex, requiring reasoning about the sizes of various objects identified by specific colors. To handle this, our agent invokes both a chart-to-table converter to extract numeric values (shown as an image for illustration) and an image-to-SVG converter to capture color information. Using this combined input, the reasoner is able to correctly answer the question.</p>
+</div>
+</section>
+<section id="S4.SS11" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.11 </span>Constructing the ChartQA-OoD Test Set</h3>
+
+<div id="S4.SS11.p1" class="ltx_para">
+<p id="S4.SS11.p1.1" class="ltx_p">Chart-based question answering poses unique challenges, requiring models to reason over numerical values, textual labels, and complex visual structures. Effective chart comprehension demands not only the identification of visual elements but also precise interpretation—such as accurately estimating bar heights in bar charts.</p>
+</div>
+<div id="S4.SS11.p2" class="ltx_para">
+<p id="S4.SS11.p2.1" class="ltx_p">To better evaluate the robustness and reasoning capabilities of VLMs, we construct an out-of-distribution (OoD) test set for ChartQA <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib19" title="" class="ltx_ref">19</a>]</cite> with two targeted perturbations. We manually remove textual labels from geometric elements (e.g., bars and points) in each chart. This isolates the model’s reliance on visual features by eliminating access to direct numeric answers via OCR. To further test the models’ spatial reasoning robustness, we apply random geometric perturbations to the charts. With a 50% chance, each chart is either horizontally or vertically stretched to twice its original width or height. These transformations maintain semantic structure but introduce visual variability. The resulting ChartQA-OoD test set allows us to probe whether models depend heavily on textual cues and how sensitive their reasoning is to mild visual distortions. This setup provides a more rigorous benchmark for evaluating the generalization and visual understanding capabilities of VLMs.</p>
+</div>
+</section>
+</section>
+<section id="S5" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">5 </span>Discussion and Conclusion</h2>
+
+<div id="S5.p1" class="ltx_para">
+<p id="S5.p1.1" class="ltx_p">We introduced VisTA, an RL framework enabling visual agents to autonomously select effective external tools for multimodal reasoning. Unlike prior methods, VisTA learns adaptive tool-selection strategies without explicit supervision. Our experiments showed significant accuracy gains over strong baselines, highlighting VisTA’s potential for robust, flexible visual reasoning.</p>
+</div>
+<div id="S5.p2" class="ltx_para">
+<p id="S5.p2.1" class="ltx_p"><span id="S5.p2.1.1" class="ltx_text ltx_font_bold">Limitations.</span> Our framework enables agents to learn visual tool selection through experience, but it currently does not handle cases requiring sequential composition of multiple tools. Exploring this sequential tool-composition capability represents a promising direction for future research. Second, our framework currently relies on a fixed, manually curated set of tools, which could be enhanced by methods for automatically discovering and integrating new tools. Developing such automated tool-selection and integration methods could significantly improve the scalability and adaptability of our approach.</p>
+</div>
+<div id="S5.p3" class="ltx_para">
+<p id="S5.p3.1" class="ltx_p"><span id="S5.p3.1.1" class="ltx_text ltx_font_bold">Broader Impact.</span> Our framework enhances the ability of AI systems to autonomously learn when and how to utilize external tools, such as image captioners and object detectors, potentially improving generalization and robustness in multimodal environments. While our current study focuses on relatively low-stakes settings, such as chart understanding and geometry problems, deploying similar approaches in high-stakes domains like healthcare could introduce subtle yet significant errors due to incorrect tool usage. Ensuring reliability, transparency, and appropriate human oversight in these sensitive applications will be crucial.</p>
+</div>
+</section>
+<section id="bib" class="ltx_bibliography">
+<h2 class="ltx_title ltx_title_bibliography">References</h2>
+
+<ul class="ltx_biblist">
+      
+<li id="bib.bib1" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[1]</span>
+<span class="ltx_bibblock">
+Zhihong Shao, Peiyi Wang, Qihao Zhu, Runxin Xu, Junxiao Song, Xiao Bi, Haowei Zhang, Mingchuan Zhang, YK Li, Y Wu, et al.
+
+</span>
+<span class="ltx_bibblock">Deepseekmath: Pushing the limits of mathematical reasoning in open language models.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib1.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2402.03300</span>, 2024.
+
+</span></li>
+      
+<li id="bib.bib2" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[2]</span>
+<span class="ltx_bibblock">
+Tom Brown, Benjamin Mann, Nick Ryder, Melanie Subbiah, Jared D Kaplan, Prafulla Dhariwal, Arvind Neelakantan, Pranav Shyam, Girish Sastry, Amanda Askell, et al.
+
+</span>
+<span class="ltx_bibblock">Language models are few-shot learners.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib2.1" class="ltx_text ltx_font_italic">Advances in neural information processing systems</span>, 33:1877–1901, 2020.
+
+</span></li>
+      
+<li id="bib.bib3" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[3]</span>
+<span class="ltx_bibblock">
+Hugo Touvron, Thibaut Lavril, Gautier Izacard, Xavier Martinet, Marie-Anne Lachaux, Timothée Lacroix, Baptiste Rozière, Naman Goyal, Eric Hambro, Faisal Azhar, et al.
+
+</span>
+<span class="ltx_bibblock">Llama: Open and efficient foundation language models.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib3.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2302.13971</span>, 2023.
+
+</span></li>
+      
+<li id="bib.bib4" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[4]</span>
+<span class="ltx_bibblock">
+Josh Achiam, Steven Adler, Sandhini Agarwal, Lama Ahmad, Ilge Akkaya, Florencia Leoni Aleman, Diogo Almeida, Janko Altenschmidt, Sam Altman, Shyamal Anadkat, et al.
+
+</span>
+<span class="ltx_bibblock">Gpt-4 technical report.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib4.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2303.08774</span>, 2023.
+
+</span></li>
+      
+<li id="bib.bib5" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[5]</span>
+<span class="ltx_bibblock">
+Haotian Liu, Chunyuan Li, Qingyang Wu, and Yong Jae Lee.
+
+</span>
+<span class="ltx_bibblock">Visual instruction tuning.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib5.1" class="ltx_text ltx_font_italic">Advances in neural information processing systems</span>, 36:34892–34916, 2023.
+
+</span></li>
+      
+<li id="bib.bib6" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[6]</span>
+<span class="ltx_bibblock">
+An Yang, Baosong Yang, Beichen Zhang, Binyuan Hui, Bo Zheng, Bowen Yu, Chengyuan Li, Dayiheng Liu, Fei Huang, Haoran Wei, et al.
+
+</span>
+<span class="ltx_bibblock">Qwen2. 5 technical report.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib6.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2412.15115</span>, 2024.
+
+</span></li>
+      
+<li id="bib.bib7" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[7]</span>
+<span class="ltx_bibblock">
+Aaron Hurst, Adam Lerer, Adam P Goucher, Adam Perelman, Aditya Ramesh, Aidan Clark, AJ Ostrow, Akila Welihinda, Alan Hayes, Alec Radford, et al.
+
+</span>
+<span class="ltx_bibblock">Gpt-4o system card.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib7.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2410.21276</span>, 2024.
+
+</span></li>
+      
+<li id="bib.bib8" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[8]</span>
+<span class="ltx_bibblock">
+Wenhu Chen, Xueguang Ma, Xinyi Wang, and William W Cohen.
+
+</span>
+<span class="ltx_bibblock">Program of thoughts prompting: Disentangling computation from reasoning for numerical reasoning tasks.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib8.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2211.12588</span>, 2022.
+
+</span></li>
+      
+<li id="bib.bib9" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[9]</span>
+<span class="ltx_bibblock">
+Zhibin Gou, Zhihong Shao, Yeyun Gong, Yelong Shen, Yujiu Yang, Minlie Huang, Nan Duan, and Weizhu Chen.
+
+</span>
+<span class="ltx_bibblock">Tora: A tool-integrated reasoning agent for mathematical problem solving.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib9.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2309.17452</span>, 2023.
+
+</span></li>
+      
+<li id="bib.bib10" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[10]</span>
+<span class="ltx_bibblock">
+Luyu Gao, Aman Madaan, Shuyan Zhou, Uri Alon, Pengfei Liu, Yiming Yang, Jamie Callan, and Graham Neubig.
+
+</span>
+<span class="ltx_bibblock">Pal: Program-aided language models.
+
+</span>
+<span class="ltx_bibblock">In <span id="bib.bib10.1" class="ltx_text ltx_font_italic">International Conference on Machine Learning</span>, pages 10764–10799. PMLR, 2023.
+
+</span></li>
+      
+<li id="bib.bib11" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[11]</span>
+<span class="ltx_bibblock">
+Shishir G Patil, Tianjun Zhang, Xin Wang, and Joseph E Gonzalez.
+
+</span>
+<span class="ltx_bibblock">Gorilla: Large language model connected with massive apis.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib11.1" class="ltx_text ltx_font_italic">Advances in Neural Information Processing Systems</span>, 37:126544–126565, 2024.
+
+</span></li>
+      
+<li id="bib.bib12" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[12]</span>
+<span class="ltx_bibblock">
+Yushi Hu, Weijia Shi, Xingyu Fu, Dan Roth, Mari Ostendorf, Luke Zettlemoyer, Noah A Smith, and Ranjay Krishna.
+
+</span>
+<span class="ltx_bibblock">Visual sketchpad: Sketching as a visual chain of thought for multimodal language models.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib12.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2406.09403</span>, 2024.
+
+</span></li>
+      
+<li id="bib.bib13" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[13]</span>
+<span class="ltx_bibblock">
+Tanmay Gupta and Aniruddha Kembhavi.
+
+</span>
+<span class="ltx_bibblock">Visual programming: Compositional visual reasoning without training.
+
+</span>
+<span class="ltx_bibblock">In <span id="bib.bib13.1" class="ltx_text ltx_font_italic">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition</span>, pages 14953–14962, 2023.
+
+</span></li>
+      
+<li id="bib.bib14" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[14]</span>
+<span class="ltx_bibblock">
+Dídac Surís, Sachit Menon, and Carl Vondrick.
+
+</span>
+<span class="ltx_bibblock">Vipergpt: Visual inference via python execution for reasoning.
+
+</span>
+<span class="ltx_bibblock">In <span id="bib.bib14.1" class="ltx_text ltx_font_italic">Proceedings of the IEEE/CVF International Conference on Computer Vision</span>, pages 11888–11898, 2023.
+
+</span></li>
+      
+<li id="bib.bib15" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[15]</span>
+<span class="ltx_bibblock">
+Timo Schick, Jane Dwivedi-Yu, Roberto Dessì, Roberta Raileanu, Maria Lomeli, Eric Hambro, Luke Zettlemoyer, Nicola Cancedda, and Thomas Scialom.
+
+</span>
+<span class="ltx_bibblock">Toolformer: Language models can teach themselves to use tools.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib15.1" class="ltx_text ltx_font_italic">Advances in Neural Information Processing Systems</span>, 36:68539–68551, 2023.
+
+</span></li>
+      
+<li id="bib.bib16" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[16]</span>
+<span class="ltx_bibblock">
+Shilong Liu, Hao Cheng, Haotian Liu, Hao Zhang, Feng Li, Tianhe Ren, Xueyan Zou, Jianwei Yang, Hang Su, Jun Zhu, et al.
+
+</span>
+<span class="ltx_bibblock">Llava-plus: Learning to use tools for creating multimodal agents.
+
+</span>
+<span class="ltx_bibblock">In <span id="bib.bib16.1" class="ltx_text ltx_font_italic">European Conference on Computer Vision</span>, pages 126–142. Springer, 2024.
+
+</span></li>
+      
+<li id="bib.bib17" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[17]</span>
+<span class="ltx_bibblock">
+Pan Lu, Bowen Chen, Sheng Liu, Rahul Thapa, Joseph Boen, and James Zou.
+
+</span>
+<span class="ltx_bibblock">Octotools: An agentic framework with extensible tools for complex reasoning.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib17.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2502.11271</span>, 2025.
+
+</span></li>
+      
+<li id="bib.bib18" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[18]</span>
+<span class="ltx_bibblock">
+Richard S Sutton, Andrew G Barto, et al.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib18.1" class="ltx_text ltx_font_italic">Reinforcement learning: An introduction</span>, volume 1.
+
+</span>
+<span class="ltx_bibblock">MIT press Cambridge, 1998.
+
+</span></li>
+      
+<li id="bib.bib19" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[19]</span>
+<span class="ltx_bibblock">
+Ahmed Masry, Do Xuan Long, Jia Qing Tan, Shafiq Joty, and Enamul Hoque.
+
+</span>
+<span class="ltx_bibblock">Chartqa: A benchmark for question answering about charts with visual and logical reasoning.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib19.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2203.10244</span>, 2022.
+
+</span></li>
+      
+<li id="bib.bib20" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[20]</span>
+<span class="ltx_bibblock">
+Pan Lu, Ran Gong, Shibiao Jiang, Liang Qiu, Siyuan Huang, Xiaodan Liang, and Song-Chun Zhu.
+
+</span>
+<span class="ltx_bibblock">Inter-gps: Interpretable geometry problem solving with formal language and symbolic reasoning.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib20.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2105.04165</span>, 2021.
+
+</span></li>
+      
+<li id="bib.bib21" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[21]</span>
+<span class="ltx_bibblock">
+Mojtaba Komeili, Kurt Shuster, and Jason Weston.
+
+</span>
+<span class="ltx_bibblock">Internet-augmented dialogue generation.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib21.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2107.07566</span>, 2021.
+
+</span></li>
+      
+<li id="bib.bib22" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[22]</span>
+<span class="ltx_bibblock">
+Karl Cobbe, Vineet Kosaraju, Mohammad Bavarian, Mark Chen, Heewoo Jun, Lukasz Kaiser, Matthias Plappert, Jerry Tworek, Jacob Hilton, Reiichiro Nakano, et al.
+
+</span>
+<span class="ltx_bibblock">Training verifiers to solve math word problems.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib22.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2110.14168</span>, 2021.
+
+</span></li>
+      
+<li id="bib.bib23" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[23]</span>
+<span class="ltx_bibblock">
+OpenAI.
+
+</span>
+<span class="ltx_bibblock">Learning to reason with llms.
+
+</span>
+<span class="ltx_bibblock"><a href="https://openai.com/index/learning-to-reason-with-llms/" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://openai.com/index/learning-to-reason-with-llms/</a>, 2024.
+
+</span>
+<span class="ltx_bibblock">Accessed: 2025-05-13.
+
+</span></li>
+      
+<li id="bib.bib24" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[24]</span>
+<span class="ltx_bibblock">
+Daya Guo, Dejian Yang, Haowei Zhang, Junxiao Song, Ruoyu Zhang, Runxin Xu, Qihao Zhu, Shirong Ma, Peiyi Wang, Xiao Bi, et al.
+
+</span>
+<span class="ltx_bibblock">Deepseek-r1: Incentivizing reasoning capability in llms via reinforcement learning.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib24.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2501.12948</span>, 2025.
+
+</span></li>
+      
+<li id="bib.bib25" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[25]</span>
+<span class="ltx_bibblock">
+Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Fei Xia, Ed Chi, Quoc V Le, Denny Zhou, et al.
+
+</span>
+<span class="ltx_bibblock">Chain-of-thought prompting elicits reasoning in large language models.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib25.1" class="ltx_text ltx_font_italic">Advances in neural information processing systems</span>, 35:24824–24837, 2022.
+
+</span></li>
+      
+<li id="bib.bib26" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[26]</span>
+<span class="ltx_bibblock">
+Ziyu Liu, Zeyi Sun, Yuhang Zang, Xiaoyi Dong, Yuhang Cao, Haodong Duan, Dahua Lin, and Jiaqi Wang.
+
+</span>
+<span class="ltx_bibblock">Visual-rft: Visual reinforcement fine-tuning.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib26.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2503.01785</span>, 2025.
+
+</span></li>
+      
+<li id="bib.bib27" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[27]</span>
+<span class="ltx_bibblock">
+Wenxuan Huang, Bohan Jia, Zijie Zhai, Shaosheng Cao, Zheyu Ye, Fei Zhao, Zhe Xu, Yao Hu, and Shaohui Lin.
+
+</span>
+<span class="ltx_bibblock">Vision-r1: Incentivizing reasoning capability in multimodal large language models.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib27.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2503.06749</span>, 2025.
+
+</span></li>
+      
+<li id="bib.bib28" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[28]</span>
+<span class="ltx_bibblock">
+Jiazhan Feng, Shijue Huang, Xingwei Qu, Ge Zhang, Yujia Qin, Baoquan Zhong, Chengquan Jiang, Jinxin Chi, and Wanjun Zhong.
+
+</span>
+<span class="ltx_bibblock">Retool: Reinforcement learning for strategic tool use in llms.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib28.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2504.11536</span>, 2025.
+
+</span></li>
+      
+<li id="bib.bib29" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[29]</span>
+<span class="ltx_bibblock">
+Xingyu Fu, Yushi Hu, Bangzheng Li, Yu Feng, Haoyu Wang, Xudong Lin, Dan Roth, Noah A Smith, Wei-Chiu Ma, and Ranjay Krishna.
+
+</span>
+<span class="ltx_bibblock">Blink: Multimodal large language models can see but not perceive.
+
+</span>
+<span class="ltx_bibblock">In <span id="bib.bib29.1" class="ltx_text ltx_font_italic">European Conference on Computer Vision</span>, pages 148–166. Springer, 2024.
+
+</span></li>
+      
+<li id="bib.bib30" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[30]</span>
+<span class="ltx_bibblock">
+Pan Lu, Hritik Bansal, Tony Xia, Jiacheng Liu, Chunyuan Li, Hannaneh Hajishirzi, Hao Cheng, Kai-Wei Chang, Michel Galley, and Jianfeng Gao.
+
+</span>
+<span class="ltx_bibblock">Mathvista: Evaluating mathematical reasoning of foundation models in visual contexts.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib30.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2310.02255</span>, 2023.
+
+</span></li>
+      
+<li id="bib.bib31" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[31]</span>
+<span class="ltx_bibblock">
+Renrui Zhang, Dongzhi Jiang, Yichi Zhang, Haokun Lin, Ziyu Guo, Pengshuo Qiu, Aojun Zhou, Pan Lu, Kai-Wei Chang, Yu Qiao, et al.
+
+</span>
+<span class="ltx_bibblock">Mathverse: Does your multi-modal llm truly see the diagrams in visual math problems?
+
+</span>
+<span class="ltx_bibblock">In <span id="bib.bib31.1" class="ltx_text ltx_font_italic">European Conference on Computer Vision</span>, pages 169–186. Springer, 2024.
+
+</span></li>
+      
+<li id="bib.bib32" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[32]</span>
+<span class="ltx_bibblock">
+Ilya Loshchilov and Frank Hutter.
+
+</span>
+<span class="ltx_bibblock">Decoupled weight decay regularization.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib32.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:1711.05101</span>, 2017.
+
+</span></li>
+      
+<li id="bib.bib33" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[33]</span>
+<span class="ltx_bibblock">
+Ahmed Masry, Parsa Kavehzadeh, Xuan Long Do, Enamul Hoque, and Shafiq Joty.
+
+</span>
+<span class="ltx_bibblock">Unichart: A universal vision-language pretrained model for chart comprehension and reasoning.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib33.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2305.14761</span>, 2023.
+
+</span></li>
+      
+<li id="bib.bib34" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[34]</span>
+<span class="ltx_bibblock">
+Fangyu Liu, Julian Martin Eisenschlos, Francesco Piccinno, Syrine Krichene, Chenxi Pang, Kenton Lee, Mandar Joshi, Wenhu Chen, Nigel Collier, and Yasemin Altun.
+
+</span>
+<span class="ltx_bibblock">Deplot: One-shot visual language reasoning by plot-to-table translation.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib34.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2212.10505</span>, 2022.
+
+</span></li>
+      
+<li id="bib.bib35" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[35]</span>
+<span class="ltx_bibblock">
+Zhengzhuo Xu, Bowen Qu, Yiyan Qi, Sinan Du, Chengjin Xu, Chun Yuan, and Jian Guo.
+
+</span>
+<span class="ltx_bibblock">Chartmoe: Mixture of expert connector for advanced chart understanding.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib35.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2409.03277</span>, 2024.
+
+</span></li>
+      
+<li id="bib.bib36" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[36]</span>
+<span class="ltx_bibblock">
+Gary Bradski.
+
+</span>
+<span class="ltx_bibblock">The opencv library.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib36.1" class="ltx_text ltx_font_italic">Dr. Dobb’s Journal: Software Tools for the Professional Programmer</span>, 25(11):120–123, 2000.
+
+</span></li>
+      
+<li id="bib.bib37" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[37]</span>
+<span class="ltx_bibblock">
+Pengyu Yan, Saleem Ahmed, and David Doermann.
+
+</span>
+<span class="ltx_bibblock">Context-aware chart element detection.
+
+</span>
+<span class="ltx_bibblock">In <span id="bib.bib37.1" class="ltx_text ltx_font_italic">International conference on document analysis and recognition</span>, pages 218–233. Springer, 2023.
+
+</span></li>
+      
+<li id="bib.bib38" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[38]</span>
+<span class="ltx_bibblock">
+Junyu Luo, Zekun Li, Jinpeng Wang, and Chin-Yew Lin.
+
+</span>
+<span class="ltx_bibblock">Chartocr: Data extraction from charts images via a deep hybrid framework.
+
+</span>
+<span class="ltx_bibblock">In <span id="bib.bib38.1" class="ltx_text ltx_font_italic">Proceedings of the IEEE/CVF winter conference on applications of computer vision</span>, pages 1917–1925, 2021.
+
+</span></li>
+      
+<li id="bib.bib39" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[39]</span>
+<span class="ltx_bibblock">
+Fanqing Meng, Wenqi Shao, Quanfeng Lu, Peng Gao, Kaipeng Zhang, Yu Qiao, and Ping Luo.
+
+</span>
+<span class="ltx_bibblock">Chartassisstant: A universal chart multimodal language model via chart-to-table pre-training and multitask instruction tuning.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib39.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2401.02384</span>, 2024.
+
+</span></li>
+      
+<li id="bib.bib40" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[40]</span>
+<span class="ltx_bibblock">
+Renqiu Xia, Bo Zhang, Hancheng Ye, Xiangchao Yan, Qi Liu, Hongbin Zhou, Zijun Chen, Peng Ye, Min Dou, Botian Shi, et al.
+
+</span>
+<span class="ltx_bibblock">Chartx &amp; chartvlm: A versatile benchmark and foundation model for complicated chart reasoning.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib40.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2402.12185</span>, 2024.
+
+</span></li>
+      
+<li id="bib.bib41" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[41]</span>
+<span class="ltx_bibblock">
+Shuai Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, Sibo Song, Kai Dang, Peng Wang, Shijie Wang, Jun Tang, et al.
+
+</span>
+<span class="ltx_bibblock">Qwen2. 5-vl technical report.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib41.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2502.13923</span>, 2025.
+
+</span></li>
+      
+<li id="bib.bib42" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[42]</span>
+<span class="ltx_bibblock">
+Zeren Zhang, Jo-Ku Cheng, Jingyang Deng, Lu Tian, Jinwen Ma, Ziran Qin, Xiaokai Zhang, Na Zhu, and Tuo Leng.
+
+</span>
+<span class="ltx_bibblock">Diagram formalization enhanced multi-modal geometry problem solver.
+
+</span>
+<span class="ltx_bibblock">In <span id="bib.bib42.1" class="ltx_text ltx_font_italic">ICASSP 2025-2025 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)</span>, pages 1–5. IEEE, 2025.
+
+</span></li>
+      
+<li id="bib.bib43" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[43]</span>
+<span class="ltx_bibblock">
+Jiahui Gao, Renjie Pi, Jipeng Zhang, Jiacheng Ye, Wanjun Zhong, Yufei Wang, Lanqing Hong, Jianhua Han, Hang Xu, Zhenguo Li, et al.
+
+</span>
+<span class="ltx_bibblock">G-llava: Solving geometric problem with multi-modal large language model.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib43.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2312.11370</span>, 2023.
+
+</span></li>
+      
+<li id="bib.bib44" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[44]</span>
+<span class="ltx_bibblock">
+Shuai Peng, Di Fu, Liangcai Gao, Xiuqin Zhong, Hongguang Fu, and Zhi Tang.
+
+</span>
+<span class="ltx_bibblock">Multimath: Bridging visual and mathematical reasoning for large language models.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib44.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2409.00147</span>, 2024.
+
+</span></li>
+      
+<li id="bib.bib45" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[45]</span>
+<span class="ltx_bibblock">
+Gemini Team.
+
+</span>
+<span class="ltx_bibblock">Gemini 1.5: Unlocking multimodal understanding across millions of tokens of context.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib45.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2403.05530</span>, 2024.
+
+</span></li>
+      
+<li id="bib.bib46" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[46]</span>
+<span class="ltx_bibblock">
+Anthropic.
+
+</span>
+<span class="ltx_bibblock">The claude 3 model family: Opus, sonnet, haiku, 2024.
+
+</span></li>
+      
+<li id="bib.bib47" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[47]</span>
+<span class="ltx_bibblock">
+Lucas Beyer, Andreas Steiner, André Susano Pinto, Alexander Kolesnikov, Xiao Wang, Daniel Salz, Maxim Neumann, Ibrahim Alabdulmohsin, Michael Tschannen, Emanuele Bugliarello, Thomas Unterthiner, Daniel Keysers, Skanda Koppula, Fangyu Liu, Adam Grycner, Alexey Gritsenko, Neil Houlsby, Manoj Kumar, Keran Rong, Julian Eisenschlos, Rishabh Kabra, Matthias Bauer, Matko Bošnjak, Xi Chen, Matthias Minderer, Paul Voigtlaender, Ioana Bica, Ivana Balazevic, Joan Puigcerver, Pinelopi Papalampidi, Olivier Henaff, Xi Xiong, Radu Soricut, Jeremiah Harmsen, and Xiaohua Zhai.
+
+</span>
+<span class="ltx_bibblock">PaliGemma: A versatile 3B VLM for transfer.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib47.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2407.07726</span>, 2024.
+
+</span></li>
+      
+<li id="bib.bib48" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[48]</span>
+<span class="ltx_bibblock">
+Marah Abdin, Jyoti Aneja, Hany Awadalla, Ahmed Awadallah, Ammar Ahmad Awan, Nguyen Bach, Amit Bahree, Arash Bakhtiari, Jianmin Bao, Harkirat Behl, et al.
+
+</span>
+<span class="ltx_bibblock">Phi-3 technical report: A highly capable language model locally on your phone.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib48.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2404.14219</span>, 2024.
+
+</span></li>
+      
+<li id="bib.bib49" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[49]</span>
+<span class="ltx_bibblock">
+OpenGVLab Team.
+
+</span>
+<span class="ltx_bibblock">Internvl2: Better than the best—expanding performance boundaries of open-source multimodal models with the progressive scaling strategy, July 2024.
+
+</span></li>
+      
+<li id="bib.bib50" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[50]</span>
+<span class="ltx_bibblock">
+Meta AI.
+
+</span>
+<span class="ltx_bibblock">The llama 3 herd of models.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib50.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2407.21783</span>, 2024.
+
+</span></li>
+      
+<li id="bib.bib51" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[51]</span>
+<span class="ltx_bibblock">
+Shengbang Tong, Ellis Brown, Penghao Wu, Sanghyun Woo, Manoj Middepogu, Sai Charitha Akula, Jihan Yang, Shusheng Yang, Adithya Iyer, Xichen Pan, et al.
+
+</span>
+<span class="ltx_bibblock">Cambrian-1: A fully open, vision-centric exploration of multimodal LLMs.
+
+</span>
+<span class="ltx_bibblock">In <span id="bib.bib51.1" class="ltx_text ltx_font_italic">NeurIPS</span>, 2024.
+
+</span></li>
+      
+<li id="bib.bib52" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[52]</span>
+<span class="ltx_bibblock">
+Pravesh Agrawal, Szymon Antoniak, Emma Bou Hanna, Devendra Chaplot, Jessica Chudnovsky, Saurabh Garg, Theophile Gervet, Soham Ghosh, Amélie Héliou, Paul Jacob, et al.
+
+</span>
+<span class="ltx_bibblock">Pixtral 12b.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib52.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2410.07073</span>, 2024.
+
+</span></li>
+      
+<li id="bib.bib53" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[53]</span>
+<span class="ltx_bibblock">
+Matt Deitke, Christopher Clark, Sangho Lee, Rohun Tripathi, Yue Yang, Jae Sung Park, Mohammadreza Salehi, Niklas Muennighoff, Kyle Lo, Luca Soldaini, et al.
+
+</span>
+<span class="ltx_bibblock">Molmo and pixmo: Open weights and open data for state-of-the-art multimodal models.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib53.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2409.17146</span>, 2024.
+
+</span></li>
+      
+<li id="bib.bib54" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[54]</span>
+<span class="ltx_bibblock">
+Wenhao Shi, Zhiqiang Hu, Yi Bin, Junhua Liu, Yang Yang, See-Kiong Ng, Lidong Bing, and Roy Ka-Wei Lee.
+
+</span>
+<span class="ltx_bibblock">Math-llava: Bootstrapping mathematical reasoning for multimodal large language models.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib54.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2406.17294</span>, 2024.
+
+</span></li>
+      
+<li id="bib.bib55" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[55]</span>
+<span class="ltx_bibblock">
+Haotian Xu, Xing Wu, Weinong Wang, Zhongzhi Li, Da Zheng, Boyuan Chen, Yi Hu, Shijia Kang, Jiaming Ji, Yingying Zhang, et al.
+
+</span>
+<span class="ltx_bibblock">Redstar: Does scaling long-cot data unlock better slow-reasoning systems?
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib55.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2501.11284</span>, 2025.
+
+</span></li>
+      
+<li id="bib.bib56" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[56]</span>
+<span class="ltx_bibblock">
+Haotian Liu, Chunyuan Li, Yuheng Li, and Yong Jae Lee.
+
+</span>
+<span class="ltx_bibblock">Improved baselines with visual instruction tuning.
+
+</span>
+<span class="ltx_bibblock">In <span id="bib.bib56.1" class="ltx_text ltx_font_italic">CVPR</span>, 2024.
+
+</span></li>
+      
+<li id="bib.bib57" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[57]</span>
+<span class="ltx_bibblock">
+Le Xue, Manli Shu, Anas Awadalla, Jun Wang, An Yan, Senthil Purushwalkam, Honglu Zhou, Viraj Prabhu, Yutong Dai, Michael S Ryoo, et al.
+
+</span>
+<span class="ltx_bibblock">xGen-MM (BLIP-3): A family of open large multimodal models.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib57.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2408.08872</span>, 2024.
+
+</span></li>
+      
+<li id="bib.bib58" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[58]</span>
+<span class="ltx_bibblock">
+Bo Li, Yuanhan Zhang, Dong Guo, Renrui Zhang, Feng Li, Hao Zhang, Kaichen Zhang, Yanwei Li, Ziwei Liu, and Chunyuan Li.
+
+</span>
+<span class="ltx_bibblock">LLaVA-OneVision: Easy visual task transfer.
+
+</span>
+<span class="ltx_bibblock"><span id="bib.bib58.1" class="ltx_text ltx_font_italic">arXiv preprint arXiv:2408.03326</span>, 2024.
+
+</span></li>
+      
+<li id="bib.bib59" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">[59]</span>
+<span class="ltx_bibblock">
+Pooyan Rahmanzadehgervi, Logan Bolton, Mohammad Reza, Taesiri, and Anh Totti Nguyen.
+
+</span>
+<span class="ltx_bibblock">Vision language models are blind.
+
+</span>
+<span class="ltx_bibblock">In <span id="bib.bib59.1" class="ltx_text ltx_font_italic">ACCV</span>, 2024.
+
+</span></li>
+    
+</ul>
+</section>
+</article>
+    </div>
+  </section>
+  <section class="pane pane-zh">
+    <div class="pane-head">中文精读翻译</div>
+    <div class="pane-body" id="zhBody"><div class="md" id="mdRoot"></div></div>
+  </section>
+</main>
+<script type="text/markdown" id="zhSrc"># 《VisualToolAgent (VisTA): A Reinforcement Learning Framework for Visual Tool Selection》中文精读翻译
+
+## 论文信息
+
+- **英文标题**：VisualToolAgent (VisTA): A Reinforcement Learning Framework for Visual Tool Selection
+- **中文标题**：VisTA：视觉工具选择的强化学习框架
+- **作者**：Zeyi Huang*、Yuyang Ji*（共同一作）、Anirudh Sundara Rajan、Zefan Cai、Wen Xiao、Junjie Hu、Yong Jae Lee
+- **机构**：威斯康星大学麦迪逊分校（University of Wisconsin-Madison）；微软（Microsoft）
+- **arXiv 链接**：<https://arxiv.org/abs/2505.20289>
+- **提出的框架**：VisTA（VisualToolAgent）
+- **项目网站**：<https://oodbag.github.io/vista_web/>
+
+## 一句话核心总结
+
+VisTA 把"视觉工具选择"建模为强化学习问题：训练一个独立的视觉-语言智能体，仅以任务答案的正确性为反馈信号（GRPO + 工具感知的对比式奖励），从包含同类异构工具的多样化工具库中按查询动态探索、选择并组合工具，去辅助一个全程冻结的推理模型——由此学得的选择策略无需重训即可迁移到不同推理骨干（如 GPT-4o），并在 ChartQA、Geometry3K、MathVerse、BlindTest 及分布外（OoD）变体上稳定超越免训练与直接微调推理器的基线。
+
+---
+
+## 摘要
+
+我们提出 VisTA——一个新的强化学习（Reinforcement Learning, RL）框架，它使视觉智能体能够依据经验性能（empirical performance），从一个多样化的工具库中动态地探索、选择与组合工具。现有的工具增强推理方法或依赖免训练（training-free）的提示，或依赖大规模微调；二者均缺乏主动的工具探索，且通常假设工具多样性有限，而微调方法还额外需要大量人工监督。与之相对，VisTA 利用端到端强化学习，以任务结果作为反馈信号，迭代地打磨复杂的、针对具体查询的工具选择策略。借助组相对策略优化（Group Relative Policy Optimization, GRPO），该框架使智能体无需显式的推理监督即可自主发现有效的工具选择路径。在 ChartQA、Geometry3K 与 BlindTest 基准上的实验表明，VisTA 相对免训练基线取得了显著的性能增益，在分布外（out-of-distribution, OoD）样本上尤为明显。这些结果突显了 VisTA 增强泛化、自适应利用多样工具的能力，并为灵活的、经验驱动的视觉推理系统铺平了道路。项目网站：https://oodbag.github.io/vista_web/。
+
+---
+
+## 1 引言
+
+大型语言模型（Large Language Models, LLMs）（Brown et al., 2020; Touvron et al., 2023; Achiam et al., 2023）与视觉-语言模型（Vision-Language Models, VLMs）（Liu et al., 2023; Yang et al., 2024; Hurst et al., 2024）的最新进展，在数学问题求解、代码生成与视觉问答等任务上展现出令人印象深刻的能力。然而，这些模型仍然受限于其架构的静态性与权重中信息的固定性。为突破这些约束，近期工作探索用外部工具增强 LLMs 与 VLMs（Chen et al., 2022; Gou et al., 2023; Gao et al., 2023; Patil et al., 2024; Hu et al., 2024; Gupta & Kembhavi, 2023; Surís et al., 2023），大幅扩展了它们的功能。工具增强使模型得以访问专家知识源与动态计算——例如调用 Python 解释器进行自我验证——从而提升复杂任务上的推理表现。
+
+然而，当前的工具集成范式在 LLMs 与 VLMs 中都面临显著局限。现有方法通常或依赖带人工监督的大规模微调来教会 LLMs 如何调用工具（Schick et al., 2023; Liu et al., 2024），或以免训练方式纯粹依赖 LLMs 的内部世界知识（Gou et al., 2023; Lu et al., 2025; Hu et al., 2024）。这些方法往往依赖工具使用演示（Schick et al., 2023; Liu et al., 2024）或详细的工具描述来指导 LLMs 的使用（Hu et al., 2024; Lu et al., 2025）。因此，它们缺乏依据每个查询的具体特性来自动探索、选择或调整工具选择的能力——当存在多个能力各异的同类工具时（这在真实场景中十分常见），这一问题尤为突出。当集成能力未知、文档不全或表现不一致的工具时——其实际性能可能与描述不符——挑战更加明显。从多样来源检索工具时，LLMs 缺乏对这些工具强项与弱项的全面了解。若没有经验学习（experiential learning）机制，系统便无法确定最优的工具选择，也无法发现可能通过协同部署而涌现的工具组合增效。
+
+在真实应用中，工具在不同问题域上的功能与适用性差异巨大。在每一工具类别内部，各个实现各具能力，使其在不同语境下的效果各不相同。这构成了一个复杂的决策问题，恰好适合强化学习（RL）（Sutton & Barto, 1998）。RL 固有的探索-利用（exploration-exploitation）机制使智能体能够基于经验性能而非预先设定的规则，系统地评估并自适应地识别最有效的工具。通过与环境的迭代交互，RL 智能体可以学到依据具体查询动态调整工具组合的自适应策略，甚至可能发现仅凭工具描述难以察觉的非显性工具效用模式。
+
+为此，本文提出一个新的 RL 框架——VisualToolAgent（VisTA），训练自主智能体从多个可用选项中智能地选择最优工具。与免训练（Gou et al., 2023; Lu et al., 2025; Hu et al., 2024）和微调方法（Schick et al., 2023; Liu et al., 2024）不同，本文的 RL 方法内在地支持探索-利用机制，允许智能体通过迭代交互系统性地试验各种工具组合。
+
+本工作聚焦视觉推理任务。该框架包含一个通过端到端 RL 训练的自主智能体，它动态选择最优工具以引导一个固定的 VLM 解决复杂的视觉推理问题。额外的好处是，该框架允许 VLM 本身在 RL 训练期间保持冻结，这意味着智能体学得的选择策略无需重新训练即可迁移到不同的推理模型——这是部署灵活性上的一个关键优势。框架采用组相对策略优化（GRPO）（Shao et al., 2024）算法，使智能体完全从零开始自主发现有效的工具选择路径，无需显式的推理示例。关于智能体在实践中如何执行推理与选择工具的详细展示，见图 6、图 7 中的示例。
+
+> **图 1**：VisTA 总览。（左）该方法训练智能体在无人工监督的情况下自主发现有效的视觉工具组合。（右）通过将智能体与推理器解耦，学得的选择策略可与广泛的推理模型无缝集成。
+
+我们在 ChartQA（Masry et al., 2022）上评估本文方法——这是一个颇具挑战性的视觉推理基准，要求模型解读数值数据、文本标签与复杂视觉结构，例如精确估计图表中柱条的高度。我们还在 Geometry3K（Lu et al., 2021）上测试，它考察细粒度的图形理解与逻辑推理：该任务要求模型准确解析视觉元素（如图形、标签），并将其与文本问题条件对齐以进行基于数学的推理。实验结果表明，本文的 RL 方法显著优于免训练方法；在分布外（OoD）变体——一个对标准数据集引入扰动的鲁棒版本——上测试时，性能差距进一步拉大。这证明了本文方法面对新颖场景时出色的泛化能力，以及在挑战性视觉条件下保持性能的能力。
+
+---
+
+## 2 相关工作
+
+### 2.1 工具增强推理
+
+当配备搜索引擎（Komeili et al., 2021）、计算器（Cobbe et al., 2021）与 Python 解释器（Chen et al., 2022; Gao et al., 2023）等外部工具时，LLMs 展现出显著提升的推理能力。例如，基于编程的方法（Chen et al., 2022; Gao et al., 2023）集成 Python 解释器来简化中间步骤并验证最终输出，从而提升数学任务上的准确率。类似策略已被引入视觉领域：近期的 VLM 方法（Gupta & Kembhavi, 2023; Surís et al., 2023; Hu et al., 2024）生成 Python 代码来调用专门的视觉模块，将复杂视觉任务分解为可由专用视觉工具处理的更简单子任务。然而，现有方法往往依赖人工演示或标注（Schick et al., 2023; Liu et al., 2024），或仅用模型内部知识以免训练方式运行（Lu et al., 2025; Hu et al., 2024）。这些方法通常工具多样性有限，并严重依赖显式的工具描述（Schick et al., 2023; Hu et al., 2024; Liu et al., 2024; Lu et al., 2025），缺乏针对具体查询自主探索或调整工具使用的能力。与之相对，本文提出的 VisTA 框架使 VLMs 能够在无人为设计先验的情况下，基于经验性能自主探索与选择工具。通过 RL 训练智能体，VisTA 发现了随上下文而定的工具选择策略，可自适应地针对每个视觉推理任务的细微需求定制工具使用。
+
+### 2.2 面向增强推理的强化学习
+
+RL 在增强复杂推理能力与实现推理扩展（inference scaling）方面展现了强劲潜力。OpenAI 的 o1（OpenAI, 2024）与 DeepSeek-R1（Guo et al., 2025）等模型借助长链式思考（chain-of-thought, CoT）（Wei et al., 2022）推理，在数学问题求解等任务上取得显著成功。这些模型擅长错误纠正、步骤分解与迭代精炼等策略，形成更结构化、更长的推理。近期多项研究（Liu et al., 2025; Huang et al., 2025）将 DeepSeek-R1 框架适配到视觉推理，训练模型直接从视觉输入生成基于 CoT 的输出。这些工作聚焦于微调推理模型本身以执行端到端视觉推理，而本文采取一个正交视角：不修改、不重训推理模型，而是训练一个自主智能体去推理"应选择哪些工具来最好地辅助一个*冻结的*推理模型求解给定查询"。通过学习依据每个查询选择辅助工具，智能体在不改动模型内部参数的情况下提升性能（从而保持对其他任务的泛化能力）。该设计也确保了跨不同视觉推理模型的广泛兼容性，为改进多模态推理系统提供了灵活、模块化的策略。ReTool（Feng et al., 2025）是一项并行工作，用 RL 教 LLMs 为文本推理调用代码执行工具；与之不同，本文处理的是具有多样工具选择的视觉推理这一更具挑战性的设定，它要求智能体自适应地选出最有效的工具。
+
+### 2.3 视觉推理任务
+
+一些视觉推理任务，如深度估计与空间推理（Fu et al., 2024），可以用直接的专用工具（如深度估计器或目标检测器）有效解决。与之相对，本文瞄准更复杂、认知要求更高的任务——其最优工具选择依赖于具体查询且并不显然。图表理解（Masry et al., 2022; Lu et al., 2023）是一项具有挑战性的任务，也是视觉推理能力的有力指标：它要求模型处理数值数据、文本标签与复杂视觉结构，不仅要识别视觉元素，还要进行精确的解读与测量，例如准确估计柱状图中柱条的高度。几何问题（Lu et al., 2021; Lu et al., 2023; Zhang et al., 2024）构成类似的高要求挑战：需要细粒度的图形理解，以及植根于视觉细节的文本推理。它通过要求 VLMs 解码图中的视觉元素（如字符与几何图形），并将其与文本问题中给定的条件对齐以求解数学问题，来评估 VLMs 的多模态逻辑推理能力。本文方法在这两类基准上均取得强劲表现，证明了为图表与几何推理任务自适应地学习选择工具的有效性。
+
+---
+
+## 3 方法
+
+本节介绍 VisTA——一个用于工具增强视觉推理的强化学习（RL）框架。与依赖免训练或微调策略的既往方法不同，VisTA 使智能体通过试错交互学习如何选择工具，无需人工监督。借助 RL 的探索-利用动态，智能体基于性能反馈从大量工具中自适应地做出选择。值得注意的是，核心推理模型保持固定，使学得的工具选择策略无需额外训练即可跨不同推理骨干迁移。
+
+> **图 2**：策略优化。给定用户查询，智能体从预定义的外部工具集中选择工具。工具作用于图像，其输出与查询一起输入冻结的推理器模型。*直接路径*（Direct Path，query+image）与*工具增强路径*（Tool-Augmented Path，query+tools+image）均被评估以计算奖励信号，该信号用于更新智能体的工具选择策略。
+
+### 3.1 问题形式化
+
+记 $(q, I)$ 为一个视觉-语言查询，由图像 $I$ 与关联的文本查询 $q$ 组成，采样自任务分布 $\mathcal{D}$。我们考虑如下设定：一个冻结的视觉-语言模型（推理器，reasoner）$f_\theta$，以及一个外部工具库 $\mathcal{T}=\{T_1,\ldots,T_M\}$，其中 $M$ 为可用工具总数。这些工具涵盖多样的专门视觉模块；例如在图表理解任务中，我们使用图表转 SVG 转换器、图表转表格抽取器与图表转描述（caption）生成器。
+
+我们将智能体的观测或状态定义为 $s=(q,I)$，同时涵盖图像及其对应查询。我们的目标是学习一个选择策略 $\pi_\phi(t\mid s)$——由一个视觉-语言模型（智能体，agent）实现——来决定对给定查询部署哪些工具。形式上，选择策略将状态 $s$ 映射到所选工具序列 $t=\langle T^{(1)},\ldots,T^{(K)}\rangle$，其中 $T^{(i)}\in\mathcal{T}$ 且 $K\leq M$。这里 $K$ 表示为该具体查询选择的工具数量，它随任务复杂度自适应变化。
+
+### 3.2 VisTA 框架
+
+VisTA 框架实现了一条端到端流水线，为视觉推理任务中的动态工具选择学习策略（图 2），利用强化学习实现对工具组合的系统性探索。该流水线运行如下：
+
+1. 视觉-语言智能体观测状态 $s=(q,I)$，并通过策略 $\pi_\phi(t\mid s)$ 选择工具序列 $t=\langle T^{(1)},\ldots,T^{(K)}\rangle$；
+2. 每个所选工具在图像上执行，产生输出 $o^{(i)}=T^{(i)}(I)$，其中 $i\in\{1,\ldots,K\}$；
+3. 这些输出与原始输入组合，构成增强提示（augmented prompt）；
+4. 冻结的推理器 $f_\theta$ 处理增强提示，产生最终答案：
+
+$$
+y^{\text{img+tools}}=f_\theta\!\left(q,I,\{o^{(1)},\ldots,o^{(K)}\}\right). \tag{1}
+$$
+
+训练期间，我们还仅用原始查询与图像计算一个基线预测：
+
+$$
+y^{\text{img}}=f_\theta(q,I), \tag{2}
+$$
+
+这使我们能够度量所选工具对推理性能的影响，具体见下一节的奖励设计。
+
+### 3.3 策略优化
+
+为训练智能体通过系统性探索发现有效的工具组合，我们基于 GRPO 算法（Shao et al., 2024）构建；关键区别在于，为使其适配视觉工具选择，我们设计了一个新颖的任务专属奖励函数。
+
+在给定上下文中，某个工具从推理器的视角可能是有助、有害或中性的。若所选工具使推理器答对问题，我们奖励智能体。若工具未带来正确答案，奖励取决于推理器在没有工具增强输入时的表现：具体而言，若推理器在没有工具时同样失败，奖励置 0，因为工具对结果没有影响；但若推理器本可独立答对，我们赋奖励 $-0.5$，惩罚其对最终答案的负面影响。
+
+更形式化地，在每个训练步，给定输入状态 $s=(q,I)$，我们从当前策略 $\pi_\phi$ 采样 $G$ 个工具选择候选 $\{t_j\}_{j=1}^G$。对每个候选 $t_j$，通过比较推理器有无工具时的预测，计算工具感知奖励 $r_j$：
+
+$$
+r_j=\begin{cases}
++1 & \text{若 } y^{\text{img}}\neq y^* \text{ 且 } y^{\text{img+tools}}_j=y^*\quad(\text{工具有助})\\
+-0.5 & \text{若 } y^{\text{img}}=y^* \text{ 且 } y^{\text{img+tools}}_j\neq y^*\quad(\text{工具有害})\\
+0 & \text{若 } y^{\text{img}}\neq y^* \text{ 且 } y^{\text{img+tools}}_j\neq y^*\quad(\text{无变化})\\
++1 & \text{若 } y^{\text{img}}=y^* \text{ 且 } y^{\text{img+tools}}_j=y^*\quad(\text{工具中性})
+\end{cases} \tag{3}
+$$
+
+其中 $y^{\text{img}}$ 是推理器仅使用问题的预测，$y^{\text{img+tools}}_j$ 是使用 $t_j$ 所选工具后的预测，$y^*$ 是真值。该奖励设计激励"仅凭图像不足时能带来正确预测"的工具选择，同时惩罚损害性能的选择。随后计算每个候选的组相对优势（group-relative advantage）：
+
+$$
+A_j=\frac{r_j-\text{mean}(\{r_1,\ldots,r_G\})}{\text{std}(\{r_1,\ldots,r_G\})}. \tag{4}
+$$
+
+这一归一化将每次工具选择的性能置于其他候选的语境中，使智能体能够辨别哪些工具组合对该具体查询表现更好，而不依赖绝对奖励值。最后，通过最大化以下目标更新策略 $\pi_\phi$：
+
+$$
+\mathcal{J}_{\text{VisTA}}(\phi)=\mathbb{E}_{s\sim\mathcal{D}}\,\mathbb{E}_{\{t_j\}_{j=1}^G\sim\pi_{\phi_{\text{old}}}(\cdot\mid s)}\!\left[\frac{1}{G}\sum_{j=1}^{G}\min\!\left(r_j^{\text{ratio}}A_j,\ \text{clip}\left(r_j^{\text{ratio}},1\pm\epsilon\right)A_j\right)-\beta\,\mathbb{D}_{\text{KL}}\left(\pi_\phi\,\|\,\pi_{\text{ref}}\right)\right], \tag{5}
+$$
+
+其中 $r_j^{\text{ratio}}=\frac{\pi_\phi(t_j\mid s)}{\pi_{\phi_{\text{old}}}(t_j\mid s)}$，$\pi_{\phi_{\text{old}}}$ 是前一策略，$\pi_{\text{ref}}$ 是固定的参考策略。该目标通过比率裁剪与 KL 正则化平衡探索与利用：比率项防止过大的策略更新，KL 散度项通过使策略贴近参考分布来保持稳定性。经过这一优化，能持续提升推理性能的工具获得更高的选择概率，使智能体得以基于经验证据而非预定义规则发现有效的工具组合。
+
+### 3.4 工具选择提示
+
+我们设计了一个结构化的提示模板来引导智能体的工具选择过程。对图表理解任务，该模板呈现组织在三个功能类别下的 9 个工具（编号 0–8）："你是一名专家智能体，负责为图表推理任务选择工具。你可以使用编号 0 到 8 的 9 个工具，每个工具属于三种功能类型之一：type1、type2 与 type3……功能：0: type1 (A)、1: type1 (B)、2: type1 (C)、3: type2 (D)、4: type2 (E)……给定一张图表与查询 {Question}，请选出最有帮助的工具编号。仅以逗号分隔的编号列表形式，在 \<answer\> 标签内输出所选编号。"
+
+该提示结构仅提供最小的工具分类信息，不含免训练方法通常依赖的详细功能描述或使用演示。相反，本文框架激励智能体通过强化学习经验性地发现并自适应地选择最有效的工具。当集成能力未知、文档不全或表现不一致的工具时，这一进路尤具价值。
+
+---
+
+## 4 实验
+
+我们在视觉推理基准上评估 VisTA 框架，与免训练基线及其他基于 RL 的方法比较，并分析 VisTA 的工具选择策略与分布，以及训练过程中的智能体行为动态。
+
+### 4.1 实验设置
+
+**数据集与指标**。我们在两个主要数据集上实验：ChartQA（Masry et al., 2022）与 Geometry3K（Lu et al., 2021）。二者都提供成对的视觉输入与问题，但推理风格与评测协议不同。我们使用两个数据集的训练集训练 VisTA 智能体，并在各自测试集上评估。对 ChartQA，除原始测试集外，我们还通过人工移除图表中的文本标签构造一个分布外（OoD）变体，该设定旨在考察模型对文本线索的依赖与其视觉推理能力。因此，我们总共在三个测试集上评估：ChartQA（域内）、ChartQA-OoD（扰动版）与 Geometry3K。ChartQA 采用开放式答案格式，因此我们报告宽松准确率（relaxed accuracy，与金标准答案相差 5% 以内即算正确）作为评估指标，以奖励语义正确的答案；Geometry3K 是多项选择基准，使用标准准确率来度量与正确选项的精确匹配。
+
+**训练细节**。对 ChartQA 与 Geometry3K，我们各随机采样约 800 个样本用于训练，并在完整测试集上评估。我们使用 8 块 NVIDIA A100 GPU 训练本文方法，批大小为 8，每个查询生成 4 个答案以鼓励多样化的工具交互。我们使用 AdamW（Loshchilov & Hutter, 2017）优化器，学习率为 $5\times 10^{-5}$，智能体训练 100 轮迭代。推理时仅使用工具增强预测路径。
+
+**工具池**。我们为每个领域的推理需求精心组织了基准专属的工具池。对 ChartQA，我们构建了 9 个工具的池子，分为三种功能类型：图表转 SVG、图表转表格与图表转描述，每类 3 个工具。图表转表格工具（T0: UniChart（Masry et al., 2023）、T1: DePlot（Liu et al., 2022）、T2: ChartMoE（Xu et al., 2024））将图表转换为结构化表格；图表转 SVG 工具（T3: OpenCV（Bradski, 2000）、T4: ChartDet（Yan et al., 2023）、T5: ChartQCR（Luo et al., 2021））从图表中抽取几何元素（柱、线、饼）与颜色；描述模块（T6: ChartAssistant（Meng et al., 2024）、T7: ChartVLM（Xia et al., 2024）、T8: QwenVL-32B（Bai et al., 2025））在全局层面总结视觉内容。对 Geometry3K，我们使用较小的 4 工具池，分为两类：符号解析器与专用几何求解器，每类 2 个工具。符号解析器抽取实体与关系（如角度、标签）；专用模型接收问题与图形，生成求解该问题的步骤序列。符号解析器使用 T0: DiagramFormalizer（Zhang et al., 2025）与 T1: Inter-GPS（Lu et al., 2021）；专用求解器使用 T2: G-LLaVA 13B（Gao et al., 2023）与 T3: MultiMath（Peng et al., 2024）。每类中的工具相互独立实现，使智能体能够在能力重叠但有差异的工具之间学习细粒度偏好。
+
+### 4.2 主要结果
+
+我们首先在 ChartQA、ChartQA-OoD 与 Geometry3K 三个视觉推理基准上评估 VisTA 框架，与免训练基线、其他 RL 方法及最先进的 VLMs 比较。
+
+> **表 1**：主要结果。这些结果突显了 VisTA 支持工具提供互补视觉理解的复杂多模态推理的能力，及其在部署时与 GPT-4o 等更强推理模型结合的灵活性与兼容性。
+
+| 方法 | 智能体模型 | 推理模型 | ChartQA | ChartQA(OoD) | Geometry3K |
+| --- | --- | --- | --- | --- | --- |
+| Training-Free | – | QwenVL 7B | 76.4 | 62.3 | 54.0 |
+| Training-Free | QwenVL 7B | QwenVL 7B | 76.1 | 66.8 | 51.3 |
+| Training-Free | GPT4o | QwenVL 7B | 73.0 | 66.4 | 51.5 |
+| RL | – | QwenVL 7B | 77.5 | 64.3 | 41.0 |
+| 本文 | QwenVL 7B | QwenVL 7B | **79.4** | **73.2** | **55.6** |
+| Training-Free | – | GPT4o | 84.3 | 50.1 | 50.1 |
+| Training-Free | QwenVL 7B | GPT4o | 82.3 | 67.1 | 48.7 |
+| Training-Free | GPT4o | GPT4o | 84.6 | 73.3 | 49.5 |
+| 本文 | QwenVL 7B | GPT4o | **88.9** | **76.8** | **52.4** |
+
+表 1 汇总了结果。工具选择使用 QwenVL-7B（Bai et al., 2025）作为智能体，训练期间推理模型（QwenVL-7B 或 GPT-4o）保持冻结。当智能体与推理器均使用 QwenVL 7B 时，本文方法在所有基准上一致超越基线：在 ChartQA 上，VisTA 取得 79.4% 的准确率，比最佳免训练基线（76.4%）提升 3.0 个百分点；在需要细粒度图形理解与多步符号推理的 Geometry3K 基准上，VisTA 取得 55.6%，超过最佳免训练基线（54.0%）。这一结果突显了 VisTA 支持工具提供互补视觉理解的复杂多模态推理的能力。
+
+本文方法的一个关键优势是其可迁移性。无需任何重训，用 QwenVL 7B 学得的工具选择策略可以直接搭配 GPT-4o 作为推理器。在该设定下，我们在 ChartQA 上取得 88.9%、在 ChartQA-OoD 上取得 76.8%，在两个基准上均超过最佳免训练 GPT-4o 基线（译注：原文称"两个基准均超 3.5 个百分点"，但按表 1 数值，ChartQA 上 88.9 − 84.6 = 4.3、OoD 上 76.8 − 73.3 = 3.5，正文数字与表格略有出入）；在 Geometry3K 上取得 52.4%，超过最佳基线（49.5%）2.9 个百分点。这展示了 VisTA 在部署时与更强推理模型的灵活性与兼容性。我们还与一个 RL 基线比较：该基线直接用 GRPO（Guo et al., 2025）训练推理器，使其在 \<think\> 块中生成链式思考推理、随后在 \<answer\> 块中给出最终答案，不使用工具。VisTA 在 ChartQA 上超过该 RL 训练的推理器 1.9 个百分点，在 ChartQA-OoD 上大幅超过 8.9 个百分点，表明工具增强的推理比直接优化模型本身带来更大的收益。
+
+本文方法相对基线的优势在 ChartQA-OoD 上更为显著：VisTA 达到 73.2%，比最佳基线（66.8%）提升 6.4 个百分点。这一结果表明，通过 RL 学习选择视觉工具，VisTA 智能体框架能够比其他可能更依赖文本线索的基线进行更好的视觉推理。
+
+> **表 2**：与最先进 VLM 的比较。本文方法中，智能体模型为 QwenVL 7B；推理器在 ChartQA 上为 GPT4o，在 Geometry3K 上为 QwenVL 7B。
+
+| 方法 | ChartQA | Geometry3K |
+| --- | --- | --- |
+| 本文 | **88.9** | **55.6** |
+| Intern2VL-8B | 83.3 | 26.5 |
+| Intern2VL-8B-ShortCoT | – | 29.7 |
+| Geo-Intern2VL-8B | – | 30.7 |
+| G-LLaVA-7B | – | 22.4 |
+| Math-LLaVA-13B | – | 33.1 |
+| QvQ-72B-Preview | – | 29.4 |
+| RedStar-Geo-8B | – | 33.6 |
+| GPT4v | 78.1 | – |
+| GPT4o-0513 | 85.7 | – |
+| Gemini 1.5 Flash | 85.4 | – |
+| Gemini 1.5 Pro | 87.2 | – |
+| Claude-3 Haiku | 81.7 | – |
+| Claude-3 Opus | 80.8 | – |
+| Claude-3.5 Sonnet | 90.8 | – |
+| PaliGemma-mix-3B | 33.7 | – |
+| Phi3.5-Vision-4B | 81.8 | – |
+| InternVL2-Llama-3-76B | 88.4 | – |
+| Pixtral-12B | 81.8 | – |
+| Llama-3.2V-11B-Instruct | 83.4 | – |
+| Llama-3.2V-90B-Instruct | 85.5 | – |
+| LLaVA-1.5-7B | 17.8 | – |
+| LLaVA-1.5-13B | 18.2 | – |
+| xGen-MM-interleave-4B | 60.0 | – |
+| Cambrian-1-8B | 73.3 | – |
+| Cambrian-1-34B | 75.6 | – |
+| LLaVA OneVision-7B | 80.0 | – |
+| LLaVA OneVision-72B | 83.7 | – |
+| MolmoE-1B | 78.0 | – |
+| Molmo-7B-O | 80.4 | – |
+| Molmo-7B-D | 84.1 | – |
+| Molmo-72B | 87.3 | – |
+
+最后，表 2 给出与最先进 VLMs 的比较。VisTA 在 Geometry3K 上取得最佳性能，显著超越所有已有方法。在 ChartQA 上，VisTA 总体排名第二，仅略逊于 Claude-3.5 Sonnet（90.8 对 88.9），并超过 Molmo-72B、Gemini 1.5 Pro 与 InternVL2-Llama-3 等其他强力基线。这表明本文方法在复杂图表推理任务上高度有效，并在几何基准上能力显著更强。
+
+### 4.3 工具选择分析
+
+为评估本文工具选择策略是否有效学会了为每个查询组合并选择最合适的工具，我们将其性能与单独使用各个工具进行比较。具体而言，我们将每个工具的输出连同原始输入送入冻结的推理器，并记录其在 ChartQA 基准上的准确率。我们还计算了一个 88.0% 的伪上界（pseudo-upper bound）：若任一单个工具能使推理器产生正确答案，则该查询视为正确。这充当完美单工具选择所能达到的宽松上限，但未计入组合多个工具的收益。
+
+> **图 3**：单个工具（T0–T8）、无工具基线（No）、本文基于 RL 的选择策略（Ours）与伪上界（Upper）在 ChartQA 准确率上的比较。
+
+图 3 展示了每个工具单独的表现（T0–T8）以及无工具基线（76.4%）。虽然某些工具（如 T2 的 78.3% 与 T1 的 78.0%）优于无工具基线，但与伪上界（88.0%）的巨大差距表明，没有任何单一工具能在所有查询上一致表现最佳——不同工具似乎在不同的数据子集上最优。理想情况下，训练良好的策略应学会为每个具体查询选择最有效的工具，取得超越任何静态工具选择的性能。本文方法取得 79.4% 的准确率，超过所有单个工具。这表明该策略学会了超越固定的工具使用，并基于查询特定上下文调整其选择。本文策略也缩小了最佳单个工具与伪上界之间的部分差距，显示出在无显式监督下向最优工具选择的进展。
+
+### 4.4 RL 训练过程中的智能体行为演化
+
+为分析智能体是否在学习偏好更有效的工具，我们跟踪工具使用频率与单个工具性能在训练过程中的相关性。具体而言，每 10 轮迭代，我们计算每个工具的使用计数与其对应单独准确率（如图 3 所报）之间的 Pearson 相关系数。
+
+> **图 4**：工具使用频率与单个工具性能之间的 Pearson 相关。
+
+图 4 展示了该相关性随训练迭代的变化。尽管初期有所波动，我们观察到明显的上升趋势：相关性随训练进展从接近零增长到超过 0.8。这表明智能体在逐渐使其工具选择策略与每个工具的相对效用对齐——偏爱那些对推理器准确率贡献更大的工具。这些结果表明，本文的 RL 策略并不依赖固定启发式，而是学会基于工具对任务成功的经验贡献加以辨别。这种对齐随时间涌现，进一步证明智能体正通过强化反馈有效地调整其行为。
+
+### 4.5 工具选择分布
+
+图 5 展示了本文 RL 训练的智能体以及使用 QwenVL-7B 与 GPT-4o 的免训练基线在测试集上的工具选择分布。本文方法明显偏好工具 1 与工具 2——二者均为图表转表格工具，是基于单独表现最有效的工具之列（见图 3）。与之相对，表现较弱的工具（如图表转 SVG 的工具 3 与描述模块的工具 6）被选择的频率低得多，说明学得的策略已基于经验反馈有效适应，偏好高效用的工具。
+
+以免训练方式运行、没有强化反馈的 QwenVL-7B 基线呈现出更均衡的选择模式，接近正态分布。这表明它缺乏强烈偏好，不会持续优先选择最有效的工具。同时，GPT-4o 倾向于为每个查询选择更多工具、极少选择不用工具，并将选择分散到更广的工具集上；然而这种更广的使用仍与工具有效性缺乏清晰对齐，选择频率与工具性能之间未表现出强相关。
+
+这些差异凸显了通过 RL 学习工具选择策略的好处。与仅依赖静态提示理解的免训练方法不同，本文智能体基于下游任务结果调整其行为，从而实现更有效的工具使用。
+
+> **图 5**：本文 RL 训练的智能体、QwenVL-7B 与 GPT-4o 的工具选择频率。本文方法强烈偏好有效工具（工具 1 与工具 2）并回避用处较小的工具，而 QwenVL-7B 呈均匀分布，GPT-4o 选择面广但与工具性能无明显对齐。
+
+### 4.6 与随机选择及全选策略的比较
+
+为进一步评估学得的工具选择策略的有效性，我们与两种替代工具选择策略进行比较。全选工具（All Tools）：该基线将全部 9 个工具的输出与原始图像同时提供给推理模型，输入全面但可能造成过载。随机工具（Random Tools）：该基线为每个查询随机选择固定数量的工具。由于本文策略平均每个查询选择约 1.2 个工具，我们为公平比较而对每个查询随机采样 2 个工具。
+
+> **表 3**：不同工具选择策略的性能比较。
+
+| 推理模型 | 全选工具 | 随机工具 | 本文 |
+| --- | --- | --- | --- |
+| QwenVL-7B | 74.6 | 75.8 | **79.4** |
+| GPT-4o | 81.3 | 83.5 | **88.1** |
+
+表 3 给出了不同推理模型（QwenVL-7B 与 GPT-4o）下的比较结果。本文的选择性方法一致优于两个基线，表明策略性的工具选择相对全面与随机方法均能带来实质收益。
+
+本文方法与全选工具基线之间的差距（QwenVL-7B 与 GPT-4o 分别为 4.8 与 6.8 个百分点）表明，单纯提供更多工具输出可能适得其反。这暗示冗余信息可能干扰推理模型，凸显了选择性增强的重要性。类似地，本文方法比随机工具基线高出 3.6 与 4.6 个百分点，说明有效推理取决于工具的选择而非数量。
+
+### 4.7 在 MathVerse 几何基准上的评估
+
+我们在 MathVerse（Zhang et al., 2024）基准上评估本文方法——这是为考察几何问题视觉推理而设计的新近数据集。由于我们的工具集聚焦二维平面几何，我们在表 4 中报告 MathVerse 对应子集（完整 3,940 个样本中的 2,550 个）的结果。
+
+重要的是，我们没有在 MathVerse 上重训智能体，而是直接应用在 Geometry3K（Lu et al., 2021）上训练的智能体，以考察其对新基准的零样本泛化能力。如表 4 所示，本文方法超过所有免训练基线，包括直接用工具输出提示 GPT-4o 的设定。
+
+此外，我们还与若干近期最先进（SOTA）的 VLMs 比较，包括 GPT-o1、Claude-3.5 Sonnet 与 Gemini-2.0-Flash。本文方法在所有配置下均取得最佳性能，其中搭配 GPT-o1 作为推理器时取得 73.1 的强结果——超过此前最佳 SOTA 准确率 67.7。这些结果证明了本文工具选择策略在应用于结构更多样、更具挑战性的几何基准时的鲁棒性与泛化能力。
+
+> **表 4**：MathVerse 基准平面几何子集上的结果。本文方法取得最佳性能，展示了其在结构多样的几何推理任务上的有效性。
+
+| 方法 | 智能体模型 | 推理模型 | MathVerse |
+| --- | --- | --- | --- |
+| Training-Free | – | GPT4o | 50.2 |
+| Training-Free | QwenVL 7B | GPT4o | 51.4 |
+| Training-Free | GPT4o | GPT4o | 53.6 |
+| 本文 | QwenVL 7B | GPT4o | **56.1** |
+| Training-Free | – | Claude-3.5-Sonnet | 58.2 |
+| Training-Free | – | Gemini-2.0-Flash | 65.6 |
+| Training-Free | – | GPT-o1 | 67.7 |
+| 本文 | QwenVL 7B | GPT-o1 | **73.1** |
+
+### 4.8 BlindTest 基准上的结果
+
+最后，为评估框架的泛化性，我们在 BlindTest（Rahmanzadehgervi et al., 2024）上评估——该基准针对需要细粒度空间理解的低层视觉任务，连 GPT-4o（Hurst et al., 2024）与 Gemini 1.5 Pro（Gemini Team, 2024）等最先进 VLMs 也表现不佳。沿用此前的训练设置，我们训练一个 QwenVL-7B 智能体从 6 个工具中进行选择，这些工具分为三类，每类负责检测一种特定的几何元素：直线、圆或矩形；每类包含两个工具以提供互补视角。如表 5 所示，本文方法取得高于两个免训练基线的准确率，凸显了学得工具选择在需要细粒度视觉推理场景中的优势。
+
+> **表 5**：不同工具选择策略在 BlindTest 上的性能。
+
+| 方法 | 智能体模型 | 推理模型 | BlindTest |
+| --- | --- | --- | --- |
+| Training-Free | – | GPT4o | 48.5 |
+| Training-Free | GPT4o | GPT4o | 51.8 |
+| 本文 | QwenVL 7B | GPT4o | **53.4** |
+
+### 4.9 与 Visual Sketchpad 在 Geometry3K 上的比较
+
+为进一步检验本文方法，我们与 Visual Sketchpad（Hu et al., 2024）——Geometry3K 上近期最先进的系统——进行比较。Visual Sketchpad 使 VLMs 能够用线条、方框、标记进行绘制，从而更好地辅助视觉感知与推理。为公平比较，我们遵循其评测协议，在相同的 Geometry3K\* 精选子集上测试本文方法，该子集小于官方测试集。如表 6 所示，本文方法仍优于 Visual Sketchpad。这一结果凸显了本文学得的工具选择策略在驱动有效视觉推理上的实力。
+
+> **表 6**：在 Geometry3K\* 测试子集上与 Visual Sketchpad 的比较。本文遵循其评测协议使用相同精选子集。\*表示 Visual Sketchpad 使用的较小子集。本文方法取得更高准确率，展示了本文工具选择策略的实力。
+
+| 方法 | 智能体模型 | 推理模型 | Geometry3K\* |
+| --- | --- | --- | --- |
+| Visual Sketchpad | – | GPT4o | 66.7 |
+| 本文 | QwenVL 7B | GPT4o | **68.8** |
+
+### 4.10 可视化
+
+本节提供展示本文智能体如何依据查询选择合适工具的定性示例。
+
+> **图 6**：几何问题的工具选择。本文智能体选择形式化图形解析器 Inter-GPS，它准确提取了图中的关键细节并以形式化结构表示。借助这一表示，推理器得以确定正确答案。
+
+来自 Geometry3K 数据集的一个示例见图 6。基于上下文，本文智能体选择了 Inter-GPS 工具，该工具用形式化语言表示图中的对象及其关系。这一结构化信息随后被推理器模型用于正确回答问题。
+
+> **图 7**：图表问题的工具选择。一个展示智能体调用一组互补工具的案例。该问题需要同时理解数值（从表格提取）与颜色信息（从 SVG 提取）；推理器综合这些信息得出正确答案。
+
+图 7 展示了图表理解的一个定性示例。该问题较为复杂，需要对按特定颜色标识的各物体大小进行推理。为此，本文智能体同时调用了图表转表格转换器来提取数值（以图像形式展示以便说明）与图像转 SVG 转换器来捕获颜色信息。利用这一组合输入，推理器得以正确回答问题。
+
+### 4.11 ChartQA-OoD 测试集的构建
+
+图表问答提出了独特的挑战：要求模型在数值、文本标签与复杂视觉结构上进行推理。有效的图表理解不仅需要识别视觉元素，还需要精确的解读——例如准确估计柱状图中柱条的高度。
+
+为更好地评估 VLMs 的鲁棒性与推理能力，我们为 ChartQA（Masry et al., 2022）构造了带两类针对性扰动的分布外（OoD）测试集。其一，人工移除每张图表中几何元素（如柱与点）上的文本标签；这通过消除经 OCR 直接获取数值答案的途径，孤立地考察模型对视觉特征的依赖。其二，为进一步测试模型空间推理的鲁棒性，我们对图表施加随机几何扰动：每张图表以 50% 的概率被水平或垂直拉伸至原宽或原高的两倍。这些变换保持语义结构但引入视觉变化。所得 ChartQA-OoD 测试集使我们得以探查模型是否严重依赖文本线索，以及其推理对轻微视觉扭曲的敏感程度。该设置为评估 VLMs 的泛化与视觉理解能力提供了更严格的基准。
+
+---
+
+## 5 讨论与结论
+
+本文提出了 VisTA——一个使视觉智能体能够为多模态推理自主选择有效外部工具的 RL 框架。与既往方法不同，VisTA 在无显式监督的情况下学习自适应的工具选择策略。实验表明其相对强基线取得显著的准确率提升，突显了 VisTA 在鲁棒、灵活视觉推理上的潜力。
+
+**局限性**。本文框架使智能体能够通过经验学习视觉工具选择，但目前尚不能处理需要多工具顺序组合（sequential composition）的情形；探索这一顺序工具组合能力代表了一个有前景的未来研究方向。其次，框架目前依赖固定的人工组织工具集，这可以通过自动发现与集成新工具的方法加以增强。发展此类自动化工具选择与集成方法可显著提升本文方法的可扩展性与适应性。
+
+**更广泛的影响**。本文框架增强了 AI 系统自主学习何时以及如何使用外部工具（如图像描述器与目标检测器）的能力，有望改善多模态环境中的泛化性与鲁棒性。虽然本文当前研究聚焦于图表理解与几何问题等风险相对较低的设定，但在医疗等高风险领域部署类似方法时，错误的工具使用可能引入微妙却重大的错误。在这些敏感应用中，确保可靠性、透明度与适当的人类监督将至关重要。
+
+---
+
+## 创新点提炼
+
+1. **免监督的端到端视觉工具选择 RL 框架**。VisTA 将"从同类异构工具库中为每个查询选择工具"建模为 RL 问题：智能体通过试错交互与任务结果反馈自主学习选择策略，全程无需人工演示、详细工具描述或显式推理监督。相比依赖提示或微调的既有范式，其固有的探索-利用机制支持对能力未知、文档不全工具的系统性试验。
+
+2. **工具感知的对比式奖励设计**。通过同时评估"直接路径"（仅查询+图像）与"工具增强路径"（查询+工具输出+图像）的答案正确性，构造 +1 / −0.5 / 0 / +1 四情形奖励（式 3），精确区分工具有助、有害、中性、无变化四种情况，并经组相对优势归一化（式 4）后由 GRPO 目标（式 5）优化，使奖励信号聚焦于工具对推理器的边际贡献而非绝对正确率。
+
+3. **智能体与推理器解耦带来的零成本可迁移性**。推理模型全程冻结、仅训练选择策略，使学得的策略无需重训即可搭配不同推理骨干部署：用 QwenVL 7B 训练的策略直接换用 GPT-4o 后，ChartQA 从 79.4 升至 88.9。这既保留了推理模型对其他任务的通用能力，又兼容 GPT-4o、GPT-o1 等多种推理器，是部署灵活性的关键来源。
+
+4. **面向经验学习的极简工具提示接口**。提示模板仅给出工具的功能分类与索引编号，刻意省略详细功能描述与使用演示，迫使智能体通过 RL 经验性地发现工具的真实效用。这使框架天然适合集成能力未知、文档不全或表现不一致的工具——而依赖静态描述的免训练方法在这些场景下缺乏可靠依据。
+
+5. **多维度的策略行为实证分析**。论文从单个工具性能与伪上界（88.0% 对本文 79.4%）、工具使用频率与效用的 Pearson 相关（从近 0 收敛至 0.8 以上）、选择分布（强偏好高效表格工具、回避低效 SVG/描述工具）等多个角度，系统刻画了 RL 策略从均匀探索到偏好高效工具的收敛过程，为"经验驱动工具选择"提供了行为层面的证据。
+
+6. **面向鲁棒性检验的 ChartQA-OoD 基准构造**。通过移除图表文本标签（切断 OCR 捷径）与 50% 概率的双向几何拉伸（宽或高拉伸至两倍）两类扰动，构造分布外测试集以检验模型对文本线索的依赖与视觉推理鲁棒性；VisTA 在该基准上领先最佳基线 6.4 个百分点，验证了经验驱动工具选择的泛化优势。
+
+---
+
+*注：本翻译基于 ar5iv（LaTeXML）转换的 arXiv HTML 版本，已忽略站点导航残留与 LaTeX 转义符；参考文献列表从略，正文引用保留 (作者, 年份) 格式。原文无附录，故未设"附录要点"一节。原文 4.2 节"两个基准均超 3.5 个百分点"的表述与表 1 数值存在轻微出入，已以译注形式标明。*
+
+
+</script>
+<script src="../assets/app.js?v=5"></script>
+</body>
+</html>

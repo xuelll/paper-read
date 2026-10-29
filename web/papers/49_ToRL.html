@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>49 · 工具集成 RL 扩展 — 中英对照精读</title>
+<link rel="stylesheet" href="../assets/style.css?v=6">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="back" href="../index.html">← 首页</a>
+  <div class="tb-title"><span class="num">49</span>工具集成 RL 扩展</div>
+  <div class="tb-controls">
+    <a class="tb-link" href="https://arxiv.org/abs/2503.23383" target="_blank" rel="noopener">arXiv</a>
+    <label class="sync"><input type="checkbox" id="syncToggle"> 滚动同步</label>
+  </div>
+</header>
+<main class="reader">
+  <section class="pane pane-en">
+    <div class="pane-head">ENGLISH 原文 (arXiv HTML)</div>
+    <div class="pane-body" id="enBody">
+<article class="ltx_document ltx_authors_1line" lang="en">
+<h1 class="ltx_title ltx_title_document"><span id="id1" class="ltx_text ltx_font_smallcaps">ToRL</span>: Scaling Tool-Integrated RL</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Xuefeng Li   Haoyang Zou<span id="footnotex1" class="ltx_note ltx_role_footnotemark"><sup class="ltx_note_mark">†</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">†</sup><span class="ltx_note_type">footnotemark: </span>
+          
+          
+        </span></span></span>  
+Pengfei Liu
+</span><span id="id2" class="ltx_note ltx_note_frontmatter ltx_thanks_note ltx_role_thanks"><sup class="ltx_note_mark">†</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">†</sup><span class="ltx_note_type">thanks: </span><span id="id2.1" class="ltx_text ltx_font_bold">˜˜Co-first authors</span></span></span></span><span id="id3" class="ltx_note ltx_note_frontmatter ltx_thanks_correspondence ltx_role_thanks"><sup class="ltx_note_mark">†</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">†</sup><span class="ltx_note_type">thanks: </span>˜˜Corresponding author</span></span></span><span class="ltx_author_notes"><span class="ltx_author_notes_content">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_contact_name">Affiliation: </span>SJTU, SII, GAIR
+</span></span></span></span></div>
+
+<div id="abstract1" class="ltx_abstract"><h6 class="ltx_title ltx_title_abstract">Abstract</h6>
+    
+<p id="abstract1.1" class="ltx_p">We introduce <span id="abstract1.1.1" class="ltx_text ltx_font_bold ltx_font_smallcaps">ToRL</span> (Tool-Integrated Reinforcement Learning), a framework designed to train large language models (LLMs) to autonomously utilize computational tools through <span id="abstract1.1.2" class="ltx_text ltx_font_bold">scaling reinforcement learning directly from <em id="abstract1.1.2.1" class="ltx_emph ltx_font_italic">base</em> models</span> (i.e., models without post-training). Unlike approaches based on supervised fine-tuning, <span id="abstract1.1.3" class="ltx_text ltx_font_smallcaps">ToRL</span> enables models to discover optimal strategies for tool utilization via unrestricted exploration. Experiments with Qwen2.5-Math base models demonstrate substantial improvements, with <span id="abstract1.1.4" class="ltx_text ltx_font_smallcaps">ToRL</span>-7B achieving <span id="abstract1.1.5" class="ltx_text ltx_font_bold">43.3%</span> accuracy on AIME24—surpassing RL without tool integration by <span id="abstract1.1.6" class="ltx_text ltx_font_bold">14%</span> and the best existing Tool-Integrated Reasoning (TIR) model by <span id="abstract1.1.7" class="ltx_text ltx_font_bold">17%</span>. Further analysis reveals several emergent <em id="abstract1.1.8" class="ltx_emph ltx_font_italic">cognitive behaviors</em>—such as strategic tool invocation, self-regulation of ineffective code generation, and dynamic adaptation between computational and analytical reasoning. These capabilities <span id="abstract1.1.9" class="ltx_text ltx_font_bold">emerge without explicit instruction</span>, solely through reward-driven learning. We open-source our implementation, datasets, and models at <a href="https://github.com/GAIR-NLP/ToRL" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://github.com/GAIR-NLP/ToRL</a>.</p>
+  
+</div>
+<div id="id4" class="ltx_logical-block ltx_align_bottom">
+    <span class="ltx_rule" style="width:100%;height:1.0pt;--ltx-fg-color:#000000;--ltx-bg-color:#000000;display:inline-block;"> </span>
+    
+<div id="p1" class="ltx_para">
+<table id="p1.1" class="ltx_tabular ltx_centering ltx_align_top">
+<tr id="p1.1.1" class="ltx_tr">
+<td id="p1.1.1.1" class="ltx_td ltx_align_center"><span class="ltx_rule" style="width:0.0pt;height:24.0pt;--ltx-bg-color:black;display:inline-block;"></span></td></tr>
+</table>
+</div>
+  
+</div>
+<figure id="S0.F1" class="ltx_figure">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure id="S0.F1.fig1" class="ltx_figure ltx_figure_panel ltx_align_center"><object type="image/svg+xml" data="2503.23383v1/abstract_aime.svg" id="S0.F1.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:429/133;" width="429" height="133"></object>
+</figure></div><div class="ltx_flex_break"></div><div class="ltx_flex_cell ltx_flex_size_1">
+<figure id="S0.F1.fig2" class="ltx_figure ltx_figure_panel ltx_align_center">
+<table id="S0.F1.fig2.1" class="ltx_tabular ltx_centering ltx_align_middle">
+<tr id="S0.F1.fig2.1.1" class="ltx_tr">
+<td id="S0.F1.fig2.1.1.1" class="ltx_td ltx_align_left ltx_border_tt">Question: Two parabolas are the graphs of the equations <math id="S0.F1.m1" class="ltx_Math" alttext="y=2x^{2}" display="inline" intent=":literal"><semantics><mrow><mi>y</mi><mo>=</mo><mrow><mn>2</mn><mo lspace="0em" rspace="0em">​</mo><msup><mi>x</mi><mn>2</mn></msup></mrow></mrow><annotation encoding="application/x-tex">y=2x^{2}</annotation></semantics></math> …Please give the value of k + m.</td></tr>
+<tr id="S0.F1.fig2.1.2" class="ltx_tr">
+<td id="S0.F1.fig2.1.2.1" class="ltx_td ltx_align_left ltx_border_t">Response: To solve this problem, we need to find the points of intersection between …</td></tr>
+<tr id="S0.F1.fig2.1.3" class="ltx_tr">
+<td id="S0.F1.fig2.1.3.1" class="ltx_td ltx_align_left"><span id="S0.F1.fig2.1.3.1.1" class="ltx_text ltx_font_typewriter">‘‘‘python</span></td></tr>
+<tr id="S0.F1.fig2.1.4" class="ltx_tr">
+<td id="S0.F1.fig2.1.4.1" class="ltx_td ltx_align_left"><span id="S0.F1.fig2.1.4.1.1" class="ltx_text ltx_font_typewriter">k_m_sum = k + m; <span id="S0.F1.fig2.1.4.1.1.1" class="ltx_text" style="--ltx-fg-color:#DAA520;">print</span>(k_m_sum)</span></td></tr>
+<tr id="S0.F1.fig2.1.5" class="ltx_tr">
+<td id="S0.F1.fig2.1.5.1" class="ltx_td ltx_align_left"><span id="S0.F1.fig2.1.5.1.1" class="ltx_text ltx_font_typewriter">‘‘‘</span></td></tr>
+<tr id="S0.F1.fig2.1.6" class="ltx_tr">
+<td id="S0.F1.fig2.1.6.1" class="ltx_td ltx_align_left"><span id="S0.F1.fig2.1.6.1.1" class="ltx_text ltx_font_typewriter">‘‘‘output</span> <span id="S0.F1.fig2.1.6.1.2" class="ltx_text ltx_font_typewriter ltx_font_bold">16</span> <span id="S0.F1.fig2.1.6.1.3" class="ltx_text ltx_font_typewriter">‘‘‘</span></td></tr>
+<tr id="S0.F1.fig2.1.7" class="ltx_tr">
+<td id="S0.F1.fig2.1.7.1" class="ltx_td ltx_align_left">…<math id="S0.F1.m2" class="ltx_Math" alttext="k+m=-1+(-8)=-9" display="inline" intent=":literal"><semantics><mrow><mrow><mi style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">k</mi><mo style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">+</mo><mi style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">m</mi></mrow><mo style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">=</mo><mrow><mrow><mo style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">−</mo><mn style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">1</mn></mrow><mo style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">+</mo><mrow><mo style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000" stretchy="false">(</mo><mrow><mo style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">−</mo><mn style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">8</mn></mrow><mo style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000" stretchy="false">)</mo></mrow></mrow><mo style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">=</mo><mrow><mo style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">−</mo><mn style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">9</mn></mrow></mrow><annotation encoding="application/x-tex">k+m=-1+(-8)=-9</annotation></semantics></math><span id="S0.F1.fig2.1.7.1.1" class="ltx_text" style="--ltx-fg-color:#FF0000;">. …</span> <span id="S0.F1.fig2.1.7.1.2" class="ltx_text" style="--ltx-fg-color:#FF0000;">However, the output of the code is 16, …Let’s recheck the code and the steps:</span></td></tr>
+<tr id="S0.F1.fig2.1.8" class="ltx_tr">
+<td id="S0.F1.fig2.1.8.1" class="ltx_td ltx_align_left"><span id="S0.F1.fig2.1.8.1.1" class="ltx_text ltx_font_typewriter">‘‘‘python</span></td></tr>
+<tr id="S0.F1.fig2.1.9" class="ltx_tr">
+<td id="S0.F1.fig2.1.9.1" class="ltx_td ltx_align_left">…</td></tr>
+<tr id="S0.F1.fig2.1.10" class="ltx_tr">
+<td id="S0.F1.fig2.1.10.1" class="ltx_td ltx_align_left"><span id="S0.F1.fig2.1.10.1.1" class="ltx_text ltx_font_typewriter" style="--ltx-fg-color:#54AD33;"># Find the corresponding y-coordinates</span></td></tr>
+<tr id="S0.F1.fig2.1.11" class="ltx_tr">
+<td id="S0.F1.fig2.1.11.1" class="ltx_td ltx_align_left"><span id="S0.F1.fig2.1.11.1.1" class="ltx_text ltx_font_typewriter">intersection_points = [(x_val, eq1.<span id="S0.F1.fig2.1.11.1.1.1" class="ltx_text" style="--ltx-fg-color:#DAA520;">subs</span>(x, x_val)) <span id="S0.F1.fig2.1.11.1.1.2" class="ltx_text" style="--ltx-fg-color:#5BC2E0;">for</span> x_val <span id="S0.F1.fig2.1.11.1.1.3" class="ltx_text" style="--ltx-fg-color:#5BC2E0;">in</span> intersection_x]</span>…</td></tr>
+<tr id="S0.F1.fig2.1.12" class="ltx_tr">
+<td id="S0.F1.fig2.1.12.1" class="ltx_td ltx_align_left"><span id="S0.F1.fig2.1.12.1.1" class="ltx_text ltx_font_typewriter" style="--ltx-fg-color:#DAA520;">print<span id="S0.F1.fig2.1.12.1.1.1" class="ltx_text" style="--ltx-fg-color:#000000;">((intersection_points, k_m_sum))</span></span></td></tr>
+<tr id="S0.F1.fig2.1.13" class="ltx_tr">
+<td id="S0.F1.fig2.1.13.1" class="ltx_td ltx_align_left"><span id="S0.F1.fig2.1.13.1.1" class="ltx_text ltx_font_typewriter">‘‘‘</span></td></tr>
+<tr id="S0.F1.fig2.1.14" class="ltx_tr">
+<td id="S0.F1.fig2.1.14.1" class="ltx_td ltx_align_left"><span id="S0.F1.fig2.1.14.1.1" class="ltx_text ltx_font_typewriter">‘‘‘output</span> <span id="S0.F1.fig2.1.14.1.2" class="ltx_text ltx_font_typewriter ltx_font_bold">([(-2, 18), (8, 38)], 16)</span> <span id="S0.F1.fig2.1.14.1.3" class="ltx_text ltx_font_typewriter">‘‘‘</span></td></tr>
+<tr id="S0.F1.fig2.1.15" class="ltx_tr">
+<td id="S0.F1.fig2.1.15.1" class="ltx_td ltx_align_left ltx_border_bb">Thus, the value of <math id="S0.F1.m3" class="ltx_Math" alttext="k+m" display="inline" intent=":literal"><semantics><mrow><mi>k</mi><mo>+</mo><mi>m</mi></mrow><annotation encoding="application/x-tex">k+m</annotation></semantics></math> is <math id="S0.F1.m4" class="ltx_Math" alttext="\boxed{16}" display="inline" intent=":literal"><semantics><menclose notation="box"><mn>16</mn></menclose><annotation encoding="application/x-tex">\boxed{16}</annotation></semantics></math>.</td></tr>
+</table>
+</figure></div></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 1: </span>Top Figure: Performance comparison of <span id="S0.F1.7" class="ltx_text ltx_font_smallcaps">ToRL</span> versus baseline models(16-step moving). Both plots show AIME24 Accuracy (%) against training steps across 1.5B and 7B models. In both cases, <span id="S0.F1.8" class="ltx_text ltx_font_smallcaps" style="--ltx-fg-color:#97BDFC;">ToRL<span id="S0.F1.8.1" class="ltx_text ltx_font_upright"> (Ours)</span></span> significantly outperforms the <span id="S0.F1.9" class="ltx_text" style="--ltx-fg-color:#F67189;">baseline without tool</span> and <span id="S0.F1.10" class="ltx_text" style="--ltx-fg-color:#808080;">Qwen-2.5-Math-Instruct-TIR</span>, achieving up to 12%(1.5B) and 14%(7B) higher. Bottom Figure: Emergent cognitive behavior during training. <span id="S0.F1.11" class="ltx_text ltx_font_smallcaps">ToRL</span> first cross-validates the tool’s output with reasoning results. Upon detecting inconsistencies, it engages in reflection and further verification through tool.</figcaption>
+</figure>
+<div class="ltx_pagination ltx_role_newpage"></div>
+<div class="ltx_pagination ltx_role_newpage"></div>
+<div class="ltx_pagination ltx_role_newpage"></div>
+<section id="S1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">1 </span>Introduction</h2>
+
+<div id="S1.p1" class="ltx_para">
+<p id="S1.p1.1" class="ltx_p">Recent advances in large language models (LLMs) have demonstrated remarkable reasoning capabilities through reinforcement learning (RL). Models such as o1, R1 and Kimi exhibit emergent abilities including backtracking, self-correction, and reflection when trained with large-scale RL  <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib17" title="" class="ltx_ref">Team, 2024</a>; <a href="#bib.bib4" title="" class="ltx_ref">Guo et al., 2025</a>; <a href="#bib.bib16" title="" class="ltx_ref">Team et al., 2025</a>)</cite>. Several open-source efforts have shown similar promising results <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib13" title="" class="ltx_ref">Qin et al. (2024)</a>; <a href="#bib.bib8" title="" class="ltx_ref">Huang et al. (2024)</a>; <a href="#bib.bib22" title="" class="ltx_ref">Zeng et al. (2025)</a>; <a href="#bib.bib12" title="" class="ltx_ref">Luo et al. (2025)</a>; <a href="#bib.bib21" title="" class="ltx_ref">Ye et al. (2025)</a></cite>.</p>
+</div>
+<div id="S1.p2" class="ltx_para">
+<p id="S1.p2.1" class="ltx_p">Traditional reasoning in language models has relied on pure natural language approaches such as Chain-of-Thought (CoT) <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib19" title="" class="ltx_ref">Wei et al. (2022)</a></cite>. While effective for many tasks, these methods falter when facing complex calculations, equation solving, or processes requiring precise computation <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib2" title="" class="ltx_ref">Gao et al. (2023)</a>; <a href="#bib.bib1" title="" class="ltx_ref">Chen et al. (2022)</a></cite>. Despite research into code generation models, few approaches successfully bridge the gap between LLMs’ reasoning capabilities and computational tools’ execution power through reinforcement learning.
+Tool-Integrated Reasoning (TIR), explored prior to recent RL scaling breakthroughs, enables models to invoke external tools by writing code, executing it through interpreters, and iteratively generating reasoning informed by code outputs. Implementations like ToRA, MathCoder, and Qwen2.5-Math-Instruct-TIR demonstrate TIR’s effectiveness in enhancing mathematical problem-solving <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib3" title="" class="ltx_ref">Gou et al. (2023)</a>; <a href="#bib.bib18" title="" class="ltx_ref">Wang et al. (2023)</a>; <a href="#bib.bib14" title="" class="ltx_ref">Shao et al. (2024)</a>; <a href="#bib.bib11" title="" class="ltx_ref">Liao et al. (2024)</a>; <a href="#bib.bib20" title="" class="ltx_ref">Yang et al. (2024)</a></cite>.</p>
+</div>
+<div id="S1.p3" class="ltx_para">
+<p id="S1.p3.1" class="ltx_p">Despite these advances, existing TIR approaches face critical limitations. Most studies distill trajectories from stronger models and perform Supervised Fine-Tuning (SFT), restricting models to predetermined tool usage patterns and limiting exploration of optimal strategies. While some work, like Qwen-Math, applies RL to SFT-trained models, limited implementation transparency obscures understanding of tool integration within RL frameworks.
+To address these challenges, we introduce <span id="S1.p3.1.1" class="ltx_text ltx_font_smallcaps">ToRL</span> (Tool-Integrated Reinforcement Learning), a framework that scales reinforcement learning directly from base models without the constraints of prior supervised fine-tuning. Unlike previous approaches that incrementally improve SFT-trained models, <span id="S1.p3.1.2" class="ltx_text ltx_font_smallcaps">ToRL</span> enables RL training from scratch, allowing models to discover optimal tool utilization strategies through extensive exploration. This scaling approach yields qualitatively different behaviors than methods that build upon predetermined patterns.</p>
+</div>
+<div id="S1.p4" class="ltx_para">
+<p id="S1.p4.1" class="ltx_p">Our experiments with Qwen2.5-Math base models at both 1.5B and 7B scales demonstrate substantial performance improvements over both traditional RL without code interpreters and Qwen2.5-Math-Instruct in TIR environments <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib20" title="" class="ltx_ref">Yang et al. (2024)</a></cite>. Notably, our 7B model achieves a 43.3% accuracy on AIME problems, comparable to some 32B models trained with reinforcement learning <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib7" title="" class="ltx_ref">Hu et al. (2025)</a></cite>.</p>
+</div>
+<div id="S1.p5" class="ltx_para">
+<p id="S1.p5.1" class="ltx_p">Through extensive analysis, we uncover several key insights about tool-integrated learning dynamics:</p>
+</div>
+<div id="S1.p6" class="ltx_para">
+<ul id="S1.I1" class="ltx_itemize">
+<li id="S1.I1.i1" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I1.i1.p1" class="ltx_para">
+<p id="S1.I1.i1.p1.1" class="ltx_p"><span id="S1.I1.i1.p1.1.1" class="ltx_text ltx_font_bold">Code usage evolution:</span> As training progresses, the proportion of problems the model solves using code increases steadily, accompanied by a growing percentage of syntactically correct and executable code. This demonstrates the model’s autonomous acquisition of effective tool utilization strategies.</p>
+</div></li>
+<li id="S1.I1.i2" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I1.i2.p1" class="ltx_para">
+<p id="S1.I1.i2.p1.1" class="ltx_p"><span id="S1.I1.i2.p1.1.1" class="ltx_text ltx_font_bold">Self-regulation of ineffective code:</span> Without explicit instruction, models learn to identify and reduce the generation of ineffective code patterns, suggesting an emerging form of metacognition about tool utility.</p>
+</div></li>
+<li id="S1.I1.i3" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I1.i3.p1" class="ltx_para">
+<p id="S1.I1.i3.p1.1" class="ltx_p"><span id="S1.I1.i3.p1.1.1" class="ltx_text ltx_font_bold">Tool call frequency trade-offs:</span> Increasing the maximum allowed tool calls per problem significantly enhances performance but introduces severe computational overhead, revealing a critical efficiency-effectiveness trade-off in tool-integrated learning.</p>
+</div></li>
+</ul>
+</div>
+<div id="S1.p7" class="ltx_para">
+<p id="S1.p7.1" class="ltx_p">These findings reveal how <span id="S1.p7.1.1" class="ltx_text ltx_font_smallcaps">ToRL</span> fosters diverse cognitive behaviors, including obtaining feedback from code execution, cross-checking between computational and analytical approaches, and adaptively selecting reasoning strategies based on problem characteristics. The emergence of these behaviors through reward-driven learning, rather than imitation of human-designed patterns, suggests tool-integrated reinforcement learning represents a promising direction for enhancing LLMs’ reasoning capabilities.</p>
+</div>
+<div id="S1.p8" class="ltx_para">
+<p id="S1.p8.1" class="ltx_p">To support further research, we open-source our implementation and trained models, enabling the community to build upon and extend <span id="S1.p8.1.1" class="ltx_text ltx_font_smallcaps">ToRL</span> for advancing tool-augmented language models.</p>
+</div>
+</section>
+<section id="S2" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">2 </span>Methodology</h2>
+
+<section id="S2.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">2.1 </span>Dataset Construction</h3>
+
+<div id="S2.SS1.p1" class="ltx_para">
+<p id="S2.SS1.p1.1" class="ltx_p">We constructed our dataset from Olympic-level mathematical competitions questions sourced from NuminaMATH <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib9" title="" class="ltx_ref">Li et al. (2024)</a></cite>, MATH <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib6" title="" class="ltx_ref">Hendrycks et al. (2021)</a></cite>, and DeepScaleR <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib12" title="" class="ltx_ref">Luo et al. (2025)</a></cite>. The initial filtering removed proof-based problems and questions with ambiguous verification criteria, yielding 75,149 verifiable questions. We then applied LIMR <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib10" title="" class="ltx_ref">Li et al. (2025)</a></cite>, a reinforcement learning data distillation technique, to extract high-quality samples with balanced difficulty distribution. This process resulted in a final dataset of 28,740 questions, which serves as the foundation for all subsequent experiments.</p>
+</div>
+</section>
+<section id="S2.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">2.2 </span>Tool Intergrated Reasoning</h3>
+
+<figure id="S2.F2" class="ltx_figure">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_1"><span class="ltx_inline-block"><svg id="S2.F2.pic1" class="ltx_picture ltx_figure_panel" height="75.65" overflow="visible" version="1.1" viewBox="0 0 626.77 75.65" width="626.77"><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" fill="#000000" stroke="#000000" stroke-width="0.4pt" transform="translate(0,75.65) matrix(1 0 0 -1 0 0)"><g style="--ltx-fill-color:#5A5A5A;" fill="#5A5A5A" fill-opacity="1.0"><path style="stroke:none" d="M 0 5.91 L 0 69.74 C 0 73 2.64 75.65 5.91 75.65 L 620.87 75.65 C 624.13 75.65 626.77 73 626.77 69.74 L 626.77 5.91 C 626.77 2.64 624.13 0 620.87 0 L 5.91 0 C 2.64 0 0 2.64 0 5.91 Z"></path></g><g style="--ltx-fill-color:#E6E6E6;" fill="#E6E6E6" fill-opacity="1.0"><path style="stroke:none" d="M 1.97 5.91 L 1.97 54.23 L 624.8 54.23 L 624.8 5.91 C 624.8 3.73 623.04 1.97 620.87 1.97 L 5.91 1.97 C 3.73 1.97 1.97 3.73 1.97 5.91 Z"></path></g><g fill-opacity="1.0" transform="matrix(1.0 0.0 0.0 1.0 21.65 60.13)"><foreignObject style="--ltx-fo-width:42.17em;--ltx-fo-height:0.69em;--ltx-fo-depth:0em;font-size:10pt;" height="9.61" overflow="visible" transform="matrix(1 0 0 -1 0 9.61)" width="583.51"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content">
+<span id="S2.F2.pic1.1" class="ltx_inline-block ltx_minipage ltx_align_bottom" style="width:42.17em;">
+<span id="S2.F2.pic1.1.1" class="ltx_p"><span id="S2.F2.pic1.1.1.1" class="ltx_text" style="--ltx-fg-color:#FFFFFF;">Problem</span></span>
+</span></span></span></foreignObject></g><g fill-opacity="1.0" transform="matrix(1.0 0.0 0.0 1.0 21.65 16.2)"><foreignObject style="--ltx-fo-width:42.17em;--ltx-fo-height:1.89em;--ltx-fo-depth:0.18em;font-size:10pt;" height="28.64" overflow="visible" transform="matrix(1 0 0 -1 0 26.21)" width="583.51"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content">
+<span id="S2.F2.pic1.2" class="ltx_inline-block ltx_minipage ltx_align_bottom" style="width:42.17em;">
+<span id="S2.F2.pic1.2.1" class="ltx_p"><span id="S2.F2.pic1.2.1.1" class="ltx_text" style="--ltx-fg-color:#000000;">Determine how many zeros immediately follow the decimal point in the decimal representation of <math id="S2.F2.pic1.m1" class="ltx_Math" alttext="\frac{1}{(6\cdot 10)^{10}}." display="inline" intent=":literal"><semantics><mrow><mfrac style="--ltx-fg-color:#000000;" mathcolor="#000000"><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">1</mn><msup><mrow><mo style="--ltx-fg-color:#000000;" mathcolor="#000000" stretchy="false">(</mo><mrow><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">6</mn><mo style="--ltx-fg-color:#000000;" lspace="0.222em" mathcolor="#000000" rspace="0.222em">⋅</mo><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></mrow><mo style="--ltx-fg-color:#000000;" mathcolor="#000000" stretchy="false">)</mo></mrow><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></msup></mfrac><mo style="--ltx-fg-color:#000000;" lspace="0em" mathcolor="#000000">.</mo></mrow><annotation encoding="application/x-tex">\frac{1}{(6\cdot 10)^{10}}.</annotation></semantics></math></span></span>
+</span></span></span></foreignObject></g></g></svg></span></div><div class="ltx_flex_break"></div><div class="ltx_flex_cell ltx_flex_size_1">
+<div class="ltx_pagination ltx_figure_panel ltx_role_start_2_columns"></div></div><div class="ltx_flex_break"></div><div class="ltx_flex_cell ltx_flex_size_2"><span class="ltx_inline-block"><svg id="S2.F2.pic2" class="ltx_picture ltx_figure_panel" height="481.8" overflow="visible" version="1.1" viewBox="0 0 311.02 481.8" width="311.02"><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" fill="#000000" stroke="#000000" stroke-width="0.4pt" transform="translate(0,481.8) matrix(1 0 0 -1 0 0)"><g style="--ltx-fill-color:#EA6B82;" fill="#EA6B82" fill-opacity="1.0"><path style="stroke:none" d="M 0 5.91 L 0 475.89 C 0 479.15 2.64 481.8 5.91 481.8 L 305.12 481.8 C 308.38 481.8 311.02 479.15 311.02 475.89 L 311.02 5.91 C 311.02 2.64 308.38 0 305.12 0 L 5.91 0 C 2.64 0 0 2.64 0 5.91 Z"></path></g><g style="--ltx-fill-color:#FDE3E7;" fill="#FDE3E7" fill-opacity="1.0"><path style="stroke:none" d="M 1.97 5.91 L 1.97 456.15 L 309.05 456.15 L 309.05 5.91 C 309.05 3.73 307.29 1.97 305.12 1.97 L 5.91 1.97 C 3.73 1.97 1.97 3.73 1.97 5.91 Z"></path></g><g fill-opacity="1.0" transform="matrix(1.0 0.0 0.0 1.0 21.65 465.51)"><foreignObject style="--ltx-fo-width:19.35em;--ltx-fo-height:0.75em;--ltx-fo-depth:0.25em;font-size:10pt;" height="13.84" overflow="visible" transform="matrix(1 0 0 -1 0 10.38)" width="267.75"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content">
+<span id="S2.F2.pic2.1" class="ltx_inline-block ltx_minipage ltx_align_bottom" style="width:19.35em;">
+<span id="S2.F2.pic2.1.1" class="ltx_p"><span id="S2.F2.pic2.1.1.1" class="ltx_text" style="--ltx-fg-color:#000000;">(a) CoT example</span></span>
+</span></span></span></foreignObject></g><g fill-opacity="1.0" transform="matrix(1.0 0.0 0.0 1.0 21.65 16.47)"><foreignObject style="--ltx-fo-width:19.35em;--ltx-fo-height:30.92em;--ltx-fo-depth:0.19em;font-size:10pt;" height="430.56" overflow="visible" transform="matrix(1 0 0 -1 0 427.87)" width="267.75"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content">
+<span id="S2.F2.pic2.2" class="ltx_inline-block ltx_minipage ltx_align_bottom" style="width:19.35em;">
+<span id="S2.F2.pic2.2.1" class="ltx_p"><span id="S2.F2.pic2.2.1.1" class="ltx_text" style="--ltx-fg-color:#000000;">To determine how many zeros immediately follow the decimal point in the decimal representation of <math id="S2.F2.pic2.m1" class="ltx_Math" alttext="\frac{1}{(6\cdot 10)^{10}}" display="inline" intent=":literal"><semantics><mfrac style="--ltx-fg-color:#000000;" mathcolor="#000000"><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">1</mn><msup><mrow><mo style="--ltx-fg-color:#000000;" mathcolor="#000000" stretchy="false">(</mo><mrow><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">6</mn><mo style="--ltx-fg-color:#000000;" lspace="0.222em" mathcolor="#000000" rspace="0.222em">⋅</mo><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></mrow><mo style="--ltx-fg-color:#000000;" mathcolor="#000000" stretchy="false">)</mo></mrow><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></msup></mfrac><annotation encoding="application/x-tex">\frac{1}{(6\cdot 10)^{10}}</annotation></semantics></math>, we first simplify the expression.</span></span>
+<span id="S2.F2.pic2.2.2" class="ltx_p"><span id="S2.F2.pic2.2.2.1" class="ltx_text" style="--ltx-fg-color:#000000;">Given expression: <math id="S2.F2.pic2.m2" class="ltx_Math" alttext="\frac{1}{(6\cdot 10)^{10}}" display="inline" intent=":literal"><semantics><mfrac style="--ltx-fg-color:#000000;" mathcolor="#000000"><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">1</mn><msup><mrow><mo style="--ltx-fg-color:#000000;" mathcolor="#000000" stretchy="false">(</mo><mrow><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">6</mn><mo style="--ltx-fg-color:#000000;" lspace="0.222em" mathcolor="#000000" rspace="0.222em">⋅</mo><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></mrow><mo style="--ltx-fg-color:#000000;" mathcolor="#000000" stretchy="false">)</mo></mrow><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></msup></mfrac><annotation encoding="application/x-tex">\frac{1}{(6\cdot 10)^{10}}</annotation></semantics></math></span></span>
+<span id="S2.F2.pic2.2.3" class="ltx_p"><span id="S2.F2.pic2.2.3.1" class="ltx_text" style="--ltx-fg-color:#000000;">Simplifying the denominator:</span></span>
+<span id="S2.Ex1" class="ltx_equation ltx_eqn_table">
+
+<span><span class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<span class="ltx_eqn_cell ltx_eqn_center_padleft"></span>
+<span class="ltx_eqn_cell ltx_align_center"><math id="S2.Ex1.m1" class="ltx_Math" alttext="(6\cdot 10)^{10}=(60)^{10}=(6^{10}\cdot 10^{10})" display="block" intent=":literal"><semantics><mrow><msup><mrow><mo style="--ltx-fg-color:#000000;" mathcolor="#000000" stretchy="false">(</mo><mrow><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">6</mn><mo style="--ltx-fg-color:#000000;" lspace="0.222em" mathcolor="#000000" rspace="0.222em">⋅</mo><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></mrow><mo style="--ltx-fg-color:#000000;" mathcolor="#000000" stretchy="false">)</mo></mrow><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></msup><mo style="--ltx-fg-color:#000000;" mathcolor="#000000">=</mo><msup><mrow><mo style="--ltx-fg-color:#000000;" mathcolor="#000000" stretchy="false">(</mo><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">60</mn><mo style="--ltx-fg-color:#000000;" mathcolor="#000000" stretchy="false">)</mo></mrow><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></msup><mo style="--ltx-fg-color:#000000;" mathcolor="#000000">=</mo><mrow><mo style="--ltx-fg-color:#000000;" mathcolor="#000000" stretchy="false">(</mo><mrow><msup><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">6</mn><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></msup><mo style="--ltx-fg-color:#000000;" lspace="0.222em" mathcolor="#000000" rspace="0.222em">⋅</mo><msup><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></msup></mrow><mo style="--ltx-fg-color:#000000;" mathcolor="#000000" stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">(6\cdot 10)^{10}=(60)^{10}=(6^{10}\cdot 10^{10})</annotation></semantics></math></span>
+<span class="ltx_eqn_cell ltx_eqn_center_padright"></span></span></span>
+</span>
+<span id="S2.F2.pic2.2.4" class="ltx_p"><span id="S2.F2.pic2.2.4.1" class="ltx_text" style="--ltx-fg-color:#000000;">So, the expression becomes:</span></span>
+<span id="S2.Ex2" class="ltx_equation ltx_eqn_table">
+
+<span><span class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<span class="ltx_eqn_cell ltx_eqn_center_padleft"></span>
+<span class="ltx_eqn_cell ltx_align_center"><math id="S2.Ex2.m1" class="ltx_Math" alttext="\frac{1}{6^{10}\cdot 10^{10}}" display="block" intent=":literal"><semantics><mfrac style="--ltx-fg-color:#000000;" mathcolor="#000000"><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">1</mn><mrow><msup><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">6</mn><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></msup><mo style="--ltx-fg-color:#000000;" lspace="0.222em" mathcolor="#000000" rspace="0.222em">⋅</mo><msup><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></msup></mrow></mfrac><annotation encoding="application/x-tex">\frac{1}{6^{10}\cdot 10^{10}}</annotation></semantics></math></span>
+<span class="ltx_eqn_cell ltx_eqn_center_padright"></span></span></span>
+</span>
+<span id="S2.F2.pic2.2.5" class="ltx_p"><span id="S2.F2.pic2.2.5.1" class="ltx_text" style="--ltx-fg-color:#000000;">This can be further simplified as:</span></span>
+<span id="S2.Ex3" class="ltx_equation ltx_eqn_table">
+
+<span><span class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<span class="ltx_eqn_cell ltx_eqn_center_padleft"></span>
+<span class="ltx_eqn_cell ltx_align_center"><math id="S2.Ex3.m1" class="ltx_Math" alttext="\frac{1}{6^{10}}\cdot\frac{1}{10^{10}}" display="block" intent=":literal"><semantics><mrow><mfrac style="--ltx-fg-color:#000000;" mathcolor="#000000"><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">1</mn><msup><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">6</mn><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></msup></mfrac><mo style="--ltx-fg-color:#000000;" lspace="0.222em" mathcolor="#000000" rspace="0.222em">⋅</mo><mfrac style="--ltx-fg-color:#000000;" mathcolor="#000000"><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">1</mn><msup><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></msup></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{6^{10}}\cdot\frac{1}{10^{10}}</annotation></semantics></math></span>
+<span class="ltx_eqn_cell ltx_eqn_center_padright"></span></span></span>
+</span>
+<span id="S2.F2.pic2.2.6" class="ltx_p"><span id="S2.F2.pic2.2.6.1" class="ltx_text" style="--ltx-fg-color:#000000;">The term <math id="S2.F2.pic2.m3" class="ltx_Math" alttext="\frac{1}{10^{10}}" display="inline" intent=":literal"><semantics><mfrac style="--ltx-fg-color:#000000;" mathcolor="#000000"><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">1</mn><msup><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></msup></mfrac><annotation encoding="application/x-tex">\frac{1}{10^{10}}</annotation></semantics></math> is the one that directly affects the number of zeros immediately following the decimal point.</span></span>
+<span id="S2.F2.pic2.2.7" class="ltx_p"><span id="S2.F2.pic2.2.7.1" class="ltx_text" style="--ltx-fg-color:#000000;">This is because <math id="S2.F2.pic2.m4" class="ltx_Math" alttext="\frac{1}{10^{10}}" display="inline" intent=":literal"><semantics><mfrac style="--ltx-fg-color:#000000;" mathcolor="#000000"><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">1</mn><msup><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></msup></mfrac><annotation encoding="application/x-tex">\frac{1}{10^{10}}</annotation></semantics></math> is equivalent to moving the decimal point ten places to the left of 1, resulting in a number with nine zeros immediately following the decimal point (and a 1 in the 10th position).</span></span>
+<span id="S2.F2.pic2.2.8" class="ltx_p"><span id="S2.F2.pic2.2.8.1" class="ltx_text" style="--ltx-fg-color:#000000;">The term <math id="S2.F2.pic2.m5" class="ltx_Math" alttext="\frac{1}{6^{10}}" display="inline" intent=":literal"><semantics><mfrac style="--ltx-fg-color:#000000;" mathcolor="#000000"><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">1</mn><msup><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">6</mn><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></msup></mfrac><annotation encoding="application/x-tex">\frac{1}{6^{10}}</annotation></semantics></math> will affect the digits that follow the nine zeros, but it does not change the number of zeros immediately following the decimal point.</span></span>
+<span id="S2.F2.pic2.2.9" class="ltx_p"><span id="S2.F2.pic2.2.9.1" class="ltx_text" style="--ltx-fg-color:#000000;">Therefore, the number of zeros immediately following the decimal point in the decimal representation of <math id="S2.F2.pic2.m6" class="ltx_Math" alttext="\frac{1}{(6\cdot 10)^{10}}" display="inline" intent=":literal"><semantics><mfrac style="--ltx-fg-color:#000000;" mathcolor="#000000"><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">1</mn><msup><mrow><mo style="--ltx-fg-color:#000000;" mathcolor="#000000" stretchy="false">(</mo><mrow><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">6</mn><mo style="--ltx-fg-color:#000000;" lspace="0.222em" mathcolor="#000000" rspace="0.222em">⋅</mo><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></mrow><mo style="--ltx-fg-color:#000000;" mathcolor="#000000" stretchy="false">)</mo></mrow><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></msup></mfrac><annotation encoding="application/x-tex">\frac{1}{(6\cdot 10)^{10}}</annotation></semantics></math> is <math id="S2.F2.pic2.m7" class="ltx_Math" alttext="\boxed{9}" display="inline" intent=":literal"><semantics><menclose notation="box"><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">9</mn></menclose><annotation encoding="application/x-tex">\boxed{9}</annotation></semantics></math>.</span></span>
+</span></span></span></foreignObject></g></g></svg></span></div><div class="ltx_flex_cell ltx_flex_size_2"><span class="ltx_inline-block"><svg id="S2.F2.pic3" class="ltx_picture ltx_figure_panel" height="673.18" overflow="visible" version="1.1" viewBox="0 0 314.96 673.18" width="314.96"><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" fill="#000000" stroke="#000000" stroke-width="0.4pt" transform="translate(0,673.18) matrix(1 0 0 -1 0 0)"><g style="--ltx-fill-color:#8FB4EF;" fill="#8FB4EF" fill-opacity="1.0"><path style="stroke:none" d="M 0 5.91 L 0 667.27 C 0 670.53 2.64 673.18 5.91 673.18 L 309.06 673.18 C 312.32 673.18 314.96 670.53 314.96 667.27 L 314.96 5.91 C 314.96 2.64 312.32 0 309.06 0 L 5.91 0 C 2.64 0 0 2.64 0 5.91 Z"></path></g><g style="--ltx-fill-color:#EAF2FE;" fill="#EAF2FE" fill-opacity="1.0"><path style="stroke:none" d="M 1.97 5.91 L 1.97 647.53 L 312.99 647.53 L 312.99 5.91 C 312.99 3.73 311.23 1.97 309.06 1.97 L 5.91 1.97 C 3.73 1.97 1.97 3.73 1.97 5.91 Z"></path></g><g fill-opacity="1.0" transform="matrix(1.0 0.0 0.0 1.0 21.65 656.89)"><foreignObject style="--ltx-fo-width:19.63em;--ltx-fo-height:0.75em;--ltx-fo-depth:0.25em;font-size:10pt;" height="13.84" overflow="visible" transform="matrix(1 0 0 -1 0 10.38)" width="271.62"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content">
+<span id="S2.F2.pic3.1" class="ltx_inline-block ltx_minipage ltx_align_bottom" style="width:19.63em;">
+<span id="S2.F2.pic3.1.1" class="ltx_p"><span id="S2.F2.pic3.1.1.1" class="ltx_text" style="--ltx-fg-color:#000000;">(b) TIR example</span></span>
+</span></span></span></foreignObject></g><g fill-opacity="1.0" transform="matrix(1.0 0.0 0.0 1.0 21.65 13.78)"><foreignObject style="--ltx-fo-width:19.63em;--ltx-fo-height:44.95em;--ltx-fo-depth:0em;font-size:10pt;" height="621.95" overflow="visible" transform="matrix(1 0 0 -1 0 621.95)" width="271.62"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content">
+<span id="S2.F2.pic3.2" class="ltx_inline-block ltx_minipage ltx_align_bottom" style="width:19.63em;">
+<span id="S2.F2.pic3.2.1" class="ltx_p"><span id="S2.F2.pic3.2.1.1" class="ltx_text" style="--ltx-fg-color:#000000;">To determine how many zeros immediately follow the decimal point in the decimal representation of <math id="S2.F2.pic3.m1" class="ltx_Math" alttext="\frac{1}{(6\cdot 10)^{10}}" display="inline" intent=":literal"><semantics><mfrac style="--ltx-fg-color:#000000;" mathcolor="#000000"><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">1</mn><msup><mrow><mo style="--ltx-fg-color:#000000;" mathcolor="#000000" stretchy="false">(</mo><mrow><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">6</mn><mo style="--ltx-fg-color:#000000;" lspace="0.222em" mathcolor="#000000" rspace="0.222em">⋅</mo><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></mrow><mo style="--ltx-fg-color:#000000;" mathcolor="#000000" stretchy="false">)</mo></mrow><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></msup></mfrac><annotation encoding="application/x-tex">\frac{1}{(6\cdot 10)^{10}}</annotation></semantics></math>, we can break down the problem into the following steps:</span></span>
+<span id="S2.F2.pic3.2.2" class="ltx_p"><span id="S2.F2.pic3.2.2.1" class="ltx_text" style="--ltx-fg-color:#000000;">1. Calculate the value of <math id="S2.F2.pic3.m2" class="ltx_Math" alttext="6\cdot 10" display="inline" intent=":literal"><semantics><mrow><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">6</mn><mo style="--ltx-fg-color:#000000;" lspace="0.222em" mathcolor="#000000" rspace="0.222em">⋅</mo><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></mrow><annotation encoding="application/x-tex">6\cdot 10</annotation></semantics></math>.</span></span>
+<span id="S2.F2.pic3.2.3" class="ltx_p"><span id="S2.F2.pic3.2.3.1" class="ltx_text" style="--ltx-fg-color:#000000;">2. Raise the result to the power of 10.</span></span>
+<span id="S2.F2.pic3.2.4" class="ltx_p"><span id="S2.F2.pic3.2.4.1" class="ltx_text" style="--ltx-fg-color:#000000;">3. Find the decimal representation of the reciprocal of this value.</span></span>
+<span id="S2.F2.pic3.2.5" class="ltx_p"><span id="S2.F2.pic3.2.5.1" class="ltx_text" style="--ltx-fg-color:#000000;">4. Count the number of zeros immediately following the decimal point.</span></span>
+<span id="S2.F2.pic3.2.6" class="ltx_p"><span id="S2.F2.pic3.2.6.1" class="ltx_text" style="--ltx-fg-color:#000000;">Let’s go through these steps using Python code.</span></span><span class="ltx_rule" style="width:196.3pt;height:0.5pt;--ltx-bg-color:black;display:inline-block;"> </span>
+<span id="S2.F2.pic3.2.7" class="ltx_p"><span id="S2.F2.pic3.2.7.1" class="ltx_text ltx_font_typewriter ltx_font_bold" style="--ltx-fg-color:#000000;">‘‘‘<span id="S2.F2.pic3.2.7.1.1" class="ltx_text ltx_font_serif">python<span id="S2.F2.pic3.2.7.1.1.1" class="ltx_text ltx_font_medium">
+</span></span></span></span>
+<span id="S2.F2.pic3.2.8" class="ltx_p"><span id="S2.F2.pic3.2.8.1" class="ltx_text" style="--ltx-fg-color:#000000;">base = 6 * 10</span></span>
+<span id="S2.F2.pic3.2.9" class="ltx_p"><span id="S2.F2.pic3.2.9.1" class="ltx_text" style="--ltx-fg-color:#000000;">power_value = base ** 10</span></span>
+<span id="S2.F2.pic3.2.10" class="ltx_p"><span id="S2.F2.pic3.2.10.1" class="ltx_text" style="--ltx-fg-color:#000000;">reciprocal = 1 / power_value</span></span>
+<span id="S2.F2.pic3.2.11" class="ltx_p"><span id="S2.F2.pic3.2.11.1" class="ltx_text" style="--ltx-fg-color:#000000;">reciprocal_str = f<span id="S2.F2.pic3.2.11.1.1" class="ltx_text ltx_font_typewriter">"</span>{reciprocal}<span id="S2.F2.pic3.2.11.1.2" class="ltx_text ltx_font_typewriter">"</span></span></span>
+<span id="S2.F2.pic3.2.12" class="ltx_p"><span id="S2.F2.pic3.2.12.1" class="ltx_text" style="--ltx-fg-color:#000000;">decimal_part = reciprocal_str.split(<span id="S2.F2.pic3.2.12.1.1" class="ltx_text ltx_font_typewriter">"</span>.<span id="S2.F2.pic3.2.12.1.2" class="ltx_text ltx_font_typewriter">"</span>)[1] # get the part after the decimal point</span></span>
+<span id="S2.F2.pic3.2.13" class="ltx_p"><span id="S2.F2.pic3.2.13.1" class="ltx_text" style="--ltx-fg-color:#000000;">zero_count = 0</span></span>
+<span id="S2.F2.pic3.2.14" class="ltx_p"><span id="S2.F2.pic3.2.14.1" class="ltx_text" style="--ltx-fg-color:#000000;">for char in decimal_part:</span></span>
+<span id="S2.F2.pic3.2.15" class="ltx_p"><span id="S2.F2.pic3.2.15.1" class="ltx_text" style="--ltx-fg-color:#000000;">if char == <span id="S2.F2.pic3.2.15.1.1" class="ltx_text ltx_font_typewriter">"</span>0<span id="S2.F2.pic3.2.15.1.2" class="ltx_text ltx_font_typewriter">"</span>: zero_count += 1</span></span>
+<span id="S2.F2.pic3.2.16" class="ltx_p"><span id="S2.F2.pic3.2.16.1" class="ltx_text" style="--ltx-fg-color:#000000;">else: break</span></span>
+<span id="S2.F2.pic3.2.17" class="ltx_p"><span id="S2.F2.pic3.2.17.1" class="ltx_text" style="--ltx-fg-color:#000000;">print(zero_count)</span></span>
+<span id="S2.F2.pic3.2.18" class="ltx_p"><span id="S2.F2.pic3.2.18.1" class="ltx_text ltx_font_typewriter ltx_font_bold" style="--ltx-fg-color:#000000;">‘‘‘</span><span id="S2.F2.pic3.2.18.2" class="ltx_text"></span></span><span class="ltx_rule" style="width:196.3pt;height:0.5pt;--ltx-bg-color:black;display:inline-block;"> </span>
+<span id="S2.F2.pic3.2.19" class="ltx_p"><span id="S2.F2.pic3.2.19.1" class="ltx_text ltx_font_typewriter ltx_font_bold" style="--ltx-fg-color:#000000;">‘‘‘<span id="S2.F2.pic3.2.19.1.1" class="ltx_text ltx_font_serif">output<span id="S2.F2.pic3.2.19.1.1.1" class="ltx_text ltx_font_medium">
+</span></span></span></span>
+<span id="S2.F2.pic3.2.20" class="ltx_p"><span id="S2.F2.pic3.2.20.1" class="ltx_text ltx_font_bold" style="--ltx-fg-color:#000000;">17<span id="S2.F2.pic3.2.20.1.1" class="ltx_text"></span></span></span>
+<span id="S2.F2.pic3.2.21" class="ltx_p"><span id="S2.F2.pic3.2.21.1" class="ltx_text ltx_font_typewriter ltx_font_bold" style="--ltx-fg-color:#000000;">‘‘‘</span><span id="S2.F2.pic3.2.21.2" class="ltx_text"></span></span><span class="ltx_rule" style="width:196.3pt;height:0.5pt;--ltx-bg-color:black;display:inline-block;"> </span>
+<span id="S2.F2.pic3.2.22" class="ltx_p"><span id="S2.F2.pic3.2.22.1" class="ltx_text" style="--ltx-fg-color:#000000;">The number of zeros immediately following the decimal point in the decimal representation of <math id="S2.F2.pic3.m3" class="ltx_Math" alttext="\frac{1}{(6\cdot 10)^{10}}" display="inline" intent=":literal"><semantics><mfrac style="--ltx-fg-color:#000000;" mathcolor="#000000"><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">1</mn><msup><mrow><mo style="--ltx-fg-color:#000000;" mathcolor="#000000" stretchy="false">(</mo><mrow><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">6</mn><mo style="--ltx-fg-color:#000000;" lspace="0.222em" mathcolor="#000000" rspace="0.222em">⋅</mo><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></mrow><mo style="--ltx-fg-color:#000000;" mathcolor="#000000" stretchy="false">)</mo></mrow><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">10</mn></msup></mfrac><annotation encoding="application/x-tex">\frac{1}{(6\cdot 10)^{10}}</annotation></semantics></math> is <math id="S2.F2.pic3.m4" class="ltx_Math" alttext="\boxed{17}" display="inline" intent=":literal"><semantics><menclose notation="box"><mn style="--ltx-fg-color:#000000;" mathcolor="#000000">17</mn></menclose><annotation encoding="application/x-tex">\boxed{17}</annotation></semantics></math>.</span></span>
+</span></span></span></foreignObject></g></g></svg></span></div><div class="ltx_flex_break"></div><div class="ltx_flex_cell ltx_flex_size_1">
+<div class="ltx_pagination ltx_figure_panel ltx_role_end_2_columns"></div></div></div>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure">Figure 2: </span>Example of CoT and TIR solution of the problem. TIR enables the model to write code and call an interpreter to obtain the output of the executed code, and then perform further reasoning based on the execution results.</figcaption>
+</figure>
+<div id="S2.SS2.p1" class="ltx_para">
+<p id="S2.SS2.p1.1" class="ltx_p">Tool Integrated Reasoning (TIR) <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib3" title="" class="ltx_ref">Gou et al. (2023)</a>; <a href="#bib.bib18" title="" class="ltx_ref">Wang et al. (2023)</a>; <a href="#bib.bib14" title="" class="ltx_ref">Shao et al. (2024)</a>; <a href="#bib.bib11" title="" class="ltx_ref">Liao et al. (2024)</a>; <a href="#bib.bib20" title="" class="ltx_ref">Yang et al. (2024)</a></cite> enables large language models (LLMs) to overcome their computational limitations by incorporating executable code into their reasoning process. Unlike traditional prompting approaches, TIR significantly improves accuracy on numerical computation and logical tasks through an iterative process of reasoning and code execution.</p>
+</div>
+<div id="S2.SS2.p2" class="ltx_para">
+<p id="S2.SS2.p2.1" class="ltx_p">Formally, given a language model <math id="S2.SS2.p2.m1" class="ltx_Math" alttext="M" display="inline" intent=":literal"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math>, A code interpreter <math id="S2.SS2.p2.m2" class="ltx_Math" alttext="I" display="inline" intent=":literal"><semantics><mi>I</mi><annotation encoding="application/x-tex">I</annotation></semantics></math> which executes code written by <math id="S2.SS2.p2.m3" class="ltx_Math" alttext="M" display="inline" intent=":literal"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math> to obtain the results of tool calls, and an input question <math id="S2.SS2.p2.m4" class="ltx_Math" alttext="Q" display="inline" intent=":literal"><semantics><mi>Q</mi><annotation encoding="application/x-tex">Q</annotation></semantics></math>, TIR constructs a reasoning trajectory <math id="S2.SS2.p2.m5" class="ltx_Math" alttext="s_{k}" display="inline" intent=":literal"><semantics><msub><mi>s</mi><mi>k</mi></msub><annotation encoding="application/x-tex">s_{k}</annotation></semantics></math> at step <math id="S2.SS2.p2.m6" class="ltx_Math" alttext="k" display="inline" intent=":literal"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math> as:</p>
+<table id="S2.EGx1" class="ltx_equationgroup ltx_eqn_align ltx_eqn_table">
+
+<tbody id="S2.E1"><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_td ltx_align_right ltx_eqn_cell"><math id="S2.E1.m1" class="ltx_Math" alttext="\displaystyle s_{k}={r_{1},c_{1},o_{1},\dots,r_{k},c_{k},o_{k}}" display="inline" intent=":literal"><semantics><mrow><mrow><msub><mi>s</mi><mi>k</mi></msub><mo>=</mo><msub><mi>r</mi><mn>1</mn></msub></mrow><mo>,</mo><msub><mi>c</mi><mn>1</mn></msub><mo>,</mo><msub><mi>o</mi><mn>1</mn></msub><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msub><mi>r</mi><mi>k</mi></msub><mo>,</mo><msub><mi>c</mi><mi>k</mi></msub><mo>,</mo><msub><mi>o</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">\displaystyle s_{k}={r_{1},c_{1},o_{1},\dots,r_{k},c_{k},o_{k}}</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(1)</span></td></tr></tbody>
+</table>
+<p id="S2.SS2.p2.2" class="ltx_p">where <math id="S2.SS2.p2.m7" class="ltx_Math" alttext="r_{i}" display="inline" intent=":literal"><semantics><msub><mi>r</mi><mi>i</mi></msub><annotation encoding="application/x-tex">r_{i}</annotation></semantics></math> represents natural language reasoning, <math id="S2.SS2.p2.m8" class="ltx_Math" alttext="c_{i}" display="inline" intent=":literal"><semantics><msub><mi>c</mi><mi>i</mi></msub><annotation encoding="application/x-tex">c_{i}</annotation></semantics></math> denotes generated code, and <math id="S2.SS2.p2.m9" class="ltx_Math" alttext="o_{i}" display="inline" intent=":literal"><semantics><msub><mi>o</mi><mi>i</mi></msub><annotation encoding="application/x-tex">o_{i}</annotation></semantics></math> is the execution result of <math id="S2.SS2.p2.m10" class="ltx_Math" alttext="c_{i}" display="inline" intent=":literal"><semantics><msub><mi>c</mi><mi>i</mi></msub><annotation encoding="application/x-tex">c_{i}</annotation></semantics></math>. The iterative generation process follows:</p>
+<table id="S2.EGx2" class="ltx_equationgroup ltx_eqn_align ltx_eqn_table">
+
+<tbody id="S2.E2"><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_td ltx_eqn_cell"></td>
+<td class="ltx_td ltx_align_left ltx_eqn_cell"><math id="S2.E2.m1" class="ltx_Math" alttext="\displaystyle(r_{k},c_{k})=M(Q\oplus s_{k-1})" display="inline" intent=":literal"><semantics><mrow><mrow><mo stretchy="false">(</mo><msub><mi>r</mi><mi>k</mi></msub><mo>,</mo><msub><mi>c</mi><mi>k</mi></msub><mo stretchy="false">)</mo></mrow><mo>=</mo><mrow><mi>M</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mrow><mi>Q</mi><mo>⊕</mo><msub><mi>s</mi><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msub></mrow><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">\displaystyle(r_{k},c_{k})=M(Q\oplus s_{k-1})</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(2)</span></td></tr></tbody>
+<tbody id="S2.E3"><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_td ltx_eqn_cell"></td>
+<td class="ltx_td ltx_align_left ltx_eqn_cell"><math id="S2.E3.m1" class="ltx_Math" alttext="\displaystyle o_{k}=I(c_{k})" display="inline" intent=":literal"><semantics><mrow><msub><mi>o</mi><mi>k</mi></msub><mo>=</mo><mrow><mi>I</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mi>k</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">\displaystyle o_{k}=I(c_{k})</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(3)</span></td></tr></tbody>
+<tbody id="S2.E4"><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_td ltx_eqn_cell"></td>
+<td class="ltx_td ltx_align_left ltx_eqn_cell"><math id="S2.E4.m1" class="ltx_Math" alttext="\displaystyle s_{k}=s_{k-1}\oplus r_{k}\oplus c_{k}\oplus o_{k}" display="inline" intent=":literal"><semantics><mrow><msub><mi>s</mi><mi>k</mi></msub><mo>=</mo><mrow><msub><mi>s</mi><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>⊕</mo><msub><mi>r</mi><mi>k</mi></msub><mo>⊕</mo><msub><mi>c</mi><mi>k</mi></msub><mo>⊕</mo><msub><mi>o</mi><mi>k</mi></msub></mrow></mrow><annotation encoding="application/x-tex">\displaystyle s_{k}=s_{k-1}\oplus r_{k}\oplus c_{k}\oplus o_{k}</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(4)</span></td></tr></tbody>
+</table>
+</div>
+<div id="S2.SS2.p3" class="ltx_para">
+<p id="S2.SS2.p3.1" class="ltx_p">This cycle continues until the model produces a final answer, with each step informed by previous code execution results. The dynamic adjustment of reasoning paths based on computational feedback allows the model to verify intermediate steps and correct errors during complex problem-solving.</p>
+</div>
+</section>
+<section id="S2.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">2.3 </span><span id="S2.SS3.2" class="ltx_text ltx_font_smallcaps">ToRL</span>: Tool Integrated Reinforcement Learning</h3>
+
+<div id="S2.SS3.p1" class="ltx_para">
+<p id="S2.SS3.p1.1" class="ltx_p">We propose Tool Integrated Reinforcement Learning (<span id="S2.SS3.p1.1.1" class="ltx_text ltx_font_smallcaps">ToRL</span>), a framework that combines TIR with reinforcement learning directly from base language models without prior supervised fine-tuning. While existing approaches typically apply RL on models already aligned through SFT, our method demonstrates that tool-augmented reasoning capabilities can emerge effectively from base models through properly designed reinforcement learning.</p>
+</div>
+<div id="S2.SS3.p2" class="ltx_para">
+<p id="S2.SS3.p2.1" class="ltx_p">In conventional RL for reasoning, models generate Chain-of-Thought (CoT) trajectories and receive rewards based on answer correctness. However, CoT often fails in scenarios requiring precise computation or exhaustive enumeration. Our approach replaces these pure language trajectories with tool-integrated reasoning paths, where a Code Interpreter module is integrated directly into the RL environment interaction loop.</p>
+</div>
+<section id="S2.SS3.SSS1" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection"><span class="ltx_tag ltx_tag_subsubsection">2.3.1 </span>TIR Rollout Framework</h4>
+
+<div id="S2.SS3.SSS1.p1" class="ltx_para">
+<p id="S2.SS3.SSS1.p1.1" class="ltx_p">To enable the model to automatically output reasoning with code blocks, we use the prompt in Figure  <a href="#S2.F3" title="Figure 3 ‣ 2.3.1 TIR Rollout Framework ‣ 2.3 ToRL: Tool Integrated Reinforcement Learning ‣ 2 Methodology ‣ ToRL: Scaling Tool-Integrated RL" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a>. During the model’s rollout process, when a code termination identifier (<span id="S2.SS3.SSS1.p1.1.1" class="ltx_text ltx_font_typewriter">‘‘‘output</span>) is detected, the system pauses text generation, extracts the latest code block for execution, and inserts the structured execution result into the context in the format <span id="S2.SS3.SSS1.p1.1.2" class="ltx_text ltx_font_typewriter">‘‘‘output\nOBSERVATION\n‘‘‘\n</span>, where <span id="S2.SS3.SSS1.p1.1.3" class="ltx_text ltx_font_typewriter">OBSERVATION</span> is the execution result. The system then continues to generate subsequent natural language reasoning until the model either provides a final answer or produces a new code block. Notably, we deliberately return error messages to the LLM when code execution fails, as we hypothesize that these error diagnostics enhance the model’s capacity to generate syntactically and semantically correct code in subsequent iterations.</p>
+</div>
+<figure id="S2.F3" class="ltx_figure"><span class="ltx_inline-block"><svg id="S2.F3.pic1" class="ltx_picture ltx_centering" height="111.88" overflow="visible" version="1.1" viewBox="0 0 629.92 111.88" width="629.92"><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" fill="#000000" stroke="#000000" stroke-width="0.4pt" transform="translate(0,111.88) matrix(1 0 0 -1 0 0)"><g style="--ltx-fill-color:#404040;" fill="#404040" fill-opacity="1.0"><path style="stroke:none" d="M 0 5.71 L 0 106.17 C 0 109.32 2.56 111.88 5.71 111.88 L 624.21 111.88 C 627.37 111.88 629.92 109.32 629.92 106.17 L 629.92 5.71 C 629.92 2.56 627.37 0 624.21 0 L 5.71 0 C 2.56 0 0 2.56 0 5.71 Z"></path></g><g style="--ltx-fill-color:#F2F2F2;" fill="#F2F2F2" fill-opacity="1.0"><path style="stroke:none" d="M 1.77 5.71 L 1.77 88.28 L 628.15 88.28 L 628.15 5.71 C 628.15 3.53 626.39 1.77 624.21 1.77 L 5.71 1.77 C 3.53 1.77 1.77 3.53 1.77 5.71 Z"></path></g><g fill-opacity="1.0" transform="matrix(1.0 0.0 0.0 1.0 21.46 96.67)"><foreignObject style="--ltx-fo-width:36.89em;--ltx-fo-height:0.69em;--ltx-fo-depth:0.19em;font-size:10pt;" height="12.18" overflow="visible" transform="matrix(1 0 0 -1 0 9.49)" width="510.45"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content">
+<span id="S2.F3.pic1.1" class="ltx_inline-block ltx_minipage ltx_align_bottom" style="width:36.89em;">
+<span id="S2.F3.pic1.1.1" class="ltx_p"><span id="S2.F3.pic1.1.1.1" class="ltx_text ltx_font_bold" style="--ltx-fg-color:#FFFFFF;">Prompt</span></span>
+</span></span></span></foreignObject></g><g fill-opacity="1.0" transform="matrix(1.0 0.0 0.0 1.0 21.46 17.04)"><foreignObject style="--ltx-fo-width:42.42em;--ltx-fo-height:4.29em;--ltx-fo-depth:0.25em;font-size:10pt;" height="62.88" overflow="visible" transform="matrix(1 0 0 -1 0 59.42)" width="586.97"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content">
+<span id="S2.F3.pic1.2" class="ltx_inline-block ltx_minipage ltx_align_bottom" style="width:42.42em;">
+<span id="S2.F3.pic1.2.1" class="ltx_p"><span id="S2.F3.pic1.2.1.1" class="ltx_text" style="--ltx-fg-color:#000000;">A conversation between User and Assistant. The user asks a question, and the Assistant solves it.\nUser: Please integrate natural language reasoning with programs to solve the problem above, and put your final answer within \boxed{}.\n<span id="S2.F3.pic1.2.1.1.1" class="ltx_text" style="--ltx-fg-color:#FF0000;">prompt</span>\nAssistant:</span></span>
+</span></span></span></foreignObject></g></g></svg></span>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 3: </span>Prompt template for <span id="S2.F3.4" class="ltx_text ltx_font_smallcaps">ToRL</span>, and <span id="S2.F3.5" class="ltx_text" style="--ltx-fg-color:#FF0000;">prompt</span> will be replaced with specific question in training.</figcaption>
+</figure>
+<div id="S2.SS3.SSS1.p2" class="ltx_para">
+<p id="S2.SS3.SSS1.p2.1" class="ltx_p">We observed that the integration of tool during the rollout process introduces significant GPU idle time, with speed of rollout process inversely proportional to the frequency of tool calls. To maintain training speed within a reasonable range, we introduced a hyperparameter, <math id="S2.SS3.SSS1.p2.m1" class="ltx_Math" alttext="C" display="inline" intent=":literal"><semantics><mi>C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math>, which is the maximum number of tool calls the model can make during a single response generation. Once this threshold is exceeded, the system ignores further code execution requests, forcing the model to switch to pure-text reasoning mode.</p>
+</div>
+</section>
+<section id="S2.SS3.SSS2" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection"><span class="ltx_tag ltx_tag_subsubsection">2.3.2 </span>Design Choices of <span id="S2.SS3.SSS2.2" class="ltx_text ltx_font_smallcaps">ToRL</span></h4>
+
+<div id="S2.SS3.SSS2.p1" class="ltx_para">
+<ol id="S2.I1" class="ltx_enumerate">
+<li id="S2.I1.i1" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">1.</span> 
+<div id="S2.I1.i1.p1" class="ltx_para">
+<p id="S2.I1.i1.p1.1" class="ltx_p"><span id="S2.I1.i1.p1.1.1" class="ltx_text ltx_font_bold">Tool Call Frequency Control.</span> We observed that tool integration during rollout introduces significant GPU idle time, with rollout speed inversely proportional to tool call frequency. To maintain reasonable training efficiency, we introduced a hyperparameter <math id="S2.I1.i1.p1.m1" class="ltx_Math" alttext="C" display="inline" intent=":literal"><semantics><mi>C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math>, representing the maximum number of tool calls allowed per response generation. Once this threshold is exceeded, the system ignores further code execution requests, forcing the model to switch to pure-text reasoning mode.</p>
+</div></li>
+<li id="S2.I1.i2" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">2.</span> 
+<div id="S2.I1.i2.p1" class="ltx_para">
+<p id="S2.I1.i2.p1.1" class="ltx_p"><span id="S2.I1.i2.p1.1.1" class="ltx_text ltx_font_bold">Execution Environment Selection.</span> To balance training efficiency and effectiveness, we sought a stable, accurate, and responsive code interpreter implementation. We initially tested the Python executor from qwen-agent<span id="footnote1" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">1</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">1</sup>
+                      <span class="ltx_tag ltx_tag_note">1</span>
+                      
+                      
+                      
+                    https://github.com/QwenLM/Qwen-Agent</span></span></span>, which offers extremely low latency. However, its execution environment lacks isolation from the training system, potentially allowing execution errors (e.g., segmentation faults from illegal memory access) to compromise the entire training process. We ultimately selected Sandbox Fusion<span id="footnote2" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">2</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">2</sup>
+                      <span class="ltx_tag ltx_tag_note">2</span>
+                      
+                      
+                      
+                    https://bytedance.github.io/SandboxFusion/</span></span></span>, which provides an isolated execution environment. Despite slightly higher latency, it delivers superior stability for sustained training operations.</p>
+</div></li>
+<li id="S2.I1.i3" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">3.</span> 
+<div id="S2.I1.i3.p1" class="ltx_para">
+<p id="S2.I1.i3.p1.1" class="ltx_p"><span id="S2.I1.i3.p1.1.1" class="ltx_text ltx_font_bold">Error Message Processing.</span> We implemented specific error handling optimizations to enhance training effectiveness. When Sandbox Fusion encounters execution errors, it generates verbose tracebacks containing irrelevant file path information. To reduce context length and preserve only relevant error information, we extract only the final line of error messages (e.g., <span id="S2.I1.i3.p1.1.2" class="ltx_text ltx_font_typewriter">NameError: name ’a’ is not defined</span>).</p>
+</div></li>
+<li id="S2.I1.i4" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">4.</span> 
+<div id="S2.I1.i4.p1" class="ltx_para">
+<p id="S2.I1.i4.p1.1" class="ltx_p"><span id="S2.I1.i4.p1.1.1" class="ltx_text ltx_font_bold">Sandbox Output Masking.</span> During loss computation, we mask out the <span id="S2.I1.i4.p1.1.2" class="ltx_text ltx_font_typewriter">OBSERVATION</span> outputs from the sandbox environment, significantly improving training stability by preventing the model from attempting to memorize specific execution outputs rather than learning generalizable reasoning patterns.</p>
+</div></li>
+</ol>
+</div>
+</section>
+<section id="S2.SS3.SSS3" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection"><span class="ltx_tag ltx_tag_subsubsection">2.3.3 </span>Reward Design</h4>
+
+<div id="S2.SS3.SSS3.p1" class="ltx_para">
+<p id="S2.SS3.SSS3.p1.1" class="ltx_p">We implemented a rule-based reward function where correct answers receive a reward of 1, incorrect answers receive -1.
+In addition, the code interpreter naturally provides feedback on code executability. Based on the correlation between successful code execution and problem-solving accuracy, we introduced an <span id="S2.SS3.SSS3.p1.1.1" class="ltx_text ltx_font_bold">execution-based penalty</span>: responses containing non-executable code incur a -0.5 reward reduction.</p>
+</div>
+<div id="S2.SS3.SSS3.2" class="ltx_logical-block ltx_minipage ltx_align_top" style="width:165.6pt;">
+          
+<figure id="S2.T1" class="ltx_table ltx_align_center">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_table">Table 1: </span>Answer Correctness Reward</figcaption>
+</figure>
+          
+<div id="S2.SS3.SSS3.p2" class="ltx_para">
+<table id="S2.SS3.SSS3.p2.1" class="ltx_tabular ltx_centering ltx_align_middle">
+<tr id="S2.SS3.SSS3.p2.1.1" class="ltx_tr">
+<td id="S2.SS3.SSS3.p2.1.1.1" class="ltx_td ltx_align_center ltx_border_tt">Answer Correctness</td>
+<td id="S2.SS3.SSS3.p2.1.1.2" class="ltx_td ltx_align_center ltx_border_tt">Reward Value</td></tr>
+<tr id="S2.SS3.SSS3.p2.1.2" class="ltx_tr">
+<td id="S2.SS3.SSS3.p2.1.2.1" class="ltx_td ltx_align_center ltx_border_t">Correct</td>
+<td id="S2.SS3.SSS3.p2.1.2.2" class="ltx_td ltx_align_center ltx_border_t">1</td></tr>
+<tr id="S2.SS3.SSS3.p2.1.3" class="ltx_tr">
+<td id="S2.SS3.SSS3.p2.1.3.1" class="ltx_td ltx_align_center ltx_border_bb">Incorrect</td>
+<td id="S2.SS3.SSS3.p2.1.3.2" class="ltx_td ltx_align_center ltx_border_bb">-1</td></tr>
+</table>
+</div>
+        
+</div>
+<div id="S2.SS3.SSS3.3" class="ltx_logical-block ltx_minipage ltx_align_top" style="width:165.6pt;">
+          
+<figure id="S2.T2" class="ltx_table ltx_align_center">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_table">Table 2: </span>Code Executability Reward</figcaption>
+</figure>
+          
+<div id="S2.SS3.SSS3.p3" class="ltx_para">
+<table id="S2.SS3.SSS3.p3.1" class="ltx_tabular ltx_centering ltx_align_middle">
+<tr id="S2.SS3.SSS3.p3.1.1" class="ltx_tr">
+<td id="S2.SS3.SSS3.p3.1.1.1" class="ltx_td ltx_align_center ltx_border_tt">Code Executability</td>
+<td id="S2.SS3.SSS3.p3.1.1.2" class="ltx_td ltx_align_center ltx_border_tt">Reward Value</td></tr>
+<tr id="S2.SS3.SSS3.p3.1.2" class="ltx_tr">
+<td id="S2.SS3.SSS3.p3.1.2.1" class="ltx_td ltx_align_center ltx_border_t">Executable</td>
+<td id="S2.SS3.SSS3.p3.1.2.2" class="ltx_td ltx_align_center ltx_border_t">0</td></tr>
+<tr id="S2.SS3.SSS3.p3.1.3" class="ltx_tr">
+<td id="S2.SS3.SSS3.p3.1.3.1" class="ltx_td ltx_align_center ltx_border_bb">Unexecutable</td>
+<td id="S2.SS3.SSS3.p3.1.3.2" class="ltx_td ltx_align_center ltx_border_bb">-0.5</td></tr>
+</table>
+</div>
+        
+</div>
+</section>
+</section>
+</section>
+<section id="S3" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">3 </span>Experiment</h2>
+
+<section id="S3.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">3.1 </span>Experimental Setup</h3>
+
+<section id="S3.SS1.SSS0.Px1" class="ltx_paragraph">
+<h5 class="ltx_title ltx_title_paragraph">Training</h5>
+
+<div id="S3.SS1.SSS0.Px1.p1" class="ltx_para">
+<p id="S3.SS1.SSS0.Px1.p1.1" class="ltx_p">All RL experiments are conducted using the veRL <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib15" title="" class="ltx_ref">Sheng et al. (2024)</a></cite> framework, with Sandbox Fusion as the code interpreter. We employ the GRPO <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib14" title="" class="ltx_ref">Shao et al. (2024)</a></cite> algorithm, setting the rollout batch size to 128 and generating 16 samples per problem. To enhance model exploration, all experiments omit the KL loss and set the temperature to 1.
+We choose the Qwen-2.5-Math <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib20" title="" class="ltx_ref">Yang et al. (2024)</a></cite> series models as the base models for RL.
+To maximize efficiency, the default number of calls, <math id="S3.SS1.SSS0.Px1.p1.m1" class="ltx_Math" alttext="C" display="inline" intent=":literal"><semantics><mi>C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math>, is set to <span id="S3.SS1.SSS0.Px1.p1.1.1" class="ltx_text ltx_font_bold">1</span>. Moreover, only the <span id="S3.SS1.SSS0.Px1.p1.1.2" class="ltx_text ltx_font_bold">Answer Correctness Reward</span> is retained in the default experiments, without incorporating the <span id="S3.SS1.SSS0.Px1.p1.1.3" class="ltx_text ltx_font_bold">Code Executability Reward</span>, which will be discussed in § <a href="#S3.SS3" title="3.3 Analysis ‣ 3 Experiment ‣ ToRL: Scaling Tool-Integrated RL" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3.3</span></a>.</p>
+</div>
+</section>
+<section id="S3.SS1.SSS0.Px2" class="ltx_paragraph">
+<h5 class="ltx_title ltx_title_paragraph">Evaluation</h5>
+
+<div id="S3.SS1.SSS0.Px2.p1" class="ltx_para">
+<p id="S3.SS1.SSS0.Px2.p1.1" class="ltx_p">For evaluation, we use greedy decoding (temperature = 0) across all models. We evaluate our results on several challenging mathematical benchmarks: (1) AIME24, (2) AIME25, (3) MATH500 <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib6" title="" class="ltx_ref">Hendrycks et al. (2021)</a></cite>, (4) OlympiadBench <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib5" title="" class="ltx_ref">He et al. (2024)</a></cite>, and (5) AMC23.</p>
+</div>
+</section>
+</section>
+<section id="S3.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">3.2 </span>Main Results</h3>
+
+<figure id="S3.T3" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 3: </span>Comparison of different models testing accuracy on mathematical benchmarks. Qwen2.5-Math-1.5B-Instruct-TIR represents the testing of Qwen2.5-Math-1.5B-Instruct in the TIR environment. For a fair comparison, we set the maximum number of tool calls to 1. The best results are presented in <span id="S3.T3.3" class="ltx_text ltx_font_bold">bold</span>.</figcaption>
+<div id="S3.T3.4" class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:345.0pt;height:88.2pt;vertical-align:-42.6pt;"><span class="ltx_transformed_inner" style="transform:translate(-112.1pt,28.7pt) scale(0.606133979621173,0.606133979621173) ;">
+<table id="S3.T3.4.1" class="ltx_tabular ltx_align_middle">
+<tr id="S3.T3.4.1.1" class="ltx_tr">
+<td id="S3.T3.4.1.1.1" class="ltx_td ltx_align_left ltx_border_tt">Model</td>
+<td id="S3.T3.4.1.1.2" class="ltx_td ltx_align_center ltx_border_tt">SFT/RL</td>
+<td id="S3.T3.4.1.1.3" class="ltx_td ltx_align_center ltx_border_tt">Tool</td>
+<td id="S3.T3.4.1.1.4" class="ltx_td ltx_align_center ltx_border_tt">AIME24</td>
+<td id="S3.T3.4.1.1.5" class="ltx_td ltx_align_center ltx_border_tt">AIME25</td>
+<td id="S3.T3.4.1.1.6" class="ltx_td ltx_align_center ltx_border_tt">MATH500</td>
+<td id="S3.T3.4.1.1.7" class="ltx_td ltx_align_center ltx_border_tt">Olympiad</td>
+<td id="S3.T3.4.1.1.8" class="ltx_td ltx_align_center ltx_border_tt">AMC23</td>
+<td id="S3.T3.4.1.1.9" class="ltx_td ltx_align_center ltx_border_tt">Avg</td></tr>
+<tr id="S3.T3.4.1.2" class="ltx_tr">
+<td id="S3.T3.4.1.2.1" class="ltx_td ltx_align_center ltx_border_t" colspan="8"><span id="S3.T3.4.1.2.1.1" class="ltx_text ltx_font_italic">Models based on Qwen2.5-Math-1.5B-Base</span></td>
+<td id="S3.T3.4.1.2.2" class="ltx_td ltx_border_t"></td></tr>
+<tr id="S3.T3.4.1.3" class="ltx_tr">
+<td id="S3.T3.4.1.3.1" class="ltx_td ltx_align_left">Qwen2.5-Math-1.5B-Instruct</td>
+<td id="S3.T3.4.1.3.2" class="ltx_td ltx_align_center">RL</td>
+<td id="S3.T3.4.1.3.3" class="ltx_td ltx_align_center"><span id="S3.T3.4.1.3.3.1" class="ltx_text" style="--ltx-fg-color:#FF0000;">✗</span></td>
+<td id="S3.T3.4.1.3.4" class="ltx_td ltx_align_center">10.0</td>
+<td id="S3.T3.4.1.3.5" class="ltx_td ltx_align_center">10.0</td>
+<td id="S3.T3.4.1.3.6" class="ltx_td ltx_align_center">66.0</td>
+<td id="S3.T3.4.1.3.7" class="ltx_td ltx_align_center">31.0</td>
+<td id="S3.T3.4.1.3.8" class="ltx_td ltx_align_center">62.5</td>
+<td id="S3.T3.4.1.3.9" class="ltx_td ltx_align_center">35.9</td></tr>
+<tr id="S3.T3.4.1.4" class="ltx_tr">
+<td id="S3.T3.4.1.4.1" class="ltx_td ltx_align_left">Qwen2.5-Math-1.5B-Instruct-TIR</td>
+<td id="S3.T3.4.1.4.2" class="ltx_td ltx_align_center">RL</td>
+<td id="S3.T3.4.1.4.3" class="ltx_td ltx_align_center"><span id="S3.T3.4.1.4.3.1" class="ltx_text" style="--ltx-fg-color:#00FF00;">✓</span></td>
+<td id="S3.T3.4.1.4.4" class="ltx_td ltx_align_center">13.3</td>
+<td id="S3.T3.4.1.4.5" class="ltx_td ltx_align_center">13.3</td>
+<td id="S3.T3.4.1.4.6" class="ltx_td ltx_align_center">73.8</td>
+<td id="S3.T3.4.1.4.7" class="ltx_td ltx_align_center">41.3</td>
+<td id="S3.T3.4.1.4.8" class="ltx_td ltx_align_center">55.0</td>
+<td id="S3.T3.4.1.4.9" class="ltx_td ltx_align_center">41.3</td></tr>
+<tr id="S3.T3.4.1.5" class="ltx_tr" style="--ltx-bg-color:#EAF2FE;">
+<td id="S3.T3.4.1.5.1" class="ltx_td ltx_align_left"><span id="S3.T3.4.1.5.1.1" class="ltx_text ltx_font_smallcaps" style="--ltx-bg-color:#EAF2FE;">ToRL<span id="S3.T3.4.1.5.1.1.1" class="ltx_text ltx_font_upright">-1.5B(Ours)</span></span></td>
+<td id="S3.T3.4.1.5.2" class="ltx_td ltx_align_center"><span id="S3.T3.4.1.5.2.1" class="ltx_text" style="--ltx-bg-color:#EAF2FE;">RL</span></td>
+<td id="S3.T3.4.1.5.3" class="ltx_td ltx_align_center"><span id="S3.T3.4.1.5.3.1" class="ltx_text" style="--ltx-fg-color:#00FF00;--ltx-bg-color:#EAF2FE;">✓</span></td>
+<td id="S3.T3.4.1.5.4" class="ltx_td ltx_align_center"><span id="S3.T3.4.1.5.4.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EAF2FE;">26.7<sub id="S3.T3.4.1.5.4.1.1" class="ltx_sub"><span id="S3.T3.4.1.5.4.1.1.1" class="ltx_text ltx_font_italic">+13.3</span></sub></span></td>
+<td id="S3.T3.4.1.5.5" class="ltx_td ltx_align_center"><span id="S3.T3.4.1.5.5.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EAF2FE;">26.7<sub id="S3.T3.4.1.5.5.1.1" class="ltx_sub"><span id="S3.T3.4.1.5.5.1.1.1" class="ltx_text ltx_font_italic">+13.3</span></sub></span></td>
+<td id="S3.T3.4.1.5.6" class="ltx_td ltx_align_center"><span id="S3.T3.4.1.5.6.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EAF2FE;">77.8<sub id="S3.T3.4.1.5.6.1.1" class="ltx_sub"><span id="S3.T3.4.1.5.6.1.1.1" class="ltx_text ltx_font_italic">+3.0</span></sub></span></td>
+<td id="S3.T3.4.1.5.7" class="ltx_td ltx_align_center"><span id="S3.T3.4.1.5.7.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EAF2FE;">44.0<sub id="S3.T3.4.1.5.7.1.1" class="ltx_sub"><span id="S3.T3.4.1.5.7.1.1.1" class="ltx_text ltx_font_italic">+2.7</span></sub></span></td>
+<td id="S3.T3.4.1.5.8" class="ltx_td ltx_align_center"><span id="S3.T3.4.1.5.8.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EAF2FE;">67.5<sub id="S3.T3.4.1.5.8.1.1" class="ltx_sub"><span id="S3.T3.4.1.5.8.1.1.1" class="ltx_text ltx_font_italic">+5.0</span></sub></span></td>
+<td id="S3.T3.4.1.5.9" class="ltx_td ltx_align_center"><span id="S3.T3.4.1.5.9.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EAF2FE;">48.5<sub id="S3.T3.4.1.5.9.1.1" class="ltx_sub"><span id="S3.T3.4.1.5.9.1.1.1" class="ltx_text ltx_font_italic">+7.2</span></sub></span></td></tr>
+<tr id="S3.T3.4.1.6" class="ltx_tr">
+<td id="S3.T3.4.1.6.1" class="ltx_td ltx_align_center ltx_border_t" colspan="8"><span id="S3.T3.4.1.6.1.1" class="ltx_text ltx_font_italic">Models based on Qwen2.5-Math-7B-Base</span></td>
+<td id="S3.T3.4.1.6.2" class="ltx_td ltx_border_t"></td></tr>
+<tr id="S3.T3.4.1.7" class="ltx_tr">
+<td id="S3.T3.4.1.7.1" class="ltx_td ltx_align_left">Qwen2.5-Math-7B-Instruct</td>
+<td id="S3.T3.4.1.7.2" class="ltx_td ltx_align_center">RL</td>
+<td id="S3.T3.4.1.7.3" class="ltx_td ltx_align_center"><span id="S3.T3.4.1.7.3.1" class="ltx_text" style="--ltx-fg-color:#FF0000;">✗</span></td>
+<td id="S3.T3.4.1.7.4" class="ltx_td ltx_align_center">10.0</td>
+<td id="S3.T3.4.1.7.5" class="ltx_td ltx_align_center">16.7</td>
+<td id="S3.T3.4.1.7.6" class="ltx_td ltx_align_center">74.8</td>
+<td id="S3.T3.4.1.7.7" class="ltx_td ltx_align_center">32.4</td>
+<td id="S3.T3.4.1.7.8" class="ltx_td ltx_align_center">65.0</td>
+<td id="S3.T3.4.1.7.9" class="ltx_td ltx_align_center">39.8</td></tr>
+<tr id="S3.T3.4.1.8" class="ltx_tr">
+<td id="S3.T3.4.1.8.1" class="ltx_td ltx_align_left">Qwen2.5-Math-7B-Instruct-TIR</td>
+<td id="S3.T3.4.1.8.2" class="ltx_td ltx_align_center">RL</td>
+<td id="S3.T3.4.1.8.3" class="ltx_td ltx_align_center"><span id="S3.T3.4.1.8.3.1" class="ltx_text" style="--ltx-fg-color:#00FF00;">✓</span></td>
+<td id="S3.T3.4.1.8.4" class="ltx_td ltx_align_center">26.7</td>
+<td id="S3.T3.4.1.8.5" class="ltx_td ltx_align_center">16.7</td>
+<td id="S3.T3.4.1.8.6" class="ltx_td ltx_align_center">78.8</td>
+<td id="S3.T3.4.1.8.7" class="ltx_td ltx_align_center">45.0</td>
+<td id="S3.T3.4.1.8.8" class="ltx_td ltx_align_center">70.0</td>
+<td id="S3.T3.4.1.8.9" class="ltx_td ltx_align_center">47.4</td></tr>
+<tr id="S3.T3.4.1.9" class="ltx_tr">
+<td id="S3.T3.4.1.9.1" class="ltx_td ltx_align_left">SimpleRL-Zero</td>
+<td id="S3.T3.4.1.9.2" class="ltx_td ltx_align_center">RL</td>
+<td id="S3.T3.4.1.9.3" class="ltx_td ltx_align_center"><span id="S3.T3.4.1.9.3.1" class="ltx_text" style="--ltx-fg-color:#FF0000;">✗</span></td>
+<td id="S3.T3.4.1.9.4" class="ltx_td ltx_align_center">33.3</td>
+<td id="S3.T3.4.1.9.5" class="ltx_td ltx_align_center">6.7</td>
+<td id="S3.T3.4.1.9.6" class="ltx_td ltx_align_center">77.2</td>
+<td id="S3.T3.4.1.9.7" class="ltx_td ltx_align_center">37.6</td>
+<td id="S3.T3.4.1.9.8" class="ltx_td ltx_align_center">62.5</td>
+<td id="S3.T3.4.1.9.9" class="ltx_td ltx_align_center">43.5</td></tr>
+<tr id="S3.T3.4.1.10" class="ltx_tr">
+<td id="S3.T3.4.1.10.1" class="ltx_td ltx_align_left">rStar-Math-7B</td>
+<td id="S3.T3.4.1.10.2" class="ltx_td ltx_align_center">SFT</td>
+<td id="S3.T3.4.1.10.3" class="ltx_td ltx_align_center"><span id="S3.T3.4.1.10.3.1" class="ltx_text" style="--ltx-fg-color:#FF0000;">✗</span></td>
+<td id="S3.T3.4.1.10.4" class="ltx_td ltx_align_center">26.7</td>
+<td id="S3.T3.4.1.10.5" class="ltx_td ltx_align_center">-</td>
+<td id="S3.T3.4.1.10.6" class="ltx_td ltx_align_center">78.4</td>
+<td id="S3.T3.4.1.10.7" class="ltx_td ltx_align_center">47.1</td>
+<td id="S3.T3.4.1.10.8" class="ltx_td ltx_align_center">47.5</td>
+<td id="S3.T3.4.1.10.9" class="ltx_td ltx_align_center">-</td></tr>
+<tr id="S3.T3.4.1.11" class="ltx_tr">
+<td id="S3.T3.4.1.11.1" class="ltx_td ltx_align_left">Eurus-2-7B-PRIME</td>
+<td id="S3.T3.4.1.11.2" class="ltx_td ltx_align_center">RL</td>
+<td id="S3.T3.4.1.11.3" class="ltx_td ltx_align_center"><span id="S3.T3.4.1.11.3.1" class="ltx_text" style="--ltx-fg-color:#FF0000;">✗</span></td>
+<td id="S3.T3.4.1.11.4" class="ltx_td ltx_align_center">26.7</td>
+<td id="S3.T3.4.1.11.5" class="ltx_td ltx_align_center">13.3</td>
+<td id="S3.T3.4.1.11.6" class="ltx_td ltx_align_center">79.2</td>
+<td id="S3.T3.4.1.11.7" class="ltx_td ltx_align_center">42.1</td>
+<td id="S3.T3.4.1.11.8" class="ltx_td ltx_align_center">57.4</td>
+<td id="S3.T3.4.1.11.9" class="ltx_td ltx_align_center">43.1</td></tr>
+<tr id="S3.T3.4.1.12" class="ltx_tr" style="--ltx-bg-color:#EAF2FE;">
+<td id="S3.T3.4.1.12.1" class="ltx_td ltx_align_left ltx_border_bb"><span id="S3.T3.4.1.12.1.1" class="ltx_text ltx_font_smallcaps" style="--ltx-bg-color:#EAF2FE;">ToRL<span id="S3.T3.4.1.12.1.1.1" class="ltx_text ltx_font_upright">-7B(Ours)</span></span></td>
+<td id="S3.T3.4.1.12.2" class="ltx_td ltx_align_center ltx_border_bb"><span id="S3.T3.4.1.12.2.1" class="ltx_text" style="--ltx-bg-color:#EAF2FE;">RL</span></td>
+<td id="S3.T3.4.1.12.3" class="ltx_td ltx_align_center ltx_border_bb"><span id="S3.T3.4.1.12.3.1" class="ltx_text" style="--ltx-fg-color:#00FF00;--ltx-bg-color:#EAF2FE;">✓</span></td>
+<td id="S3.T3.4.1.12.4" class="ltx_td ltx_align_center ltx_border_bb"><span id="S3.T3.4.1.12.4.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EAF2FE;">43.3<sub id="S3.T3.4.1.12.4.1.1" class="ltx_sub"><span id="S3.T3.4.1.12.4.1.1.1" class="ltx_text ltx_font_italic">+10.0</span></sub></span></td>
+<td id="S3.T3.4.1.12.5" class="ltx_td ltx_align_center ltx_border_bb"><span id="S3.T3.4.1.12.5.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EAF2FE;">30.0<sub id="S3.T3.4.1.12.5.1.1" class="ltx_sub"><span id="S3.T3.4.1.12.5.1.1.1" class="ltx_text ltx_font_italic">+13.3</span></sub></span></td>
+<td id="S3.T3.4.1.12.6" class="ltx_td ltx_align_center ltx_border_bb"><span id="S3.T3.4.1.12.6.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EAF2FE;">82.2<sub id="S3.T3.4.1.12.6.1.1" class="ltx_sub"><span id="S3.T3.4.1.12.6.1.1.1" class="ltx_text ltx_font_italic">+3.0</span></sub></span></td>
+<td id="S3.T3.4.1.12.7" class="ltx_td ltx_align_center ltx_border_bb"><span id="S3.T3.4.1.12.7.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EAF2FE;">49.9<sub id="S3.T3.4.1.12.7.1.1" class="ltx_sub"><span id="S3.T3.4.1.12.7.1.1.1" class="ltx_text ltx_font_italic">+2.8</span></sub></span></td>
+<td id="S3.T3.4.1.12.8" class="ltx_td ltx_align_center ltx_border_bb"><span id="S3.T3.4.1.12.8.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EAF2FE;">75.0<sub id="S3.T3.4.1.12.8.1.1" class="ltx_sub"><span id="S3.T3.4.1.12.8.1.1.1" class="ltx_text ltx_font_italic">+5.0</span></sub></span></td>
+<td id="S3.T3.4.1.12.9" class="ltx_td ltx_align_center ltx_border_bb"><span id="S3.T3.4.1.12.9.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EAF2FE;">62.1<sub id="S3.T3.4.1.12.9.1.1" class="ltx_sub"><span id="S3.T3.4.1.12.9.1.1.1" class="ltx_text ltx_font_italic">+14.7</span></sub></span></td></tr>
+</table>
+</span></div>
+</figure>
+<figure id="S3.F4" class="ltx_figure"><object type="image/svg+xml" data="2503.23383v1/main_results_allbenchmark.svg" id="S3.F4.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:467/208;" width="467" height="208"></object>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 4: </span>Performance comparison across mathematical benchmarks. The plots show accuracy (%) against training steps for the 7B model evaluated on different benchmarks. Across all benchmarks, <span id="S3.F4.3" class="ltx_text ltx_font_smallcaps">ToRL</span>-7B (blue) consistently outperforms both the baseline without tool integration (red) and Qwen-2.5-Math-7B-Instruct-TIR (dashed gray).</figcaption>
+</figure>
+<div id="S3.SS2.p1" class="ltx_para">
+<p id="S3.SS2.p1.1" class="ltx_p">Table <a href="#S3.T3" title="Table 3 ‣ 3.2 Main Results ‣ 3 Experiment ‣ ToRL: Scaling Tool-Integrated RL" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a> presents the performance comparison of different models on mathematical benchmarks. <span id="S3.SS2.p1.1.1" class="ltx_text ltx_font_smallcaps">ToRL</span> consistently outperforms baseline models across all tested benchmarks. For the 1.5B parameter models, <span id="S3.SS2.p1.1.2" class="ltx_text ltx_font_smallcaps">ToRL</span>-1.5B achieves an average accuracy of <span id="S3.SS2.p1.1.3" class="ltx_text ltx_font_bold">48.5%</span>, surpassing both Qwen2.5-Math-1.5B-Instruct (35.9%) and Qwen2.5-Math-1.5B-Instruct-TIR (41.3%). The improvement is even more pronounced in the 7B parameter models, where <span id="S3.SS2.p1.1.4" class="ltx_text ltx_font_smallcaps">ToRL</span>-7B reaches 62.1% average accuracy, significantly higher than other open-source models with the same base model—representing an impressive <span id="S3.SS2.p1.1.5" class="ltx_text ltx_font_bold">14.7%</span> absolute improvement.</p>
+</div>
+<div id="S3.SS2.p2" class="ltx_para">
+<p id="S3.SS2.p2.1" class="ltx_p">Figure <a href="#S3.F4" title="Figure 4 ‣ 3.2 Main Results ‣ 3 Experiment ‣ ToRL: Scaling Tool-Integrated RL" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a> illustrates the training dynamics across five different mathematical benchmarks. <span id="S3.SS2.p2.1.1" class="ltx_text ltx_font_smallcaps">ToRL</span>-7B shows consistent improvement over training steps and maintains a clear advantage over both the baseline without tool integration and Qwen-2.5-Math-7B-Instruct-TIR. This performance gap is particularly notable in challenging benchmarks like AIME24, AIME25, and OlympiadBench, where <span id="S3.SS2.p2.1.2" class="ltx_text ltx_font_smallcaps">ToRL</span>-7B achieves <span id="S3.SS2.p2.1.3" class="ltx_text ltx_font_bold">43.3%</span>, <span id="S3.SS2.p2.1.4" class="ltx_text ltx_font_bold">30.0%</span>, and <span id="S3.SS2.p2.1.5" class="ltx_text ltx_font_bold">49.9%</span> accuracy respectively.</p>
+</div>
+</section>
+<section id="S3.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">3.3 </span>Analysis</h3>
+
+<div id="S3.SS3.p1" class="ltx_para">
+<p id="S3.SS3.p1.1" class="ltx_p">To gain deeper insights into how RL facilitates the model’s tool invocation for reasoning assistance, we quantitatively analyze the model’s tool usage and code-writing behaviors in § <a href="#S3.SS3.SSS1" title="3.3.1 Part I: Code behaviors during training ‣ 3.3 Analysis ‣ 3 Experiment ‣ ToRL: Scaling Tool-Integrated RL" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3.3.1</span></a> and showcase illustrative examples in § <a href="#S3.SS3.SSS3" title="3.3.3 Part III: Cognitive Behavior via RL Scaling ‣ 3.3 Analysis ‣ 3 Experiment ‣ ToRL: Scaling Tool-Integrated RL" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3.3.3</span></a>. Furthermore, we change critical parameters related to <span id="S3.SS3.p1.1.1" class="ltx_text ltx_font_smallcaps">ToRL</span> in the RL framework to examine their effects on both model performance and training efficiency in § <a href="#S3.SS3.SSS2" title="3.3.2 Part II: Impact of Key Settings ‣ 3.3 Analysis ‣ 3 Experiment ‣ ToRL: Scaling Tool-Integrated RL" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3.3.2</span></a>.</p>
+</div>
+<section id="S3.SS3.SSS1" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection"><span class="ltx_tag ltx_tag_subsubsection">3.3.1 </span>Part I: Code behaviors during training</h4>
+
+<figure id="S3.F5" class="ltx_figure">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_4">
+<figure id="S3.F5.sf1" class="ltx_figure ltx_figure_panel ltx_align_center"><object type="image/svg+xml" data="2503.23383v1/Code.svg" id="S3.F5.sf1.g1" class="ltx_graphics ltx_img_square" style="aspect-ratio:476/423;" width="476" height="423"></object>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure">(a) </span>Code Ratio</figcaption>
+</figure></div><div class="ltx_flex_cell ltx_flex_size_4">
+<figure id="S3.F5.sf2" class="ltx_figure ltx_figure_panel ltx_align_center"><object type="image/svg+xml" data="2503.23383v1/Pass.svg" id="S3.F5.sf2.g1" class="ltx_graphics ltx_img_square" style="aspect-ratio:476/423;" width="476" height="423"></object>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure">(b) </span>Pass Ratio</figcaption>
+</figure></div><div class="ltx_flex_cell ltx_flex_size_4">
+<figure id="S3.F5.sf3" class="ltx_figure ltx_figure_panel ltx_align_center"><object type="image/svg+xml" data="2503.23383v1/Correct.svg" id="S3.F5.sf3.g1" class="ltx_graphics ltx_img_square" style="aspect-ratio:476/423;" width="476" height="423"></object>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure">(c) </span>Correct/Incorrect Pass Ratio</figcaption>
+</figure></div><div class="ltx_flex_cell ltx_flex_size_4">
+<figure id="S3.F5.sf4" class="ltx_figure ltx_figure_panel ltx_align_center"><object type="image/svg+xml" data="2503.23383v1/Executed.svg" id="S3.F5.sf4.g1" class="ltx_graphics ltx_img_square" style="aspect-ratio:476/423;" width="476" height="423"></object>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure">(d) </span>Effective Pass Ratio</figcaption>
+</figure></div></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 5: </span>Tool usage dynamics during training. (a) Code Ratio: proportion of responses that contain code, (b) Pass Ratio: proportion of executed code that runs without errors, (c) Pass Ratio in Correct/Incorrect Responses: comparing execution success rates for correct vs. incorrect responses, and (d) Effective Code Ratio.</figcaption>
+</figure>
+<div id="S3.SS3.SSS1.p1" class="ltx_para">
+<p id="S3.SS3.SSS1.p1.1" class="ltx_p">Figure <a href="#S3.F5" title="Figure 5 ‣ 3.3.1 Part I: Code behaviors during training ‣ 3.3 Analysis ‣ 3 Experiment ‣ ToRL: Scaling Tool-Integrated RL" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a> provides insights into tool usage patterns during training, including:</p>
+</div>
+<section id="S3.SS3.SSS1.Px1" class="ltx_paragraph">
+<h5 class="ltx_title ltx_title_paragraph">Code Ratio</h5>
+
+<div id="S3.SS3.SSS1.Px1.p1" class="ltx_para">
+<p id="S3.SS3.SSS1.Px1.p1.1" class="ltx_p">Figure <a href="#S3.F5.sf1" title="In Figure 5 ‣ 3.3.1 Part I: Code behaviors during training ‣ 3.3 Analysis ‣ 3 Experiment ‣ ToRL: Scaling Tool-Integrated RL" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5(a)</span></a> illustrates the proportion of model-generated responses containing code within the first 100 steps, which increased from 40% to 80%, demonstrating steady improvement throughout training.</p>
+</div>
+</section>
+<section id="S3.SS3.SSS1.Px2" class="ltx_paragraph">
+<h5 class="ltx_title ltx_title_paragraph">Pass Ratio</h5>
+
+<div id="S3.SS3.SSS1.Px2.p1" class="ltx_para">
+<p id="S3.SS3.SSS1.Px2.p1.1" class="ltx_p">Figure <a href="#S3.F5.sf2" title="In Figure 5 ‣ 3.3.1 Part I: Code behaviors during training ‣ 3.3 Analysis ‣ 3 Experiment ‣ ToRL: Scaling Tool-Integrated RL" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5(b)</span></a> presents the proportion of successfully executed code, highlighting a continuous upward trend that reflects the model’s enhanced coding capability.</p>
+</div>
+</section>
+<section id="S3.SS3.SSS1.Px3" class="ltx_paragraph">
+<h5 class="ltx_title ltx_title_paragraph">Pass Ratio of Correct to Incorrect Responses</h5>
+
+<div id="S3.SS3.SSS1.Px3.p1" class="ltx_para">
+<p id="S3.SS3.SSS1.Px3.p1.1" class="ltx_p">Meanwhile, Figure <a href="#S3.F5.sf3" title="In Figure 5 ‣ 3.3.1 Part I: Code behaviors during training ‣ 3.3 Analysis ‣ 3 Experiment ‣ ToRL: Scaling Tool-Integrated RL" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5(c)</span></a> depicts the Pass Ratio of Correct to Incorrect Responses, revealing a correlation between code execution errors and final answer accuracy, with correct responses exhibiting higher code pass rates.</p>
+</div>
+</section>
+<section id="S3.SS3.SSS1.Px4" class="ltx_paragraph">
+<h5 class="ltx_title ltx_title_paragraph">Effective Code Ratio</h5>
+
+<div id="S3.SS3.SSS1.Px4.p1" class="ltx_para">
+<p id="S3.SS3.SSS1.Px4.p1.1" class="ltx_p">Furthermore, Figure <a href="#S3.F5.sf4" title="In Figure 5 ‣ 3.3.1 Part I: Code behaviors during training ‣ 3.3 Analysis ‣ 3 Experiment ‣ ToRL: Scaling Tool-Integrated RL" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5(d)</span></a> examines changes in the proportion of effective code, focusing on two key metrics:</p>
+<ul id="S3.I1" class="ltx_itemize">
+<li id="S3.I1.i1" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i1.p1" class="ltx_para">
+<p id="S3.I1.i1.p1.1" class="ltx_p">Executed code ratio, which represents the proportion of generated code successfully executed by the interpreter, excluding any code omitted due to due to exceeding the maximum number of tool calls (<math id="S3.I1.i1.p1.m1" class="ltx_Math" alttext="C" display="inline" intent=":literal"><semantics><mi>C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math>).</p>
+</div></li>
+<li id="S3.I1.i2" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i2.p1" class="ltx_para">
+<p id="S3.I1.i2.p1.1" class="ltx_p">Before final answer code ratio, which measures the proportion of code generated before the model provides its final answer, disregarding code used solely for correctness verification post-answer generation.</p>
+</div></li>
+</ul>
+<p id="S3.SS3.SSS1.Px4.p1.2" class="ltx_p">Both metrics increased over time, indicating that the effectiveness of model-generated code improved as training progressed.</p>
+</div>
+<div id="S3.SS3.SSS1.Px4.p2" class="ltx_para ltx_noindent"><span class="ltx_inline-block"><svg id="S3.SS3.SSS1.Px4.p2.pic1" class="ltx_picture" height="108.53" overflow="visible" version="1.1" viewBox="0 0 629.92 108.53" width="629.92"><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" fill="#000000" stroke="#000000" stroke-width="0.4pt" transform="translate(0,108.53) matrix(1 0 0 -1 0 0)"><g style="--ltx-fill-color:#404040;" fill="#404040" fill-opacity="1.0"><path style="stroke:none" d="M 0 5.71 L 0 102.82 C 0 105.98 2.56 108.53 5.71 108.53 L 624.21 108.53 C 627.37 108.53 629.92 105.98 629.92 102.82 L 629.92 5.71 C 629.92 2.56 627.37 0 624.21 0 L 5.71 0 C 2.56 0 0 2.56 0 5.71 Z"></path></g><g style="--ltx-fill-color:#F2F2F2;" fill="#F2F2F2" fill-opacity="1.0"><path style="stroke:none" d="M 1.77 5.71 L 1.77 84.82 L 628.15 84.82 L 628.15 5.71 C 628.15 3.53 626.39 1.77 624.21 1.77 L 5.71 1.77 C 3.53 1.77 1.77 3.53 1.77 5.71 Z"></path></g><g fill-opacity="1.0" transform="matrix(1.0 0.0 0.0 1.0 21.46 93.21)"><foreignObject style="--ltx-fo-width:36.89em;--ltx-fo-height:0.69em;--ltx-fo-depth:0.19em;font-size:10pt;" height="12.3" overflow="visible" transform="matrix(1 0 0 -1 0 9.61)" width="510.45"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content">
+<span id="S3.SS3.SSS1.Px4.p2.pic1.1" class="ltx_inline-block ltx_minipage ltx_align_bottom" style="width:36.89em;">
+<span id="S3.SS3.SSS1.Px4.p2.pic1.1.1" class="ltx_p"><span id="S3.SS3.SSS1.Px4.p2.pic1.1.1.1" class="ltx_text ltx_font_bold" style="--ltx-fg-color:#FFFFFF;">Takeaway-I</span></span>
+</span></span></span></foreignObject></g><g fill-opacity="1.0" transform="matrix(1.0 0.0 0.0 1.0 21.46 13.58)"><foreignObject style="--ltx-fo-width:42.42em;--ltx-fo-height:4.29em;--ltx-fo-depth:0em;font-size:10pt;" height="59.42" overflow="visible" transform="matrix(1 0 0 -1 0 59.42)" width="586.97"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content">
+<span id="S3.SS3.SSS1.Px4.p2.pic1.2" class="ltx_inline-block ltx_minipage ltx_align_bottom" style="width:42.42em;">
+<span id="S3.SS3.SSS1.Px4.p2.pic1.2.1" class="ltx_p"><span id="S3.SS3.SSS1.Px4.p2.pic1.2.1.1" class="ltx_text" style="--ltx-fg-color:#000000;">As the number of training steps increases, the proportion of problems the model solves using code, as well as the proportion of code that can be executed correctly, continues to grow. Meanwhile, during the training process, the model identifies and reduces the generation of ineffective code.</span></span>
+</span></span></span></foreignObject></g></g></svg></span>
+</div>
+</section>
+</section>
+<section id="S3.SS3.SSS2" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection"><span class="ltx_tag ltx_tag_subsubsection">3.3.2 </span>Part II: Impact of Key Settings</h4>
+
+<figure id="S3.F6" class="ltx_figure">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_4">
+<figure id="S3.F6.sf1" class="ltx_figure ltx_figure_panel ltx_align_center"><object type="image/svg+xml" data="2503.23383v1/ablation_accuracy_c1_vs_c2.svg" id="S3.F6.sf1.g1" class="ltx_graphics ltx_img_landscape" style="aspect-ratio:476/381;" width="476" height="381"></object>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure">(a) </span></figcaption>
+</figure></div><div class="ltx_flex_cell ltx_flex_size_4">
+<figure id="S3.F6.sf2" class="ltx_figure ltx_figure_panel ltx_align_center"><object type="image/svg+xml" data="2503.23383v1/ablation_reward_c1_vs_c2.svg" id="S3.F6.sf2.g1" class="ltx_graphics ltx_img_landscape" style="aspect-ratio:476/381;" width="476" height="381"></object>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure">(b) </span></figcaption>
+</figure></div><div class="ltx_flex_cell ltx_flex_size_4">
+<figure id="S3.F6.sf3" class="ltx_figure ltx_figure_panel ltx_align_center"><object type="image/svg+xml" data="2503.23383v1/ablation_accuracy_standard_vs_penalty.svg" id="S3.F6.sf3.g1" class="ltx_graphics ltx_img_landscape" style="aspect-ratio:476/381;" width="476" height="381"></object>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure">(c) </span></figcaption>
+</figure></div><div class="ltx_flex_cell ltx_flex_size_4">
+<figure id="S3.F6.sf4" class="ltx_figure ltx_figure_panel ltx_align_center"><object type="image/svg+xml" data="2503.23383v1/ablation_reward_standard_vs_penalty.svg" id="S3.F6.sf4.g1" class="ltx_graphics ltx_img_landscape" style="aspect-ratio:476/381;" width="476" height="381"></object>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure">(d) </span></figcaption>
+</figure></div></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 6: </span><span id="S3.F6.4" class="ltx_text ltx_font_smallcaps">ToRL</span>-1.5B-C=2 indicates that the hyperparameter <math id="S3.F6.m2" class="ltx_Math" alttext="C" display="inline" intent=":literal"><semantics><mi>C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math> is set to 2. <span id="S3.F6.5" class="ltx_text ltx_font_smallcaps">ToRL</span>-1.5B-ErrorPenalty represents the incorporation of the Code Executability Reward into the reward function, penalizing incorrectly executed code.</figcaption>
+</figure>
+<div id="S3.SS3.SSS2.p1" class="ltx_para">
+<p id="S3.SS3.SSS2.p1.1" class="ltx_p">In this section, we explore the impact of key <span id="S3.SS3.SSS2.p1.1.1" class="ltx_text ltx_font_smallcaps">ToRL</span> settings on final performance and behavior.</p>
+</div>
+<figure id="S3.T4" class="ltx_table ltx_align_floatright" style="width:30%;">
+<table id="S3.T4.2" class="ltx_tabular ltx_centering ltx_align_middle">
+<tr id="S3.T4.2.1" class="ltx_tr">
+<td id="S3.T4.2.1.1" class="ltx_td ltx_align_center ltx_border_tt"><math id="S3.T4.m1" class="ltx_Math" alttext="C" display="inline" intent=":literal"><semantics><mi>C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math></td>
+<td id="S3.T4.2.1.2" class="ltx_td ltx_align_right ltx_border_tt"><span id="S3.T4.2.1.2.1" class="ltx_text ltx_font_bold">Average Step Time(s)</span></td></tr>
+<tr id="S3.T4.2.2" class="ltx_tr">
+<td id="S3.T4.2.2.1" class="ltx_td ltx_align_center ltx_border_t">0</td>
+<td id="S3.T4.2.2.2" class="ltx_td ltx_align_right ltx_border_t">118</td></tr>
+<tr id="S3.T4.2.3" class="ltx_tr">
+<td id="S3.T4.2.3.1" class="ltx_td ltx_align_center">1</td>
+<td id="S3.T4.2.3.2" class="ltx_td ltx_align_right">237</td></tr>
+<tr id="S3.T4.2.4" class="ltx_tr">
+<td id="S3.T4.2.4.1" class="ltx_td ltx_align_center ltx_border_bb">2</td>
+<td id="S3.T4.2.4.2" class="ltx_td ltx_align_right ltx_border_bb">288</td></tr>
+</table>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 4: </span>The average time per single step under different values of <math id="S3.T4.m3" class="ltx_Math" alttext="C" display="inline" intent=":literal"><semantics><mi>C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math>(measured on an 8*A800 GPU system). </figcaption>
+</figure>
+<div id="S3.SS3.SSS2.p2" class="ltx_para">
+<p id="S3.SS3.SSS2.p2.1" class="ltx_p">First, we investigate the effect of increasing <math id="S3.SS3.SSS2.p2.m1" class="ltx_Math" alttext="C" display="inline" intent=":literal"><semantics><mi>C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math>, the maximum number of tools that can be called in a single response generation during rollout. Specifically, we examine the impact of setting <math id="S3.SS3.SSS2.p2.m2" class="ltx_Math" alttext="C" display="inline" intent=":literal"><semantics><mi>C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math> to 1 and 2 on model performance. As shown in Figures  <a href="#S3.F6.sf1" title="In Figure 6 ‣ 3.3.2 Part II: Impact of Key Settings ‣ 3.3 Analysis ‣ 3 Experiment ‣ ToRL: Scaling Tool-Integrated RL" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6(a)</span></a> and  <a href="#S3.F6.sf2" title="In Figure 6 ‣ 3.3.2 Part II: Impact of Key Settings ‣ 3.3 Analysis ‣ 3 Experiment ‣ ToRL: Scaling Tool-Integrated RL" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6(b)</span></a>, setting <math id="S3.SS3.SSS2.p2.m3" class="ltx_Math" alttext="C" display="inline" intent=":literal"><semantics><mi>C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math> to 2 significantly improves performance, increasing average accuracy by approximately 2%. However, as indicated in Table  <a href="#S3.T4" title="Table 4 ‣ 3.3.2 Part II: Impact of Key Settings ‣ 3.3 Analysis ‣ 3 Experiment ‣ ToRL: Scaling Tool-Integrated RL" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>, increasing <math id="S3.SS3.SSS2.p2.m4" class="ltx_Math" alttext="C" display="inline" intent=":literal"><semantics><mi>C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math> substantially reduces training speed, necessitating a trade-off between performance and efficiency.</p>
+</div>
+<div id="S3.SS3.SSS2.p3" class="ltx_para">
+<p id="S3.SS3.SSS2.p3.1" class="ltx_p">Furthermore, we analyze the impact of incorporating <span id="S3.SS3.SSS2.p3.1.1" class="ltx_text ltx_font_bold">Code Executability Reward</span> into the reward shaping. Figures  <a href="#S3.F6.sf3" title="In Figure 6 ‣ 3.3.2 Part II: Impact of Key Settings ‣ 3.3 Analysis ‣ 3 Experiment ‣ ToRL: Scaling Tool-Integrated RL" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6(c)</span></a> and  <a href="#S3.F6.sf4" title="In Figure 6 ‣ 3.3.2 Part II: Impact of Key Settings ‣ 3.3 Analysis ‣ 3 Experiment ‣ ToRL: Scaling Tool-Integrated RL" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6(d)</span></a> demonstrate that this reward design does not enhance model performance. We hypothesize that introducing penalties for execution errors may incentivize the model to generate overly simplistic code to minimize errors, which could, in turn, hinder its ability to solve problems correctly.</p>
+</div>
+<div id="S3.SS3.SSS2.p4" class="ltx_para ltx_noindent"><span class="ltx_inline-block"><svg id="S3.SS3.SSS2.p4.pic1" class="ltx_picture" height="111.22" overflow="visible" version="1.1" viewBox="0 0 629.92 111.22" width="629.92"><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" fill="#000000" stroke="#000000" stroke-width="0.4pt" transform="translate(0,111.22) matrix(1 0 0 -1 0 0)"><g style="--ltx-fill-color:#404040;" fill="#404040" fill-opacity="1.0"><path style="stroke:none" d="M 0 5.71 L 0 105.51 C 0 108.67 2.56 111.22 5.71 111.22 L 624.21 111.22 C 627.37 111.22 629.92 108.67 629.92 105.51 L 629.92 5.71 C 629.92 2.56 627.37 0 624.21 0 L 5.71 0 C 2.56 0 0 2.56 0 5.71 Z"></path></g><g style="--ltx-fill-color:#F2F2F2;" fill="#F2F2F2" fill-opacity="1.0"><path style="stroke:none" d="M 1.77 5.71 L 1.77 87.51 L 628.15 87.51 L 628.15 5.71 C 628.15 3.53 626.39 1.77 624.21 1.77 L 5.71 1.77 C 3.53 1.77 1.77 3.53 1.77 5.71 Z"></path></g><g fill-opacity="1.0" transform="matrix(1.0 0.0 0.0 1.0 21.46 95.91)"><foreignObject style="--ltx-fo-width:36.89em;--ltx-fo-height:0.69em;--ltx-fo-depth:0.19em;font-size:10pt;" height="12.3" overflow="visible" transform="matrix(1 0 0 -1 0 9.61)" width="510.45"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content">
+<span id="S3.SS3.SSS2.p4.pic1.1" class="ltx_inline-block ltx_minipage ltx_align_bottom" style="width:36.89em;">
+<span id="S3.SS3.SSS2.p4.pic1.1.1" class="ltx_p"><span id="S3.SS3.SSS2.p4.pic1.1.1.1" class="ltx_text ltx_font_bold" style="--ltx-fg-color:#FFFFFF;">Takeaway-II</span></span>
+</span></span></span></foreignObject></g><g fill-opacity="1.0" transform="matrix(1.0 0.0 0.0 1.0 21.46 16.27)"><foreignObject style="--ltx-fo-width:42.42em;--ltx-fo-height:4.29em;--ltx-fo-depth:0.19em;font-size:10pt;" height="62.11" overflow="visible" transform="matrix(1 0 0 -1 0 59.42)" width="586.97"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content">
+<span id="S3.SS3.SSS2.p4.pic1.2" class="ltx_inline-block ltx_minipage ltx_align_bottom" style="width:42.42em;">
+<span id="S3.SS3.SSS2.p4.pic1.2.1" class="ltx_p"><span id="S3.SS3.SSS2.p4.pic1.2.1.1" class="ltx_text" style="--ltx-fg-color:#000000;">Increasing the <math id="S3.SS3.SSS2.p4.pic1.m1" class="ltx_Math" alttext="C" display="inline" intent=":literal"><semantics><mi style="--ltx-fg-color:#000000;" mathcolor="#000000">C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math> can significantly enhance model performance but also severely reduces training efficiency. Incorporating <span id="S3.SS3.SSS2.p4.pic1.2.1.1.1" class="ltx_text ltx_font_bold">Code Executability Reward</span> does not improve performance.</span></span>
+</span></span></span></foreignObject></g></g></svg></span>
+</div>
+</section>
+<section id="S3.SS3.SSS3" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection"><span class="ltx_tag ltx_tag_subsubsection">3.3.3 </span>Part III: Cognitive Behavior via RL Scaling</h4>
+
+<figure id="S3.T6" class="ltx_table">
+<div class="ltx_flex_figure ltx_flex_table">
+<div class="ltx_flex_cell ltx_flex_size_2">
+<figure id="S3.T6.fig1" class="ltx_figure ltx_figure_panel ltx_minipage ltx_align_center ltx_align_middle" style="width:165.6pt;">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Table 5: </span>The code initially generate by the model encountered an execution error, then it is corrected by model and is successfully executed.</figcaption>
+<table id="S3.T6.fig1.1" class="ltx_tabular ltx_centering ltx_align_middle">
+<tr id="S3.T6.fig1.1.1" class="ltx_tr">
+<td id="S3.T6.fig1.1.1.1" class="ltx_td ltx_align_left ltx_border_tt">Question: Given the polynomial <math id="S3.T6.m1" class="ltx_Math" alttext="f(x)=x^{6}-5x^{5}+6x^{4}+x^{2}+0.3x+2" display="inline" intent=":literal"><semantics><mrow><mrow><mi>f</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><mrow><msup><mi>x</mi><mn>6</mn></msup><mo>−</mo><mrow><mn>5</mn><mo lspace="0em" rspace="0em">​</mo><msup><mi>x</mi><mn>5</mn></msup></mrow></mrow><mo>+</mo><mrow><mn>6</mn><mo lspace="0em" rspace="0em">​</mo><msup><mi>x</mi><mn>4</mn></msup></mrow><mo>+</mo><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mrow><mn>0.3</mn><mo lspace="0em" rspace="0em">​</mo><mi>x</mi></mrow><mo>+</mo><mn>2</mn></mrow></mrow><annotation encoding="application/x-tex">f(x)=x^{6}-5x^{5}+6x^{4}+x^{2}+0.3x+2</annotation></semantics></math>,</td></tr>
+<tr id="S3.T6.fig1.1.2" class="ltx_tr">
+<td id="S3.T6.fig1.1.2.1" class="ltx_td ltx_align_left">use Horner’s method to calculate <math id="S3.T6.m2" class="ltx_Math" alttext="f(-2)" display="inline" intent=":literal"><semantics><mrow><mi>f</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mrow><mo>−</mo><mn>2</mn></mrow><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(-2)</annotation></semantics></math> and find the value of <math id="S3.T6.m3" class="ltx_Math" alttext="v_{1}" display="inline" intent=":literal"><semantics><msub><mi>v</mi><mn>1</mn></msub><annotation encoding="application/x-tex">v_{1}</annotation></semantics></math>.</td></tr>
+<tr id="S3.T6.fig1.1.3" class="ltx_tr">
+<td id="S3.T6.fig1.1.3.1" class="ltx_td ltx_align_left ltx_border_t">Response: To solve the given problem using Horner’s method, we can …</td></tr>
+<tr id="S3.T6.fig1.1.4" class="ltx_tr">
+<td id="S3.T6.fig1.1.4.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig1.1.4.1.1" class="ltx_text ltx_font_typewriter">‘‘‘python</span></td></tr>
+<tr id="S3.T6.fig1.1.5" class="ltx_tr">
+<td id="S3.T6.fig1.1.5.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig1.1.5.1.1" class="ltx_text ltx_font_typewriter">def horner(coeffs, x):</span></td></tr>
+<tr id="S3.T6.fig1.1.6" class="ltx_tr">
+<td id="S3.T6.fig1.1.6.1" class="ltx_td ltx_align_left">…</td></tr>
+<tr id="S3.T6.fig1.1.7" class="ltx_tr">
+<td id="S3.T6.fig1.1.7.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig1.1.7.1.1" class="ltx_text ltx_font_typewriter">return result, <span id="S3.T6.fig1.1.7.1.1.1" class="ltx_text" style="--ltx-fg-color:#FF0000;">results[1]</span></span></td></tr>
+<tr id="S3.T6.fig1.1.8" class="ltx_tr">
+<td id="S3.T6.fig1.1.8.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig1.1.8.1.1" class="ltx_text ltx_font_typewriter">‘‘‘</span></td></tr>
+<tr id="S3.T6.fig1.1.9" class="ltx_tr">
+<td id="S3.T6.fig1.1.9.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig1.1.9.1.1" class="ltx_text ltx_font_typewriter">‘‘‘output</span></td></tr>
+<tr id="S3.T6.fig1.1.10" class="ltx_tr">
+<td id="S3.T6.fig1.1.10.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig1.1.10.1.1" class="ltx_text ltx_font_typewriter">TypeError: ’int’ object is not subscriptable</span></td></tr>
+<tr id="S3.T6.fig1.1.11" class="ltx_tr">
+<td id="S3.T6.fig1.1.11.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig1.1.11.1.1" class="ltx_text ltx_font_typewriter">‘‘‘</span></td></tr>
+<tr id="S3.T6.fig1.1.12" class="ltx_tr">
+<td id="S3.T6.fig1.1.12.1" class="ltx_td ltx_align_left">To fix this, we need to ensure that we properly store and access the …</td></tr>
+<tr id="S3.T6.fig1.1.13" class="ltx_tr">
+<td id="S3.T6.fig1.1.13.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig1.1.13.1.1" class="ltx_text ltx_font_typewriter">‘‘‘python</span></td></tr>
+<tr id="S3.T6.fig1.1.14" class="ltx_tr">
+<td id="S3.T6.fig1.1.14.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig1.1.14.1.1" class="ltx_text ltx_font_typewriter">def horner(coeffs, x):</span></td></tr>
+<tr id="S3.T6.fig1.1.15" class="ltx_tr">
+<td id="S3.T6.fig1.1.15.1" class="ltx_td ltx_align_left">…</td></tr>
+<tr id="S3.T6.fig1.1.16" class="ltx_tr">
+<td id="S3.T6.fig1.1.16.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig1.1.16.1.1" class="ltx_text ltx_font_typewriter">return result, <span id="S3.T6.fig1.1.16.1.1.1" class="ltx_text" style="--ltx-fg-color:#FF0000;">results</span></span></td></tr>
+<tr id="S3.T6.fig1.1.17" class="ltx_tr">
+<td id="S3.T6.fig1.1.17.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig1.1.17.1.1" class="ltx_text ltx_font_typewriter">‘‘‘</span></td></tr>
+<tr id="S3.T6.fig1.1.18" class="ltx_tr">
+<td id="S3.T6.fig1.1.18.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig1.1.18.1.1" class="ltx_text ltx_font_typewriter">‘‘‘output</span></td></tr>
+<tr id="S3.T6.fig1.1.19" class="ltx_tr">
+<td id="S3.T6.fig1.1.19.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig1.1.19.1.1" class="ltx_text ltx_font_typewriter">v_1 = -7</span></td></tr>
+<tr id="S3.T6.fig1.1.20" class="ltx_tr">
+<td id="S3.T6.fig1.1.20.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig1.1.20.1.1" class="ltx_text ltx_font_typewriter">‘‘‘</span></td></tr>
+<tr id="S3.T6.fig1.1.21" class="ltx_tr">
+<td id="S3.T6.fig1.1.21.1" class="ltx_td ltx_align_left ltx_border_bb">Thus, the value of <math id="S3.T6.m4" class="ltx_Math" alttext="f(-2)" display="inline" intent=":literal"><semantics><mrow><mi>f</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mrow><mo>−</mo><mn>2</mn></mrow><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(-2)</annotation></semantics></math> is <math id="S3.T6.m5" class="ltx_Math" alttext="\boxed{325.4}" display="inline" intent=":literal"><semantics><menclose notation="box"><mn>325.4</mn></menclose><annotation encoding="application/x-tex">\boxed{325.4}</annotation></semantics></math> and the value of <math id="S3.T6.m6" class="ltx_Math" alttext="v_{1}" display="inline" intent=":literal"><semantics><msub><mi>v</mi><mn>1</mn></msub><annotation encoding="application/x-tex">v_{1}</annotation></semantics></math> is <math id="S3.T6.m7" class="ltx_Math" alttext="\boxed{-7}" display="inline" intent=":literal"><semantics><menclose notation="box"><mrow><mo>−</mo><mn>7</mn></mrow></menclose><annotation encoding="application/x-tex">\boxed{-7}</annotation></semantics></math>.</td></tr>
+</table>
+</figure></div><div class="ltx_flex_cell ltx_flex_size_2">
+<figure id="S3.T6.fig2" class="ltx_figure ltx_figure_panel ltx_minipage ltx_align_center ltx_align_middle" style="width:165.6pt;">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure">Table 6: </span>The model first derives an incorrect result based on natural language reasoning, then discovers the error during code verification and makes corrections</figcaption>
+<table id="S3.T6.fig2.1" class="ltx_tabular ltx_centering ltx_align_middle">
+<tr id="S3.T6.fig2.1.1" class="ltx_tr">
+<td id="S3.T6.fig2.1.1.1" class="ltx_td ltx_align_left ltx_border_tt">Question: After labeling 12 balls with numbers 1, 2, 3, … 12 …</td></tr>
+<tr id="S3.T6.fig2.1.2" class="ltx_tr">
+<td id="S3.T6.fig2.1.2.1" class="ltx_td ltx_align_left">What are the numbers on the other three balls taken by Person C?</td></tr>
+<tr id="S3.T6.fig2.1.3" class="ltx_tr">
+<td id="S3.T6.fig2.1.3.1" class="ltx_td ltx_align_left ltx_border_t">Response: To solve the problem, we need to find the numbers on the …</td></tr>
+<tr id="S3.T6.fig2.1.4" class="ltx_tr">
+<td id="S3.T6.fig2.1.4.1" class="ltx_td ltx_align_left">…</td></tr>
+<tr id="S3.T6.fig2.1.5" class="ltx_tr">
+<td id="S3.T6.fig2.1.5.1" class="ltx_td ltx_align_left">The numbers on the other three balls taken by Person C are <math id="S3.T6.m8" class="ltx_Math" alttext="2,10,13" display="inline" intent=":literal"><semantics><mrow><mn>2</mn><mo>,</mo><mn>10</mn><mo>,</mo><mn>13</mn></mrow><annotation encoding="application/x-tex">2,10,13</annotation></semantics></math>,</td></tr>
+<tr id="S3.T6.fig2.1.6" class="ltx_tr">
+<td id="S3.T6.fig2.1.6.1" class="ltx_td ltx_align_left">reduced to valid numbers from 2 to 12, so the only valid combination is <math id="S3.T6.m9" class="ltx_Math" alttext="2,10,13" display="inline" intent=":literal"><semantics><mrow><mn style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">2</mn><mo style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">,</mo><mn style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">10</mn><mo style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">,</mo><mn style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">13</mn></mrow><annotation encoding="application/x-tex">2,10,13</annotation></semantics></math>.</td></tr>
+<tr id="S3.T6.fig2.1.7" class="ltx_tr">
+<td id="S3.T6.fig2.1.7.1" class="ltx_td ltx_align_left">…</td></tr>
+<tr id="S3.T6.fig2.1.8" class="ltx_tr">
+<td id="S3.T6.fig2.1.8.1" class="ltx_td ltx_align_left">Here is the Python code to verify the solution:</td></tr>
+<tr id="S3.T6.fig2.1.9" class="ltx_tr">
+<td id="S3.T6.fig2.1.9.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig2.1.9.1.1" class="ltx_text ltx_font_typewriter">‘‘‘python</span></td></tr>
+<tr id="S3.T6.fig2.1.10" class="ltx_tr">
+<td id="S3.T6.fig2.1.10.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig2.1.10.1.1" class="ltx_text ltx_font_typewriter"># Define the total sum of the numbers from 1 to 12</span></td></tr>
+<tr id="S3.T6.fig2.1.11" class="ltx_tr">
+<td id="S3.T6.fig2.1.11.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig2.1.11.1.1" class="ltx_text ltx_font_typewriter">total_sum = sum(range(1, 13))</span></td></tr>
+<tr id="S3.T6.fig2.1.12" class="ltx_tr">
+<td id="S3.T6.fig2.1.12.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig2.1.12.1.1" class="ltx_text ltx_font_typewriter"># Each person’s sum is total_sum / 3</span></td></tr>
+<tr id="S3.T6.fig2.1.13" class="ltx_tr">
+<td id="S3.T6.fig2.1.13.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig2.1.13.1.1" class="ltx_text ltx_font_typewriter">person_sum = total_sum // 3</span></td></tr>
+<tr id="S3.T6.fig2.1.14" class="ltx_tr">
+<td id="S3.T6.fig2.1.14.1" class="ltx_td ltx_align_left">…</td></tr>
+<tr id="S3.T6.fig2.1.15" class="ltx_tr">
+<td id="S3.T6.fig2.1.15.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig2.1.15.1.1" class="ltx_text ltx_font_typewriter"># Output the balls taken by Person C</span></td></tr>
+<tr id="S3.T6.fig2.1.16" class="ltx_tr">
+<td id="S3.T6.fig2.1.16.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig2.1.16.1.1" class="ltx_text ltx_font_typewriter">print(balls_C_remaining)</span></td></tr>
+<tr id="S3.T6.fig2.1.17" class="ltx_tr">
+<td id="S3.T6.fig2.1.17.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig2.1.17.1.1" class="ltx_text ltx_font_typewriter">‘‘‘output</span></td></tr>
+<tr id="S3.T6.fig2.1.18" class="ltx_tr">
+<td id="S3.T6.fig2.1.18.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig2.1.18.1.1" class="ltx_text ltx_font_typewriter" style="--ltx-fg-color:#FF0000;">[3, 10, 12]</span></td></tr>
+<tr id="S3.T6.fig2.1.19" class="ltx_tr">
+<td id="S3.T6.fig2.1.19.1" class="ltx_td ltx_align_left"><span id="S3.T6.fig2.1.19.1.1" class="ltx_text ltx_font_typewriter">‘‘‘</span></td></tr>
+<tr id="S3.T6.fig2.1.20" class="ltx_tr">
+<td id="S3.T6.fig2.1.20.1" class="ltx_td ltx_align_left">…</td></tr>
+<tr id="S3.T6.fig2.1.21" class="ltx_tr">
+<td id="S3.T6.fig2.1.21.1" class="ltx_td ltx_align_left ltx_border_bb">The numbers on the other three balls taken by Person C are <math id="S3.T6.m10" class="ltx_Math" alttext="\boxed{3,10,12}" display="inline" intent=":literal"><semantics><menclose notation="box"><mrow><mn style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">3</mn><mo style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">,</mo><mn style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">10</mn><mo style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">,</mo><mn style="--ltx-fg-color:#FF0000;" mathcolor="#FF0000">12</mn></mrow></menclose><annotation encoding="application/x-tex">\boxed{3,10,12}</annotation></semantics></math><span id="S3.T6.fig2.1.21.1.1" class="ltx_text" style="--ltx-fg-color:#FF0000;">.</span></td></tr>
+</table>
+</figure></div></div>
+</figure>
+<div id="S3.SS3.SSS3.p1" class="ltx_para">
+<p id="S3.SS3.SSS3.p1.1" class="ltx_p">We present some interesting phenomena that occurred in the later stages of model training, which can help us further understand in detail the model’s cognitive behavior in solving problems using tools.</p>
+</div>
+<div id="S3.SS3.SSS3.p2" class="ltx_para">
+<p id="S3.SS3.SSS3.p2.1" class="ltx_p">Table <a href="#S3.T6" title="Table 6 ‣ 3.3.3 Part III: Cognitive Behavior via RL Scaling ‣ 3.3 Analysis ‣ 3 Experiment ‣ ToRL: Scaling Tool-Integrated RL" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a> shows an example of the model adjusting its reasoning based on execution feedback from the code interpreter. The model first wrote the code, but improper handling of <span id="S3.SS3.SSS3.p2.1.1" class="ltx_text ltx_font_typewriter">results</span> caused an indexing error. After receiving the feedback <span id="S3.SS3.SSS3.p2.1.2" class="ltx_text ltx_font_typewriter">TypeError: ’int’ object is not subscriptable</span>, it promptly adjusted and produced executable code, eventually inferring the correct answer.</p>
+</div>
+<div id="S3.SS3.SSS3.p3" class="ltx_para">
+<p id="S3.SS3.SSS3.p3.1" class="ltx_p">Table <a href="#S3.T6" title="Table 6 ‣ 3.3.3 Part III: Cognitive Behavior via RL Scaling ‣ 3.3 Analysis ‣ 3 Experiment ‣ ToRL: Scaling Tool-Integrated RL" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a> demonstrates the model’s cognitive behavior of reflection. The model initially solved the problem with natural language reasoning, then verified it through tool but found inconsistencies. Consequently, the model further makes corrections, ultimately generate the correct answer.</p>
+</div>
+<div id="S3.SS3.SSS3.p4" class="ltx_para ltx_noindent"><span class="ltx_inline-block"><svg id="S3.SS3.SSS3.p4.pic1" class="ltx_picture" height="94.46" overflow="visible" version="1.1" viewBox="0 0 629.92 94.46" width="629.92"><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" fill="#000000" stroke="#000000" stroke-width="0.4pt" transform="translate(0,94.46) matrix(1 0 0 -1 0 0)"><g style="--ltx-fill-color:#404040;" fill="#404040" fill-opacity="1.0"><path style="stroke:none" d="M 0 5.71 L 0 88.76 C 0 91.91 2.56 94.46 5.71 94.46 L 624.21 94.46 C 627.37 94.46 629.92 91.91 629.92 88.76 L 629.92 5.71 C 629.92 2.56 627.37 0 624.21 0 L 5.71 0 C 2.56 0 0 2.56 0 5.71 Z"></path></g><g style="--ltx-fill-color:#F2F2F2;" fill="#F2F2F2" fill-opacity="1.0"><path style="stroke:none" d="M 1.77 5.71 L 1.77 70.75 L 628.15 70.75 L 628.15 5.71 C 628.15 3.53 626.39 1.77 624.21 1.77 L 5.71 1.77 C 3.53 1.77 1.77 3.53 1.77 5.71 Z"></path></g><g fill-opacity="1.0" transform="matrix(1.0 0.0 0.0 1.0 21.46 79.15)"><foreignObject style="--ltx-fo-width:36.89em;--ltx-fo-height:0.69em;--ltx-fo-depth:0.19em;font-size:10pt;" height="12.3" overflow="visible" transform="matrix(1 0 0 -1 0 9.61)" width="510.45"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content">
+<span id="S3.SS3.SSS3.p4.pic1.1" class="ltx_inline-block ltx_minipage ltx_align_bottom" style="width:36.89em;">
+<span id="S3.SS3.SSS3.p4.pic1.1.1" class="ltx_p"><span id="S3.SS3.SSS3.p4.pic1.1.1.1" class="ltx_text ltx_font_bold" style="--ltx-fg-color:#FFFFFF;">Takeaway-III</span></span>
+</span></span></span></foreignObject></g><g fill-opacity="1.0" transform="matrix(1.0 0.0 0.0 1.0 21.46 16.27)"><foreignObject style="--ltx-fo-width:42.42em;--ltx-fo-height:3.08em;--ltx-fo-depth:0.19em;font-size:10pt;" height="45.36" overflow="visible" transform="matrix(1 0 0 -1 0 42.66)" width="586.97"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content">
+<span id="S3.SS3.SSS3.p4.pic1.2" class="ltx_inline-block ltx_minipage ltx_align_bottom" style="width:42.42em;">
+<span id="S3.SS3.SSS3.p4.pic1.2.1" class="ltx_p"><span id="S3.SS3.SSS3.p4.pic1.2.1.1" class="ltx_text ltx_font_smallcaps" style="--ltx-fg-color:#000000;">ToRL<span id="S3.SS3.SSS3.p4.pic1.2.1.1.1" class="ltx_text ltx_font_upright"> gives rise to a variety of cognitive behaviors, including obtaining feedback from code execution results, cross-checking with code and natural language.</span></span></span>
+</span></span></span></foreignObject></g></g></svg></span>
+</div>
+</section>
+</section>
+</section>
+<section id="S4" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">4 </span>Conclusion</h2>
+
+<div id="S4.p1" class="ltx_para">
+<p id="S4.p1.1" class="ltx_p">We propose <span id="S4.p1.1.1" class="ltx_text ltx_font_smallcaps">ToRL</span>, which enables LLMs to integrate tools in reasoning through reinforcement learning, surpassing predefined tool usage constraints. Our results show significant performance gains and emergent reasoning, highlighting <span id="S4.p1.1.2" class="ltx_text ltx_font_smallcaps">ToRL</span>’s potential for advancing LLMs in complex reasoning.</p>
+</div>
+<div class="ltx_pagination ltx_role_newpage"></div>
+</section>
+<section id="bib" class="ltx_bibliography">
+<h2 class="ltx_title ltx_title_bibliography">References</h2>
+
+<ul class="ltx_biblist">
+      
+<li id="bib.bib1" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Chen et al. (2022)</span>
+<span class="ltx_bibblock">
+Wenhu Chen, Xueguang Ma, Xinyi Wang, and William W Cohen. 2022.
+
+</span>
+<span class="ltx_bibblock">Program of thoughts prompting: Disentangling computation from reasoning for numerical reasoning tasks.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib1.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2211.12588</em>.
+
+</span></li>
+      
+<li id="bib.bib2" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Gao et al. (2023)</span>
+<span class="ltx_bibblock">
+Luyu Gao, Aman Madaan, Shuyan Zhou, Uri Alon, Pengfei Liu, Yiming Yang, Jamie Callan, and Graham Neubig. 2023.
+
+</span>
+<span class="ltx_bibblock">Pal: Program-aided language models.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib2.1" class="ltx_emph ltx_font_italic">International Conference on Machine Learning</em>, pages 10764–10799. PMLR.
+
+</span></li>
+      
+<li id="bib.bib3" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Gou et al. (2023)</span>
+<span class="ltx_bibblock">
+Zhibin Gou, Zhihong Shao, Yeyun Gong, Yelong Shen, Yujiu Yang, Minlie Huang, Nan Duan, and Weizhu Chen. 2023.
+
+</span>
+<span class="ltx_bibblock">Tora: A tool-integrated reasoning agent for mathematical problem solving.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib3.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2309.17452</em>.
+
+</span></li>
+      
+<li id="bib.bib4" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Guo et al. (2025)</span>
+<span class="ltx_bibblock">
+Daya Guo, Dejian Yang, Haowei Zhang, Junxiao Song, Ruoyu Zhang, Runxin Xu, Qihao Zhu, Shirong Ma, Peiyi Wang, Xiao Bi, et al. 2025.
+
+</span>
+<span class="ltx_bibblock">Deepseek-r1: Incentivizing reasoning capability in llms via reinforcement learning.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib4.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2501.12948</em>.
+
+</span></li>
+      
+<li id="bib.bib5" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">He et al. (2024)</span>
+<span class="ltx_bibblock">
+Chaoqun He, Renjie Luo, Yuzhuo Bai, Shengding Hu, Zhen Leng Thai, Junhao Shen, Jinyi Hu, Xu Han, Yujie Huang, Yuxiang Zhang, et al. 2024.
+
+</span>
+<span class="ltx_bibblock">Olympiadbench: A challenging benchmark for promoting agi with olympiad-level bilingual multimodal scientific problems.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib5.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2402.14008</em>.
+
+</span></li>
+      
+<li id="bib.bib6" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Hendrycks et al. (2021)</span>
+<span class="ltx_bibblock">
+Dan Hendrycks, Collin Burns, Saurav Kadavath, Akul Arora, Steven Basart, Eric Tang, Dawn Song, and Jacob Steinhardt. 2021.
+
+</span>
+<span class="ltx_bibblock">Measuring mathematical problem solving with the math dataset.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib6.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2103.03874</em>.
+
+</span></li>
+      
+<li id="bib.bib7" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Hu et al. (2025)</span>
+<span class="ltx_bibblock">
+Jingcheng Hu, Yinmin Zhang, Qi Han, Daxin Jiang, and Heung-Yeung Shum Xiangyu Zhang. 2025.
+
+</span>
+<span class="ltx_bibblock">Open-reasoner-zero: An open source approach to scaling reinforcement learning on the base model.
+
+</span>
+<span class="ltx_bibblock"><a href="https://github.com/Open-Reasoner-Zero/Open-Reasoner-Zero" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://github.com/Open-Reasoner-Zero/Open-Reasoner-Zero</a>.
+
+</span></li>
+      
+<li id="bib.bib8" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Huang et al. (2024)</span>
+<span class="ltx_bibblock">
+Zhen Huang, Haoyang Zou, Xuefeng Li, Yixiu Liu, Yuxiang Zheng, Ethan Chern, Shijie Xia, Yiwei Qin, Weizhe Yuan, and Pengfei Liu. 2024.
+
+</span>
+<span class="ltx_bibblock">O1 replication journey–part 2: Surpassing o1-preview through simple distillation, big progress or bitter lesson?
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib8.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2411.16489</em>.
+
+</span></li>
+      
+<li id="bib.bib9" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Li et al. (2024)</span>
+<span class="ltx_bibblock">
+Jia Li, Edward Beeching, Lewis Tunstall, Ben Lipkin, Roman Soletskyi, Shengyi Huang, Kashif Rasul, Longhui Yu, Albert Q Jiang, Ziju Shen, et al. 2024.
+
+</span>
+<span class="ltx_bibblock">Numinamath: The largest public dataset in ai4maths with 860k pairs of competition math problems and solutions.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib9.1" class="ltx_emph ltx_font_italic">Hugging Face repository</em>, 13:9.
+
+</span></li>
+      
+<li id="bib.bib10" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Li et al. (2025)</span>
+<span class="ltx_bibblock">
+Xuefeng Li, Haoyang Zou, and Pengfei Liu. 2025.
+
+</span>
+<span class="ltx_bibblock">Limr: Less is more for rl scaling.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib10.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2502.11886</em>.
+
+</span></li>
+      
+<li id="bib.bib11" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Liao et al. (2024)</span>
+<span class="ltx_bibblock">
+Minpeng Liao, Wei Luo, Chengxi Li, Jing Wu, and Kai Fan. 2024.
+
+</span>
+<span class="ltx_bibblock">Mario: Math reasoning with code interpreter output–a reproducible pipeline.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib11.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2401.08190</em>.
+
+</span></li>
+      
+<li id="bib.bib12" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Luo et al. (2025)</span>
+<span class="ltx_bibblock">
+Michael Luo, Sijun Tan, Justin Wong, Xiaoxiang Shi, William Y. Tang, Manan Roongta, Colin Cai, Jeffrey Luo, Tianjun Zhang, Li Erran Li, Raluca Ada Popa, and Ion Stoica. 2025.
+
+</span>
+<span class="ltx_bibblock">Deepscaler: Surpassing o1-preview with a 1.5b model by scaling rl.
+
+</span>
+<span class="ltx_bibblock"><a href="https://pretty-radio-b75.notion.site/DeepScaleR-Surpassing-O1-Preview-with-a-1-5B-Model-by-Scaling-RL-19681902c1468005bed8ca303013a4e2" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://pretty-radio-b75.notion.site/DeepScaleR-Surpassing-O1-Preview-with-a-1-5B-Model-by-Scaling-RL-19681902c1468005bed8ca303013a4e2</a>.
+
+</span>
+<span class="ltx_bibblock">Notion Blog.
+
+</span></li>
+      
+<li id="bib.bib13" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Qin et al. (2024)</span>
+<span class="ltx_bibblock">
+Yiwei Qin, Xuefeng Li, Haoyang Zou, Yixiu Liu, Shijie Xia, Zhen Huang, Yixin Ye, Weizhe Yuan, Hector Liu, Yuanzhi Li, et al. 2024.
+
+</span>
+<span class="ltx_bibblock">O1 replication journey: A strategic progress report–part 1.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib13.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2410.18982</em>.
+
+</span></li>
+      
+<li id="bib.bib14" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Shao et al. (2024)</span>
+<span class="ltx_bibblock">
+Zhihong Shao, Peiyi Wang, Qihao Zhu, Runxin Xu, Junxiao Song, Xiao Bi, Haowei Zhang, Mingchuan Zhang, YK Li, Y Wu, et al. 2024.
+
+</span>
+<span class="ltx_bibblock">Deepseekmath: Pushing the limits of mathematical reasoning in open language models.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib14.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2402.03300</em>.
+
+</span></li>
+      
+<li id="bib.bib15" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Sheng et al. (2024)</span>
+<span class="ltx_bibblock">
+Guangming Sheng, Chi Zhang, Zilingfeng Ye, Xibin Wu, Wang Zhang, Ru Zhang, Yanghua Peng, Haibin Lin, and Chuan Wu. 2024.
+
+</span>
+<span class="ltx_bibblock">Hybridflow: A flexible and efficient rlhf framework.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib15.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv: 2409.19256</em>.
+
+</span></li>
+      
+<li id="bib.bib16" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Team et al. (2025)</span>
+<span class="ltx_bibblock">
+Kimi Team, Angang Du, Bofei Gao, Bowei Xing, Changjiu Jiang, Cheng Chen, Cheng Li, Chenjun Xiao, Chenzhuang Du, Chonghua Liao, Chuning Tang, Congcong Wang, Dehao Zhang, Enming Yuan, Enzhe Lu, Fengxiang Tang, Flood Sung, Guangda Wei, Guokun Lai, Haiqing Guo, Han Zhu, Hao Ding, Hao Hu, Hao Yang, Hao Zhang, Haotian Yao, Haotian Zhao, Haoyu Lu, Haoze Li, Haozhen Yu, Hongcheng Gao, Huabin Zheng, Huan Yuan, Jia Chen, Jianhang Guo, Jianlin Su, Jianzhou Wang, Jie Zhao, Jin Zhang, Jingyuan Liu, Junjie Yan, Junyan Wu, Lidong Shi, Ling Ye, Longhui Yu, Mengnan Dong, Neo Zhang, Ningchen Ma, Qiwei Pan, Qucheng Gong, Shaowei Liu, Shengling Ma, Shupeng Wei, Sihan Cao, Siying Huang, Tao Jiang, Weihao Gao, Weimin Xiong, Weiran He, Weixiao Huang, Wenhao Wu, Wenyang He, Xianghui Wei, Xianqing Jia, Xingzhe Wu, Xinran Xu, Xinxing Zu, Xinyu Zhou, Xuehai Pan, Y. Charles, Yang Li, Yangyang Hu, Yangyang Liu, Yanru Chen, Yejie Wang, Yibo Liu, Yidao Qin, Yifeng Liu, Ying Yang, Yiping Bao, Yulun Du, Yuxin Wu, Yuzhi Wang, Zaida Zhou,
+Zhaoji Wang, Zhaowei Li, Zhen Zhu, Zheng Zhang, Zhexu Wang, Zhilin Yang, Zhiqi Huang, Zihao Huang, Ziyao Xu, and Zonghan Yang. 2025.
+
+</span>
+<span class="ltx_bibblock"><a href="http://arxiv.org/abs/2501.12599" title="" class="ltx_ref ltx_href">Kimi k1.5: Scaling reinforcement learning with llms</a>.
+
+</span></li>
+      
+<li id="bib.bib17" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Team (2024)</span>
+<span class="ltx_bibblock">
+OpenO1 Team. 2024.
+
+</span>
+<span class="ltx_bibblock"><a href="https://github.com/Open-Source-O1/Open-O1" title="" class="ltx_ref ltx_href">Openo1</a>.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib17.1" class="ltx_emph ltx_font_italic">Github</em>.
+
+</span></li>
+      
+<li id="bib.bib18" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Wang et al. (2023)</span>
+<span class="ltx_bibblock">
+Ke Wang, Houxing Ren, Aojun Zhou, Zimu Lu, Sichun Luo, Weikang Shi, Renrui Zhang, Linqi Song, Mingjie Zhan, and Hongsheng Li. 2023.
+
+</span>
+<span class="ltx_bibblock">Mathcoder: Seamless code integration in llms for enhanced mathematical reasoning.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib18.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2310.03731</em>.
+
+</span></li>
+      
+<li id="bib.bib19" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Wei et al. (2022)</span>
+<span class="ltx_bibblock">
+Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Fei Xia, Ed Chi, Quoc V Le, Denny Zhou, et al. 2022.
+
+</span>
+<span class="ltx_bibblock">Chain-of-thought prompting elicits reasoning in large language models.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib19.1" class="ltx_emph ltx_font_italic">Advances in neural information processing systems</em>, 35:24824–24837.
+
+</span></li>
+      
+<li id="bib.bib20" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Yang et al. (2024)</span>
+<span class="ltx_bibblock">
+An Yang, Beichen Zhang, Binyuan Hui, Bofei Gao, Bowen Yu, Chengpeng Li, Dayiheng Liu, Jianhong Tu, Jingren Zhou, Junyang Lin, et al. 2024.
+
+</span>
+<span class="ltx_bibblock">Qwen2. 5-math technical report: Toward mathematical expert model via self-improvement.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib20.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2409.12122</em>.
+
+</span></li>
+      
+<li id="bib.bib21" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Ye et al. (2025)</span>
+<span class="ltx_bibblock">
+Yixin Ye, Zhen Huang, Yang Xiao, Ethan Chern, Shijie Xia, and Pengfei Liu. 2025.
+
+</span>
+<span class="ltx_bibblock">Limo: Less is more for reasoning.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib21.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2502.03387</em>.
+
+</span></li>
+      
+<li id="bib.bib22" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zeng et al. (2025)</span>
+<span class="ltx_bibblock">
+Weihao Zeng, Yuzhen Huang, Wei Liu, Keqing He, Qian Liu, Zejun Ma, and Junxian He. 2025.
+
+</span>
+<span class="ltx_bibblock">7b model and 8k examples: Emerging reasoning with reinforcement learning is both effective and efficient.
+
+</span>
+<span class="ltx_bibblock"><a href="https://hkust-nlp.notion.site/simplerl-reason" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://hkust-nlp.notion.site/simplerl-reason</a>.
+
+</span>
+<span class="ltx_bibblock">Notion Blog.
+
+</span></li>
+    
+</ul>
+</section>
+</article>
+    </div>
+  </section>
+  <section class="pane pane-zh">
+    <div class="pane-head">中文精读翻译</div>
+    <div class="pane-body" id="zhBody"><div class="md" id="mdRoot"></div></div>
+  </section>
+</main>
+<script type="text/markdown" id="zhSrc"># 《ToRL: Scaling Tool-Integrated RL》中文精读翻译
+
+## 论文信息
+
+- **英文标题**：ToRL: Scaling Tool-Integrated RL
+- **中文标题**：ToRL：扩展工具集成强化学习
+- **作者**：Xuefeng Li、Haoyang Zou（共同第一作者）、Pengfei Liu（通讯作者）
+- **机构**：上海交通大学（SJTU）、上海创新研究院（SII）、GAIR 实验室
+- **arXiv 链接**：<https://arxiv.org/abs/2503.23383>（arXiv:2503.23383v1，2025 年 3 月 30 日提交）
+- **提出的框架**：ToRL（Tool-Integrated Reinforcement Learning，工具集成强化学习）
+- **开源地址**：<https://github.com/GAIR-NLP/ToRL>
+
+## 一句话核心总结
+
+ToRL 跳过监督微调，直接在 Qwen2.5-Math 基座模型上扩展"工具集成"的强化学习：把 Python 代码解释器嵌入 GRPO 的采样（rollout）循环，仅用"答案对 +1 / 答案错 −1"的规则奖励驱动模型不受限制地自由探索，使其自主学会"何时写代码、何时纯文本推理"的最优工具使用策略——ToRL-7B 在 AIME24 上取得 43.3% 的准确率，比不带工具的 RL 高 14%、比现有最佳的工具集成推理（TIR）模型高 17%，并在训练中涌现出策略性调用工具、自我抑制无效代码、在计算式与解析式推理之间动态切换等认知行为。
+
+---
+
+## 摘要
+
+我们提出 ToRL（Tool-Integrated Reinforcement Learning，工具集成强化学习）——一个旨在训练大语言模型（LLM）通过直接从**基座模型**（base model，即未经后训练的模型）扩展强化学习、从而自主利用计算工具的框架。与基于监督微调的方法不同，ToRL 使模型能够通过不受限制的探索来发现最优的工具使用策略。在 Qwen2.5-Math 基座模型上的实验展示了大幅改进：ToRL-7B 在 AIME24 上取得 43.3% 的准确率——超过无工具集成的 RL 14%，并超过现有最佳的工具集成推理（Tool-Integrated Reasoning, TIR）模型 17%。进一步的分析揭示了若干涌现的**认知行为**——例如策略性的工具调用、对无效代码生成的自我调节，以及在计算式与解析式推理之间的动态切换。这些能力无需任何显式指令，仅通过奖励驱动的学习即可涌现。我们在 https://github.com/GAIR-NLP/ToRL 开源了实现、数据集与模型。
+
+---
+
+## 1 引言
+
+大语言模型的近期进展已经证明，强化学习可以带来卓越的推理能力。o1、R1 与 Kimi 等模型在大规模 RL 训练下展现出回溯（backtracking）、自我修正（self-correction）与反思（reflection）等涌现能力 (Team, 2024; Guo et al., 2025; Team et al., 2025)。若干开源工作也展示了类似的可喜结果 (Qin et al., 2024; Huang et al., 2024; Zeng et al., 2025; Luo et al., 2025; Ye et al., 2025)。
+
+语言模型的传统推理依赖纯自然语言方法，如思维链（Chain-of-Thought, CoT）(Wei et al., 2022)。这类方法虽然对许多任务有效，但在面对复杂计算、方程求解或需要精确计算的过程时会失效 (Gao et al., 2023; Chen et al., 2022)。尽管已有不少围绕代码生成模型的研究，很少有方法能够通过强化学习成功架起 LLM 推理能力与计算工具执行能力之间的桥梁。工具集成推理（Tool-Integrated Reasoning, TIR）早在近期的 RL 扩展突破之前就已被探索：它使模型能够通过编写代码来调用外部工具、通过解释器执行代码，并根据代码输出迭代地生成后续推理。ToRA、MathCoder 与 Qwen2.5-Math-Instruct-TIR 等实现证明了 TIR 在增强数学问题求解方面的有效性 (Gou et al., 2023; Wang et al., 2023; Shao et al., 2024; Liao et al., 2024; Yang et al., 2024)。
+
+尽管有这些进展，现有 TIR 方法仍面临关键局限。多数研究从更强的模型蒸馏轨迹后执行监督微调（Supervised Fine-Tuning, SFT），这把模型限制在预先设定的工具使用模式上，并束缚了对最优策略的探索。虽然也有工作（如 Qwen-Math）对 SFT 训练后的模型应用 RL，但有限的实现透明度使人难以理解工具在 RL 框架内是如何集成的。为应对这些挑战，我们提出 ToRL（Tool-Integrated Reinforcement Learning）——一个直接从基座模型扩展强化学习、不受先前监督微调约束的框架。与以往在 SFT 模型上做增量改进的方法不同，ToRL 支持从零开始的 RL 训练，使模型能够通过大量探索发现最优的工具使用策略。这种扩展方式产生了与"建立在预设模式之上"的方法在质上不同的行为。
+
+我们在 1.5B 与 7B 两种规模的 Qwen2.5-Math 基座模型上的实验表明：ToRL 的性能显著优于无代码解释器的传统 RL，也优于在 TIR 环境中的 Qwen2.5-Math-Instruct (Yang et al., 2024)。值得注意的是，我们的 7B 模型在 AIME 上取得 43.3% 的准确率，可媲美某些用强化学习训练的 32B 模型 (Hu et al., 2025)。
+
+通过大量分析，我们揭示了关于工具集成学习动力学的若干关键洞察：
+
+- **代码使用演化**：随着训练推进，模型用代码求解的问题占比稳步上升，同时语法正确、可执行代码的比例也不断增长。这证明模型自主习得了有效的工具使用策略。
+- **对无效代码的自我调节**：无需显式指令，模型学会识别并减少无效代码模式的生成，提示一种关于工具效用的元认知（metacognition）正在涌现。
+- **工具调用频率的权衡**：提高每题允许的最大工具调用次数能显著增强性能，但也带来严重的计算开销，揭示了工具集成学习中一个关键的效率-效果权衡。
+
+这些发现揭示了 ToRL 如何孕育多样的认知行为，包括从代码执行中获取反馈、计算式与分析式方法之间的交叉验证，以及根据问题特征自适应地选择推理策略。这些行为是通过奖励驱动的学习、而非对人类设计模式的模仿涌现出来的，这表明工具集成强化学习是提升 LLM 推理能力的一个有前景的方向。
+
+为支持后续研究，我们开源了实现与训练模型，使社区能够在 ToRL 之上构建与扩展，推进工具增强的语言模型。
+
+> **图 1**：上图为 ToRL 与基线模型的性能对比（16 步滑动平均）。两图分别展示 1.5B 与 7B 模型上 AIME24 准确率（%）随训练步数的变化。两种情形下，ToRL（Ours）都显著优于无工具基线与 Qwen-2.5-Math-Instruct-TIR，最高分别高出 12%（1.5B）与 14%（7B）。下图为训练中涌现的认知行为示例（求两条抛物线 $y=2x^{2}$ 等对应的交点参数 $k+m$）：模型先用自然语言推理解出交点并得到 $k+m=-1+(-8)=-9$；随后写代码计算 `k_m_sum = k + m` 并执行，输出为 16；发现推理结果与代码输出不一致后，模型没有直接采信任何一方，而是说"代码输出是 16……让我们重新检查代码和步骤"，再次调用工具同时打印交点坐标与 $k+m$（输出为 `[(-2, 18), (8, 38)]` 与 `16`），确认代码无误后以推理复核，最终给出 $\boxed{16}$——体现出"计算结果与推理结果交叉验证、发现不一致时进行反思并借助工具进一步核实"的行为模式。
+
+---
+
+## 2 方法论
+
+### 2.1 数据集构建
+
+我们从 NuminaMATH (Li et al., 2024)、MATH (Hendrycks et al., 2021) 与 DeepScaleR (Luo et al., 2025) 中的奥林匹克级数学竞赛题构建数据集。初始过滤移除了证明类问题与验证标准模糊的题目，得到 75,149 道可验证题目。随后我们应用 LIMR (Li et al., 2025)——一种强化学习数据蒸馏技术——提取难度分布均衡的高质量样本。该过程最终得到 28,740 道题目，作为所有后续实验的基础。
+
+### 2.2 工具集成推理（Tool Integrated Reasoning）
+
+（译注：原文本小节标题拼写为 "Tool Intergrated Reasoning"，系原文笔误，应为 "Tool Integrated Reasoning"。）
+
+> **图 2**：同一问题的 CoT 与 TIR 解法示例。问题为"确定 $\frac{1}{(6\cdot 10)^{10}}$ 的十进制表示中小数点后紧跟着多少个零"。(a) CoT 示例：模型先化简分母 $(6\cdot 10)^{10}=(60)^{10}=(6^{10}\cdot 10^{10})$，把表达式拆为 $\frac{1}{6^{10}}\cdot\frac{1}{10^{10}}$；随后判断 $\frac{1}{10^{10}}$ 是直接决定小数点后连续零个数的项——它等价于把小数点左移十位，得到小数点后连续九个零（第十位为 1），并认为 $\frac{1}{6^{10}}$ 只影响这九个零之后的数字而不改变连续零的个数，从而给出答案 9。(b) TIR 示例：模型把问题拆解为四步（计算 $6\cdot 10$、求十次幂、求其倒数的十进制表示、统计小数点后紧随的零个数），随后编写 Python 代码：以 `base = 6 * 10`、`power_value = base ** 10`、`reciprocal = 1 / power_value` 计算倒数，将结果转为字符串、取小数点后的部分并逐字符统计前导零，解释器输出 17，模型据此给出最终答案 17。（译注：CoT 的推理看似层层有据却得出错误答案 9——它忽略了 $\frac{1}{6^{10}}$ 同样会带来前导零；而 TIR 借助代码执行得到正确答案 17，直观展示了纯语言推理在精确数值计算上的固有局限。）TIR 使模型能够编写代码、调用解释器获取所执行代码的输出，再基于执行结果进行进一步推理。
+
+工具集成推理（TIR）(Gou et al., 2023; Wang et al., 2023; Shao et al., 2024; Liao et al., 2024; Yang et al., 2024) 使 LLM 通过在推理过程中纳入可执行代码来克服自身的计算局限。与传统的提示方法不同，TIR 通过"推理—代码执行"的迭代过程，显著提升数值计算与逻辑任务上的准确率。
+
+形式化地，给定语言模型 $M$、一个执行 $M$ 所写代码以获取工具调用结果的代码解释器 $I$、以及输入问题 $Q$，TIR 在第 $k$ 步构造推理轨迹 $s_{k}$：
+
+$$s_{k}=\{r_{1},c_{1},o_{1},\dots,r_{k},c_{k},o_{k}\} \tag{1}$$
+
+其中 $r_{i}$ 表示自然语言推理，$c_{i}$ 表示生成的代码，$o_{i}$ 是 $c_{i}$ 的执行结果。迭代生成过程遵循：
+
+$$(r_{k},c_{k})=M(Q\oplus s_{k-1}) \tag{2}$$
+
+$$o_{k}=I(c_{k}) \tag{3}$$
+
+$$s_{k}=s_{k-1}\oplus r_{k}\oplus c_{k}\oplus o_{k} \tag{4}$$
+
+该循环持续到模型给出最终答案为止，每一步都以先前的代码执行结果为条件。基于计算反馈对推理路径的动态调整，使模型能够验证中间步骤，并在复杂问题求解过程中纠正错误。
+
+### 2.3 ToRL：工具集成强化学习
+
+我们提出 ToRL（Tool-Integrated Reinforcement Learning）——一个将 TIR 与强化学习结合、直接从基座语言模型出发而无需先前监督微调的框架。现有方法通常在已经通过 SFT 对齐的模型上应用 RL，而我们的方法证明：通过恰当设计的强化学习，工具增强的推理能力可以从基座模型中有效涌现。
+
+在常规的推理 RL 中，模型生成 CoT 轨迹并依据答案正确性获得奖励。然而，CoT 在需要精确计算或穷举的场景下经常失败。我们的方法用工具集成的推理路径替代这些纯语言轨迹，将代码解释器（Code Interpreter）模块直接集成到 RL 环境交互循环之中。
+
+#### 2.3.1 TIR 采样（Rollout）框架
+
+为使模型自动输出带代码块的推理，我们使用图 3 所示的提示。在模型的采样（rollout）过程中，当检测到代码终止标识符（```output）时，系统暂停文本生成，提取最新的代码块并执行，然后将结构化的执行结果以 ```output\nOBSERVATION\n``` 的格式插入上下文，其中 OBSERVATION 为执行结果。随后系统继续生成后续的自然语言推理，直到模型给出最终答案或产生新的代码块。值得注意的是，当代码执行失败时，我们刻意把错误信息返回给 LLM——我们假设这些错误诊断信息能增强模型在后续迭代中生成语法与语义均正确的代码的能力。
+
+> **图 3**：ToRL 的提示模板（训练时 prompt 占位符会被替换为具体题目）：「用户与助手之间的一段对话。用户提问，助手解题。\nUser: 请将自然语言推理与程序相结合来解决上述问题，并把你的最终答案放在 \boxed{} 中。\n{prompt}\nAssistant:」
+
+我们观察到，采样过程中集成工具会引入显著的 GPU 空闲时间，采样速度与工具调用频率成反比。为将训练速度维持在合理范围内，我们引入超参数 $C$——单次响应生成中模型可进行的最大工具调用次数。一旦超过该阈值，系统将忽略后续的代码执行请求，迫使模型切换到纯文本推理模式。
+
+#### 2.3.2 ToRL 的设计选择
+
+1. **工具调用频率控制**。我们观察到，采样中集成工具会带来显著的 GPU 空闲时间，采样速度与工具调用频率成反比。为维持合理的训练效率，我们引入超参数 $C$，表示单次响应生成中允许的最大工具调用次数。一旦超过该阈值，系统将忽略后续的代码执行请求，迫使模型切换到纯文本推理模式。（译注：此条内容与 §2.3.1 末段重复，原文如此。）
+
+2. **执行环境选择**。为平衡训练效率与效果，我们需要一个稳定、准确且响应及时的代码解释器实现。我们最初测试了 qwen-agent（https://github.com/QwenLM/Qwen-Agent）的 Python 执行器，其延迟极低；但其执行环境与训练系统之间缺乏隔离，执行错误（如非法内存访问导致的段错误）可能危及整个训练过程。我们最终选择了 Sandbox Fusion（https://bytedance.github.io/SandboxFusion/），它提供隔离的执行环境；尽管延迟略高，但能为持续性训练操作提供更优的稳定性。
+
+3. **错误信息处理**。我们实施了特定的错误处理优化以增强训练效果。当 Sandbox Fusion 遇到执行错误时，它会生成包含无关文件路径信息的冗长 traceback。为缩减上下文长度、只保留相关的错误信息，我们仅提取错误信息的最后一行（例如 NameError: name 'a' is not defined）。
+
+4. **沙箱输出掩码**。在损失计算时，我们对来自沙箱环境的 OBSERVATION 输出做掩码处理。这能防止模型试图记住具体的执行输出、而非学习可泛化的推理模式，从而显著提升训练稳定性。
+
+#### 2.3.3 奖励设计
+
+我们实现了一个基于规则的奖励函数：答案正确获得奖励 1，答案错误获得 −1。此外，代码解释器天然提供关于代码可执行性的反馈。基于成功执行代码与解题正确率之间的相关性，我们引入了一个基于执行的惩罚：包含不可执行代码的响应将招致 0.5 的奖励扣减。
+
+**表 1：答案正确性奖励**
+
+| 答案正确性 | 奖励值 |
+| --- | --- |
+| 正确 | 1 |
+| 错误 | −1 |
+
+**表 2：代码可执行性奖励**
+
+| 代码可执行性 | 奖励值 |
+| --- | --- |
+| 可执行 | 0 |
+| 不可执行 | −0.5 |
+
+---
+
+## 3 实验
+
+### 3.1 实验设置
+
+**训练**。所有 RL 实验均使用 veRL (Sheng et al., 2024) 框架进行，以 Sandbox Fusion 作为代码解释器。我们采用 GRPO (Shao et al., 2024) 算法，采样（rollout）批大小设为 128，每道题生成 16 个样本。为增强模型探索，所有实验均省略 KL 损失并将温度设为 1。我们选择 Qwen-2.5-Math (Yang et al., 2024) 系列模型作为 RL 的基座模型。为最大化效率，默认调用次数 $C$ 设为 1。此外，默认实验只保留答案正确性奖励，不纳入代码可执行性奖励——后者将在 §3.3 中讨论。
+
+**评估**。评估时所有模型均使用贪心解码（temperature = 0）。我们在若干有挑战性的数学基准上评估结果：(1) AIME24；(2) AIME25；(3) MATH500 (Hendrycks et al., 2021)；(4) OlympiadBench (He et al., 2024)；以及 (5) AMC23。
+
+### 3.2 主要结果
+
+**表 3：不同模型在数学基准上测试准确率的比较。** Qwen2.5-Math-1.5B-Instruct-TIR 表示在 TIR 环境中测试 Qwen2.5-Math-1.5B-Instruct。为公平比较，我们将最大工具调用次数设为 1。最佳结果以粗体呈现。
+
+| 模型 | SFT/RL | 工具 | AIME24 | AIME25 | MATH500 | Olympiad | AMC23 | 平均 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| *基于 Qwen2.5-Math-1.5B-Base 的模型* | | | | | | | | |
+| Qwen2.5-Math-1.5B-Instruct | RL | ✗ | 10.0 | 10.0 | 66.0 | 31.0 | 62.5 | 35.9 |
+| Qwen2.5-Math-1.5B-Instruct-TIR | RL | ✓ | 13.3 | 13.3 | 73.8 | 41.3 | 55.0 | 41.3 |
+| ToRL-1.5B（本文） | RL | ✓ | **26.7**（+13.3） | **26.7**（+13.3） | **77.8**（+3.0） | **44.0**（+2.7） | **67.5**（+5.0） | **48.5**（+7.2） |
+| *基于 Qwen2.5-Math-7B-Base 的模型* | | | | | | | | |
+| Qwen2.5-Math-7B-Instruct | RL | ✗ | 10.0 | 16.7 | 74.8 | 32.4 | 65.0 | 39.8 |
+| Qwen2.5-Math-7B-Instruct-TIR | RL | ✓ | 26.7 | 16.7 | 78.8 | 45.0 | 70.0 | 47.4 |
+| SimpleRL-Zero | RL | ✗ | 33.3 | 6.7 | 77.2 | 37.6 | 62.5 | 43.5 |
+| rStar-Math-7B | SFT | ✗ | 26.7 | - | 78.4 | 47.1 | 47.5 | - |
+| Eurus-2-7B-PRIME | RL | ✗ | 26.7 | 13.3 | 79.2 | 42.1 | 57.4 | 43.1 |
+| ToRL-7B（本文） | RL | ✓ | **43.3**（+10.0） | **30.0**（+13.3） | **82.2**（+3.0） | **49.9**（+2.8） | **75.0**（+5.0） | **62.1**（+14.7） |
+
+表 3 给出了不同模型在数学基准上的性能比较。（译注：括号中的提升量系相对表中同规模、同列的最强基线计算，例如 7B 组 AIME24 的 +10.0 对应超过 SimpleRL-Zero 的 33.3，平均列的 +14.7 对应超过 Qwen2.5-Math-7B-Instruct-TIR 的 47.4。）ToRL 在所有测试基准上一致优于基线模型。对于 1.5B 参数模型，ToRL-1.5B 取得 48.5% 的平均准确率，超过 Qwen2.5-Math-1.5B-Instruct（35.9%）与 Qwen2.5-Math-1.5B-Instruct-TIR（41.3%）。在 7B 参数模型上，提升更为显著：ToRL-7B 达到 62.1% 的平均准确率，显著高于使用同一基座模型的其他开源模型——绝对提升达 14.7%。
+
+> **图 4**：各数学基准上的性能比较。图中展示 7B 模型在不同基准上准确率（%）随训练步数的变化。在所有基准上，ToRL-7B（蓝色）一致优于无工具集成的基线（红色）与 Qwen-2.5-Math-7B-Instruct-TIR（灰色虚线）。
+
+图 4 展示了五个不同数学基准上的训练动态。ToRL-7B 的成绩随训练步数持续改进，并保持对"无工具集成基线"与"Qwen-2.5-Math-7B-Instruct-TIR"的明显优势。这一性能差距在 AIME24、AIME25 与 OlympiadBench 等高难度基准上尤为突出——ToRL-7B 在其上分别取得 43.3%、30.0% 与 49.9% 的准确率。
+
+### 3.3 分析
+
+为深入理解 RL 如何促使模型调用工具辅助推理，我们在 §3.3.1 中定量分析模型的工具使用与代码编写行为，并在 §3.3.3 中展示有代表性的示例。此外，我们在 §3.3.2 中改变 RL 框架中与 ToRL 相关的关键参数，考察其对模型性能与训练效率的影响。
+
+#### 3.3.1 第一部分：训练中的代码行为
+
+> **图 5**：训练期间的工具使用动态。(a) 代码占比（Code Ratio）：包含代码的响应比例；(b) 通过率（Pass Ratio）：已执行代码中无错误运行的比例；(c) 正确/错误响应中的通过率：比较正确响应与错误响应的执行成功率；(d) 有效代码占比（Effective Code Ratio）。
+
+图 5 提供了对训练中工具使用模式的洞察，具体如下：
+
+**代码占比**。图 5(a) 展示了前 100 步内模型生成的响应中包含代码的比例，该比例从 40% 增长到 80%，在训练全程保持稳步提升。
+
+**通过率**。图 5(b) 展示了成功执行代码的比例，呈持续上升趋势，反映出模型编码能力的增强。
+
+**正确与错误响应的通过率**。图 5(c) 描绘了正确与错误响应各自的代码通过率，揭示出代码执行错误与最终答案准确率之间的相关性——正确的响应表现出更高的代码通过率。
+
+**有效代码占比**。图 5(d) 考察了有效代码占比的变化，聚焦两个关键指标：
+
+- **已执行代码占比**（Executed code ratio）：解释器成功执行的被生成代码所占比例，其中排除了因超过最大工具调用次数 $C$ 而被省略的代码。（译注：原文此处 "due to due to" 系重复笔误。）
+- **最终答案前代码占比**（Before final answer code ratio）：模型给出最终答案之前生成的代码所占比例，忽略仅在答案生成之后用于正确性验证的代码。
+
+两项指标都随时间增长，表明模型所生成代码的有效性随训练推进而提升。
+
+**Takeaway-I**：随着训练步数增加，模型用代码求解的问题比例以及能被正确执行的代码比例持续增长；与此同时，模型在训练过程中会识别并减少无效代码的生成。
+
+#### 3.3.2 第二部分：关键设置的影响
+
+> **图 6**：ToRL-1.5B-C=2 表示超参数 $C$ 设为 2；ToRL-1.5B-ErrorPenalty 表示在奖励函数中纳入代码可执行性奖励，对执行错误的代码施加惩罚。
+
+本节探讨 ToRL 关键设置对最终性能与行为的影响。
+
+**表 4：不同 $C$ 值下单步平均耗时（在 8×A800 GPU 系统上测得）。**
+
+| $C$ | 每步平均时间（秒） |
+| --- | --- |
+| 0 | 118 |
+| 1 | 237 |
+| 2 | 288 |
+
+首先，我们考察增大 $C$（采样时单次响应生成中可调用的最大工具次数）的效果，具体比较 $C$ 设为 1 与 2 时对模型性能的影响。如图 6(a) 与 6(b) 所示，将 $C$ 设为 2 能显著提升性能，使平均准确率提高约 2%。然而，如表 4 所示，增大 $C$ 会大幅降低训练速度，因此需要在性能与效率之间做出权衡。
+
+进一步地，我们分析了在奖励塑形（reward shaping）中纳入代码可执行性奖励的影响。图 6(c) 与 6(d) 表明，这一奖励设计并不能提升模型性能。我们的假设是：对执行错误引入惩罚，可能激励模型生成过于简单的代码以尽量减少出错，这反过来会妨碍其正确解题的能力。
+
+**Takeaway-II**：增大 $C$ 能显著增强模型性能，但也会严重降低训练效率；纳入代码可执行性奖励不能提升性能。
+
+#### 3.3.3 第三部分：RL 扩展带来的认知行为
+
+**表 5：模型初始生成的代码遭遇执行错误，随后由模型自行修正并成功执行。**（问题：给定多项式 $f(x)=x^{6}-5x^{5}+6x^{4}+x^{2}+0.3x+2$，用秦九韶算法（Horner 法）计算 $f(-2)$ 并求 $v_{1}$ 的值。模型先编写 `horner(coeffs, x)` 函数，但第一版代码以 `return result, results[1]` 收尾——对返回的整数做下标访问，触发执行错误 TypeError: 'int' object is not subscriptable；接收该错误反馈后，模型解释"要修正此问题，我们需要确保正确地存储和访问结果"，将返回语句改为 `return result, results` 并再次执行，成功输出 $v_{1}=-7$，最终给出 $f(-2)$ 与 $v_{1}$ 的正确答案。）
+
+**表 6：模型先基于自然语言推理得到错误结果，随后在代码验证中发现错误并予以纠正。**（问题：将 12 个球标上数字 1, 2, 3, …, 12 后分给三人……问 C 拿走的是哪三个球。模型先用自然语言推理得出"2, 10, 13"，并试图将其"归约"为 2 到 12 的有效数字、自我合理化为唯一有效组合；随后模型写 Python 代码验证解法：以 `total_sum = sum(range(1, 13))` 计算总和、按三人平分得 `person_sum = total_sum // 3`，枚举核对后输出 C 剩余的球 `balls_C_remaining` 为 `[3, 10, 12]`；模型据此修正推理，给出正确答案 3, 10, 12。）
+
+我们展示训练后期出现的一些有趣现象，它们可以帮助我们更细致地理解模型使用工具解题时的认知行为。
+
+表 5 展示了模型基于代码解释器的执行反馈调整推理的示例。（译注：原文此段误引为"表 6"，按内容应为表 5。）模型先编写代码，但对结果的不当处理引发了索引错误；在收到 TypeError: 'int' object is not subscriptable 的反馈后，它及时调整并产出可执行的代码，最终推断出正确答案。
+
+表 6 展示了模型"反思"的认知行为。模型最初用自然语言推理求解问题，随后通过工具验证时发现不一致；于是模型进一步修正，最终生成正确答案。
+
+**Takeaway-III**：ToRL 孕育出多种认知行为，包括从代码执行结果中获取反馈，以及用代码与自然语言进行交叉验证。
+
+---
+
+## 4 结论
+
+我们提出 ToRL，它使 LLM 能够通过强化学习在推理中集成工具，从而超越预设的工具使用约束。我们的结果显示了显著的性能增益与涌现的推理能力，凸显了 ToRL 在推进 LLM 复杂推理方面的潜力。
+
+---
+
+## 创新点提炼
+
+1. **直接从基座模型扩展工具集成 RL（跳过 SFT）**。与"从强模型蒸馏轨迹→SFT→再 RL"的主流路径不同，ToRL 证明：仅靠规则奖励与不受限制的探索，工具增强的推理能力即可直接从基座模型中涌现。这消除了对预设工具使用模式的依赖，也使训练出的行为在性质上不同于模仿蒸馏数据的方法。
+
+2. **把代码解释器嵌入 RL 环境交互循环的 TIR Rollout 框架**。检测到 ```output 终止标识符即暂停生成、抽取最新代码块送沙箱执行、把 OBSERVATION 以结构化格式插回上下文继续解码，并由统一的提示模板驱动，使 GRPO 的每条采样轨迹都能自然穿插"推理—执行—再推理"的多轮循环，为强化学习提供了可训练的工具使用接口。
+
+3. **一套面向训练稳定性与效率的工程化设计选择**。工具调用频率上限 $C$ 控制 GPU 空闲、Sandbox Fusion 提供隔离执行环境、错误信息只截取最后一行、以及对沙箱 OBSERVATION 输出做损失掩码——四项设计共同把"在 RL 循环中运行外部解释器"这一不稳定因素转化为可长期维持的训练系统，其中掩码机制从机制上防止模型记忆具体执行输出、只学习可泛化的推理模式。
+
+4. **对训练中代码行为的四维定量分析**。以代码占比、通过率、正确/错误响应通过率之对比、有效代码占比（含"已执行代码"与"最终答案前代码"两个口径）四组指标刻画训练动态，实证了"模型自主习得工具使用策略、并主动抑制无效代码"这一元认知式演化，而非仅报告最终分数。
+
+5. **关键设置的消融揭示效率-效果权衡**。$C$ 从 1 提高到 2 带来约 2% 的平均准确率提升，但单步耗时从 237 秒增至 288 秒（对照无工具的 118 秒）；而"不可执行代码扣 0.5"的惩罚项反而损害性能——提示该惩罚会诱使模型生成过于简单的代码。这些结论对后续工具集成 RL 的超参数选择具有直接参考价值。
+
+6. **涌现认知行为的实证刻画**。模型在训练后期自发出现"根据执行反馈修正代码"（表 5）与"先自然语言推理、再用代码验证、发现矛盾后反思修正"（表 6）等行为；这些行为完全由奖励驱动涌现，没有任何显式指令或人工设计的模式，为"RL 扩展能产生新质的认知行为"提供了具体例证。这与摘要所强调的策略性工具调用、无效代码自我调节、计算式与解析式推理间的动态切换相呼应，也构成了本文区别于单纯刷分工作的核心叙事。
+
+---
+
+*注：本翻译基于 arXiv HTML（LaTeXML）转换的 Markdown 版本，已忽略站点导航残留与 LaTeX 转义符；参考文献列表从略，正文引用保留 (作者, 年份) 格式。原文（v1）无附录，故未设"附录要点"一节。原文中的个别笔误与误引（如 §2.2 标题 "Intergrated"、§2.3.2 第 1 条与 §2.3.1 末段重复、§3.3.1 "due to due to"、§3.3.3 首段"表 6"应为"表 5"）已在相应位置以译注形式标明。*
+</script>
+<script src="../assets/app.js?v=5"></script>
+</body>
+</html>

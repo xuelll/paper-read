@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>22 · Pick-a-Pic 开放偏好数据集 — 中英对照精读</title>
+<link rel="stylesheet" href="../assets/style.css?v=6">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="back" href="../index.html">← 首页</a>
+  <div class="tb-title"><span class="num">22</span>Pick-a-Pic 开放偏好数据集</div>
+  <div class="tb-controls">
+    <a class="tb-link" href="https://arxiv.org/abs/2305.01569" target="_blank" rel="noopener">arXiv</a>
+    <label class="sync"><input type="checkbox" id="syncToggle"> 滚动同步</label>
+  </div>
+</header>
+<main class="reader">
+  <section class="pane pane-en">
+    <div class="pane-head">ENGLISH 原文 (arXiv HTML)</div>
+    <div class="pane-body" id="enBody">
+<article class="ltx_document ltx_authors_1line">
+<h1 class="ltx_title ltx_title_document">Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Yuval Kirstain    Adam Polyak    Uriel Singer
+</span><span class="ltx_author_notes"><span class="ltx_author_notes_content">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_contact_name">Affiliation: </span> Tel Aviv University
+</span>
+<span class="ltx_contact ltx_role_email"><span class="ltx_contact_name">Email: </span><a href="mailto:"><span id="id1" class="ltx_text ltx_font_typewriter">yuval.kirstain@cs.tau.ac.il</span></a>
+</span></span></span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname"><span id="id2" class="ltx_text ltx_font_bold">Shahbuland Matiana</span>    <span id="id3" class="ltx_text ltx_font_bold">Joe Penna</span>    <span id="id4" class="ltx_text ltx_font_bold">Omer Levy</span>
+</span><span class="ltx_author_notes"><span class="ltx_author_notes_content">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_contact_name">Affiliation: </span> Tel Aviv University
+</span>
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_contact_name">Affiliation: </span> Stability AI
+</span></span></span></span></div>
+
+<div id="abstract1" class="ltx_abstract"><h6 class="ltx_title ltx_title_abstract">Abstract</h6>
+    
+<p id="abstract1.1" class="ltx_p">The ability to collect a large dataset of human preferences from text-to-image users is usually limited to companies, making such datasets inaccessible to the public.
+To address this issue, we create a web app that enables text-to-image users to generate images and specify their preferences.
+Using this web app we build Pick-a-Pic, a large, open dataset of text-to-image prompts and real users’ preferences over generated images.
+We leverage this dataset to train a CLIP-based scoring function, PickScore, which exhibits superhuman performance on the task of predicting human preferences.
+Then, we test PickScore’s ability to perform model evaluation and observe that it correlates better with human rankings than other automatic evaluation metrics.
+Therefore, we recommend using PickScore for evaluating future text-to-image generation models, and using Pick-a-Pic prompts as a more relevant dataset than MS-COCO.
+Finally, we demonstrate how PickScore can enhance existing text-to-image models via ranking.<span id="footnote1" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">1</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">1</sup>
+          <span class="ltx_tag ltx_tag_note">1</span>
+          
+          
+          
+          
+          
+          
+          
+        <a href="https://github.com/yuvalkirstain/PickScore" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://github.com/yuvalkirstain/PickScore</a></span></span></span></p>
+  
+</div>
+<figure id="S0.F1" class="ltx_figure"><img src="https://arxiv.org/html/2305.01569v2/teaser.png" id="S0.F1.g1" class="ltx_graphics ltx_img_landscape" style="aspect-ratio:476/172;" width="476" height="172" alt="Refer to caption">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span id="S0.F1.3" class="ltx_text" style="font-size:90%;">Figure 1</span>: </span><span id="S0.F1.4" class="ltx_text" style="font-size:90%;">Images generated via our web application, showing darkened non-preferred images (left) and preferred images (right).</span></figcaption>
+</figure>
+<section id="S1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">1 </span>Introduction</h2>
+
+<div id="S1.p1" class="ltx_para">
+<p id="S1.p1.1" class="ltx_p">Recent advances in aligning language models with user behaviors and expectations have placed a significant emphasis on the ability to model user preferences <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib10" title="" class="ltx_ref">10</a>, <a href="#bib.bib1" title="" class="ltx_ref">1</a>, <a href="#bib.bib3" title="" class="ltx_ref">3</a>]</cite>.
+However, little attention has been paid to this ability in the realm of text-to-image generation.
+This lack of attention can largely be attributed to the absence of a <span id="S1.p1.1.1" class="ltx_text ltx_font_italic">large</span> and <span id="S1.p1.1.2" class="ltx_text ltx_font_italic">open</span> dataset of human preferences over state-of-the-art image generation models.</p>
+</div>
+<div id="S1.p2" class="ltx_para">
+<p id="S1.p2.1" class="ltx_p">To fill this void, we create a web application that enables users to generate images using state-of-the-art text-to-image models while specifying their preferences.
+With explicit consent from the users, we collect their prompts and preferences to create Pick-a-Pic, a publicly available dataset comprising over half-a-million examples of human preferences over model-generated images.<span id="footnote2" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">2</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">2</sup>
+            <span class="ltx_tag ltx_tag_note">2</span>
+            
+            
+            
+            
+            
+            
+            
+          We recently open-sourced a new version of the Pick-a-Pic dataset that has more than one million examples.</span></span></span>
+Each example in our dataset includes a prompt, two generated images, and a label indicating the preferred image, or a tie when no image is significantly preferred over the other.
+Notably, Pick-a-Pic was created by <span id="S1.p2.1.1" class="ltx_text ltx_font_italic">real users</span> with a genuine interest in generating images.
+This interest differs from that of crowd workers who lack the intrinsic motivation to produce creative prompts or the original intent of the prompt’s author to judge which image better aligns with their needs.</p>
+</div>
+<div id="S1.p3" class="ltx_para">
+<p id="S1.p3.1" class="ltx_p">Tapping into authentic user preferences allows us to train a scoring function that estimates the user’s satisfaction from a particular generated image given a prompt.
+To train such a scoring function we finetune CLIP-H <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib12" title="" class="ltx_ref">12</a>, <a href="#bib.bib7" title="" class="ltx_ref">7</a>]</cite> using human preference data and an analogous objective to that of InstructGPT’s reward model <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib10" title="" class="ltx_ref">10</a>]</cite>.
+This objective aims to maximize the probability of a preferred image being picked over an unpreferred one, or even the probability in cases of a tie.
+We find that the resulting scoring function, PickScore <span id="footnote3" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">3</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">3</sup>
+            <span class="ltx_tag ltx_tag_note">3</span>
+            
+            
+            
+            
+            
+            
+            
+          The model is available at <a href="https://huggingface.co/yuvalkirstain/PickScore_v1" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://huggingface.co/yuvalkirstain/PickScore_v1</a></span></span></span>, achieves superhuman performance in the task of predicting user preferences (a 70.5% accuracy rate, compared to humans’ 68.0%), while zero-shot CLIP-H (60.8%) and the popular aesthetics predictor <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib14" title="" class="ltx_ref">14</a>]</cite> (56.8%) perform closer to chance (56.8%).</p>
+</div>
+<div id="S1.p4" class="ltx_para">
+<p id="S1.p4.1" class="ltx_p">Equipped with a dataset for human preferences and a state-of-the-art scoring function, we propose updating the standard protocol for evaluating text-to-image generation models.
+First, we suggest that researchers evaluate their text-to-image models using prompts from Pick-a-Pic, which better represent what humans want to generate than mundane captions, such as those found in MS-COCO <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib2" title="" class="ltx_ref">2</a>, <a href="#bib.bib9" title="" class="ltx_ref">9</a>]</cite>.
+Second, to compare PickScore with FID, we conduct a human evaluation study and find that even when evaluated against MS-COCO captions, PickScore exhibits a strong correlation with human preferences (0.917), while ranking with FID yields a negative correlation (-0.900).
+Importantly, we also compare PickScore with other evaluation metrics using model rankings inferred from real user preferences.
+We observe that PickScore is more strongly correlated with ground truth rankings, as determined by real users, than other evaluation metrics.
+Thus, we recommend using PickScore as a more reliable evaluation metric than existing ones.</p>
+</div>
+<div id="S1.p5" class="ltx_para">
+<p id="S1.p5.1" class="ltx_p">Finally, we explore how PickScore can improve the quality of vanilla text-to-image models via ranking.
+To accomplish this, we generate images with different initial random noises as well as different templates (e.g. “breathtaking <span id="S1.p5.1.1" class="ltx_text ltx_font_typewriter">[prompt]</span>. award-winning, professional, highly detailed”) to slightly alter the user prompt.
+We then test the impact of selecting the top image according to different scoring functions.
+Our findings indicate that human raters prefer images selected by PickScore more than those selected by CLIP-H <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib7" title="" class="ltx_ref">7</a>]</cite> (win rate of 71.3%), an aesthetics predictor <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib14" title="" class="ltx_ref">14</a>]</cite> (win rate of 85.1%), and the vanilla text-to-image model (win rate of 71.4%).</p>
+</div>
+<div id="S1.p6" class="ltx_para">
+<p id="S1.p6.1" class="ltx_p">In summary, the presented work addresses a gap in the field of text-to-image generation by creating a large, open, high-quality dataset of human preferences over user-prompted model-generated images.
+We demonstrate the potential of this dataset by training a scoring function, PickScore, which exhibits a performance superior to any other publicly-available automatic scoring function, in predicting human preferences, evaluating text-to-image models, and improving them via ranking.
+We encourage the research community to adopt Pick-a-Pic and PickScore as a basis for further advances in text-to-image modeling and incorporating human preferences into the learning process.</p>
+</div>
+<figure id="S1.F2" class="ltx_figure">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_3">
+<figure id="S1.F2.fig1" class="ltx_figure ltx_figure_panel ltx_minipage ltx_align_top" style="width:112.1pt;"><img src="https://arxiv.org/html/2305.01569v2/first.png" id="S1.F2.g1" class="ltx_graphics ltx_img_square" style="aspect-ratio:155/150;" width="155" height="150" alt="Refer to caption">
+<figcaption class="ltx_caption">(a)</figcaption>
+</figure></div><div class="ltx_flex_cell ltx_flex_size_3">
+<figure id="S1.F2.fig2" class="ltx_figure ltx_figure_panel ltx_minipage ltx_align_top" style="width:112.1pt;"><img src="https://arxiv.org/html/2305.01569v2/second.png" id="S1.F2.g2" class="ltx_graphics ltx_img_square" style="aspect-ratio:155/150;" width="155" height="150" alt="Refer to caption">
+<figcaption class="ltx_caption">(b)</figcaption>
+</figure></div><div class="ltx_flex_cell ltx_flex_size_3">
+<figure id="S1.F2.fig3" class="ltx_figure ltx_figure_panel ltx_minipage ltx_align_top" style="width:112.1pt;"><img src="https://arxiv.org/html/2305.01569v2/third.png" id="S1.F2.g3" class="ltx_graphics ltx_img_square" style="aspect-ratio:155/150;" width="155" height="150" alt="Refer to caption">
+<figcaption class="ltx_caption">(c)</figcaption>
+</figure></div></div>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span id="S1.F2.3" class="ltx_text" style="font-size:90%;">Figure 2</span>: </span><span id="S1.F2.4" class="ltx_text" style="font-size:90%;">How Pick-a-Pic data is collected through the app: (a) the user first writes a caption, and receives two images; (b) the user makes a preference judgment; (c) a new image is presented instead of the rejected image. This flow repeats itself until the user changes the prompt.</span></figcaption>
+</figure>
+</section>
+<section id="S2" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">2 </span>Pick-a-Pic Dataset</h2>
+
+<div id="S2.p1" class="ltx_para">
+<p id="S2.p1.1" class="ltx_p">The Pick-a-Pic dataset<span id="footnote4" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">4</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">4</sup>
+            <span class="ltx_tag ltx_tag_note">4</span>
+            
+            
+            
+            
+            
+            
+            
+          The dataset is available at <a href="https://huggingface.co/datasets/yuvalkirstain/pickapic_v1" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://huggingface.co/datasets/yuvalkirstain/pickapic_v1</a>, and its updated version is available at <a href="https://huggingface.co/datasets/yuvalkirstain/pickapic_v2" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://huggingface.co/datasets/yuvalkirstain/pickapic_v2</a>.</span></span></span> was created by logging user interactions with the Pick-a-Pic web application for text-to-image generation.
+Overall, the Pick-a-Pic dataset contains over 500,000 examples and 35,000 distinct prompts.
+Each example contains a prompt, two generated images, and a label for which image is preferred, or if there is a tie when no image is significantly preferred over the other.
+The images in the dataset were generated by employing multiple backbone models, namely, Stable Diffusion 2.1, Dreamlike Photoreal 2.0<span id="footnote5" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">5</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">5</sup>
+            <span class="ltx_tag ltx_tag_note">5</span>
+            
+            
+            
+            
+            
+            
+            
+          Dreamlike Photoreal 2.0 is a finetuned version of Stable Diffusion 1.5</span></span></span>, and Stable Diffusion XL variants <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib13" title="" class="ltx_ref">13</a>]</cite> while sampling different classifier-free guidance scale values <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib6" title="" class="ltx_ref">6</a>]</cite>.
+As we continue with our efforts to collect more user interactions through the Pick-a-Pic web app and decrease the number of NSFW examples included in the dataset, we will periodically upload new revisions of the dataset.</p>
+</div>
+<section id="S2.SS0.SSS0.Px1" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">The Pick-a-Pic Web App</h4>
+
+<div id="S2.SS0.SSS0.Px1.p1" class="ltx_para">
+<p id="S2.SS0.SSS0.Px1.p1.1" class="ltx_p">To ensure maximum accessibility for a wide range of users, the user interface was designed with simplicity in mind.
+The application allows users to write creative prompts and generate images.
+At each turn, the user is presented with two generated images (conditioned on their prompt), and asked to select their preferred option or indicate a tie if they have no strong preference.
+Upon selection, the rejected (non-preferred) image is replaced with a newly generated image, and the process repeats.
+The user can also clear or edit the prompt at any time, and the app will generate new images appropriately.
+<a href="#S1.F2" title="In 1 Introduction ‣ Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">Figure</span> <span class="ltx_text ltx_ref_tag">2</span></a> illustrates the usage flow.</p>
+</div>
+</section>
+<section id="S2.SS0.SSS0.Px2" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Real Data from Real Users</h4>
+
+<div id="S2.SS0.SSS0.Px2.p1" class="ltx_para">
+<p id="S2.SS0.SSS0.Px2.p1.1" class="ltx_p">A key advantage of Pick-a-Pic is that our data is collected from real, intrinsically-motivated users, rather than paid crowd workers.
+We achieve this by approaching a wide audience through various social media channels such as Twitter, Facebook, Discord, and Reddit.
+At the same time, we mitigate the risk of collecting low-quality data resulting from potential misuse of the application by implementing several quality control measures.
+First, users are required to authenticate their identity using either a Gmail or a Discord account.<span id="footnote6" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">6</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">6</sup>
+              <span class="ltx_tag ltx_tag_note">6</span>
+              
+              
+              
+              
+              
+              
+              
+            All users provide explicit consent to share their interactions with Pick-a-Pic’s application as part of a public dataset. To ensure privacy, we anonymize user IDs.</span></span></span>
+Second, we closely monitor user activity logs and take action to ban users who generate NSFW content, use multiple instances of the web app simultaneously, or make judgments at an unreasonably fast pace.
+Third, we use a list of NSFW phrases to prevent users from generating harmful content.
+Last, we limit users to 1000 interactions and periodically increase the limit.
+These measures work in tandem to ensure the integrity and reliability of Pick-a-Pic’s data.</p>
+</div>
+</section>
+<section id="S2.SS0.SSS0.Px3" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Annotation Methodology</h4>
+
+<div id="S2.SS0.SSS0.Px3.p1" class="ltx_para">
+<p id="S2.SS0.SSS0.Px3.p1.1" class="ltx_p">While piloting the web app, we experimented with different annotation strategies to optimize for data quality, efficiency of collection, and user experience.
+Specifically, we tested the following annotation options: (1) 4 images, no ties; (2) 2 images, no ties; (3) 2 images, with ties.
+We found that the latter option (2 images, with ties) exceeds the other two in terms of user engagement and inter-rater agreement.</p>
+</div>
+</section>
+<section id="S2.SS0.SSS0.Px4" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Preprocessing</h4>
+
+<div id="S2.SS0.SSS0.Px4.p1" class="ltx_para">
+<p id="S2.SS0.SSS0.Px4.p1.1" class="ltx_p">When processing the collected interactions, we filter prompts with NSFW phrases and banned users.
+We acknowledge that there are still NSFW images and prompts, and will periodically attempt to update the dataset and reduce such occurrences.
+To divide the dataset into training, validation, and testing subsets, we first sample one thousand prompts, ensuring that each prompt was created by a unique user.
+Next, we randomly divide those prompts into two sets of equal size to create the validation and test sets.
+We then sample exactly one example for each prompt to include in these sets.
+For the training set, we include all examples that do not share a prompt with the validation and test sets.
+This approach ensures that no split shares prompts with another split, and the validation and test sets do not suffer from being non-proportionally fitted to a specific prompt or user.</p>
+</div>
+</section>
+<section id="S2.SS0.SSS0.Px5" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Statistics</h4>
+
+<div id="S2.SS0.SSS0.Px5.p1" class="ltx_para">
+<p id="S2.SS0.SSS0.Px5.p1.1" class="ltx_p">Since the creation of the Pick-a-Pic web app we have gathered 968,965 rankings which originated from 66,798 prompts and 6,394 users.
+However, as the Pick-a-Pic dataset is constantly updating, the reported experiments in this paper involve an NSFW filtered and not fully updated version of Pick-a-Pic, that contains 583,747 training examples, and 500 validation and test examples.
+The training set of this dataset contains 37,523 prompts from 4,375 distinct users.</p>
+</div>
+</section>
+<section id="S2.SS0.SSS0.Px6" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Model Selection and Evaluation</h4>
+
+<div id="S2.SS0.SSS0.Px6.p1" class="ltx_para">
+<p id="S2.SS0.SSS0.Px6.p1.1" class="ltx_p">The Pick-a-Pic dataset offers a unique opportunity for a model selection and evaluation methodology, leveraging users’ preferences for unbiased analysis.
+To illustrate this opportunity, we use the collected data and analyze the impact of changing the classifier-free guidance scale of Stable Diffusion XL (Alpha variant) on its performance.
+Specifically, we compare human preferences made when both images were generated by Stable Diffusion XL (Alpha variant) but using different classifier-free guidance scales<span id="footnote7" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">7</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">7</sup>
+              <span class="ltx_tag ltx_tag_note">7</span>
+              
+              
+              
+              
+              
+              
+              
+            The frequency of different guidance scales is similar.</span></span></span>.
+For each scale, we compute the win ratio, representing the percentage of judgments where its use led to a preferred image.
+We also calculate the corresponding tie and lose ratios for each scale, enabling a detailed analysis of which classifier-free guidance scales are more effective.
+Our results are depicted in Figure <a href="#S2.F3" title="Figure 3 ‣ Model Selection and Evaluation ‣ 2 Pick-a-Pic Dataset ‣ Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a> (a), and verify for example, that a guidance scale of <math id="S2.SS0.SSS0.Px6.p1.m1" class="ltx_Math" alttext="9" display="inline" intent=":literal"><semantics><mn>9</mn><annotation encoding="application/x-tex">9</annotation></semantics></math> usually yields preferred images when compared to a guidance scale of <math id="S2.SS0.SSS0.Px6.p1.m2" class="ltx_Math" alttext="3" display="inline" intent=":literal"><semantics><mn>3</mn><annotation encoding="application/x-tex">3</annotation></semantics></math>.</p>
+</div>
+<div id="S2.SS0.SSS0.Px6.p2" class="ltx_para">
+<p id="S2.SS0.SSS0.Px6.p2.1" class="ltx_p">Furthermore, by examining user preferences between images generated by different backbone models, we can determine which model is preferred more by users.
+For instance, considering judgments in which one image was generated by Dreamlike Photoreal 2.0 and the other by Stable Diffusion 2.1, we can evaluate which model is more performant.
+As shown in <a href="#S2.F3" title="In Model Selection and Evaluation ‣ 2 Pick-a-Pic Dataset ‣ Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">fig.</span> <span class="ltx_text ltx_ref_tag">3</span></a> (b), users usually prefer Dreamlike Photoreal 2.0 over Stable Diffusion 2.1.
+We encourage researchers to contact us and include their text-to-image models in the Pick-a-Pic web app for the purpose of model selection and evaluation.</p>
+</div>
+<figure id="S2.F3" class="ltx_figure">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_2">
+<figure id="S2.F3.fig1" class="ltx_figure ltx_figure_panel ltx_minipage ltx_align_center ltx_align_top" style="width:165.6pt;"><object type="image/svg+xml" data="2305.01569v2/SDXL_ALPHA__eval.svg" id="S2.F3.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:115/90;" width="115" height="90"></object>
+<figcaption class="ltx_caption ltx_centering">(a) Win rate versus classifier-free guidance scale for Stable Diffusion XL (Alpha).</figcaption>
+</figure></div><div class="ltx_flex_cell ltx_flex_size_2">
+<figure id="S2.F3.fig2" class="ltx_figure ltx_figure_panel ltx_minipage ltx_align_center ltx_align_top" style="width:165.6pt;"><object type="image/svg+xml" data="2305.01569v2/model_eval.svg" id="S2.F3.g2" class="ltx_graphics ltx_centering ltx_img_square" style="aspect-ratio:115/115;" width="115" height="115"></object>
+<figcaption class="ltx_caption ltx_centering">(b) Preference distribution when comparing Stable Diffusion 2.1 with Dreamlike Photoreal 2.0.</figcaption>
+</figure></div></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span id="S2.F3.3" class="ltx_text" style="font-size:90%;">Figure 3</span>: </span><span id="S2.F3.4" class="ltx_text" style="font-size:90%;">The Pick-a-Pic dataset enables us to perform model selection (a), and model evaluation (b).</span></figcaption>
+</figure>
+</section>
+</section>
+<section id="S3" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">3 </span>PickScore</h2>
+
+<div id="S3.p1" class="ltx_para">
+<p id="S3.p1.1" class="ltx_p">One valuable outcome from collecting a large, natural dataset of user preferences is that we can use it to train a function that scores the quality of a generated image given a prompt.
+We train the PickScore scoring function over Pick-a-Pic by combining a CLIP-style model with a variant of InstructGPT’s reward model objective <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib10" title="" class="ltx_ref">10</a>]</cite>.
+PickScore is able to predict user preferences in held-out Pick-a-Pic prompts better than any other publicly-available scoring function, surpassing even expert human annotators (Section <a href="#S4" title="4 Preference Prediction ‣ Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>).
+Such a scoring function can be of value for various scenarios, such as performing model evaluation (Section <a href="#S5" title="5 Model Evaluation ‣ Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a>), increasing the quality of generated images via ranking (Section <a href="#S6" title="6 Text-to-Image Ranking ‣ Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a>), building better large-scale datasets to improve text-to-image models <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib14" title="" class="ltx_ref">14</a>]</cite>, and improving text-to-image models through weak supervision (e.g. RLHF).</p>
+</div>
+<section id="S3.SS0.SSS0.Px1" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Model</h4>
+
+<div id="S3.SS0.SSS0.Px1.p1" class="ltx_para">
+<p id="S3.SS0.SSS0.Px1.p1.1" class="ltx_p">PickScore follows the architecture of CLIP <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib12" title="" class="ltx_ref">12</a>]</cite>; given a prompt <math id="S3.SS0.SSS0.Px1.p1.m1" class="ltx_Math" alttext="x" display="inline" intent=":literal"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math> and an image <math id="S3.SS0.SSS0.Px1.p1.m2" class="ltx_Math" alttext="y" display="inline" intent=":literal"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>, our scoring function <math id="S3.SS0.SSS0.Px1.p1.m3" class="ltx_Math" alttext="s" display="inline" intent=":literal"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math> computes a real number by representing <math id="S3.SS0.SSS0.Px1.p1.m4" class="ltx_Math" alttext="x" display="inline" intent=":literal"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math> using a transformer text encoder and <math id="S3.SS0.SSS0.Px1.p1.m5" class="ltx_Math" alttext="y" display="inline" intent=":literal"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math> using a transformer image encoder as <math id="S3.SS0.SSS0.Px1.p1.m6" class="ltx_Math" alttext="d" display="inline" intent=":literal"><semantics><mi>d</mi><annotation encoding="application/x-tex">d</annotation></semantics></math>-dimensional vectors, and returning their inner product:</p>
+<table id="S3.E1" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S3.E1.m1" class="ltx_Math" alttext="s(x,y)=E_{\text{txt}}(x)\cdot E_{\text{img}}(y)\cdot T" display="block" intent=":literal"><semantics><mrow><mrow><mi>s</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>,</mo><mi>y</mi><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><mrow><mrow><mrow><msub><mi>E</mi><mtext>txt</mtext></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo rspace="0.055em" stretchy="false">)</mo></mrow></mrow><mo rspace="0.222em">⋅</mo><msub><mi>E</mi><mtext>img</mtext></msub></mrow><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>y</mi><mo rspace="0.055em" stretchy="false">)</mo></mrow></mrow><mo rspace="0.222em">⋅</mo><mi>T</mi></mrow></mrow><annotation encoding="application/x-tex">s(x,y)=E_{\text{txt}}(x)\cdot E_{\text{img}}(y)\cdot T</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(1)</span></td></tr></tbody>
+</table>
+<p id="S3.SS0.SSS0.Px1.p1.2" class="ltx_p">Where <math id="S3.SS0.SSS0.Px1.p1.m7" class="ltx_Math" alttext="T" display="inline" intent=":literal"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math> is the learned scalar temperature parameter of CLIP.</p>
+</div>
+</section>
+<section id="S3.SS0.SSS0.Px2" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Objective</h4>
+
+<div id="S3.SS0.SSS0.Px2.p1" class="ltx_para">
+<p id="S3.SS0.SSS0.Px2.p1.1" class="ltx_p">The input for our objective includes a scoring function <math id="S3.SS0.SSS0.Px2.p1.m1" class="ltx_Math" alttext="s" display="inline" intent=":literal"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>, a prompt <math id="S3.SS0.SSS0.Px2.p1.m2" class="ltx_Math" alttext="x" display="inline" intent=":literal"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>, two images <math id="S3.SS0.SSS0.Px2.p1.m3" class="ltx_Math" alttext="y_{1},y_{2}" display="inline" intent=":literal"><semantics><mrow><msub><mi>y</mi><mn>1</mn></msub><mo>,</mo><msub><mi>y</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">y_{1},y_{2}</annotation></semantics></math>, and a preference distribution vector <math id="S3.SS0.SSS0.Px2.p1.m4" class="ltx_Math" alttext="p" display="inline" intent=":literal"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>, which captures the user’s preference over the two images.
+Specifically, <math id="S3.SS0.SSS0.Px2.p1.m5" class="ltx_Math" alttext="p" display="inline" intent=":literal"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math> takes a value of <math id="S3.SS0.SSS0.Px2.p1.m6" class="ltx_Math" alttext="[1,0]" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">[</mo><mn>1</mn><mo>,</mo><mn>0</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[1,0]</annotation></semantics></math> if <math id="S3.SS0.SSS0.Px2.p1.m7" class="ltx_Math" alttext="y_{1}" display="inline" intent=":literal"><semantics><msub><mi>y</mi><mn>1</mn></msub><annotation encoding="application/x-tex">y_{1}</annotation></semantics></math> is preferred, <math id="S3.SS0.SSS0.Px2.p1.m8" class="ltx_Math" alttext="[0,1]" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0,1]</annotation></semantics></math> if <math id="S3.SS0.SSS0.Px2.p1.m9" class="ltx_Math" alttext="y_{2}" display="inline" intent=":literal"><semantics><msub><mi>y</mi><mn>2</mn></msub><annotation encoding="application/x-tex">y_{2}</annotation></semantics></math> is preferred, or <math id="S3.SS0.SSS0.Px2.p1.m10" class="ltx_Math" alttext="[0.5,0.5]" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">[</mo><mn>0.5</mn><mo>,</mo><mn>0.5</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0.5,0.5]</annotation></semantics></math> for ties.
+Given this input, the objective optimizes the scoring function’s parameters by minimizing the KL-divergence between the preference <math id="S3.SS0.SSS0.Px2.p1.m11" class="ltx_Math" alttext="p" display="inline" intent=":literal"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math> and the softmax-normalized scores of <math id="S3.SS0.SSS0.Px2.p1.m12" class="ltx_Math" alttext="y_{1}" display="inline" intent=":literal"><semantics><msub><mi>y</mi><mn>1</mn></msub><annotation encoding="application/x-tex">y_{1}</annotation></semantics></math> and <math id="S3.SS0.SSS0.Px2.p1.m13" class="ltx_Math" alttext="y_{2}" display="inline" intent=":literal"><semantics><msub><mi>y</mi><mn>2</mn></msub><annotation encoding="application/x-tex">y_{2}</annotation></semantics></math>:</p>
+<table id="S3.E2" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S3.E2.m1" class="ltx_Math" alttext="\hat{p}_{i}=\frac{\exp{s(x,y_{i})}}{\sum_{j=1}^{2}\exp{s(x,y_{j})}}" display="block" intent=":literal"><semantics><mrow><msub><mover accent="true"><mi>p</mi><mo>^</mo></mover><mi>i</mi></msub><mo>=</mo><mfrac><mrow><mi>exp</mi><mo lspace="0.167em">⁡</mo><mrow><mi>s</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>,</mo><msub><mi>y</mi><mi>i</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><mrow><msubsup><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mn>2</mn></msubsup><mrow><mi>exp</mi><mo lspace="0.167em">⁡</mo><mrow><mi>s</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>,</mo><msub><mi>y</mi><mi>j</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">\hat{p}_{i}=\frac{\exp{s(x,y_{i})}}{\sum_{j=1}^{2}\exp{s(x,y_{j})}}</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(2)</span></td></tr></tbody>
+</table>
+<table id="S3.E3" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S3.E3.m1" class="ltx_Math" alttext="L_{\text{pref}}=\sum_{i=1}^{2}p_{i}\left(\log p_{i}-\log\hat{p}_{i}\right)" display="block" intent=":literal"><semantics><mrow><msub><mi>L</mi><mtext>pref</mtext></msub><mo rspace="0.111em">=</mo><mrow><munderover><mo movablelimits="false">∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mn>2</mn></munderover><mrow><msub><mi>p</mi><mi>i</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo>(</mo><mrow><mrow><mi>log</mi><mo lspace="0.167em">⁡</mo><msub><mi>p</mi><mi>i</mi></msub></mrow><mo>−</mo><mrow><mi>log</mi><mo lspace="0.167em">⁡</mo><msub><mover accent="true"><mi>p</mi><mo>^</mo></mover><mi>i</mi></msub></mrow></mrow><mo>)</mo></mrow></mrow></mrow></mrow><annotation encoding="application/x-tex">L_{\text{pref}}=\sum_{i=1}^{2}p_{i}\left(\log p_{i}-\log\hat{p}_{i}\right)</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(3)</span></td></tr></tbody>
+</table>
+<p id="S3.SS0.SSS0.Px2.p1.2" class="ltx_p">Since many examples can originate from the same prompt, we mitigate the risk of overfitting to a small set of prompts by applying a weighted average when reducing the loss across examples in the batch.
+Specifically, we weigh each example in the batch, with an inverse proportion to its prompt frequency in the dataset.
+This objective is analogous to InstructGPT’s reward model objective <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib10" title="" class="ltx_ref">10</a>]</cite>.
+We also experiment with incorporating in-batch negatives into the objective, but find that this yields a less accurate scoring function (see Appendix).</p>
+</div>
+</section>
+<section id="S3.SS0.SSS0.Px3" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Training</h4>
+
+<div id="S3.SS0.SSS0.Px3.p1" class="ltx_para">
+<p id="S3.SS0.SSS0.Px3.p1.1" class="ltx_p">We finetune CLIP-H <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib7" title="" class="ltx_ref">7</a>]</cite> using our framework<span id="footnote8" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">8</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">8</sup>
+              <span class="ltx_tag ltx_tag_note">8</span>
+              
+              
+              
+              
+              
+              
+              
+            <a href="https://github.com/yuvalkirstain/PickScore" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://github.com/yuvalkirstain/PickScore</a></span></span></span> on the Pick-a-Pic training set.
+We train the model for 4,000 steps, with a learning rate of 3e-6, a total batch size of 128, and a warmup period of 500 steps, which follows a linearly decaying learning rate; the experiment is completed in less than an hour with 8 A100 GPUs. We did not perform hyperparameter search, which might further improve results.
+For model selection, we evaluate the model’s accuracy on the validation set (without the option for a tie) in intervals of 100 steps, and keep the best-performing checkpoint.</p>
+</div>
+</section>
+</section>
+<section id="S4" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">4 </span>Preference Prediction</h2>
+
+<div id="S4.p1" class="ltx_para">
+<p id="S4.p1.1" class="ltx_p">We first evaluate PickScore on the task it was trained to do: predict human preferences.
+We find that PickScore outperforms all other baselines, including expert human annotators.</p>
+</div>
+<section id="S4.SS0.SSS0.Px1" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Metric</h4>
+
+<div id="S4.SS0.SSS0.Px1.p1" class="ltx_para">
+<p id="S4.SS0.SSS0.Px1.p1.1" class="ltx_p">To evaluate the ability of models to predict human preferences, we use an adapted accuracy metric that accounts for the possibility of a tie.
+Our metric assigns one point to the model for predicting the same label as the user, half a point if either label or prediction is a tie (but not both), and zero otherwise.</p>
+</div>
+</section>
+<section id="S4.SS0.SSS0.Px2" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Tie Threshold Selection</h4>
+
+<div id="S4.SS0.SSS0.Px2.p1" class="ltx_para">
+<p id="S4.SS0.SSS0.Px2.p1.1" class="ltx_p">Utilizing the notation specified in Section <a href="#S3" title="3 PickScore ‣ Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a>, each model requires a tie threshold probability <math id="S4.SS0.SSS0.Px2.p1.m1" class="ltx_Math" alttext="t" display="inline" intent=":literal"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math> to predict a tied outcome when <math id="S4.SS0.SSS0.Px2.p1.m2" class="ltx_Math" alttext="|\hat{p}_{1}-\hat{p}_{2}|&lt;t" display="inline" intent=":literal"><semantics><mrow><mrow><mo stretchy="false">|</mo><mrow><msub><mover accent="true"><mi>p</mi><mo>^</mo></mover><mn>1</mn></msub><mo>−</mo><msub><mover accent="true"><mi>p</mi><mo>^</mo></mover><mn>2</mn></msub></mrow><mo stretchy="false">|</mo></mrow><mo>&lt;</mo><mi>t</mi></mrow><annotation encoding="application/x-tex">|\hat{p}_{1}-\hat{p}_{2}|&lt;t</annotation></semantics></math>.
+To achieve this, we evaluate each model on the validation set using various tie threshold probabilities and subsequently determine the most optimal tie threshold for each model.
+For human experts, we do not perform tie selection and explicitly allow them to select a tie.</p>
+</div>
+</section>
+<section id="S4.SS0.SSS0.Px3" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Baselines</h4>
+
+<div id="S4.SS0.SSS0.Px3.p1" class="ltx_para">
+<p id="S4.SS0.SSS0.Px3.p1.1" class="ltx_p">We compare our model with CLIP-H <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib7" title="" class="ltx_ref">7</a>]</cite>, an aesthetics predictor <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib14" title="" class="ltx_ref">14</a>]</cite> built on top of CLIP-L <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib12" title="" class="ltx_ref">12</a>]</cite>, a random classifier, and human experts.<span id="footnote9" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">9</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">9</sup>
+              <span class="ltx_tag ltx_tag_note">9</span>
+              
+              
+              
+              
+              
+              
+              
+            Throughout this paper, we use friends and colleagues of the authors for expert human annotation.</span></span></span> For completeness, we also compare our results with models from concurrent work, namely, HPS <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib17" title="" class="ltx_ref">17</a>]</cite> and ImageReward <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib18" title="" class="ltx_ref">18</a>]</cite>.</p>
+</div>
+<figure id="S4.T1" class="ltx_table">
+<div class="ltx_flex_figure ltx_flex_table">
+<div class="ltx_flex_cell ltx_flex_size_2">
+<figure id="S4.F4" class="ltx_figure ltx_figure_panel ltx_align_center ltx_align_middle" style="width:193.2pt;"><img src="https://arxiv.org/html/2305.01569v2/preference_predictor_compressed.png" id="S4.T1.g1" class="ltx_graphics ltx_centering ltx_figure_panel ltx_img_square" style="aspect-ratio:267/243;" width="267" height="243" alt="Refer to caption">
+<br class="ltx_break ltx_break">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span id="S4.F4.3" class="ltx_text" style="font-size:90%;">Figure 4</span>: </span><span id="S4.F4.4" class="ltx_text" style="font-size:90%;">Disagreement between CLIP-H (left) and PickScore (right) on the Pick-a-Pic validation set. We add green borders around images that humans preferred.</span></figcaption>
+</figure></div><div class="ltx_flex_cell ltx_flex_size_2">
+<figure id="S4.T1.fig2" class="ltx_figure ltx_figure_panel ltx_minipage ltx_align_middle" style="width:144.9pt;">
+
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span id="S4.T1.fig2.1" class="ltx_text" style="font-size:90%;">Table 1</span>: </span><span id="S4.T1.fig2.2" class="ltx_text" style="font-size:90%;">Quantitative results on Pick-a-Pic.</span></figcaption><div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_2">
+<table id="S4.T1.fig2.3" class="ltx_tabular ltx_figure_panel ltx_align_middle">
+<tbody class="ltx_tbody">
+<tr id="S4.T1.fig2.3.1" class="ltx_tr">
+<td id="S4.T1.fig2.3.1.1" class="ltx_td ltx_nopad_r ltx_align_center"></td></tr>
+<tr id="S4.T1.fig2.3.2" class="ltx_tr">
+<td id="S4.T1.fig2.3.2.1" class="ltx_td ltx_nopad_r ltx_align_center"></td></tr>
+</tbody>
+</table></div><div class="ltx_flex_cell ltx_flex_size_2">
+<figure id="S4.F4.sf1" class="ltx_figure ltx_figure_panel"><object type="image/svg+xml" data="2305.01569v2/validation.svg" id="S4.F4.sf1.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:160/120;" width="160" height="120"></object>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span id="S4.F4.sf1.3" class="ltx_text" style="font-size:90%;">(a)</span> </span><span id="S4.F4.sf1.4" class="ltx_text" style="font-size:90%;">Accuracy across different tie thresholds on the Pick-a-Pic validation set</span></figcaption>
+</figure></div><div class="ltx_flex_break"></div><div class="ltx_flex_cell ltx_flex_size_1">
+<figure id="S4.F4.sf2" class="ltx_figure ltx_figure_panel">
+<table id="S4.F4.sf2.3" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S4.F4.sf2.3.1" class="ltx_tr">
+<th id="S4.F4.sf2.3.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt"><span id="S4.F4.sf2.3.1.1.1" class="ltx_text ltx_font_bold" style="font-size:90%;">Model</span></th>
+<th id="S4.F4.sf2.3.1.2" class="ltx_td ltx_nopad_r ltx_align_right ltx_th ltx_th_column ltx_border_tt"><span id="S4.F4.sf2.3.1.2.1" class="ltx_text ltx_font_bold" style="font-size:90%;">Accuracy</span></th></tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S4.F4.sf2.3.2" class="ltx_tr">
+<th id="S4.F4.sf2.3.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t"><span id="S4.F4.sf2.3.2.1.1" class="ltx_text" style="font-size:90%;">Random</span></th>
+<td id="S4.F4.sf2.3.2.2" class="ltx_td ltx_nopad_r ltx_align_right ltx_border_t"><span id="S4.F4.sf2.3.2.2.1" class="ltx_text" style="font-size:90%;">56.8</span></td></tr>
+<tr id="S4.F4.sf2.3.3" class="ltx_tr">
+<th id="S4.F4.sf2.3.3.1" class="ltx_td ltx_align_left ltx_th ltx_th_row"><span id="S4.F4.sf2.3.3.1.1" class="ltx_text" style="font-size:90%;">Human Expert</span></th>
+<td id="S4.F4.sf2.3.3.2" class="ltx_td ltx_nopad_r ltx_align_right"><span id="S4.F4.sf2.3.3.2.1" class="ltx_text" style="font-size:90%;">68.0</span></td></tr>
+<tr id="S4.F4.sf2.3.4" class="ltx_tr">
+<th id="S4.F4.sf2.3.4.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t"><span id="S4.F4.sf2.3.4.1.1" class="ltx_text" style="font-size:90%;">Aesthetics <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib14" title="" class="ltx_ref">14</a>]</cite></span></th>
+<td id="S4.F4.sf2.3.4.2" class="ltx_td ltx_nopad_r ltx_align_right ltx_border_t"><span id="S4.F4.sf2.3.4.2.1" class="ltx_text" style="font-size:90%;">56.8</span></td></tr>
+<tr id="S4.F4.sf2.3.5" class="ltx_tr">
+<th id="S4.F4.sf2.3.5.1" class="ltx_td ltx_align_left ltx_th ltx_th_row"><span id="S4.F4.sf2.3.5.1.1" class="ltx_text" style="font-size:90%;">CLIP-H <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib7" title="" class="ltx_ref">7</a>]</cite></span></th>
+<td id="S4.F4.sf2.3.5.2" class="ltx_td ltx_nopad_r ltx_align_right"><span id="S4.F4.sf2.3.5.2.1" class="ltx_text" style="font-size:90%;">60.8</span></td></tr>
+<tr id="S4.F4.sf2.3.6" class="ltx_tr">
+<th id="S4.F4.sf2.3.6.1" class="ltx_td ltx_align_left ltx_th ltx_th_row"><span id="S4.F4.sf2.3.6.1.1" class="ltx_text" style="font-size:90%;">ImageReward <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib18" title="" class="ltx_ref">18</a>]</cite></span></th>
+<td id="S4.F4.sf2.3.6.2" class="ltx_td ltx_nopad_r ltx_align_right"><span id="S4.F4.sf2.3.6.2.1" class="ltx_text" style="font-size:90%;">61.1</span></td></tr>
+<tr id="S4.F4.sf2.3.7" class="ltx_tr">
+<th id="S4.F4.sf2.3.7.1" class="ltx_td ltx_align_left ltx_th ltx_th_row"><span id="S4.F4.sf2.3.7.1.1" class="ltx_text" style="font-size:90%;">HPS <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib17" title="" class="ltx_ref">17</a>]</cite></span></th>
+<td id="S4.F4.sf2.3.7.2" class="ltx_td ltx_nopad_r ltx_align_right"><span id="S4.F4.sf2.3.7.2.1" class="ltx_text" style="font-size:90%;">66.7</span></td></tr>
+<tr id="S4.F4.sf2.3.8" class="ltx_tr">
+<th id="S4.F4.sf2.3.8.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb"><span id="S4.F4.sf2.3.8.1.1" class="ltx_text" style="font-size:90%;">PickScore (Ours)</span></th>
+<td id="S4.F4.sf2.3.8.2" class="ltx_td ltx_nopad_r ltx_align_right ltx_border_bb"><span id="S4.F4.sf2.3.8.2.1" class="ltx_text ltx_font_bold" style="font-size:90%;">70.5</span></td></tr>
+</tbody>
+</table>
+<figcaption class="ltx_caption ltx_centering" style="font-size:90%;"><span class="ltx_tag ltx_tag_figure">(b) </span>Performance on the Pick-a-Pic test set.</figcaption>
+</figure></div></div>
+</figure></div></div>
+</figure>
+</section>
+<section id="S4.SS0.SSS0.Px4" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Results</h4>
+
+<div id="S4.SS0.SSS0.Px4.p1" class="ltx_para">
+<p id="S4.SS0.SSS0.Px4.p1.1" class="ltx_p">First, we compare the models’ performance on the validation set across different tie thresholds.
+Figure <a href="#S4.F4.sf1" title="Figure 4(a) ‣ Table 1 ‣ Baselines ‣ 4 Preference Prediction ‣ Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4(a)</span></a> shows that PickScore outperforms the baselines across almost all thresholds, and achieves the highest global score by a wide margin.
+After selecting the best-performing tie threshold for each model, we use the threshold to evaluate the different models on the test set.</p>
+</div>
+<div id="S4.SS0.SSS0.Px4.p2" class="ltx_para">
+<p id="S4.SS0.SSS0.Px4.p2.1" class="ltx_p">Table <a href="#S4.F4.sf2" title="Figure 4(b) ‣ Table 1 ‣ Baselines ‣ 4 Preference Prediction ‣ Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4(b)</span></a> shows that the aesthetics score (<math id="S4.SS0.SSS0.Px4.p2.m1" class="ltx_Math" alttext="56.8" display="inline" intent=":literal"><semantics><mn>56.8</mn><annotation encoding="application/x-tex">56.8</annotation></semantics></math>) and CLIP-H (<math id="S4.SS0.SSS0.Px4.p2.m2" class="ltx_Math" alttext="60.8" display="inline" intent=":literal"><semantics><mn>60.8</mn><annotation encoding="application/x-tex">60.8</annotation></semantics></math>) perform closer to a random chance baseline (<math id="S4.SS0.SSS0.Px4.p2.m3" class="ltx_Math" alttext="56.8" display="inline" intent=":literal"><semantics><mn>56.8</mn><annotation encoding="application/x-tex">56.8</annotation></semantics></math>), while PickScore (<math id="S4.SS0.SSS0.Px4.p2.m4" class="ltx_Math" alttext="70.5\pm 0.142" display="inline" intent=":literal"><semantics><mrow><mn>70.5</mn><mo>±</mo><mn>0.142</mn></mrow><annotation encoding="application/x-tex">70.5\pm 0.142</annotation></semantics></math>)<span id="footnote10" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">10</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">10</sup>
+              <span class="ltx_tag ltx_tag_note">10</span>
+              
+              
+              
+              
+              
+              
+              
+            We train PickScore using three different random seeds and report the mean and variance.</span></span></span> achieves superhuman performance, as it even outperforms human experts (<math id="S4.SS0.SSS0.Px4.p2.m5" class="ltx_Math" alttext="68.0" display="inline" intent=":literal"><semantics><mn>68.0</mn><annotation encoding="application/x-tex">68.0</annotation></semantics></math>).
+It is important to emphasize a core difference between <span id="S4.SS0.SSS0.Px4.p2.1.1" class="ltx_text ltx_font_italic">real users</span> that produce the ground truth labels and <span id="S4.SS0.SSS0.Px4.p2.1.2" class="ltx_text ltx_font_italic">annotators</span> used to evaluate human performance. The users that produce the ground truth are actual text-to-image users, which have an idea (which may be incomplete) for an image, and invent a prompt (which may lack details) with hope that the resulting image will match their preferences. In contrast, annotators that are used to measure human performance are oblivious to the original user’s context, idea, and motivation. Therefore, superhuman performance on this task means that the model is able to outperform a human annotator that is oblivious to the original user’s context, idea, and motivation.
+The superhuman performance of PickScore showcases the importance of using real users as ground truth rather than expert annotators when collecting human preferences.
+Moreover, the relatively modest human performance (<math id="S4.SS0.SSS0.Px4.p2.m6" class="ltx_Math" alttext="68.0" display="inline" intent=":literal"><semantics><mn>68.0</mn><annotation encoding="application/x-tex">68.0</annotation></semantics></math>) on the task, when compared to a random baseline (<math id="S4.SS0.SSS0.Px4.p2.m7" class="ltx_Math" alttext="56.8" display="inline" intent=":literal"><semantics><mn>56.8</mn><annotation encoding="application/x-tex">56.8</annotation></semantics></math>), shows that predicting human preferences in text-to-image generation is a difficult task for human annotators.</p>
+</div>
+<div id="S4.SS0.SSS0.Px4.p3" class="ltx_para">
+<p id="S4.SS0.SSS0.Px4.p3.1" class="ltx_p">For completeness, we also include the results of concurrent work from HPS <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib17" title="" class="ltx_ref">17</a>]</cite>, which scores 66.7, and ImageReward <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib18" title="" class="ltx_ref">18</a>]</cite>, which scores 61.1; PickScore outperforms both.
+To further illustrate the differences between CLIP-H and PickScore, we showcase examples of disagreement from the Pick-a-Pic validation set in Figure <a href="#S4.F4" title="Figure 4 ‣ Table 1 ‣ Baselines ‣ 4 Preference Prediction ‣ Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>.
+We notice that PickScore often chooses more aesthetically pleasing images than CLIP-H; at times, at the cost of faithfulness to the prompt.</p>
+</div>
+</section>
+</section>
+<section id="S5" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">5 </span>Model Evaluation</h2>
+
+<div id="S5.p1" class="ltx_para">
+<p id="S5.p1.1" class="ltx_p">Despite significant progress in the generative capabilities of text-to-image models, the standard and most popular prompt dataset has remained the Microsoft Common Objects in Context dataset (MS-COCO) <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib9" title="" class="ltx_ref">9</a>]</cite>.
+Similarly, the Fréchet Inception Distance (FID) <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib5" title="" class="ltx_ref">5</a>]</cite> is still the main metric used for model evaluation.
+In this section, we explain why we recommend researchers to evaluate their models using prompts from Pick-a-Pic rather than (or at least alongside) MS-COCO, and show that when evaluating state-of-the-art text-to-image models, PickScore is more aligned with human judgments than other automatic evaluation metrics.</p>
+</div>
+<section id="S5.SS0.SSS0.Px1" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Model Evaluation Prompts</h4>
+
+<div id="S5.SS0.SSS0.Px1.p1" class="ltx_para">
+<p id="S5.SS0.SSS0.Px1.p1.1" class="ltx_p">The prompts contained in the MS-COCO dataset are captions of photographs taken by amateur photographers, depicting objects and humans in everyday settings.
+While certain captions within this dataset may pose a challenge to text-to-image models, it is evident that the scope of interest for text-to-image users extends beyond commonplace objects and humans.
+Moreover, the main use-case of image generation is arguably to generate <span id="S5.SS0.SSS0.Px1.p1.1.1" class="ltx_text ltx_font_italic">fiction</span>, which <span id="S5.SS0.SSS0.Px1.p1.1.2" class="ltx_text ltx_font_italic">cannot</span> be captured by camera.
+By construction, Pick-a-Pic’s prompts are sampled from real users, and thus better represent the natural distribution of text-to-image intents.
+We therefore strongly advocate that the research community employ prompts from Pick-a-Pic when assessing the performance of text-to-image models.</p>
+</div>
+<figure id="S5.F6" class="ltx_figure">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_2">
+<figure id="S5.F5" class="ltx_figure ltx_figure_panel ltx_align_center ltx_align_middle" style="width:200.1pt;"><img src="https://arxiv.org/html/2305.01569v2/fid_comparison_compressed.png" id="S5.F6.g1" class="ltx_graphics ltx_centering ltx_figure_panel ltx_img_square" style="aspect-ratio:276/249;" width="276" height="249" alt="Refer to caption">
+<br class="ltx_break ltx_break">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span id="S5.F5.3" class="ltx_text" style="font-size:90%;">Figure 5</span>: </span><span id="S5.F5.4" class="ltx_text" style="font-size:90%;">Images generated using the same seed and model, but using different classifier-free guidance (CFG) scales. Even though high guidance scales lead to worse FID, humans usually find them more pleasing than low guidance scales.</span></figcaption>
+</figure></div><div class="ltx_flex_cell ltx_flex_size_2">
+<figure id="S5.F6.fig4" class="ltx_figure ltx_figure_panel ltx_minipage ltx_align_middle" style="width:131.1pt;">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_2">
+<table id="S5.F6.fig4.1" class="ltx_tabular ltx_figure_panel ltx_align_middle">
+<tbody class="ltx_tbody">
+<tr id="S5.F6.fig4.1.1" class="ltx_tr">
+<td id="S5.F6.fig4.1.1.1" class="ltx_td ltx_nopad_r ltx_align_center"></td></tr>
+<tr id="S5.F6.fig4.1.2" class="ltx_tr">
+<td id="S5.F6.fig4.1.2.1" class="ltx_td ltx_nopad_r ltx_align_center"></td></tr>
+</tbody>
+</table></div><div class="ltx_flex_cell ltx_flex_size_2">
+<figure id="S5.F6.fig2" class="ltx_figure ltx_figure_panel"><object type="image/svg+xml" data="2305.01569v2/fid_vs_human_coco.svg" id="S5.F6.g2" class="ltx_graphics ltx_centering ltx_img_square" style="aspect-ratio:145/121;" width="145" height="121"></object>
+</figure></div><div class="ltx_flex_break"></div><div class="ltx_flex_cell ltx_flex_size_1">
+<figure id="S5.F6.fig3" class="ltx_figure ltx_figure_panel"><object type="image/svg+xml" data="2305.01569v2/pref_vs_human_coco.svg" id="S5.F6.g3" class="ltx_graphics ltx_centering ltx_img_square" style="aspect-ratio:145/121;" width="145" height="121"></object>
+</figure></div></div>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span id="S5.F6.fig4.2" class="ltx_text" style="font-size:90%;">Figure 6</span>: </span><span id="S5.F6.fig4.3" class="ltx_text" style="font-size:90%;">Correlation between the win ratio of different models according to FID and PickScore to human experts on the MS-COCO validation set.</span></figcaption>
+</figure></div></div>
+</figure>
+<figure id="S5.F7" class="ltx_figure">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_4"><object type="image/svg+xml" data="2305.01569v2/clip_score_vs_human_pickapic.svg" id="S5.F7.g1" class="ltx_graphics ltx_centering ltx_figure_panel ltx_img_square" style="aspect-ratio:115/94;" width="115" height="94"></object></div><div class="ltx_flex_cell ltx_flex_size_4"><object type="image/svg+xml" data="2305.01569v2/image_reward_score_vs_human_pickapic.svg" id="S5.F7.g2" class="ltx_graphics ltx_centering ltx_figure_panel ltx_img_square" style="aspect-ratio:115/94;" width="115" height="94"></object></div><div class="ltx_flex_cell ltx_flex_size_4"><object type="image/svg+xml" data="2305.01569v2/hps_score_vs_human_pickapic.svg" id="S5.F7.g3" class="ltx_graphics ltx_centering ltx_figure_panel ltx_img_square" style="aspect-ratio:115/94;" width="115" height="94"></object></div><div class="ltx_flex_cell ltx_flex_size_4"><object type="image/svg+xml" data="2305.01569v2/reward_score_vs_human_pickapic.svg" id="S5.F7.g4" class="ltx_graphics ltx_centering ltx_figure_panel ltx_img_square" style="aspect-ratio:115/94;" width="115" height="94"></object></div></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span id="S5.F7.3" class="ltx_text" style="font-size:90%;">Figure 7</span>: </span><span id="S5.F7.4" class="ltx_text" style="font-size:90%;">Correlation between Elo ratings of real users and Elo ratings by CLIP-H, ImageReward <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib18" title="" class="ltx_ref">18</a>]</cite>, HPS <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib17" title="" class="ltx_ref">17</a>]</cite>, and PickScore.</span></figcaption>
+</figure>
+</section>
+<section id="S5.SS0.SSS0.Px2" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">FID</h4>
+
+<div id="S5.SS0.SSS0.Px2.p1" class="ltx_para">
+<p id="S5.SS0.SSS0.Px2.p1.1" class="ltx_p">The FID metric <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib5" title="" class="ltx_ref">5</a>]</cite> gauges the degree of resemblance between a set of generated images and a set of authentic images, at the set level.
+To do so, it first embeds the real and generated images into the feature space of an Inception net <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib15" title="" class="ltx_ref">15</a>]</cite>, and then estimates the mean and covariance of both sets of images and calculates their similarity.
+FID is thus geared towards measuring the realism of a set of images, but is oblivious to the prompts.
+In contrast, PickScore provides a per-instance score, and is directly conditioned on the prompt.
+We thus hypothesize that PickScore will correlate better with human judgements of generation quality.</p>
+</div>
+<div id="S5.SS0.SSS0.Px2.p2" class="ltx_para">
+<p id="S5.SS0.SSS0.Px2.p2.1" class="ltx_p">To empirically test our hypothesis with the most “convenient” settings for the FID metric, we select 100 random captions from MS-COCO validation split. For each caption, we generate images from 9 different models based on the same set of prompts, and ask human experts to rank the 9 generated images (with ties), inducing pairwise preferences.
+Specifically, we use Stable Diffusion 1.5, Stable Diffusion 2.1, and Dreamlike Photoreal 2.0 combined with three different classifier-free guidance scales (3, 6, and 9).
+We then repeat the labeling process (over the same images) using FID, and PickScore instead of humans to determine preferences.
+Since FID does not operate on a per-example base, when “labeling” with FID, we simply choose the model that has a lower (better) FID score on MS-COCO.</p>
+</div>
+<div id="S5.SS0.SSS0.Px2.p3" class="ltx_para">
+<p id="S5.SS0.SSS0.Px2.p3.1" class="ltx_p"><a href="#S5.F6" title="In Model Evaluation Prompts ‣ 5 Model Evaluation ‣ Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">Figure</span> <span class="ltx_text ltx_ref_tag">6</span></a> shows the correlation between model win rates induced by human rankings (horizontal) and model win rates induced by each automatic scoring function.
+PickScore exhibits a stronger correlation (0.917) with human raters on MS-COCO captions than FID (-0.900), which surprisingly, exhibits a strong <span id="S5.SS0.SSS0.Px2.p3.1.1" class="ltx_text ltx_font_italic">negative</span> correlation.
+As FID is oblivious to the prompt, one would expect zero correlation, and not a strong negative correlation.
+We hypothesize that this is related to the classifier-free guidance scale hyperparameter – larger scales tend to produce more vivid images (which humans typically prefer), but differ from the distribution of ground truth images in MS-COCO, yielding worse (higher) FID scores.
+Figure <a href="#S5.F5" title="Figure 5 ‣ Figure 6 ‣ Model Evaluation Prompts ‣ 5 Model Evaluation ‣ Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a> visualizes these differences by presenting pairs of images generated with the same random seed but with different classifier-free guidance (CFG) scales.</p>
+</div>
+</section>
+<section id="S5.SS0.SSS0.Px3" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Other Evaluation Metrics</h4>
+
+<div id="S5.SS0.SSS0.Px3.p1" class="ltx_para">
+<p id="S5.SS0.SSS0.Px3.p1.1" class="ltx_p">When comparing with evaluation metrics that do not assume a set of ground truth images, we are able to use a more reliable evaluation procedure.
+In this evaluation procedure, we consider real user preferences rather than human annotators, as well as more models (i.e. more data points).
+Specifically, we take all the 14,000 collected preferences that correspond to prompts from the Pick-a-Pic test set.
+This set of examples contains images generated by 45 different models – four different backbone models, each with different guidance scales.
+We then use these real user preferences to calculate Elo ratings <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib4" title="" class="ltx_ref">4</a>]</cite> for the different models.
+Afterward, we repeat the process while replacing the real user preferences with CLIP-H <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib7" title="" class="ltx_ref">7</a>]</cite>, and PickScore predictions.
+Similarly to <a href="#S4" title="4 Preference Prediction ‣ Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">Section</span> <span class="ltx_text ltx_ref_tag">4</span></a>, we also compare against the concurrent work from ImageReward<cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib18" title="" class="ltx_ref">18</a>]</cite> and HPS <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib17" title="" class="ltx_ref">17</a>]</cite>.
+Since the Elo rating system is iterative by nature, we repeat the process 50 times.
+Each time we randomly shuffle the order of examples, and calculate the correlation with human ratings. Finally, for each metric, we output the mean and standard deviation of its 50 corresponding correlations.
+<a href="#S5.F7" title="In Model Evaluation Prompts ‣ 5 Model Evaluation ‣ Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">Figure</span> <span class="ltx_text ltx_ref_tag">7</span></a> displays the correlation between real users’ Elo ratings with the different metrics’ rating, showing that PickScore exhibits a stronger correlation (<math id="S5.SS0.SSS0.Px3.p1.m1" class="ltx_Math" alttext="0.790\pm 0.054" display="inline" intent=":literal"><semantics><mrow><mn>0.790</mn><mo>±</mo><mn>0.054</mn></mrow><annotation encoding="application/x-tex">0.790\pm 0.054</annotation></semantics></math>) with real users than all other automatic metrics, namely CLIP-H (<math id="S5.SS0.SSS0.Px3.p1.m2" class="ltx_Math" alttext="0.313\pm 0.075" display="inline" intent=":literal"><semantics><mrow><mn>0.313</mn><mo>±</mo><mn>0.075</mn></mrow><annotation encoding="application/x-tex">0.313\pm 0.075</annotation></semantics></math>), ImageReward (<math id="S5.SS0.SSS0.Px3.p1.m3" class="ltx_Math" alttext="0.492\pm 0.086" display="inline" intent=":literal"><semantics><mrow><mn>0.492</mn><mo>±</mo><mn>0.086</mn></mrow><annotation encoding="application/x-tex">0.492\pm 0.086</annotation></semantics></math>), and HPS (<math id="S5.SS0.SSS0.Px3.p1.m4" class="ltx_Math" alttext="0.670\pm 0.071" display="inline" intent=":literal"><semantics><mrow><mn>0.670</mn><mo>±</mo><mn>0.071</mn></mrow><annotation encoding="application/x-tex">0.670\pm 0.071</annotation></semantics></math>).</p>
+</div>
+</section>
+</section>
+<section id="S6" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">6 </span>Text-to-Image Ranking</h2>
+
+<div id="S6.p1" class="ltx_para">
+<p id="S6.p1.1" class="ltx_p">Another possible application for scoring functions is improving the performance of generations made by text-to-image models through ranking: generate a sample of images, and select the one with the highest score.
+To test this approach, we generate one hundred images for each prompt of the one hundred prompts we take from the Pick-a-Pic test set.
+We generate the images with Dreamlike Photoreal 2.0, using a classifier-free guidance scale of 7.5, and to increase image diversity, we use 5 initial random noises and 20 different prompt templates.
+These templates include the null template “<span id="S6.p1.1.1" class="ltx_text ltx_font_typewriter">[prompt]</span>” and other templates like “breathtaking <span id="S6.p1.1.2" class="ltx_text ltx_font_typewriter">[prompt]</span>. award-winning, professional, highly detailed”.
+From each set of 100 generated images, we select the best one according to PickScore, CLIP-H, the aesthetics score, or randomly; in addition, we randomly select one image from the null template for control.
+We then ask expert human annotators to compare PickScore’s chosen image to each of the other functions’ choices, and decide which one they prefer.</p>
+</div>
+<figure id="S6.T2" class="ltx_table">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_table"><span id="S6.T2.3" class="ltx_text" style="font-size:90%;">Table 2</span>: </span><span id="S6.T2.4" class="ltx_text" style="font-size:90%;">Percentage of instances where humans prefer PickScore’s choice over another scoring function’s choice when selecting one image out of 100.</span></figcaption>
+<table id="S6.T2.5" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S6.T2.5.1" class="ltx_tr">
+<th id="S6.T2.5.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_border_tt"><span id="S6.T2.5.1.1.1" class="ltx_text ltx_font_bold" style="font-size:90%;">Comparison</span></th>
+<th id="S6.T2.5.1.2" class="ltx_td ltx_nopad_r ltx_align_right ltx_th ltx_th_column ltx_border_tt"><span id="S6.T2.5.1.2.1" class="ltx_text ltx_font_bold" style="font-size:90%;">Win Rate</span></th></tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S6.T2.5.2" class="ltx_tr">
+<td id="S6.T2.5.2.1" class="ltx_td ltx_align_left ltx_border_t"><span id="S6.T2.5.2.1.1" class="ltx_text" style="font-size:90%;">PickScore vs Random Seed</span></td>
+<td id="S6.T2.5.2.2" class="ltx_td ltx_nopad_r ltx_border_t"></td></tr>
+<tr id="S6.T2.5.3" class="ltx_tr">
+<td id="S6.T2.5.3.1" class="ltx_td ltx_align_left"><span id="S6.T2.5.3.1.1" class="ltx_text" style="font-size:90%;">   <math id="S6.T2.m1" class="ltx_Math" alttext="+" display="inline" intent=":literal"><semantics><mo>+</mo><annotation encoding="application/x-tex">+</annotation></semantics></math> Null Template</span></td>
+<td id="S6.T2.5.3.2" class="ltx_td ltx_nopad_r ltx_align_right"><span id="S6.T2.5.3.2.1" class="ltx_text" style="font-size:90%;">71.4</span></td></tr>
+<tr id="S6.T2.5.4" class="ltx_tr">
+<td id="S6.T2.5.4.1" class="ltx_td ltx_align_left"><span id="S6.T2.5.4.1.1" class="ltx_text" style="font-size:90%;">   <math id="S6.T2.m2" class="ltx_Math" alttext="+" display="inline" intent=":literal"><semantics><mo>+</mo><annotation encoding="application/x-tex">+</annotation></semantics></math> Random Template</span></td>
+<td id="S6.T2.5.4.2" class="ltx_td ltx_nopad_r ltx_align_right"><span id="S6.T2.5.4.2.1" class="ltx_text" style="font-size:90%;">82.0</span></td></tr>
+<tr id="S6.T2.5.5" class="ltx_tr">
+<td id="S6.T2.5.5.1" class="ltx_td ltx_align_left ltx_border_t"><span id="S6.T2.5.5.1.1" class="ltx_text" style="font-size:90%;">PickScore vs Aesthetics <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib14" title="" class="ltx_ref">14</a>]</cite></span></td>
+<td id="S6.T2.5.5.2" class="ltx_td ltx_nopad_r ltx_align_right ltx_border_t"><span id="S6.T2.5.5.2.1" class="ltx_text" style="font-size:90%;">85.1</span></td></tr>
+<tr id="S6.T2.5.6" class="ltx_tr">
+<td id="S6.T2.5.6.1" class="ltx_td ltx_align_left ltx_border_bb"><span id="S6.T2.5.6.1.1" class="ltx_text" style="font-size:90%;">PickScore vs CLIP-H <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib7" title="" class="ltx_ref">7</a>]</cite></span></td>
+<td id="S6.T2.5.6.2" class="ltx_td ltx_nopad_r ltx_align_right ltx_border_bb"><span id="S6.T2.5.6.2.1" class="ltx_text" style="font-size:90%;">71.3</span></td></tr>
+</tbody>
+</table>
+</figure>
+<div id="S6.p2" class="ltx_para">
+<p id="S6.p2.1" class="ltx_p">Table <a href="#S6.T2" title="Table 2 ‣ 6 Text-to-Image Ranking ‣ Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> shows that PickScore consistently selects more preferable images than the baselines.
+By manually analyzing some examples, we find that PickScore typically selects images that are both more aesthetic and better aligned with the prompt.
+We also measure this explicitly by using the aesthetic scoring function instead of a human rater when comparing PickScore’s choice to CLIP-H’s, and find that for 68.5% of the prompts, PickScore selects an image with a higher aesthetic score.
+Likewise, when comparing PickScore to the aesthetic scorer, 90.5% of PickScore’s choices have a higher CLIP-H text-alignment score than the images chosen by the aesthetic scorer.
+Figure <a href="#S6.F8" title="Figure 8 ‣ 6 Text-to-Image Ranking ‣ Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">8</span></a> visualizes the benefits of selecting images with PickScore.</p>
+</div>
+<figure id="S6.F8" class="ltx_figure">
+<table id="S6.F8.3" class="ltx_tabular ltx_centering ltx_align_middle">
+<tbody class="ltx_tbody">
+<tr id="S6.F8.3.1" class="ltx_tr">
+<td id="S6.F8.3.1.1" class="ltx_td ltx_align_center" style="padding-left:2.0pt;padding-right:2.0pt;"><img src="https://arxiv.org/html/2305.01569v2/ranking_hor.png" id="S6.F8.g1" class="ltx_graphics ltx_img_landscape" style="aspect-ratio:452/142;" width="452" height="142" alt="Refer to caption"></td></tr>
+</tbody>
+</table>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span id="S6.F8.4" class="ltx_text" style="font-size:90%;">Figure 8</span>: </span><span id="S6.F8.5" class="ltx_text" style="font-size:90%;">Comparing the image from the vanilla text-to-image model (left) with the image selected by PickScore from a set of 100 generations (right).</span></figcaption>
+</figure>
+</section>
+<section id="S7" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">7 </span>Related Work</h2>
+
+<div id="S7.p1" class="ltx_para">
+<p id="S7.p1.1" class="ltx_p">Collecting and learning from human preferences is an active area of research in natural language processing (NLP) <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib3" title="" class="ltx_ref">3</a>, <a href="#bib.bib1" title="" class="ltx_ref">1</a>, <a href="#bib.bib10" title="" class="ltx_ref">10</a>]</cite>.
+However, in the domain of text-to-image generation, related research questions have received little attention.
+One notable work that focuses on collecting human judgments in text-to-image generation is the Simulacra Aesthetic Captions (SAC) dataset <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib11" title="" class="ltx_ref">11</a>]</cite>.
+This dataset contains almost 200,000 human ratings of generated images.
+However, unlike Pick-a-Pic which focuses on <span id="S7.p1.1.1" class="ltx_text ltx_font_italic">general</span> user preferences, and allows users to compare <span id="S7.p1.1.2" class="ltx_text ltx_font_italic">between</span> generated images, the human raters of SAC provide an <span id="S7.p1.1.3" class="ltx_text ltx_font_italic">absolute</span> score for the <span id="S7.p1.1.4" class="ltx_text ltx_font_italic">aesthetic</span> quality of the generated images.</p>
+</div>
+<div id="S7.p2" class="ltx_para">
+<p id="S7.p2.1" class="ltx_p">There has been some concurrent work that involves collection and learning from human preferences that we describe below.
+Lee et al. <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib8" title="" class="ltx_ref">8</a>]</cite> consider three simple categories of challenges (count, color, and background), enumerating through templates (e.g. “[number] dogs”) to synthetically create prompts.
+Then, they instruct crowd workers to choose if a generated image is good or bad and use the collected 30,000 examples to train a scoring function.
+In contrast, Pick-a-Pick allows real users to write any prompts they choose, and provide pairwise comparisons between images that yield more than 500,000 examples.</p>
+</div>
+<div id="S7.p3" class="ltx_para">
+<p id="S7.p3.1" class="ltx_p">ImageReward <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib18" title="" class="ltx_ref">18</a>]</cite> selects prompts and images from the DiffusionDB dataset <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib16" title="" class="ltx_ref">16</a>]</cite>, and collects for them image preference ratings via crowd workers.
+Since they employ crowd workers that lack the intrinsic motivation to select images that they prefer, the authors define criteria to assess the quality of generated images and instruct crowd workers to follow these criteria when ranking images.
+They use this strategy to collect 136,892 examples which originate from 8,878 prompts.
+Importantly, they have not publicly released this dataset.
+For completeness, we tested ImageReward on the Pick-a-Pic dataset and confirmed that PickScore outperforms it.</p>
+</div>
+<div id="S7.p4" class="ltx_para">
+<p id="S7.p4.1" class="ltx_p">Another concurrent work from Wu et al. <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib17" title="" class="ltx_ref">17</a>]</cite> collects a dataset of human judgments by scraping about 25,000 human ratings (which include about 100,000 images) from the Discord channel of StabilityAI.
+Similarly to us, they use an objective analogous to that of InstructGPT to train a scoring function that they name Human Preference Score (HPS). As with ImageReward, we evaluated HPS on Pick-a-Pic and saw that PickScore achieves better performance.</p>
+</div>
+<div id="S7.p5" class="ltx_para">
+<p id="S7.p5.1" class="ltx_p">The observed superior performance of PickScore over the concurrent work from both HPS and ImageReward on the Pick-a-Pic dataset could be attributed to several factors.
+For example, differences in implementation (e.g., model size, backbone, hyperparameters), differences in the scales of data, or variations in the distribution of data.
+Notably, Pick-a-Pic is more than five times larger than the data used to train HPS and ImageReward.
+Furthermore, ImageReward collects judgments from crowd workers, which may lead to significant differences in data distribution.
+In contrast, HPS scrapes ratings from the StabilityAI discord channel for real text-to-image users but may be more aligned with this more specific distribution of text-to-image users.
+We leave Isolating and identifying the specific effects of these factors for future work.</p>
+</div>
+</section>
+<section id="S8" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">8 </span>Limitations and Broader Impact</h2>
+
+<div id="S8.p1" class="ltx_para">
+<p id="S8.p1.1" class="ltx_p">It is important to acknowledge that despite our efforts to ensure data quality (see <a href="#S2" title="2 Pick-a-Pic Dataset ‣ Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">section</span> <span class="ltx_text ltx_ref_tag">2</span></a>), some images and prompts may contain NSFW content that could potentially bias the data, and some users may have made judgments without due care. Moreover, the preferences of users may include biases that may be reflected in the collected data.
+These limitations may affect the overall quality and reliability of the data collected and should be taken into consideration when considering the broader impact of the dataset.
+Nonetheless, we believe that the advantages of collecting data from intrinsically-motivated users and publicly releasing it will enable the text-to-image community to better align text-to-image models with human preferences.</p>
+</div>
+</section>
+<section id="S9" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">9 </span>Conclusions</h2>
+
+<div id="S9.p1" class="ltx_para">
+<p id="S9.p1.1" class="ltx_p">We build a web application that serves text-to-image users and (willingly) collects their preferences. We use the collected data and present the Pick-a-Pic dataset: an open dataset of over half-a-million examples of text-to-image prompts, generated images, and user-labeled preferences.
+The quantity and quality of the data enables us to train PickScore, a state-of-the-art text-image scoring function, which achieves superhuman performance when predicting user preferences.
+PickScore aligns better with human judgements than any other publicly-available automatic metric, and together with Pick-a-Pic’s natural distribution prompts, enables much more relevant text-to-image model evaluation than existing evaluation standards, such as FID over MS-COCO.
+Finally, we demonstrate the effectiveness of using our scoring function for selecting images in improving the quality of text-to-image models.
+There are still many opportunities for building upon Pick-a-Pic and PickScore, such as RLHF and other alignment approaches, and we are excited to see how the research community will utilize this work in the near future.</p>
+</div>
+</section>
+<section id="Sx1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Acknowledgments</h2>
+
+<div id="Sx1.p1" class="ltx_para">
+<p id="Sx1.p1.1" class="ltx_p">We gratefully acknowledge the support of Stability AI, the Google TRC program, and Jonathan Berant, who provided us with invaluable compute resources, credits, and storage that were crucial to the success of this project. We extend our sincerest thanks for their contributions and support.
+Furthermore, we extend our gratitude to Roni Herman, Or Honovich, Avia Efrat, Samuel Amouyal, Tomer Ronen, Uri Shaham, Maor Ivgi, Itay Itzhak, Illy Sachs, and other friends and colleagues for their contribution to the annotation endeavor of this project.</p>
+</div>
+</section>
+<section id="bib" class="ltx_bibliography">
+<h2 class="ltx_title ltx_title_bibliography" style="font-size:90%;">References</h2>
+
+<ul class="ltx_biblist">
+      
+<li id="bib.bib1" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib1.2" class="ltx_text" style="font-size:90%;">[1]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib1.4" class="ltx_text" style="font-size:90%;">
+Yuntao Bai, Andy Jones, Kamal Ndousse, Amanda Askell, Anna Chen, Nova DasSarma,
+Dawn Drain, Stanislav Fort, Deep Ganguli, T. J. Henighan, Nicholas Joseph,
+Saurav Kadavath, John Kernion, Tom Conerly, Sheer El-Showk, Nelson Elhage,
+Zac Hatfield-Dodds, Danny Hernandez, Tristan Hume, Scott Johnston, Shauna
+Kravec, Liane Lovitt, Neel Nanda, Catherine Olsson, Dario Amodei, Tom B.
+Brown, Jack Clark, Sam McCandlish, Christopher Olah, Benjamin Mann, and Jared
+Kaplan.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib1.5" class="ltx_text" style="font-size:90%;">Training a helpful and harmless assistant with reinforcement learning
+from human feedback.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib1.6" class="ltx_text ltx_font_italic" style="font-size:90%;">ArXiv</span><span id="bib.bib1.7" class="ltx_text" style="font-size:90%;">, abs/2204.05862, 2022.
+</span>
+</span></li>
+      
+<li id="bib.bib2" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib2.2" class="ltx_text" style="font-size:90%;">[2]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib2.4" class="ltx_text" style="font-size:90%;">
+Xinlei Chen, Hao Fang, Tsung-Yi Lin, Ramakrishna Vedantam, Saurabh Gupta, Piotr
+Dollár, and C. Lawrence Zitnick.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib2.5" class="ltx_text" style="font-size:90%;">Microsoft coco captions: Data collection and evaluation server.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib2.6" class="ltx_text ltx_font_italic" style="font-size:90%;">ArXiv</span><span id="bib.bib2.7" class="ltx_text" style="font-size:90%;">, abs/1504.00325, 2015.
+</span>
+</span></li>
+      
+<li id="bib.bib3" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib3.2" class="ltx_text" style="font-size:90%;">[3]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib3.4" class="ltx_text" style="font-size:90%;">
+Paul Francis Christiano, Jan Leike, Tom B. Brown, Miljan Martic, Shane Legg,
+and Dario Amodei.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib3.5" class="ltx_text" style="font-size:90%;">Deep reinforcement learning from human preferences.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib3.6" class="ltx_text ltx_font_italic" style="font-size:90%;">ArXiv</span><span id="bib.bib3.7" class="ltx_text" style="font-size:90%;">, abs/1706.03741, 2017.
+</span>
+</span></li>
+      
+<li id="bib.bib4" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib4.2" class="ltx_text" style="font-size:90%;">[4]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib4.4" class="ltx_text" style="font-size:90%;">
+Arpad E. Elo.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib4.5" class="ltx_text" style="font-size:90%;">The rating of chessplayers, past and present.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib4.6" class="ltx_text" style="font-size:90%;">1978.
+</span>
+</span></li>
+      
+<li id="bib.bib5" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib5.2" class="ltx_text" style="font-size:90%;">[5]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib5.4" class="ltx_text" style="font-size:90%;">
+Martin Heusel, Hubert Ramsauer, Thomas Unterthiner, Bernhard Nessler, and Sepp
+Hochreiter.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib5.5" class="ltx_text" style="font-size:90%;">Gans trained by a two time-scale update rule converge to a local nash
+equilibrium.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib5.6" class="ltx_text" style="font-size:90%;">In </span><span id="bib.bib5.7" class="ltx_text ltx_font_italic" style="font-size:90%;">NIPS</span><span id="bib.bib5.8" class="ltx_text" style="font-size:90%;">, 2017.
+</span>
+</span></li>
+      
+<li id="bib.bib6" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib6.2" class="ltx_text" style="font-size:90%;">[6]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib6.4" class="ltx_text" style="font-size:90%;">
+Jonathan Ho.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib6.5" class="ltx_text" style="font-size:90%;">Classifier-free diffusion guidance.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib6.6" class="ltx_text ltx_font_italic" style="font-size:90%;">ArXiv</span><span id="bib.bib6.7" class="ltx_text" style="font-size:90%;">, abs/2207.12598, 2022.
+</span>
+</span></li>
+      
+<li id="bib.bib7" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib7.2" class="ltx_text" style="font-size:90%;">[7]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib7.4" class="ltx_text" style="font-size:90%;">
+Gabriel Ilharco, Mitchell Wortsman, Ross Wightman, Cade Gordon, Nicholas
+Carlini, Rohan Taori, Achal Dave, Vaishaal Shankar, Hongseok Namkoong, John
+Miller, Hannaneh Hajishirzi, Ali Farhadi, and Ludwig Schmidt.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib7.5" class="ltx_text" style="font-size:90%;">Openclip, July 2021.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib7.6" class="ltx_text" style="font-size:90%;">If you use this software, please cite it as below.
+</span>
+</span></li>
+      
+<li id="bib.bib8" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib8.2" class="ltx_text" style="font-size:90%;">[8]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib8.4" class="ltx_text" style="font-size:90%;">
+Kimin Lee, Hao Liu, Moonkyung Ryu, Olivia Watkins, Yuqing Du, Craig Boutilier,
+P. Abbeel, Mohammad Ghavamzadeh, and Shixiang Shane Gu.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib8.5" class="ltx_text" style="font-size:90%;">Aligning text-to-image models using human feedback.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib8.6" class="ltx_text ltx_font_italic" style="font-size:90%;">ArXiv</span><span id="bib.bib8.7" class="ltx_text" style="font-size:90%;">, abs/2302.12192, 2023.
+</span>
+</span></li>
+      
+<li id="bib.bib9" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib9.2" class="ltx_text" style="font-size:90%;">[9]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib9.4" class="ltx_text" style="font-size:90%;">
+Tsung-Yi Lin, Michael Maire, Serge J. Belongie, James Hays, Pietro Perona, Deva
+Ramanan, Piotr Dollár, and C. Lawrence Zitnick.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib9.5" class="ltx_text" style="font-size:90%;">Microsoft coco: Common objects in context.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib9.6" class="ltx_text" style="font-size:90%;">In </span><span id="bib.bib9.7" class="ltx_text ltx_font_italic" style="font-size:90%;">ECCV</span><span id="bib.bib9.8" class="ltx_text" style="font-size:90%;">, 2014.
+</span>
+</span></li>
+      
+<li id="bib.bib10" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib10.2" class="ltx_text" style="font-size:90%;">[10]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib10.4" class="ltx_text" style="font-size:90%;">
+Long Ouyang, Jeff Wu, Xu Jiang, Diogo Almeida, Carroll L. Wainwright, Pamela
+Mishkin, Chong Zhang, Sandhini Agarwal, Katarina Slama, Alex Ray, John
+Schulman, Jacob Hilton, Fraser Kelton, Luke E. Miller, Maddie Simens, Amanda
+Askell, Peter Welinder, Paul Francis Christiano, Jan Leike, and Ryan J. Lowe.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib10.5" class="ltx_text" style="font-size:90%;">Training language models to follow instructions with human feedback.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib10.6" class="ltx_text ltx_font_italic" style="font-size:90%;">ArXiv</span><span id="bib.bib10.7" class="ltx_text" style="font-size:90%;">, abs/2203.02155, 2022.
+</span>
+</span></li>
+      
+<li id="bib.bib11" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib11.2" class="ltx_text" style="font-size:90%;">[11]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib11.4" class="ltx_text" style="font-size:90%;">
+John David Pressman, Katherine Crowson, and Simulacra Captions Contributors.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib11.5" class="ltx_text" style="font-size:90%;">Simulacra aesthetic captions.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib11.6" class="ltx_text" style="font-size:90%;">Technical Report Version 1.0, Stability AI, 2022.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib11.7" class="ltx_text" style="font-size:90%;"> url  https://github.com/JD-P/simulacra-aesthetic-captions .
+</span>
+</span></li>
+      
+<li id="bib.bib12" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib12.2" class="ltx_text" style="font-size:90%;">[12]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib12.4" class="ltx_text" style="font-size:90%;">
+Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh,
+Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark,
+Gretchen Krueger, and Ilya Sutskever.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib12.5" class="ltx_text" style="font-size:90%;">Learning transferable visual models from natural language
+supervision.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib12.6" class="ltx_text" style="font-size:90%;">In </span><span id="bib.bib12.7" class="ltx_text ltx_font_italic" style="font-size:90%;">International Conference on Machine Learning</span><span id="bib.bib12.8" class="ltx_text" style="font-size:90%;">, 2021.
+</span>
+</span></li>
+      
+<li id="bib.bib13" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib13.2" class="ltx_text" style="font-size:90%;">[13]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib13.4" class="ltx_text" style="font-size:90%;">
+Robin Rombach, A. Blattmann, Dominik Lorenz, Patrick Esser, and Björn
+Ommer.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib13.5" class="ltx_text" style="font-size:90%;">High-resolution image synthesis with latent diffusion models.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib13.6" class="ltx_text ltx_font_italic" style="font-size:90%;">2022 IEEE/CVF Conference on Computer Vision and Pattern
+Recognition (CVPR)</span><span id="bib.bib13.7" class="ltx_text" style="font-size:90%;">, pages 10674–10685, 2021.
+</span>
+</span></li>
+      
+<li id="bib.bib14" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib14.2" class="ltx_text" style="font-size:90%;">[14]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib14.4" class="ltx_text" style="font-size:90%;">
+Christoph Schuhmann, Romain Beaumont, Richard Vencu, Cade W Gordon, Ross
+Wightman, Mehdi Cherti, Theo Coombes, Aarush Katta, Clayton Mullis, Mitchell
+Wortsman, Patrick Schramowski, Srivatsa R Kundurthy, Katherine Crowson,
+Ludwig Schmidt, Robert Kaczmarczyk, and Jenia Jitsev.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib14.5" class="ltx_text" style="font-size:90%;">LAION-5b: An open large-scale dataset for training next generation
+image-text models.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib14.6" class="ltx_text" style="font-size:90%;">In </span><span id="bib.bib14.7" class="ltx_text ltx_font_italic" style="font-size:90%;">Thirty-sixth Conference on Neural Information Processing
+Systems Datasets and Benchmarks Track</span><span id="bib.bib14.8" class="ltx_text" style="font-size:90%;">, 2022.
+</span>
+</span></li>
+      
+<li id="bib.bib15" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib15.2" class="ltx_text" style="font-size:90%;">[15]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib15.4" class="ltx_text" style="font-size:90%;">
+Christian Szegedy, Vincent Vanhoucke, Sergey Ioffe, Jonathon Shlens, and
+Zbigniew Wojna.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib15.5" class="ltx_text" style="font-size:90%;">Rethinking the inception architecture for computer vision.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib15.6" class="ltx_text ltx_font_italic" style="font-size:90%;">2016 IEEE Conference on Computer Vision and Pattern Recognition
+(CVPR)</span><span id="bib.bib15.7" class="ltx_text" style="font-size:90%;">, pages 2818–2826, 2015.
+</span>
+</span></li>
+      
+<li id="bib.bib16" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib16.2" class="ltx_text" style="font-size:90%;">[16]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib16.4" class="ltx_text" style="font-size:90%;">
+Zijie J. Wang, Evan Montoya, David Munechika, Haoyang Yang, Benjamin Hoover,
+and Duen Horng Chau.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib16.5" class="ltx_text" style="font-size:90%;">Diffusiondb: A large-scale prompt gallery dataset for text-to-image
+generative models.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib16.6" class="ltx_text ltx_font_italic" style="font-size:90%;">ArXiv</span><span id="bib.bib16.7" class="ltx_text" style="font-size:90%;">, abs/2210.14896, 2022.
+</span>
+</span></li>
+      
+<li id="bib.bib17" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib17.2" class="ltx_text" style="font-size:90%;">[17]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib17.4" class="ltx_text" style="font-size:90%;">
+Xiaoshi Wu, Keqiang Sun, Feng Zhu, Rui Zhao, and Hongsheng Li.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib17.5" class="ltx_text" style="font-size:90%;">Better aligning text-to-image models with human preference.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib17.6" class="ltx_text ltx_font_italic" style="font-size:90%;">ArXiv</span><span id="bib.bib17.7" class="ltx_text" style="font-size:90%;">, abs/2303.14420, 2023.
+</span>
+</span></li>
+      
+<li id="bib.bib18" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib18.2" class="ltx_text" style="font-size:90%;">[18]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib18.4" class="ltx_text" style="font-size:90%;">
+Jiazheng Xu, Xiao Liu, Yuchen Wu, Yuxuan Tong, Qinkai Li, Ming Ding, Jie Tang,
+and Yuxiao Dong.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib18.5" class="ltx_text" style="font-size:90%;">Imagereward: Learning and evaluating human preferences for
+text-to-image generation.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib18.6" class="ltx_text ltx_font_italic" style="font-size:90%;">ArXiv</span><span id="bib.bib18.7" class="ltx_text" style="font-size:90%;">, abs/2304.05977, 2023.
+</span>
+</span></li>
+    
+</ul>
+</section>
+<div class="ltx_pagination ltx_role_newpage"></div>
+<section id="Sx2" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Appendix</h2>
+
+<section id="Sx2.SSx1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Comparing Pick-a-Pic Prompts with MS-COCO Captions</h3>
+
+<div id="Sx2.SSx1.p1" class="ltx_para">
+<p id="Sx2.SSx1.p1.1" class="ltx_p">To illustrate the difference between MS-COCO captions and Pick-a-Pic prompts we show prompts from each dataset.</p>
+</div>
+<div id="Sx2.SSx1.p2" class="ltx_para">
+<p id="Sx2.SSx1.p2.1" class="ltx_p">Pick-a-Pic – “forest with ruins, photo”, “A panda bear as a mad scientist”, “product photo of a sneakers”, “photo of a bicycle, detailed, 8k uhd, dslr, high quality, film grain, Fujifilm XT3”, “female portrait photo”, “Alexander the great, cover art, colorful”, “A galactic eldritch squid towering over the planet Earth, stars, galaxies and nebulas in the background…”, “Portrait of a giant, fluffy, ninja teddy bear”, “insanely detailed portrait, darth vader, shiny, extremely intricate, high res, 8k, award winning”, “Giant ice cream cone melting and creating a river through a city”.</p>
+</div>
+<div id="Sx2.SSx1.p3" class="ltx_para">
+<p id="Sx2.SSx1.p3.1" class="ltx_p">MS-COCO – “A man with a red helmet on a small moped on a dirt road.”, “A woman wearing a net on her head cutting a cake.”, “there is a woman that is cutting a white cake”, “a little boy wearing headphones and looking at a computer monitor”, “A young girl is preparing to blow out her candle.”, “A commercial stainless kitchen with a pot of food cooking.”, “Two men that are standing in a kitchen.”, “A man riding a bike past a train traveling along tracks.”, “The pantry door of the small kitchen is closed.”, “A man is doing a trick on a skateboard”.</p>
+</div>
+</section>
+<section id="Sx2.SSx2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Training a Scoring Function</h3>
+
+<div id="Sx2.SSx2.p1" class="ltx_para">
+<p id="Sx2.SSx2.p1.1" class="ltx_p">We further explored an alternative loss function that is closer to CLIP’s original objective.
+In this loss function, we also incorporate the remaining examples in the batch as in-batch negatives.
+To elaborate, considering the notation established in <a href="#S3" title="3 PickScore ‣ Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">section</span> <span class="ltx_text ltx_ref_tag">3</span></a> and <math id="Sx2.SSx2.p1.m1" class="ltx_Math" alttext="y^{k}_{1},y^{k}_{2}" display="inline" intent=":literal"><semantics><mrow><msubsup><mi>y</mi><mn>1</mn><mi>k</mi></msubsup><mo>,</mo><msubsup><mi>y</mi><mn>2</mn><mi>k</mi></msubsup></mrow><annotation encoding="application/x-tex">y^{k}_{1},y^{k}_{2}</annotation></semantics></math> denoting the images corresponding to the <math id="Sx2.SSx2.p1.m2" class="ltx_Math" alttext="k" display="inline" intent=":literal"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>-th example in the batch, we formulate <math id="Sx2.SSx2.p1.m3" class="ltx_Math" alttext="\hat{p}^{k}" display="inline" intent=":literal"><semantics><msup><mover accent="true"><mi>p</mi><mo>^</mo></mover><mi>k</mi></msup><annotation encoding="application/x-tex">\hat{p}^{k}</annotation></semantics></math> as follows:</p>
+<table id="Sx2.E4" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx2.E4.m1" class="ltx_Math" alttext="\hat{p}^{k}_{i}=\frac{\exp{s(x,y_{i})}}{\sum_{k}\sum_{j=1}^{2}\exp{s(x,y^{k}_{j})}}" display="block" intent=":literal"><semantics><mrow><msubsup><mover accent="true"><mi>p</mi><mo>^</mo></mover><mi>i</mi><mi>k</mi></msubsup><mo>=</mo><mfrac><mrow><mi>exp</mi><mo lspace="0.167em">⁡</mo><mrow><mi>s</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>,</mo><msub><mi>y</mi><mi>i</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><mrow><msub><mo>∑</mo><mi>k</mi></msub><mrow><msubsup><mo lspace="0.167em">∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mn>2</mn></msubsup><mrow><mi>exp</mi><mo lspace="0.167em">⁡</mo><mrow><mi>s</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>,</mo><msubsup><mi>y</mi><mi>j</mi><mi>k</mi></msubsup><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">\hat{p}^{k}_{i}=\frac{\exp{s(x,y_{i})}}{\sum_{k}\sum_{j=1}^{2}\exp{s(x,y^{k}_{j})}}</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(4)</span></td></tr></tbody>
+</table>
+<p id="Sx2.SSx2.p1.2" class="ltx_p">We anticipated that this objective function would maintain the general capabilities of CLIP with minimal loss in performance.
+However, our findings demonstrated that PickScore significantly outperforms this objective function, as the latter only produced a scoring function that achieves an accuracy of 65.2 on the Pick-a-Pic test set.</p>
+</div>
+</section>
+</section>
+</article>
+    </div>
+  </section>
+  <section class="pane pane-zh">
+    <div class="pane-head">中文精读翻译</div>
+    <div class="pane-body" id="zhBody"><div class="md" id="mdRoot"></div></div>
+  </section>
+</main>
+<script type="text/markdown" id="zhSrc"># 《Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation》中文精读翻译
+
+## 论文信息
+
+- **英文标题**：Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation
+- **中文标题**：Pick-a-Pic：面向文生图生成的开放用户偏好数据集
+- **作者**：Yuval Kirstain、Adam Polyak、Uriel Singer、Shahbuland Matiana、Joe Penna、Omer Levy
+- **机构**：特拉维夫大学（Tel Aviv University）、Stability AI
+- **arXiv 链接**：<https://arxiv.org/abs/2305.01569>
+- **提出的框架**：Pick-a-Pic 数据集 + PickScore 奖励模型
+
+## 一句话核心总结
+
+本文通过一个公开的文生图（text-to-image）Web 应用，从具有内在动机的真实用户处收集了超过 50 万条（后扩展至逾百万条）成对图像偏好标注，构建了首个大规模、完全开放的文生图用户偏好数据集 Pick-a-Pic，并据此以类 InstructGPT 奖励目标微调 CLIP-H 得到奖励模型 PickScore——它在预测人类偏好上超越人类专家（70.5% vs 68.0%），与人类模型排序的相关性远超 FID 等自动指标，并可经 best-of-N 排序显著提升既有文生图模型的生成质量。
+
+---
+
+## 摘要
+
+从文生图用户处收集大规模人类偏好数据集的能力，通常仅为公司所拥有，这使得此类数据集对公众不可及。为解决这一问题，我们创建了一个 Web 应用，使文生图用户可以生成图像并表达其偏好。借助该应用，我们构建了 **Pick-a-Pic**——一个大规模、开放的文生图提示词及真实用户对生成图像偏好的数据集。我们利用该数据集训练了一个基于 CLIP 的打分函数 **PickScore**，其在预测人类偏好任务上展现出超人的性能。随后，我们检验了 PickScore 执行模型评估的能力，并观察到它与人类排序的相关性优于其他自动评估指标。因此，我们建议使用 PickScore 评估未来的文生图生成模型，并使用 Pick-a-Pic 提示词作为比 MS-COCO 更相关的评估数据集。最后，我们展示了 PickScore 如何通过排序（ranking）增强既有的文生图模型。
+
+> **图 1**：通过我们的 Web 应用生成的图像，展示了变暗的非偏好图像（左）与偏好图像（右）。
+
+---
+
+## 1 引言
+
+近期，语言模型与用户行为和期望对齐方面的进展，使建模用户偏好的能力受到高度重视 (Ouyang et al., 2022; Bai et al., 2022; Christiano et al., 2017)。然而，在文生图生成领域，这一能力鲜受关注。这种忽视在很大程度上归因于：缺乏一个关于最先进图像生成模型输出的人类偏好的大规模、开放数据集。
+
+为填补这一空白，我们创建了一个 Web 应用，让用户能够使用最先进的文生图模型生成图像，同时表达其偏好。在用户明确同意的前提下，我们收集其提示词与偏好，构建了 Pick-a-Pic——一个公开可用的数据集，包含超过 50 万条关于模型生成图像的人类偏好样本（脚注：我们近期开源了新版本的 Pick-a-Pic 数据集，其中包含超过 100 万条样本）。数据集中每条样本包含一个提示词（prompt）、两张生成图像，以及一个标明所偏好图像的标签；当没有一张图像被显著偏好时，标签为平局（tie）。值得注意的是，Pick-a-Pic 由对生成图像抱有真实兴趣的真实用户创建。这种兴趣与众包工人（crowd workers）截然不同——后者既缺乏创作提示词的内在动机，也缺乏提示词作者所拥有的、判断哪张图像更符合自身需求的原始意图。
+
+利用真实的用户偏好，我们可以训练一个打分函数，来估计给定提示词时用户对某张特定生成图像的满意度。为训练这样的打分函数，我们使用人类偏好数据以及与 InstructGPT 奖励模型 (Ouyang et al., 2022) 类似的目标函数微调 CLIP-H (Radford et al., 2021; Ilharco et al., 2021)。该目标旨在最大化偏好图像被选中而非非偏好图像的概率，平局情形下的概率亦然。我们发现，所得打分函数 **PickScore**（脚注：模型已开源于 huggingface.co/yuvalkirstain/PickScore_v1；代码见 github.com/yuvalkirstain/PickScore）在预测用户偏好任务上取得了超人性能（准确率 70.5%，人类为 68.0%），而零样本 CLIP-H（60.8%）与流行的美学预测器（aesthetics predictor）(Schuhmann et al., 2022)（56.8%）的表现则更接近随机水平（56.8%）。
+
+有了人类偏好数据集和最先进的打分函数，我们提议更新文生图生成模型评估的标准协议。**首先**，我们建议研究者使用 Pick-a-Pic 的提示词评估其文生图模型——相较于 MS-COCO (Lin et al., 2014; Chen et al., 2015) 中平凡的图像描述，这些提示词更好地代表了人类真正想生成的内容。**其次**，为将 PickScore 与 FID 进行比较，我们开展了一项人类评估研究，发现即便以 MS-COCO 描述为条件评估，PickScore 与人类偏好也呈强正相关（0.917），而以 FID 排序则呈负相关（-0.900）。更重要的是，我们还使用由真实用户偏好推断出的模型排序，将 PickScore 与其他评估指标进行了比较。我们观察到，PickScore 与由真实用户确定的真值（ground truth）排序的相关性强于其他所有评估指标。因此，我们建议将 PickScore 作为比现有指标更可靠的评估指标。
+
+最后，我们探索了 PickScore 如何通过排序提升原生（vanilla）文生图模型的质量。为此，我们使用不同的初始随机噪声以及不同的提示词模板（例如 "breathtaking [prompt]. award-winning, professional, highly detailed"）来略微改变用户提示词并生成图像，然后检验依据不同打分函数选出最优图像所带来的影响。研究结果表明：人类评估者更偏好 PickScore 选出的图像，胜过 CLIP-H (Ilharco et al., 2021) 所选（胜率 71.3%）、美学预测器 (Schuhmann et al., 2022) 所选（胜率 85.1%），以及原生文生图模型直接输出（胜率 71.4%）。
+
+> **图 2**：Pick-a-Pic 数据通过应用收集的方式：(a) 用户首先撰写一条描述，收到两张图像；(b) 用户做出偏好判断；(c) 一张新图像替代被拒绝的图像。该流程不断重复，直至用户更改提示词。
+
+综上所述，本工作通过创建一个大规模、开放、高质量的用户提示驱动的模型生成图像人类偏好数据集，填补了文生图生成领域的空白。我们通过训练打分函数 PickScore 展示了该数据集的潜力——在预测人类偏好、评估文生图模型以及通过排序改进模型三方面，PickScore 均优于任何其他公开可用的自动打分函数。我们鼓励研究社区采用 Pick-a-Pic 与 PickScore，作为推进文生图建模、将人类偏好纳入学习过程的基础。
+
+---
+
+## 2 Pick-a-Pic 数据集
+
+Pick-a-Pic 数据集（脚注：数据集可在 huggingface.co/datasets/yuvalkirstain/pickapic_v1 获取，其更新版本为 …/pickapic_v2）通过记录用户与文生图 Pick-a-Pic Web 应用的交互而创建。总体而言，Pick-a-Pic 数据集包含超过 500,000 条样本和 35,000 个不同提示词。每条样本包含一个提示词、两张生成图像，以及一个标明偏好哪张图像的标签（或在无明显偏好时为平局）。数据集中的图像由多个主干（backbone）模型生成，包括 Stable Diffusion 2.1、Dreamlike Photoreal 2.0（脚注：Dreamlike Photoreal 2.0 是 Stable Diffusion 1.5 的微调版本）以及 Stable Diffusion XL 变体 (Rombach et al., 2021)，并采样了不同的无分类器引导尺度（classifier-free guidance scale）(Ho, 2022)。随着我们持续通过 Pick-a-Pic 应用收集更多用户交互、并减少数据集中 NSFW（不适宜工作场所内容）样本的数量，我们将定期上传新版数据集。
+
+### 2.1 Pick-a-Pic Web 应用
+
+为确保对广泛用户群体的最大可及性，用户界面的设计以简洁为原则。应用允许用户撰写有创意的提示词并生成图像。每一轮，用户会看到两张（以其提示词为条件的）生成图像，并被要求选出其偏好的选项，或在无强烈偏好时标记平局。完成选择后，被拒绝（非偏好）的图像会被一张新生成的图像替换，过程不断重复。用户也可随时清除或编辑提示词，应用会相应地生成新图像。图 2 展示了这一使用流程。
+
+### 2.2 来自真实用户的真实数据
+
+Pick-a-Pic 的一个关键优势在于：我们的数据收集自真实的、有内在动机的用户，而非付费的众包工人。这一点是通过 Twitter、Facebook、Discord、Reddit 等多种社交媒体渠道接触广泛受众来实现的。与此同时，我们通过若干质量控制措施，来缓解因潜在的应用滥用而收集到低质量数据的风险。**第一**，用户须使用 Gmail 或 Discord 账户认证身份（脚注：所有用户均明确同意将其与 Pick-a-Pic 应用的交互作为公开数据集的一部分分享；为确保隐私，我们对用户 ID 做了匿名化处理）。**第二**，我们密切监控用户活动日志，并封禁生成 NSFW 内容、同时使用多个应用实例、或以不合理速度做出判断的用户。**第三**，我们使用 NSFW 短语列表来阻止用户生成有害内容。**最后**，我们将用户限制为 1000 次交互，并定期提高限额。这些措施协同作用，确保了 Pick-a-Pic 数据的完整性与可靠性。
+
+### 2.3 标注方法学
+
+在 Web 应用试点期间，我们试验了不同的标注策略，以在数据质量、收集效率与用户体验之间寻求最优。具体而言，我们测试了以下标注选项：(1) 4 张图像，无平局；(2) 2 张图像，无平局；(3) 2 张图像，允许平局。我们发现最后一个选项（2 张图像、允许平局）在用户参与度与标注者间一致性（inter-rater agreement）两方面均优于前两者。
+
+### 2.4 预处理
+
+在处理收集到的交互时，我们过滤掉含 NSFW 短语的提示词以及来自被封禁用户的样本。我们承认数据中仍存在 NSFW 图像与提示词，并将持续尝试更新数据集以减少此类情况。为将数据集划分为训练、验证与测试子集，我们首先采样一千个提示词，并确保每个提示词由不同用户创建。接着，将这些提示词随机均分为两组，分别构成验证集与测试集；然后为每个提示词采样恰好一条样本纳入这两个集合。训练集则包含所有不与验证集/测试集共享提示词的样本。这一做法确保了任意两个划分之间不共享提示词，且验证集与测试集不会非成比例地拟合于特定提示词或用户。
+
+### 2.5 统计信息
+
+自 Pick-a-Pic 应用创建以来，我们已收集 968,965 次排序（ranking），来自 66,798 个提示词和 6,394 名用户。然而，由于 Pick-a-Pic 数据集在不断更新，本文报告的实验基于一个经 NSFW 过滤、且未完全更新的 Pick-a-Pic 版本，其中包含 583,747 条训练样本，以及 500 条验证与测试样本（译注：原文为 "500 validation and test examples"；结合 2.4 节"一千个提示词均分为二、每个提示词取一条样本"的划分方式，验证集与测试集应各含 500 条）。该版本训练集包含来自 4,375 名不同用户的 37,523 个提示词。
+
+### 2.6 模型选择与评估
+
+Pick-a-Pic 数据集为模型选择（model selection）与评估方法提供了一个独特机会——利用用户偏好进行无偏分析。为展示这一机会，我们使用收集到的数据，分析了改变 Stable Diffusion XL（Alpha 变体）的无分类器引导尺度对其性能的影响。具体而言，我们比较两张图像均由 Stable Diffusion XL（Alpha 变体）生成、但使用不同引导尺度时的人类偏好（脚注：不同引导尺度出现的频率相近）。对每个尺度，我们计算其胜率（win ratio），即使用该尺度得到偏好图像的判断占比；同时计算相应的平局率与败率，从而细致分析哪些引导尺度更有效。结果如图 3(a) 所示，例如验证了：与引导尺度 3 相比，引导尺度 9 通常能产生更受偏好的图像（译注：ar5iv 转换文本中此处数字呈现为 "99"/"33"，系 LaTeXML 单字符重复伪影，已按上下文校正为 9 与 3）。
+
+此外，通过考察由不同主干模型生成的图像之间的用户偏好，我们可以确定哪个模型更受用户青睐。例如，对于一张图像由 Dreamlike Photoreal 2.0 生成、另一张由 Stable Diffusion 2.1 生成的那些判断，我们可以评估哪个模型表现更优。如图 3(b) 所示，用户通常更偏好 Dreamlike Photoreal 2.0 而非 Stable Diffusion 2.1。我们鼓励研究者与我们联系，将其文生图模型纳入 Pick-a-Pic 应用，以进行模型选择与评估。
+
+> **图 3**：Pick-a-Pic 数据集使我们能够进行模型选择 (a) 与模型评估 (b)。(a) Stable Diffusion XL（Alpha）的胜率随无分类器引导尺度的变化；(b) 比较 Stable Diffusion 2.1 与 Dreamlike Photoreal 2.0 时的偏好分布。
+
+---
+
+## 3 PickScore
+
+收集一个大规模、自然的用户偏好数据集的一个宝贵成果，是可以用它来训练一个"给定提示词时为生成图像质量打分"的函数。我们在 Pick-a-Pic 上训练 PickScore 打分函数，其做法是将一个 CLIP 式模型与 InstructGPT 奖励模型目标的变体 (Ouyang et al., 2022) 相结合。PickScore 在留出的 Pick-a-Pic 提示词上预测用户偏好的能力优于任何其他公开可用的打分函数，甚至超越专家人类标注者（第 4 节）。这样的打分函数在多种场景下都有价值，例如：执行模型评估（第 5 节）、通过排序提升生成图像质量（第 6 节）、构建更好的大规模数据集以改进文生图模型 (Schuhmann et al., 2022)，以及通过弱监督（例如 RLHF）改进文生图模型。
+
+### 3.1 模型
+
+PickScore 遵循 CLIP (Radford et al., 2021) 的架构：给定提示词 $x$ 与图像 $y$，打分函数 $s$ 用一个 transformer 文本编码器表示 $x$、用一个 transformer 图像编码器表示 $y$，得到 $d$ 维向量，并返回其内积：
+
+$$
+s(x,y) = E_{\text{txt}}(x) \cdot E_{\text{img}}(y) \cdot T \tag{1}
+$$
+
+其中 $T$ 是 CLIP 的可学习标量温度参数。
+
+### 3.2 目标函数
+
+我们目标函数的输入包括：打分函数 $s$、提示词 $x$、两张图像 $y_1, y_2$，以及捕获用户对两张图像偏好的偏好分布向量 $p$。具体而言，若 $y_1$ 被偏好，$p$ 取 $[1,0]$；若 $y_2$ 被偏好，$p$ 取 $[0,1]$；平局时取 $[0.5, 0.5]$。给定该输入，目标函数通过最小化偏好 $p$ 与 $y_1$、$y_2$ 经 softmax 归一化的分数之间的 KL 散度，来优化打分函数的参数：
+
+$$
+\hat{p}_i = \frac{\exp s(x, y_i)}{\sum_{j=1}^{2} \exp s(x, y_j)} \tag{2}
+$$
+
+$$
+L_{\text{pref}} = \sum_{i=1}^{2} p_i \left( \log p_i - \log \hat{p}_i \right) \tag{3}
+$$
+
+由于许多样本可能源自同一个提示词，我们在归约批内各样本的损失时采用加权平均，以缓解过拟合于少量提示词的风险：批内每个样本的权重，与其提示词在数据集中的出现频率成反比。该目标函数与 InstructGPT 的奖励模型目标 (Ouyang et al., 2022) 类似。我们还试验了在目标函数中引入批内负样本（in-batch negatives），但发现这会得到一个准确性较低的打分函数（见附录）。
+
+### 3.3 训练
+
+我们在 Pick-a-Pic 训练集上，用我们的框架（脚注：github.com/yuvalkirstain/PickScore）微调 CLIP-H (Ilharco et al., 2021)。模型训练 4,000 步，学习率为 3e-6，总批大小为 128，预热（warmup）500 步，之后学习率线性衰减；该实验在 8 张 A100 GPU 上不到一小时即可完成。我们未进行超参数搜索——这或许能进一步提升结果。模型选择方面，我们每 100 步在验证集上（不提供平局选项）评估模型准确率，并保留表现最佳的检查点。
+
+---
+
+## 4 偏好预测
+
+我们首先在 PickScore 被训练去完成的任务上评估它：预测人类偏好。我们发现 PickScore 优于所有其他基线，包括专家人类标注者。
+
+### 4.1 评估指标
+
+为评估模型预测人类偏好的能力，我们使用一个考虑平局可能性的改进准确率指标：若模型预测与用户标签一致，得 1 分；若标签与预测中恰有一方（而非两方）为平局，得 0.5 分；其余情况得 0 分。
+
+### 4.2 平局阈值选择
+
+沿用第 3 节的记号，每个模型需要一个平局阈值概率 $t$，当 $|\hat{p}_1 - \hat{p}_2| < t$ 时预测为平局。为此，我们在验证集上以多种平局阈值概率评估每个模型，进而为每个模型确定最优阈值。对人类专家，我们不进行阈值选择，而是明确允许其选择平局。
+
+### 4.3 基线
+
+我们将本文模型与以下基线比较：CLIP-H (Ilharco et al., 2021)、构建于 CLIP-L (Radford et al., 2021) 之上的美学预测器 (Schuhmann et al., 2022)、一个随机分类器，以及人类专家（脚注：本文全篇使用作者的朋友与同事作为专家人类标注来源）。为完整起见，我们还与并行工作的模型比较，即 HPS (Wu et al., 2023) 与 ImageReward (Xu et al., 2023)。
+
+> **图 4**：CLIP-H（左）与 PickScore（右）在 Pick-a-Pic 验证集上的分歧示例。我们为人类偏好的图像添加了绿色边框。
+
+**表 1**：Pick-a-Pic 上的定量结果。(a) 不同平局阈值下在 Pick-a-Pic 验证集上的准确率（原文为曲线图，图略）；(b) 在 Pick-a-Pic 测试集上的性能：
+
+| 模型 | 准确率 |
+| --- | --- |
+| Random（随机） | 56.8 |
+| Human Expert（人类专家） | 68.0 |
+| Aesthetics（美学预测器）(Schuhmann et al., 2022) | 56.8 |
+| CLIP-H (Ilharco et al., 2021) | 60.8 |
+| ImageReward (Xu et al., 2023) | 61.1 |
+| HPS (Wu et al., 2023) | 66.7 |
+| **PickScore（本文）** | **70.5** |
+
+### 4.4 结果
+
+首先，我们比较各模型在验证集上、不同平局阈值下的表现。表 1(a)（译注：原文此处引用编号 "Figure 4(a)"，系 LaTeXML 对表内子图的误标，实指表 1(a)）显示：PickScore 在几乎所有阈值上都优于基线，并以明显优势取得全局最高分。在为每个模型选出表现最佳的平局阈值后，我们用该阈值在测试集上评估各模型。
+
+表 1(b) 显示：美学分数（56.8）与 CLIP-H（60.8）的表现接近随机基线（56.8）；而 PickScore（70.5 ± 0.142；脚注：我们用三个不同随机种子训练 PickScore，报告其均值与方差）取得了超人性能——它甚至超过了人类专家（68.0）。此处必须强调产生真值标签的真实用户与用于衡量人类表现的标注者之间的一个核心差异：产生真值的用户是真正的文生图用户，他们对想要的图像有一个（可能不完整的）构想，并创作一个（可能缺乏细节的）提示词，期望生成结果符合其偏好；相比之下，用于衡量人类表现的标注者对原始用户的语境、构想与动机一无所知。因此，该任务上的"超人性能"意味着：模型能够胜过一个不了解原始用户语境、构想与动机的人类标注者。PickScore 的超人性能凸显了在收集人类偏好时以真实用户（而非专家标注者）作为真值的重要性。此外，人类在该任务上相对平平的表现（68.0，对比随机基线 56.8）也表明：预测文生图生成中的人类偏好，对人类标注者而言本身就是一项困难的任务。
+
+为完整起见，我们还纳入了并行工作的结果：HPS (Wu et al., 2023) 得分 66.7，ImageReward (Xu et al., 2023) 得分 61.1；PickScore 均优于二者。为进一步说明 CLIP-H 与 PickScore 的差异，我们在图 4 中展示了 Pick-a-Pic 验证集上的分歧样例。我们注意到：PickScore 往往选择比 CLIP-H 更具美感的图像——有时以牺牲对提示词的忠实度为代价。
+
+---
+
+## 5 模型评估
+
+尽管文生图模型的生成能力已取得显著进展，但标准且最流行的提示词数据集依然是 MS-COCO（Microsoft Common Objects in Context）(Lin et al., 2014)。类似地，Fréchet Inception Distance（FID）(Heusel et al., 2017) 仍是模型评估的主要指标。本节中，我们解释为何建议研究者使用 Pick-a-Pic 的提示词、而非（或至少并行于）MS-COCO 来评估其模型，并表明：在评估最先进的文生图模型时，PickScore 比其他自动评估指标更贴合人类判断。
+
+### 5.1 模型评估提示词
+
+MS-COCO 数据集中的提示词是业余摄影师所拍摄照片的描述，描绘日常场景中的物体与人物。尽管该数据集中的某些描述对文生图模型可能构成挑战，但显然，文生图用户的兴趣范围远超平凡的物体与人物。更何况，图像生成的主要用例可以说是生成无法被相机捕捉的虚构内容。而 Pick-a-Pic 的提示词天然采样自真实用户，因而更好地代表了文生图意图的自然分布。因此，我们强烈倡导研究社区在评估文生图模型性能时采用 Pick-a-Pic 的提示词。
+
+> **图 5**：使用相同种子与模型、但不同无分类器引导（CFG）尺度生成的图像。尽管高引导尺度导致更差的 FID，人类通常却比低引导尺度更喜欢它们。
+
+### 5.2 FID
+
+FID 指标 (Heusel et al., 2017) 在**集合层面**衡量一组生成图像与一组真实图像的相似程度：先将真实图像与生成图像嵌入 Inception 网络 (Szegedy et al., 2016) 的特征空间，再估计两组图像的均值与协方差并计算二者的相似度。因此，FID 旨在衡量一组图像的**真实感**，但对提示词完全无感知。相比之下，PickScore 提供逐样本的分数，且直接以提示词为条件。我们由此假设：PickScore 与人类对生成质量判断的相关性会更好。
+
+为在对 FID 指标最"有利"的设定下实证检验该假设，我们从 MS-COCO 验证划分中随机选取 100 条描述。对每条描述，我们基于相同的提示词集合、用 9 个不同模型生成图像，并请人类专家对 9 张生成图像排序（允许平局），从而导出成对偏好。具体而言，我们使用 Stable Diffusion 1.5、Stable Diffusion 2.1 与 Dreamlike Photoreal 2.0，并结合三种不同的无分类器引导尺度（3、6、9）。随后，我们分别用 FID 与 PickScore（替代人类）在同一批图像上重复该标注过程。由于 FID 不在逐样本层面运作，用 FID"标注"时，我们直接选择在 MS-COCO 上 FID 更低（更好）的模型。
+
+图 6 显示了由人类排序导出的模型胜率（横轴）与由各自动打分函数导出的模型胜率之间的相关性。在 MS-COCO 描述上，PickScore 与人类评估者的相关性（0.917）强于 FID（-0.900）——后者出人意料地呈强负相关。鉴于 FID 对提示词无感知，人们本会预期零相关而非强负相关。我们假设这与无分类器引导尺度超参数有关：更大的尺度往往产生更鲜艳的图像（人类通常更偏好），但偏离 MS-COCO 真值图像的分布，从而得到更差（更高）的 FID 分数。图 5 通过展示用相同随机种子、但不同 CFG 尺度生成的图像对，直观呈现了这些差异。
+
+> **图 6**：依据 FID 与 PickScore 得到的不同模型胜率，与人类专家在 MS-COCO 验证集上胜率的相关性。
+
+### 5.3 其他评估指标
+
+在与不假设存在真值图像集合的评估指标比较时，我们能够使用更可靠的评估流程。在该流程中，我们考虑真实用户偏好而非人类标注者，并纳入更多模型（即更多数据点）。具体而言，我们取与 Pick-a-Pic 测试集提示词相对应的全部 14,000 条已收集偏好。这批样本包含由 45 个不同模型生成的图像——四种不同的主干模型，各自配有不同的引导尺度。我们随后用这些真实用户偏好为不同模型计算 Elo 评分 (Elo, 1978)。接着，用 CLIP-H (Ilharco et al., 2021) 与 PickScore 的预测替换真实用户偏好，重复上述过程。与第 4 节类似，我们还与并行工作 ImageReward (Xu et al., 2023) 与 HPS (Wu et al., 2023) 进行了比较。由于 Elo 评分系统天然是迭代的，我们将该过程重复 50 次：每次随机打乱样本顺序，并计算与人类评分的相关性；最终为每个指标输出其 50 次相关性的均值与标准差。图 7 展示了真实用户 Elo 评分与各指标评分之间的相关性：PickScore 与真实用户的相关性（0.790 ± 0.054）强于所有其他自动指标，即 CLIP-H（0.313 ± 0.075）、ImageReward（0.492 ± 0.086）与 HPS（0.670 ± 0.071）。
+
+> **图 7**：真实用户 Elo 评分与 CLIP-H、ImageReward、HPS 及 PickScore 所得 Elo 评分之间的相关性。
+
+---
+
+## 6 文生图排序（Text-to-Image Ranking）
+
+打分函数的另一个可能应用，是通过排序提升文生图模型的生成表现：生成一批图像样本，选出分数最高的一张。为检验该方法，我们从 Pick-a-Pic 测试集中取 100 个提示词，并为每个提示词生成 100 张图像。图像由 Dreamlike Photoreal 2.0 生成，无分类器引导尺度为 7.5；为增加图像多样性，我们使用 5 种初始随机噪声与 20 种不同的提示词模板。这些模板包括空模板 "[prompt]" 以及诸如 "breathtaking [prompt]. award-winning, professional, highly detailed" 的其他模板。从每组 100 张生成图像中，我们分别依据 PickScore、CLIP-H、美学分数选出最优图像，或随机选择；此外，我们还从空模板生成结果中随机选择一张图像作为对照。然后，我们请专家人类标注者将 PickScore 所选图像与其他各函数所选图像两两比较，并判断其偏好。
+
+**表 2**：从 100 张图像中选择一张时，人类偏好 PickScore 选择（优于其他打分函数选择）的实例占比。
+
+| 比较对象 | 胜率 |
+| --- | --- |
+| PickScore vs 随机种子 + 空模板 | 71.4 |
+| PickScore vs 随机种子 + 随机模板 | 82.0 |
+| PickScore vs 美学预测器 (Schuhmann et al., 2022) | 85.1 |
+| PickScore vs CLIP-H (Ilharco et al., 2021) | 71.3 |
+
+表 2 显示：PickScore 始终能选出比基线更受偏好的图像。通过对部分样例的人工分析，我们发现 PickScore 通常会选择既更美观、又与提示词更对齐的图像。我们还对此做了显式度量——在比较 PickScore 与 CLIP-H 的选择时，以美学打分函数替代人类评估者：在 68.5% 的提示词上，PickScore 选出了美学分数更高的图像；同样，在比较 PickScore 与美学打分器的选择时，90.5% 的情况下 PickScore 的选择具有比美学打分器所选图像更高的 CLIP-H 文本对齐分数。图 8 直观展示了用 PickScore 选择图像的收益。
+
+> **图 8**：原生文生图模型的图像（左）与 PickScore 从 100 次生成中选出的图像（右）的比较。
+
+---
+
+## 7 相关工作
+
+收集人类偏好并从中学习，是自然语言处理（NLP）中的一个活跃研究方向 (Christiano et al., 2017; Bai et al., 2022; Ouyang et al., 2022)。然而在文生图生成领域，相关研究问题鲜受关注。一项聚焦于收集文生图人类判断的知名工作是 Simulacra Aesthetic Captions（SAC）数据集 (Pressman et al., 2022)，它包含近 200,000 条对生成图像的人类评分。但与聚焦于一般用户偏好、允许用户在生成图像之间进行比较的 Pick-a-Pic 不同，SAC 的人类评估者为生成图像的美学质量提供绝对分数。
+
+还有一些涉及收集并学习人类偏好的并行工作，概述如下。Lee et al. (2023) 考虑三类简单的挑战类别（数量、颜色、背景），通过模板枚举（如 "[number] dogs"）合成地创建提示词；然后指示众包工人判断一张生成图像是好是坏，并用收集到的 30,000 条样本训练一个打分函数。相比之下，Pick-a-Pic 允许真实用户撰写任意提示词，并给出图像间的成对比较，产出了超过 500,000 条样本。
+
+ImageReward (Xu et al., 2023) 从 DiffusionDB 数据集 (Wang et al., 2022) 中选取提示词与图像，并通过众包工人为其收集图像偏好评分。由于其雇用的众包工人缺乏选择自己所偏好图像的内在动机，作者定义了评估生成图像质量的标准，并指示众包工人在排序图像时遵循这些标准。他们用该策略收集了源自 8,878 个提示词的 136,892 条样本。重要的是，他们未公开发布该数据集。为完整起见，我们在 Pick-a-Pic 数据集上测试了 ImageReward，确认 PickScore 优于它。
+
+另一项来自 Wu et al. (2023) 的并行工作，通过爬取 StabilityAI 的 Discord 频道，收集了一个包含约 25,000 条人类评分（涉及约 100,000 张图像）的人类判断数据集。与我们类似，他们使用与 InstructGPT 类似的目标训练了一个打分函数，命名为 Human Preference Score（HPS）。与 ImageReward 一样，我们在 Pick-a-Pic 上评估了 HPS，发现 PickScore 取得了更好的性能。
+
+在 Pick-a-Pic 数据集上观察到的 PickScore 相对 HPS 与 ImageReward 的性能优势，可归因于若干因素，例如：实现上的差异（模型规模、主干、超参数）、数据规模的差异，或数据分布的差异。值得注意的是，Pick-a-Pic 比 HPS 与 ImageReward 所用的训练数据大五倍以上。此外，ImageReward 从众包工人处收集判断，可能导致数据分布的显著差异；相比之下，HPS 从 StabilityAI Discord 频道为真实文生图用户爬取评分，但可能更偏向这一较特定的文生图用户分布。我们将隔离并识别这些因素的具体影响留作未来工作。
+
+---
+
+## 8 局限性与更广泛影响
+
+必须承认：尽管我们为确保数据质量付出了努力（见第 2 节），某些图像与提示词仍可能包含可能使数据产生偏倚的 NSFW 内容，某些用户也可能在判断时未尽审慎。此外，用户的偏好本身可能包含偏见，并可能反映到所收集的数据中。这些局限可能影响所收集数据的整体质量与可靠性，在考虑数据集的更广泛影响时应予以考量。尽管如此，我们相信：从有内在动机的用户处收集数据并公开发布，将使文生图社区能够更好地将文生图模型与人类偏好对齐。
+
+---
+
+## 9 结论
+
+我们构建了一个服务文生图用户并（在其自愿下）收集其偏好的 Web 应用。我们使用收集到的数据提出了 Pick-a-Pic 数据集：一个开放的、包含超过 50 万条文生图提示词、生成图像与用户标注偏好样本的数据集。数据的数量与质量使我们得以训练 PickScore——一个最先进的文本-图像打分函数，其在预测用户偏好时取得了超人性能。PickScore 与人类判断的对齐程度优于任何其他公开可用的自动指标；再加上 Pick-a-Pic 自然分布的提示词，使得文生图模型评估比现有评估标准（如 MS-COCO 上的 FID）更为切题。最后，我们展示了使用该打分函数进行图像选择在提升文生图模型质量上的有效性。在 Pick-a-Pic 与 PickScore 之上仍有众多机会，例如 RLHF 与其他对齐方法；我们期待看到研究社区在不久的将来如何利用这项工作。
+
+---
+
+## 附录要点（压缩概括）
+
+1. **提示词风格对比**：附录列举了两个数据集的典型提示词以说明分布差异。Pick-a-Pic 的提示词高度"生成向"且富有想象力，如 "A panda bear as a mad scientist"（扮成疯狂科学家的熊猫）、"photo of a bicycle, detailed, 8k uhd, dslr, high quality, film grain, Fujifilm XT3"（含相机/画质修饰词）、"A galactic eldritch squid towering over the planet Earth…"（银河级克苏鲁鱿鱼）、"Giant ice cream cone melting and creating a river through a city" 等；MS-COCO 则是对日常照片的平实描述，如 "A man with a red helmet on a small moped on a dirt road."、"Two men that are standing in a kitchen."。二者分布截然不同，支撑了"应以 Pick-a-Pic 提示词评估文生图模型"的主张。
+2. **带批内负样本的替代损失**：附录进一步探索了一个更接近 CLIP 原始对比目标的替代损失——将批内其余样本的图像也作为负样本纳入 softmax 归一化（式 4：$\hat{p}^k_i = \exp s(x, y_i) / \sum_k \sum_{j=1}^{2} \exp s(x, y^k_j)$），预期该目标能以最小的性能损失保持 CLIP 的通用能力。然而实验发现该变体在 Pick-a-Pic 测试集上仅达到 65.2 的准确率，显著低于 PickScore 的 70.5——表明纯粹的偏好微调目标比"对比学习式"目标更适合该任务。
+3. **开源资源汇总**：代码开源于 github.com/yuvalkirstain/PickScore；PickScore 模型发布于 HuggingFace（yuvalkirstain/PickScore_v1）；数据集为 yuvalkirstain/pickapic_v1，更新版 pickapic_v2 已扩展至超过 100 万条样本。
+4. **主干模型说明**：数据集中的图像由 Stable Diffusion 2.1、Dreamlike Photoreal 2.0（Stable Diffusion 1.5 的微调版本）与 Stable Diffusion XL 变体在不同无分类器引导尺度下生成。
+5. **标注来源说明**：全文用于衡量"人类表现"的专家标注均来自作者的朋友与同事；PickScore 的均值±方差结果基于三个随机种子。
+6. **数据规模与划分**：实验所用版本含 583,747 条训练样本（37,523 个提示词、4,375 名用户），验证/测试集各 500 条；应用累计已收集 968,965 次排序（66,798 个提示词、6,394 名用户）。
+
+---
+
+## 创新点提炼
+
+1. **首个大规模、完全开放的真实用户文生图偏好数据集**。不同于众包或爬取，Pick-a-Pic 通过自建 Web 应用让具有内在动机的真实用户"边生成、边表达"成对偏好（含平局软标签），以极低的边际成本获得 58 万+ 条训练样本（新版已逾百万）与 3.7 万+ 个提示词；配合身份认证、活动监控、NSFW 过滤与交互限额等质控措施，保证了数据质量与可靠性。
+
+2. **PickScore：以 InstructGPT 式奖励目标微调 CLIP-H 的文生图奖励模型**。将成对偏好（含平局）建模为偏好分布与 softmax 归一化分数之间的 KL 散度（式 2–3），并按提示词频率的反比加权批内损失以缓解对少量提示词的过拟合；训练开销极低（8×A100 不足 1 小时、4,000 步、未做超参搜索），即可显著超越零样本 CLIP-H 与美学预测器。
+
+3. **超人偏好预测性能及其方法论阐释**。PickScore 在测试集上达 70.5%（±0.142）准确率，超过人类专家的 68.0%；论文进一步厘清"超人"的确切含义——胜过不了解原始用户语境与意图的标注者，从而论证了以真实用户（而非外部标注者）作为偏好真值的重要性。
+
+4. **对文生图评估协议的系统性革新**。在 MS-COCO 描述上，FID 与人类模型排序呈强负相关（-0.900）而 PickScore 呈强正相关（0.917）；在基于 45 个模型、1.4 万条真实偏好、Elo 评分（重复 50 次取均值）的大规模评估中，PickScore 的相关性（0.790）亦优于 HPS（0.670）、ImageReward（0.492）与 CLIP-H（0.313）。据此提出以"Pick-a-Pic 提示词 + PickScore"替代"MS-COCO + FID"的评估新标准。
+
+5. **best-of-N 排序作为推理时增强**。对每个提示词生成 100 张图像（5 种初始噪声 × 20 种提示词模板，如 "breathtaking [prompt]. award-winning, professional, highly detailed"），再按 PickScore 选优：相对原生模型输出、CLIP-H 与美学预测器的胜率达 71%–85%；交叉分析（68.5% 的情况下美学分数更高、90.5% 的情况下文本对齐分数更高）表明其选择兼顾美观性与提示遵循。
+
+6. **偏好数据催生的模型选择与评估新范式**。利用偏好数据可直接开展模型级分析——如"SDXL（Alpha）在引导尺度 9 下通常优于尺度 3"、"用户更偏好 Dreamlike Photoreal 2.0 而非 SD 2.1"等结论均可由用户胜率直接导出；这为后续以 RLHF 等方式将人类偏好纳入文生图学习过程奠定了数据与评测基础。
+
+---
+
+*注：本翻译基于 ar5iv/arXiv HTML（LaTeXML）转换的 Markdown 版本，已忽略站点导航残留与 LaTeX 转义符；参考文献列表从略，正文引用保留 (作者, 年份) 格式。原文疑似笔误与转换伪影（如 CFG 尺度 "99/33" 应为 9/3、"Figure 4(a)" 实指表 1(a)、验证/测试样本数"各 500 条"的推断）已在相应位置以译注形式标明。*
+
+
+</script>
+<script src="../assets/app.js?v=5"></script>
+</body>
+</html>

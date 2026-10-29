@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 · 用 T2I 奖励迁移做图像编辑在线 RL — 中英对照精读</title>
+<link rel="stylesheet" href="../assets/style.css?v=6">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="back" href="../index.html">← 首页</a>
+  <div class="tb-title"><span class="num">04</span>用 T2I 奖励迁移做图像编辑在线 RL</div>
+  <div class="tb-controls">
+    <a class="tb-link" href="https://arxiv.org/abs/2608.22780" target="_blank" rel="noopener">arXiv</a>
+    <label class="sync"><input type="checkbox" id="syncToggle"> 滚动同步</label>
+  </div>
+</header>
+<main class="reader">
+  <section class="pane pane-en">
+    <div class="pane-head">ENGLISH 原文 (arXiv HTML)</div>
+    <div class="pane-body" id="enBody">
+<article class="ltx_document ltx_authors_1line">
+<h1 class="ltx_title ltx_title_document">Can We Perform Online RL for Image Editing without Editing Rewards?</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Qichao Ma
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Jikang Cheng
+</span><span class="ltx_author_notes"><span class="ltx_author_notes_content">
+<span class="ltx_contact ltx_role_thanks"><span class="ltx_contact_name">Thanks: </span>Project Lead.
+</span></span></span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Ling Liang
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Zhaofei Yu
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Tiejun Huang
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Renye Yan<span id="id1" class="ltx_ERROR undefined">\corresponding</span>
+</span></span></div>
+
+<div id="abstract1" class="ltx_abstract"><h6 class="ltx_title ltx_title_abstract">Abstract</h6>
+    
+<p id="abstract1.1" class="ltx_p">Reinforcement learning (RL) enables direct preference optimization for image editing through editing-specific rewards, which remain less developed due to costly triplet supervision and complex task-dependent calibration. In contrast, text-to-image (T2I) generation benefits from a mature and diverse reward ecosystem spanning semantic alignment, aesthetics, realism, glyph shape, and other visual preferences. Extending this ecosystem to image editing would substantially broaden the range of visual preferences accessible to RL-based optimization, prompting the central question: <em id="abstract1.1.1" class="ltx_emph ltx_font_italic">Can We Perform Image Editing RL without Editing Rewards?</em>
+In this paper, we argue that the standard image editing dimensions have potential to be mapped to the T2I reward space: image quality can transfer directly, prompt following can be aligned through a description of the desired visual state, and reference consistency admits a coarse semantic conversion by encoding the source content to preserve.
+However, editing instructions specify relative changes, whereas T2I rewards require self-contained target descriptions; moreover, semantically valid captions from generic vision-language models may be incompatible with the frozen reward. Hence, we further introduce <span id="abstract1.1.2" class="ltx_text ltx_font_italic">Lever-Edit</span>, a two-stage framework that learns a reward-aligned captioner for counterfactual target descriptions, freezes it, and optimizes the editing policy solely with the transferred T2I reward. Experiments show competitive editing alignment and source preservation against editing-reward-based fine-tuning, while outperforming intuitive transfer baselines.</p>
+  
+</div>
+<section id="Sx1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Introduction</h2>
+
+<div id="Sx1.p1" class="ltx_para">
+<p id="Sx1.p1.1" class="ltx_p">Instruction-guided image editing enables users to modify an existing image through natural-language instructions while preserving content unrelated to the requested change <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib11" title="" class="ltx_ref">6</a>)</cite>. Although recent diffusion and flow-based editors have achieved substantial progress <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib2" title="" class="ltx_ref">17</a>; <a href="#bib.bib18" title="" class="ltx_ref">13</a>; <a href="#bib.bib16" title="" class="ltx_ref">27</a>)</cite>, supervised fine-tuning optimizes likelihood over curated editing pairs rather than task-level human preferences. Reinforcement learning (RL) instead directly optimizes scalar or rationale-based feedback on sampled results <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib8" title="" class="ltx_ref">1</a>; <a href="#bib.bib10" title="" class="ltx_ref">2</a>; <a href="#bib.bib22" title="" class="ltx_ref">4</a>; <a href="#bib.bib24" title="" class="ltx_ref">12</a>)</cite>. At the center of editing RL lies the reward. However, constructing a reliable editing reward requires joint reasoning over the reference image, editing instruction, and edited output, as well as costly triplet-level supervision. The desired balance between executing the instruction and preserving source content further varies across edit types, complicating reward calibration and generalization <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib21" title="" class="ltx_ref">19</a>; <a href="#bib.bib19" title="" class="ltx_ref">15</a>; <a href="#bib.bib20" title="" class="ltx_ref">30</a>; <a href="#bib.bib23" title="" class="ltx_ref">14</a>)</cite>.
+Editing quality is commonly characterized along three dimensions: <em id="Sx1.p1.1.1" class="ltx_emph ltx_font_italic">pure image quality</em>, <em id="Sx1.p1.1.2" class="ltx_emph ltx_font_italic">edit execution</em>, and <em id="Sx1.p1.1.3" class="ltx_emph ltx_font_italic">reference consistency</em> <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib19" title="" class="ltx_ref">15</a>; <a href="#bib.bib20" title="" class="ltx_ref">30</a>)</cite>. Pure image quality concerns intrinsic properties of the edited output, edit execution measures whether the requested transformation is realized, and reference consistency measures the preservation of source content unrelated to the edit. Surprisingly, we find that all three dimensions exhibit potential mappings to the T2I reward space: image quality can be evaluated directly, edit execution can be reformulated as alignment with a description of the desired visual state, and reference consistency can be coarsely projected by incorporating preserved source semantics into that description, as illustrated in Fig. <a href="#Sx1.F1" title="Figure 1 ‣ Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>.</p>
+</div>
+<figure id="Sx1.F1" class="ltx_figure"><img src="https://arxiv.org/html/2608.22780v1/Motivation.png" id="Sx1.F1.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="698" height="280" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 1: </span>Motivation for T2I-to-editing reward transfer. <span id="Sx1.F1.2" class="ltx_text ltx_font_italic">Lever-Edit</span> acts as an online lever that harnesses the collective power of the broad T2I reward community, transferring its mature and diverse visual preferences into effective supervision for image-editing RL.</figcaption>
+</figure>
+<div id="Sx1.p2" class="ltx_para">
+<p id="Sx1.p2.1" class="ltx_p">This raises a central question: <em id="Sx1.p2.1.1" class="ltx_emph ltx_font_italic">Can We Perform Image Editing RL without Editing Rewards</em>, instead using t2i reward? Such a formulation offers two advantages. First, it gives editing RL direct access to the mature and diverse reward ecosystem of image generation, including rewards for semantic alignment, aesthetics, realism, OCR, safety, and other visual preferences <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib3" title="" class="ltx_ref">22</a>; <a href="#bib.bib9" title="" class="ltx_ref">21</a>; <a href="#bib.bib4" title="" class="ltx_ref">8</a>; <a href="#bib.bib6" title="" class="ltx_ref">28</a>; <a href="#bib.bib29" title="" class="ltx_ref">32</a>; <a href="#bib.bib30" title="" class="ltx_ref">18</a>; <a href="#bib.bib32" title="" class="ltx_ref">5</a>; <a href="#bib.bib15" title="" class="ltx_ref">10</a>)</cite>. Improvements in these rewards can consequently be transferred to editing without redesigning the alignment objective. Second, it removes the dependence on costly editing-evaluator development and deployment.</p>
+</div>
+<div id="Sx1.p3" class="ltx_para">
+<p id="Sx1.p3.1" class="ltx_p">Directly applying a T2I reward to image editing is, however, rather challenging. First, the two tasks employ fundamentally different conditioning semantics. An editing instruction defines a relative transformation with respect to a reference image, whereas a T2I reward expects a self-contained description of the target image. Directly using the instruction preserves the requested change but omits the source semantics that should remain unchanged, necessitating a reference-aware conversion into a counterfactual target description. Second, a semantically valid target description is not necessarily compatible with the frozen T2I reward. An off-the-shelf Vision-Language Model (VLM) may produce a plausible caption whose representation is poorly calibrated to the reward model’s evaluation space, thereby weakening the resulting optimization signal. Therefore, effective reward transfer requires both edit-target conversion and explicit reward alignment, which remains a challenging issue.</p>
+</div>
+<div id="Sx1.p4" class="ltx_para">
+<p id="Sx1.p4.1" class="ltx_p">In this paper, we introduce <span id="Sx1.p4.1.1" class="ltx_text ltx_font_italic">Lever-Edit</span>, a reward-transfer framework in which a lightweight reward-aligned captioner acts as a <em id="Sx1.p4.1.2" class="ltx_emph ltx_font_italic">lever</em>: it enables a mature T2I reward to provide effective supervision for image-editing RL without constructing or invoking an editing reward. Specifically, <span id="Sx1.p4.1.3" class="ltx_text ltx_font_italic">Lever-Edit</span> follows a two-stage design. In the first stage, we adapt a VLM through prefix tuning to map a reference image and an editing instruction to a counterfactual target caption. The caption jointly describes the intended modification and the source semantics that should be retained. We further align the captioner’s representation with the frozen T2I reward, producing reward-compatible conditions rather than generic image descriptions. In the second stage, we freeze the captioner and optimize the diffusion editing policy using only the transferred T2I reward. No editing reward is used during policy fine-tuning. This design separates reward transfer from policy optimization and can be applied as a plug-in to different VLM and image-editing backbones.</p>
+</div>
+<div id="Sx1.p5" class="ltx_para">
+<p id="Sx1.p5.1" class="ltx_p">Our contributions are summarized as follows:</p>
+<ul id="Sx1.I1" class="ltx_itemize">
+<li id="Sx1.I1.i1" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="Sx1.I1.i1.p1" class="ltx_para">
+<p id="Sx1.I1.i1.p1.1" class="ltx_p">We revisit the standard dimensions of editing quality from the perspective of reward transfer and identify their potential correspondence to general image evaluation, motivating image-editing RL without an editing-specific reward.</p>
+</div></li>
+<li id="Sx1.I1.i2" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="Sx1.I1.i2.p1" class="ltx_para">
+<p id="Sx1.I1.i2.p1.1" class="ltx_p">We propose <span id="Sx1.I1.i2.p1.1.1" class="ltx_text ltx_font_italic">Lever-Edit</span>, a two-stage framework that converts reference-conditioned editing objectives into reward-aligned target captions and fine-tunes an editing policy using only a frozen T2I reward.</p>
+</div></li>
+<li id="Sx1.I1.i3" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="Sx1.I1.i3.p1" class="ltx_para">
+<p id="Sx1.I1.i3.p1.1" class="ltx_p">We empirically demonstrate that transferred T2I rewards can provide competitive editing alignment and source preservation without an image-to-image reward model during policy fine-tuning.</p>
+</div></li>
+</ul>
+</div>
+</section>
+<section id="Sx2" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Related Works</h2>
+
+<section id="Sx2.SSx1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Reinforcement Learning for Image Editing</h3>
+
+<div id="Sx2.SSx1.p1" class="ltx_para">
+<p id="Sx2.SSx1.p1.1" class="ltx_p">Reinforcement learning enables direct preference optimization for visual generation without dense task-specific annotations. DDPO <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib8" title="" class="ltx_ref">1</a>)</cite> and DPOK <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib10" title="" class="ltx_ref">2</a>)</cite> pioneered RL-based fine-tuning for text-to-image diffusion models. DanceGRPO <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib26" title="" class="ltx_ref">24</a>)</cite> and Flow-GRPO <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib25" title="" class="ltx_ref">11</a>)</cite> subsequently broadened this paradigm to contemporary diffusion and flow-matching backbones, establishing online RL as a general post-training framework for visual generation. Further studies improve optimization efficiency and stability through forward-process policy updates, pretraining-aligned objectives, entropy-adaptive exploration, and selective intervention along the denoising trajectory <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib27" title="" class="ltx_ref">31</a>; <a href="#bib.bib28" title="" class="ltx_ref">23</a>; <a href="#bib.bib14" title="" class="ltx_ref">25</a>; <a href="#bib.bib17" title="" class="ltx_ref">26</a>)</cite>. RL paradigms developed for T2I generation have subsequently been successfully adapted to preference optimization for instruction-guided image editing. In this setting, RL aims to further improve prompt adherence, reference consistency, and overall visual quality, with recent methods demonstrating encouraging gains along these dimensions <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib19" title="" class="ltx_ref">15</a>; <a href="#bib.bib20" title="" class="ltx_ref">30</a>; <a href="#bib.bib22" title="" class="ltx_ref">4</a>)</cite>.</p>
+</div>
+</section>
+<section id="Sx2.SSx2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Reward Modeling in Image RL</h3>
+
+<div id="Sx2.SSx2.p1" class="ltx_para">
+<p id="Sx2.SSx2.p1.1" class="ltx_p"><span id="Sx2.SSx2.p1.1.1" class="ltx_text ltx_font_bold">Image Generation.</span> Reward modeling for text-to-image generation has evolved into a diverse ecosystem spanning general human preferences and task-specific criteria. ImageReward <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib3" title="" class="ltx_ref">22</a>)</cite>, HPS <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib9" title="" class="ltx_ref">21</a>; <a href="#bib.bib5" title="" class="ltx_ref">20</a>)</cite>, and PickScore <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib4" title="" class="ltx_ref">8</a>)</cite> capture broad judgments of semantic alignment and visual appeal. Specialized rewards target photorealism in RealGen <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib6" title="" class="ltx_ref">28</a>)</cite> and visual-text fidelity in TextPecker <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib29" title="" class="ltx_ref">32</a>)</cite>, while UnifiedReward <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib30" title="" class="ltx_ref">18</a>)</cite> supports pointwise and pairwise multimodal evaluation and SigLIP <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib31" title="" class="ltx_ref">29</a>)</cite> provides general text–image correspondence scores. Complementing explicitly trained evaluators, SpectraReward <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib32" title="" class="ltx_ref">5</a>)</cite> repurposes pretrained MLLMs as training-free, zero-shot rewards through image-conditioned prompt likelihood. This breadth makes the T2I reward ecosystem a compelling source of supervision for broader visual alignment tasks.
+<br class="ltx_break"><span id="Sx2.SSx2.p1.1.2" class="ltx_text ltx_font_bold">Image Editing.</span> Editing rewards evaluate the triplet <math id="Sx2.SSx2.p1.m1" class="ltx_Math" alttext="(I_{\mathrm{ref}},q_{\mathrm{edit}},I_{\mathrm{edit}})" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">(</mo><msub><mi>I</mi><mi>ref</mi></msub><mo>,</mo><msub><mi>q</mi><mi>edit</mi></msub><mo>,</mo><msub><mi>I</mi><mi>edit</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(I_{\mathrm{ref}},q_{\mathrm{edit}},I_{\mathrm{edit}})</annotation></semantics></math> across output quality, edit execution, and reference consistency. EditReward <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib21" title="" class="ltx_ref">19</a>)</cite> constructs over 200K expert-annotated preference pairs and trains a multidimensional uncertainty-aware ranker. EditScore <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib19" title="" class="ltx_ref">15</a>)</cite> follows a pipeline from benchmark construction and reward-data curation to reward-model training, self-ensemble, and online RL. FIRM Reward <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib20" title="" class="ltx_ref">30</a>)</cite> employs a difference-first MLLM pipeline, specialized reward-model training, and consistency-modulated reward fusion. SpatialReward <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib23" title="" class="ltx_ref">14</a>)</cite> further introduces a multi-stage spatial-grounding and verification pipeline, followed by progressive SFT and GRPO training. Such staged construction is a common consequence of the intrinsic difficulty of evaluating relative edits and entails substantial design and implementation costs. Moreover, these rewards remain largely centered on edit execution and reference consistency, with limited coverage of the broader alignment preferences supported by T2I rewards. This restricted reward space constrains the optimization potential of image-editing RL.</p>
+</div>
+</section>
+</section>
+<section id="Sx3" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Problem Formulation</h2>
+
+<section id="Sx3.SSx1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">The Reward-Transfer Gap</h3>
+
+<div id="Sx3.SSx1.p1" class="ltx_para">
+<p id="Sx3.SSx1.p1.1" class="ltx_p">Let <math id="Sx3.SSx1.p1.m1" class="ltx_Math" alttext="I_{\mathrm{ref}}" display="inline" intent=":literal"><semantics><msub><mi>I</mi><mi>ref</mi></msub><annotation encoding="application/x-tex">I_{\mathrm{ref}}</annotation></semantics></math> denote a reference image, <math id="Sx3.SSx1.p1.m2" class="ltx_Math" alttext="q_{\mathrm{edit}}" display="inline" intent=":literal"><semantics><msub><mi>q</mi><mi>edit</mi></msub><annotation encoding="application/x-tex">q_{\mathrm{edit}}</annotation></semantics></math> an editing instruction, and <math id="Sx3.SSx1.p1.m3" class="ltx_Math" alttext="I_{\mathrm{edit}}" display="inline" intent=":literal"><semantics><msub><mi>I</mi><mi>edit</mi></msub><annotation encoding="application/x-tex">I_{\mathrm{edit}}</annotation></semantics></math> the output sampled from an editing policy:</p>
+<table id="Sx3.E1" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx3.E1.m1" class="ltx_math_unparsed" alttext="I_{\mathrm{edit}}\sim\pi_{\theta}(\cdot\mid I_{\mathrm{ref}},q_{\mathrm{edit}})." display="block" intent=":literal"><semantics><mrow><msub><mi>I</mi><mi>edit</mi></msub><mo>∼</mo><msub><mi>π</mi><mi>θ</mi></msub><mrow><mo stretchy="false">(</mo><mo lspace="0em" rspace="0em">⋅</mo><mo lspace="0em" rspace="0.167em">∣</mo><msub><mi>I</mi><mi>ref</mi></msub><mo>,</mo><msub><mi>q</mi><mi>edit</mi></msub><mo stretchy="false">)</mo></mrow><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">I_{\mathrm{edit}}\sim\pi_{\theta}(\cdot\mid I_{\mathrm{ref}},q_{\mathrm{edit}}).</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(1)</span></td></tr></tbody>
+</table>
+<p id="Sx3.SSx1.p1.2" class="ltx_p">Conventional image-editing RL optimizes a task-specific reward defined on the complete editing triplet,</p>
+<table id="Sx3.E2" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx3.E2.m1" class="ltx_Math" alttext="\max_{\theta}\;\mathbb{E}\!\left[R_{\mathrm{edit}}(I_{\mathrm{ref}},q_{\mathrm{edit}},I_{\mathrm{edit}})\right]." display="block" intent=":literal"><semantics><mrow><mrow><munder><mi>max</mi><mi>θ</mi></munder><mo lspace="0.447em">⁡</mo><mrow><mpadded style="width:0.497em;" width="0.497em"><mi>𝔼</mi></mpadded><mo>⁡</mo><mrow><mo>[</mo><mrow><msub><mi>R</mi><mi>edit</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>I</mi><mi>ref</mi></msub><mo>,</mo><msub><mi>q</mi><mi>edit</mi></msub><mo>,</mo><msub><mi>I</mi><mi>edit</mi></msub><mo stretchy="false">)</mo></mrow></mrow><mo>]</mo></mrow></mrow></mrow><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">\max_{\theta}\;\mathbb{E}\!\left[R_{\mathrm{edit}}(I_{\mathrm{ref}},q_{\mathrm{edit}},I_{\mathrm{edit}})\right].</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(2)</span></td></tr></tbody>
+</table>
+<p id="Sx3.SSx1.p1.3" class="ltx_p">The reference image allows <math id="Sx3.SSx1.p1.m4" class="ltx_Math" alttext="R_{\mathrm{edit}}" display="inline" intent=":literal"><semantics><msub><mi>R</mi><mi>edit</mi></msub><annotation encoding="application/x-tex">R_{\mathrm{edit}}</annotation></semantics></math> to determine both what should change and what should remain unchanged. By contrast, a T2I reward follows an image–text interface,</p>
+<table id="Sx3.E3" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx3.E3.m1" class="ltx_Math" alttext="R_{\mathrm{T2I}}(I,c)," display="block" intent=":literal"><semantics><mrow><mrow><msub><mi>R</mi><mi>T2I</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>I</mi><mo>,</mo><mi>c</mi><mo stretchy="false">)</mo></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">R_{\mathrm{T2I}}(I,c),</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(3)</span></td></tr></tbody>
+</table>
+<p id="Sx3.SSx1.p1.4" class="ltx_p">where <math id="Sx3.SSx1.p1.m5" class="ltx_Math" alttext="c" display="inline" intent=":literal"><semantics><mi>c</mi><annotation encoding="application/x-tex">c</annotation></semantics></math> is expected to be a self-contained description of the visual content in <math id="Sx3.SSx1.p1.m6" class="ltx_Math" alttext="I" display="inline" intent=":literal"><semantics><mi>I</mi><annotation encoding="application/x-tex">I</annotation></semantics></math>. Directly substituting <math id="Sx3.SSx1.p1.m7" class="ltx_Math" alttext="q_{\mathrm{edit}}" display="inline" intent=":literal"><semantics><msub><mi>q</mi><mi>edit</mi></msub><annotation encoding="application/x-tex">q_{\mathrm{edit}}</annotation></semantics></math> for <math id="Sx3.SSx1.p1.m8" class="ltx_Math" alttext="c" display="inline" intent=":literal"><semantics><mi>c</mi><annotation encoding="application/x-tex">c</annotation></semantics></math> therefore creates a fundamental conditioning mismatch. An editing instruction specifies a relative transformation, such as “make the car red,” whose target state depends on the particular reference image. It neither describes the complete target image nor exposes the source semantics that should be preserved. Consequently, <math id="Sx3.SSx1.p1.m9" class="ltx_Math" alttext="R_{\mathrm{T2I}}(I_{\mathrm{edit}},q_{\mathrm{edit}})" display="inline" intent=":literal"><semantics><mrow><msub><mi>R</mi><mi>T2I</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>I</mi><mi>edit</mi></msub><mo>,</mo><msub><mi>q</mi><mi>edit</mi></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">R_{\mathrm{T2I}}(I_{\mathrm{edit}},q_{\mathrm{edit}})</annotation></semantics></math> may reward the requested attribute while remaining insensitive to the loss of reference-specific content.</p>
+</div>
+<div id="Sx3.SSx1.p2" class="ltx_para">
+<p id="Sx3.SSx1.p2.1" class="ltx_p">Reward transfer thus requires a condition converter
+<math id="Sx3.SSx1.p2.m1" class="ltx_Math" alttext="g:\mathcal{I}\times\mathcal{Q}\rightarrow\mathcal{C}" display="inline" intent=":literal"><semantics><mrow><mi>g</mi><mo lspace="0.278em" rspace="0.278em">:</mo><mrow><mrow><mi class="ltx_font_mathcaligraphic">ℐ</mi><mo lspace="0.222em" rspace="0.222em">×</mo><mi class="ltx_font_mathcaligraphic">𝒬</mi></mrow><mo stretchy="false">→</mo><mi class="ltx_font_mathcaligraphic">𝒞</mi></mrow></mrow><annotation encoding="application/x-tex">g:\mathcal{I}\times\mathcal{Q}\rightarrow\mathcal{C}</annotation></semantics></math> that maps a reference image and a relative editing instruction to a self-contained target description:</p>
+<table id="Sx3.E4" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx3.E4.m1" class="ltx_Math" alttext="c_{\mathrm{tgt}}=g(I_{\mathrm{ref}},q_{\mathrm{edit}})." display="block" intent=":literal"><semantics><mrow><mrow><msub><mi>c</mi><mi>tgt</mi></msub><mo>=</mo><mrow><mi>g</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><msub><mi>I</mi><mi>ref</mi></msub><mo>,</mo><msub><mi>q</mi><mi>edit</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">c_{\mathrm{tgt}}=g(I_{\mathrm{ref}},q_{\mathrm{edit}}).</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(4)</span></td></tr></tbody>
+</table>
+<p id="Sx3.SSx1.p2.2" class="ltx_p">The edited output is then evaluated by <math id="Sx3.SSx1.p2.m2" class="ltx_Math" alttext="R_{\mathrm{T2I}}(I_{\mathrm{edit}},c_{\mathrm{tgt}})" display="inline" intent=":literal"><semantics><mrow><msub><mi>R</mi><mi>T2I</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>I</mi><mi>edit</mi></msub><mo>,</mo><msub><mi>c</mi><mi>tgt</mi></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">R_{\mathrm{T2I}}(I_{\mathrm{edit}},c_{\mathrm{tgt}})</annotation></semantics></math>. The central problem is whether <math id="Sx3.SSx1.p2.m3" class="ltx_Math" alttext="g" display="inline" intent=":literal"><semantics><mi>g</mi><annotation encoding="application/x-tex">g</annotation></semantics></math> can retain the information required for editing evaluation while producing a condition that remains effective for a frozen T2I reward.</p>
+</div>
+</section>
+<section id="Sx3.SSx2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Mapping Editing Quality to the T2I Reward Space</h3>
+
+<div id="Sx3.SSx2.p1" class="ltx_para">
+<p id="Sx3.SSx2.p1.1" class="ltx_p">Editing quality is commonly assessed along three dimensions: pure image quality, edit execution, and reference consistency <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib19" title="" class="ltx_ref">15</a>; <a href="#bib.bib20" title="" class="ltx_ref">30</a>)</cite>. We represent these criteria conceptually as:</p>
+<table id="Sx3.E5" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx3.E5.m1" class="ltx_Math" alttext="\mathbf{r}_{\mathrm{edit}}=\begin{bmatrix}r_{\mathrm{qual}}(I_{\mathrm{edit}})\\
+r_{\mathrm{exec}}(I_{\mathrm{ref}},q_{\mathrm{edit}},I_{\mathrm{edit}})\\
+r_{\mathrm{cons}}(I_{\mathrm{ref}},q_{\mathrm{edit}},I_{\mathrm{edit}})\end{bmatrix}," display="block" intent=":literal"><semantics><mrow><mrow><msub><mi>𝐫</mi><mi>edit</mi></msub><mo>=</mo><mrow><mo>[</mo><mtable displaystyle="true" rowspacing="0pt"><mtr><mtd><mrow><msub><mi>r</mi><mi>qual</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>I</mi><mi>edit</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mtd></mtr><mtr><mtd><mrow><msub><mi>r</mi><mi>exec</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>I</mi><mi>ref</mi></msub><mo>,</mo><msub><mi>q</mi><mi>edit</mi></msub><mo>,</mo><msub><mi>I</mi><mi>edit</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mtd></mtr><mtr><mtd><mrow><msub><mi>r</mi><mi>cons</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>I</mi><mi>ref</mi></msub><mo>,</mo><msub><mi>q</mi><mi>edit</mi></msub><mo>,</mo><msub><mi>I</mi><mi>edit</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mtd></mtr></mtable><mo>]</mo></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">\mathbf{r}_{\mathrm{edit}}=\begin{bmatrix}r_{\mathrm{qual}}(I_{\mathrm{edit}})\\
+r_{\mathrm{exec}}(I_{\mathrm{ref}},q_{\mathrm{edit}},I_{\mathrm{edit}})\\
+r_{\mathrm{cons}}(I_{\mathrm{ref}},q_{\mathrm{edit}},I_{\mathrm{edit}})\end{bmatrix},</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(5)</span></td></tr></tbody>
+</table>
+<p id="Sx3.SSx2.p1.2" class="ltx_p">without assuming a particular scalarization of the three criteria. Although their native formulation is reference-conditioned, each criterion admits a correspondence to the T2I reward space.</p>
+</div>
+<div id="Sx3.SSx2.p2" class="ltx_para">
+<p id="Sx3.SSx2.p2.1" class="ltx_p">Among the three dimensions, pure image quality admits an immediate transfer: it is intrinsic to <math id="Sx3.SSx2.p2.m1" class="ltx_Math" alttext="I_{\mathrm{edit}}" display="inline" intent=":literal"><semantics><msub><mi>I</mi><mi>edit</mi></msub><annotation encoding="application/x-tex">I_{\mathrm{edit}}</annotation></semantics></math> and can be assessed without reference to either the source image or the editing instruction. The apparent difficulty instead lies in edit execution and reference consistency, both of which are conventionally defined relative to <math id="Sx3.SSx2.p2.m2" class="ltx_Math" alttext="I_{\mathrm{ref}}" display="inline" intent=":literal"><semantics><msub><mi>I</mi><mi>ref</mi></msub><annotation encoding="application/x-tex">I_{\mathrm{ref}}</annotation></semantics></math>. For edit execution, however, this dependence arises primarily from the form of the condition. The instruction <math id="Sx3.SSx2.p2.m3" class="ltx_Math" alttext="q_{\mathrm{edit}}" display="inline" intent=":literal"><semantics><msub><mi>q</mi><mi>edit</mi></msub><annotation encoding="application/x-tex">q_{\mathrm{edit}}</annotation></semantics></math> describes a relative change, whereas the evaluation objective concerns whether the corresponding visual state appears in the result. Once this intended outcome is expressed as an absolute post-edit description, edit execution becomes an image–text alignment problem of the form already addressed by T2I rewards.
+Reference consistency appears to present the greatest obstacle, since it explicitly concerns the relation between <math id="Sx3.SSx2.p2.m4" class="ltx_Math" alttext="I_{\mathrm{ref}}" display="inline" intent=":literal"><semantics><msub><mi>I</mi><mi>ref</mi></msub><annotation encoding="application/x-tex">I_{\mathrm{ref}}</annotation></semantics></math> and <math id="Sx3.SSx2.p2.m5" class="ltx_Math" alttext="I_{\mathrm{edit}}" display="inline" intent=":literal"><semantics><msub><mi>I</mi><mi>edit</mi></msub><annotation encoding="application/x-tex">I_{\mathrm{edit}}</annotation></semantics></math>. Nevertheless, the source semantics that should remain unchanged can be incorporated into the target description together with the requested modification. The target condition can therefore be viewed as the composition</p>
+<table id="Sx3.E6" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx3.E6.m1" class="ltx_Math" alttext="c_{\mathrm{tgt}}=c_{\mathrm{change}}\oplus c_{\mathrm{preserve}}," display="block" intent=":literal"><semantics><mrow><mrow><msub><mi>c</mi><mi>tgt</mi></msub><mo>=</mo><mrow><msub><mi>c</mi><mi>change</mi></msub><mo>⊕</mo><msub><mi>c</mi><mi>preserve</mi></msub></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">c_{\mathrm{tgt}}=c_{\mathrm{change}}\oplus c_{\mathrm{preserve}},</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(6)</span></td></tr></tbody>
+</table>
+<p id="Sx3.SSx2.p2.2" class="ltx_p">where <math id="Sx3.SSx2.p2.m6" class="ltx_Math" alttext="c_{\mathrm{change}}" display="inline" intent=":literal"><semantics><msub><mi>c</mi><mi>change</mi></msub><annotation encoding="application/x-tex">c_{\mathrm{change}}</annotation></semantics></math> specifies the intended changes and <math id="Sx3.SSx2.p2.m7" class="ltx_Math" alttext="c_{\mathrm{preserve}}" display="inline" intent=":literal"><semantics><msub><mi>c</mi><mi>preserve</mi></msub><annotation encoding="application/x-tex">c_{\mathrm{preserve}}</annotation></semantics></math> encodes the source semantics to preserve. This formulation recasts edit execution and reference consistency as alignment between <math id="Sx3.SSx2.p2.m8" class="ltx_Math" alttext="I_{\mathrm{edit}}" display="inline" intent=":literal"><semantics><msub><mi>I</mi><mi>edit</mi></msub><annotation encoding="application/x-tex">I_{\mathrm{edit}}</annotation></semantics></math> and a unified target description, enabling their joint evaluation by a T2I reward.</p>
+</div>
+<div id="Sx3.SSx2.p3" class="ltx_para">
+<p id="Sx3.SSx2.p3.1" class="ltx_p">This mapping should be understood as a semantic projection rather than an equivalence between T2I and image-pair evaluation. A textual condition cannot fully encode low-level identity or pixel-accurate preservation. It can, however, represent the principal semantics underlying image quality, edit execution, and reference consistency. Thus, although direct reward transfer is ill-posed at the interface level, the core editing objectives remain transferable in principle. The practical challenge is to construct a target condition that faithfully realizes this correspondence.</p>
+</div>
+</section>
+<section id="Sx3.SSx3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Intuitive Reward-Transfer Protocols</h3>
+
+<div id="Sx3.SSx3.p1" class="ltx_para">
+<p id="Sx3.SSx3.p1.1" class="ltx_p">Equation <a href="#Sx3.E4" title="In The Reward-Transfer Gap ‣ Problem Formulation ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a> suggests several straightforward transfer protocols. We introduce three representative variants that differ in how they instantiate <math id="Sx3.SSx3.p1.m1" class="ltx_Math" alttext="g" display="inline" intent=":literal"><semantics><mi>g</mi><annotation encoding="application/x-tex">g</annotation></semantics></math>.</p>
+</div>
+<section id="Sx3.SSx3.SSS0.Px1" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Direct Edit Prompt.</h4>
+
+<div id="Sx3.SSx3.SSS0.Px1.p1" class="ltx_para">
+<p id="Sx3.SSx3.SSS0.Px1.p1.1" class="ltx_p">The simplest protocol directly sets <math id="Sx3.SSx3.SSS0.Px1.p1.m1" class="ltx_Math" alttext="c_{\mathrm{tgt}}=q_{\mathrm{edit}}" display="inline" intent=":literal"><semantics><mrow><msub><mi>c</mi><mi>tgt</mi></msub><mo>=</mo><msub><mi>q</mi><mi>edit</mi></msub></mrow><annotation encoding="application/x-tex">c_{\mathrm{tgt}}=q_{\mathrm{edit}}</annotation></semantics></math>. It incurs no conversion cost and retains the requested transformation, but treats a relative instruction as an absolute image description. The resulting reward condition omits reference-specific context and provides no explicit account of the content to be preserved.</p>
+</div>
+</section>
+<section id="Sx3.SSx3.SSS0.Px2" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Online VLM Rewriting.</h4>
+
+<div id="Sx3.SSx3.SSS0.Px2.p1" class="ltx_para">
+<p id="Sx3.SSx3.SSS0.Px2.p1.1" class="ltx_p">A general-purpose VLM can instead generate the target condition on demand,</p>
+<table id="Sx3.E7" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx3.E7.m1" class="ltx_Math" alttext="c_{\mathrm{tgt}}=g_{\mathrm{VLM}}(I_{\mathrm{ref}},q_{\mathrm{edit}})." display="block" intent=":literal"><semantics><mrow><mrow><msub><mi>c</mi><mi>tgt</mi></msub><mo>=</mo><mrow><msub><mi>g</mi><mi>VLM</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>I</mi><mi>ref</mi></msub><mo>,</mo><msub><mi>q</mi><mi>edit</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">c_{\mathrm{tgt}}=g_{\mathrm{VLM}}(I_{\mathrm{ref}},q_{\mathrm{edit}}).</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(7)</span></td></tr></tbody>
+</table>
+<p id="Sx3.SSx3.SSS0.Px2.p1.2" class="ltx_p">This protocol introduces reference awareness and can express the intended post-edit state more completely. However, repeatedly invoking a VLM during reward computation adds inference overhead, while its generic captions are produced for general semantic description rather than calibrated to the evaluation behavior of the selected T2I reward.</p>
+</div>
+</section>
+<section id="Sx3.SSx3.SSS0.Px3" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Offline Proprietary-MLLM Rewriting.</h4>
+
+<div id="Sx3.SSx3.SSS0.Px3.p1" class="ltx_para">
+<p id="Sx3.SSx3.SSS0.Px3.p1.1" class="ltx_p">A strong proprietary MLLM may be used to precompute target descriptions offline. Owing to its instruction-following and visual-reasoning capabilities, the resulting descriptions may accurately express the intended edit and preserved content from a human-semantic perspective. However, offline rewriting fixes these conditions independently of the downstream T2I reward, making them inflexible to the choice of reward model or subsequent optimization requirements. It also introduces dependence on a closed model. More fundamentally, semantic quality for human readers does not guarantee reward compatibility: an accurate description may emphasize attributes represented weakly by the reward or fall outside its preferred conditioning distribution.</p>
+</div>
+<div id="Sx3.SSx3.SSS0.Px3.p2" class="ltx_para">
+<p id="Sx3.SSx3.SSS0.Px3.p2.1" class="ltx_p">Collectively, these protocols identify two requirements for effective reward transfer: the target description must faithfully encode both the requested modification and the source semantics to be preserved, and it must remain compatible with the frozen T2I reward. Direct use of the editing instruction fails to specify a complete target state, whereas generic VLM- or MLLM-based rewriting provides no guarantee of reward-specific alignment. These observations motivate the reward-aligned conversion mechanism presented next.</p>
+</div>
+</section>
+</section>
+</section>
+<section id="Sx4" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Proposed Method</h2>
+
+<div id="Sx4.p1" class="ltx_para">
+<p id="Sx4.p1.1" class="ltx_p">In this section, we introduce the overall pipeline and method design of <span id="Sx4.p1.1.1" class="ltx_text ltx_font_italic">Lever-Edit</span>. <span id="Sx4.p1.1.2" class="ltx_text ltx_font_italic">Lever-Edit</span> consists of two stages. <span id="Sx4.p1.1.3" class="ltx_text ltx_font_bold">Stage 1</span> addresses the mismatch in textual representations when incorporating T2I rewards. Specifically, we jointly optimize a learnable prefix together with a fixed system prompt to align with multiple T2I reward signals at both the embedding and textual levels, therefore ensuring execution and consistency signal with explicit text, and quality signal with hidden embedding. <span id="Sx4.p1.1.4" class="ltx_text ltx_font_bold">Stage 2</span> then integrates the learned alignment into image-editing optimization. On the one hand, we freeze the parameters learned in Stage 1, allowing the resulting module to serve as a plug-in that can be seamlessly incorporated into existing image-editing fine-tuning frameworks without modifying their original training objectives. On the other hand, we inject the embedding-level alignment signal into the image-editing trajectory as auxiliary supervision, providing complementary guidance to balance prompt following and edit consistency.</p>
+</div>
+<figure id="Sx4.F2" class="ltx_figure"><img src="https://arxiv.org/html/2608.22780v1/pipeline.png" id="Sx4.F2.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="698" height="168" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 2: </span>Overall two-stage T2I reward transfer pipeline in <span id="Sx4.F2.2" class="ltx_text ltx_font_italic">Lever-Edit</span>.</figcaption>
+</figure>
+<section id="Sx4.SSx1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">T2I Query Alignment</h3>
+
+<div id="Sx4.SSx1.p1" class="ltx_para">
+<p id="Sx4.SSx1.p1.1" class="ltx_p">As illustrated on the right side of Fig. <a href="#Sx4.F2" title="Figure 2 ‣ Proposed Method ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a>, Stage 1 aims to align the VLM-generated target descriptions with the preferences of the downstream T2I reward models without updating either the image editing backbone or the VLM. To this end, we freeze both models and optimize only a set of learnable continuous query embeddings, denoted by <math id="Sx4.SSx1.p1.m1" class="ltx_Math" alttext="\mathcal{E}_{\mathrm{query}}" display="inline" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">ℰ</mi><mi>query</mi></msub><annotation encoding="application/x-tex">\mathcal{E}_{\mathrm{query}}</annotation></semantics></math>, through prefix tuning. Meanwhile, a fixed system prompt is explicitly concatenated with the original edit instruction to constrain the generation task at the semantic level. Conditioned on the reference image <math id="Sx4.SSx1.p1.m2" class="ltx_Math" alttext="I_{\mathrm{ref}}" display="inline" intent=":literal"><semantics><msub><mi>I</mi><mi>ref</mi></msub><annotation encoding="application/x-tex">I_{\mathrm{ref}}</annotation></semantics></math>, the explicit textual instruction <math id="Sx4.SSx1.p1.m3" class="ltx_Math" alttext="p_{\mathrm{sys}}\oplus q_{\mathrm{edit}}" display="inline" intent=":literal"><semantics><mrow><msub><mi>p</mi><mi>sys</mi></msub><mo>⊕</mo><msub><mi>q</mi><mi>edit</mi></msub></mrow><annotation encoding="application/x-tex">p_{\mathrm{sys}}\oplus q_{\mathrm{edit}}</annotation></semantics></math>, and the continuous edit query <math id="Sx4.SSx1.p1.m4" class="ltx_Math" alttext="\mathcal{E}_{\mathrm{query}}" display="inline" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">ℰ</mi><mi>query</mi></msub><annotation encoding="application/x-tex">\mathcal{E}_{\mathrm{query}}</annotation></semantics></math>, the VLM autoregressively generates a target description <math id="Sx4.SSx1.p1.m5" class="ltx_Math" alttext="c_{\mathrm{tgt}}" display="inline" intent=":literal"><semantics><msub><mi>c</mi><mi>tgt</mi></msub><annotation encoding="application/x-tex">c_{\mathrm{tgt}}</annotation></semantics></math>. Multiple complementary T2I reward models then evaluate the generated description, and their aggregated reward serves as the policy-gradient signal to optimize <math id="Sx4.SSx1.p1.m6" class="ltx_Math" alttext="\mathcal{E}_{\mathrm{query}}" display="inline" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">ℰ</mi><mi>query</mi></msub><annotation encoding="application/x-tex">\mathcal{E}_{\mathrm{query}}</annotation></semantics></math>. In this way, Stage 1 adapts the text-generation policy toward downstream T2I reward preferences while leaving the original model parameters unchanged.
+<br class="ltx_break"><span id="Sx4.SSx1.p1.1.1" class="ltx_text ltx_font_bold">Semantic-Preserving Embedding-level Prefix Tuning.</span>
+Reward-driven adaptation should improve downstream T2I compatibility without
+altering the underlying generation task. Given a reference image
+<math id="Sx4.SSx1.p1.m7" class="ltx_Math" alttext="I_{\mathrm{ref}}" display="inline" intent=":literal"><semantics><msub><mi>I</mi><mi>ref</mi></msub><annotation encoding="application/x-tex">I_{\mathrm{ref}}</annotation></semantics></math> and its edit instruction <math id="Sx4.SSx1.p1.m8" class="ltx_Math" alttext="C_{\mathrm{edit}}" display="inline" intent=":literal"><semantics><msub><mi>C</mi><mi>edit</mi></msub><annotation encoding="application/x-tex">C_{\mathrm{edit}}</annotation></semantics></math>, we explicitly
+concatenate a fixed system prompt <math id="Sx4.SSx1.p1.m9" class="ltx_Math" alttext="P_{\mathrm{sys}}" display="inline" intent=":literal"><semantics><msub><mi>P</mi><mi>sys</mi></msub><annotation encoding="application/x-tex">P_{\mathrm{sys}}</annotation></semantics></math> with the edit instruction,</p>
+<table id="Sx4.E8" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx4.E8.m1" class="ltx_Math" alttext="c_{\mathrm{in}}=[p_{\mathrm{sys}}\oplus q_{\mathrm{edit}}]," display="block" intent=":literal"><semantics><mrow><mrow><msub><mi>c</mi><mi>in</mi></msub><mo>=</mo><mrow><mo stretchy="false">[</mo><mrow><msub><mi>p</mi><mi>sys</mi></msub><mo>⊕</mo><msub><mi>q</mi><mi>edit</mi></msub></mrow><mo stretchy="false">]</mo></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">c_{\mathrm{in}}=[p_{\mathrm{sys}}\oplus q_{\mathrm{edit}}],</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(8)</span></td></tr></tbody>
+</table>
+<p id="Sx4.SSx1.p1.2" class="ltx_p">where <math id="Sx4.SSx1.p1.m10" class="ltx_Math" alttext="\oplus" display="inline" intent=":literal"><semantics><mo>⊕</mo><annotation encoding="application/x-tex">\oplus</annotation></semantics></math> denotes concatenation along the token dimension. The system prompt explicitly instructs the VLM to describe the hypothetical edited image according to <math id="Sx4.SSx1.p1.m11" class="ltx_Math" alttext="I_{\mathrm{ref}}" display="inline" intent=":literal"><semantics><msub><mi>I</mi><mi>ref</mi></msub><annotation encoding="application/x-tex">I_{\mathrm{ref}}</annotation></semantics></math> and <math id="Sx4.SSx1.p1.m12" class="ltx_Math" alttext="q_{\mathrm{edit}}" display="inline" intent=":literal"><semantics><msub><mi>q</mi><mi>edit</mi></msub><annotation encoding="application/x-tex">q_{\mathrm{edit}}</annotation></semantics></math>. It therefore provides a fixed, discrete specification of the target-description task throughout reward optimization.</p>
+</div>
+<div id="Sx4.SSx1.p2" class="ltx_para">
+<p id="Sx4.SSx1.p2.3" class="ltx_p">In addition to the explicit textual instruction, we introduce a learnable continuous prefix</p>
+<table id="Sx4.E9" class="ltx_equationgroup ltx_eqn_table">
+<tbody>
+<tr id="Sx4.E9X" class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_td ltx_align_right ltx_eqn_cell"><math id="Sx4.E9X.m2" class="ltx_Math" alttext="\displaystyle\mathcal{E}_{\mathrm{query}}=[\mathcal{E}_{1},\ldots,\mathcal{E}_{N_{q}}]\in\mathbb{R}^{N_{q}\times d}," display="inline" intent=":literal"><semantics><mrow><mrow><msub><mi class="ltx_font_mathcaligraphic">ℰ</mi><mi>query</mi></msub><mo>=</mo><mrow><mo stretchy="false">[</mo><mrow><msub><mi class="ltx_font_mathcaligraphic">ℰ</mi><mn>1</mn></msub><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msub><mi class="ltx_font_mathcaligraphic">ℰ</mi><msub><mi>N</mi><mi>q</mi></msub></msub></mrow><mo stretchy="false">]</mo></mrow><mo>∈</mo><msup><mi>ℝ</mi><mrow><msub><mi>N</mi><mi>q</mi></msub><mo lspace="0.222em" rspace="0.222em">×</mo><mi>d</mi></mrow></msup></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">\displaystyle\mathcal{E}_{\mathrm{query}}=[\mathcal{E}_{1},\ldots,\mathcal{E}_{N_{q}}]\in\mathbb{R}^{N_{q}\times d},</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equationgroup ltx_align_right">(9)</span></td></tr></tbody>
+</table>
+<p id="Sx4.SSx1.p2.4" class="ltx_p">where <math id="Sx4.SSx1.p2.m1" class="ltx_Math" alttext="N_{q}" display="inline" intent=":literal"><semantics><msub><mi>N</mi><mi>q</mi></msub><annotation encoding="application/x-tex">N_{q}</annotation></semantics></math> is the number of learnable query tokens and <math id="Sx4.SSx1.p2.m2" class="ltx_Math" alttext="d" display="inline" intent=":literal"><semantics><mi>d</mi><annotation encoding="application/x-tex">d</annotation></semantics></math> denotes the hidden dimension of the VLM. Let <math id="Sx4.SSx1.p2.m3" class="ltx_Math" alttext="\mathcal{E}_{\mathrm{VLM}}^{text}(\cdot)" display="inline" intent=":literal"><semantics><mrow><msubsup><mi class="ltx_font_mathcaligraphic">ℰ</mi><mi>VLM</mi><mrow><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>x</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi></mrow></msubsup><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mo lspace="0em" rspace="0em">⋅</mo><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathcal{E}_{\mathrm{VLM}}^{text}(\cdot)</annotation></semantics></math> denote the final text-domain input embedding of the VLM. The input is therefore constructed as</p>
+<table id="Sx4.E10" class="ltx_equationgroup ltx_eqn_table">
+<tbody>
+<tr id="Sx4.E10X" class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_td ltx_align_right ltx_eqn_cell"><math id="Sx4.E10X.m2" class="ltx_Math" alttext="\displaystyle\mathcal{E}_{VLM}^{text}=\Big[\mathcal{E}_{\mathrm{query}}\,;\,\mathcal{E}_{\mathrm{text}}\big([p_{\mathrm{sys}}\oplus q_{\mathrm{edit}}]\big)\Big]," display="inline" intent=":literal"><semantics><mrow><mrow><msubsup><mi class="ltx_font_mathcaligraphic">ℰ</mi><mrow><mi>V</mi><mo lspace="0em" rspace="0em">​</mo><mi>L</mi><mo lspace="0em" rspace="0em">​</mo><mi>M</mi></mrow><mrow><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>x</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi></mrow></msubsup><mo>=</mo><mrow><mo maxsize="1.600em" minsize="1.600em">[</mo><mrow><msub><mi class="ltx_font_mathcaligraphic">ℰ</mi><mi>query</mi></msub><mo rspace="0.337em">;</mo><mrow><msub><mi class="ltx_font_mathcaligraphic">ℰ</mi><mi>text</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo maxsize="1.200em" minsize="1.200em">(</mo><mrow><mo stretchy="false">[</mo><mrow><msub><mi>p</mi><mi>sys</mi></msub><mo>⊕</mo><msub><mi>q</mi><mi>edit</mi></msub></mrow><mo stretchy="false">]</mo></mrow><mo maxsize="1.200em" minsize="1.200em">)</mo></mrow></mrow></mrow><mo maxsize="1.600em" minsize="1.600em">]</mo></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">\displaystyle\mathcal{E}_{VLM}^{text}=\Big[\mathcal{E}_{\mathrm{query}}\,;\,\mathcal{E}_{\mathrm{text}}\big([p_{\mathrm{sys}}\oplus q_{\mathrm{edit}}]\big)\Big],</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equationgroup ltx_align_right">(10)</span></td></tr></tbody>
+</table>
+</div>
+<div id="Sx4.SSx1.p3" class="ltx_para">
+<p id="Sx4.SSx1.p3.1" class="ltx_p">Thus, <math id="Sx4.SSx1.p3.m1" class="ltx_Math" alttext="p_{\mathrm{sys}}\oplus q_{\mathrm{edit}}" display="inline" intent=":literal"><semantics><mrow><msub><mi>p</mi><mi>sys</mi></msub><mo>⊕</mo><msub><mi>q</mi><mi>edit</mi></msub></mrow><annotation encoding="application/x-tex">p_{\mathrm{sys}}\oplus q_{\mathrm{edit}}</annotation></semantics></math> explicitly specifies the
+generation task in the discrete text space, whereas <math id="Sx4.SSx1.p3.m2" class="ltx_Math" alttext="q_{\mathrm{edit}}" display="inline" intent=":literal"><semantics><msub><mi>q</mi><mi>edit</mi></msub><annotation encoding="application/x-tex">q_{\mathrm{edit}}</annotation></semantics></math>
+provides trainable degrees of freedom in the continuous embedding space.
+Throughout Stage 1, all original VLM parameters remain frozen and only
+<math id="Sx4.SSx1.p3.m3" class="ltx_Math" alttext="q_{\mathrm{edit}}" display="inline" intent=":literal"><semantics><msub><mi>q</mi><mi>edit</mi></msub><annotation encoding="application/x-tex">q_{\mathrm{edit}}</annotation></semantics></math> is optimized. Compared with directly fine-tuning the VLM,
+this design confines reward-driven adaptation to a lightweight prefix space,
+thereby limiting interference with the pretrained language and semantic
+capabilities while still providing sufficient flexibility to capture
+T2I-reward-preferred generation patterns beyond a fixed handcrafted prompt.</p>
+</div>
+<div id="Sx4.SSx1.p4" class="ltx_para">
+<p id="Sx4.SSx1.p4.1" class="ltx_p">For each sampled target description, we employ <math id="Sx4.SSx1.p4.m1" class="ltx_Math" alttext="K" display="inline" intent=":literal"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math> complementary T2I reward models to evaluate its compatibility with downstream image-generation objectives. Their outputs are aggregated as</p>
+<table id="Sx4.E11" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx4.E11.m1" class="ltx_Math" alttext="R_{\mathrm{T2I}}=\sum_{k=1}^{K}\omega_{k}R_{k}\left(c_{\mathrm{tgt}};I_{\mathrm{ref}}\right)," display="block" intent=":literal"><semantics><mrow><mrow><msub><mi>R</mi><mi>T2I</mi></msub><mo rspace="0.111em">=</mo><mrow><munderover><mo movablelimits="false">∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><mrow><msub><mi>ω</mi><mi>k</mi></msub><mo lspace="0em" rspace="0em">​</mo><msub><mi>R</mi><mi>k</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo>(</mo><msub><mi>c</mi><mi>tgt</mi></msub><mo>,</mo><msub><mi>I</mi><mi>ref</mi></msub><mo>)</mo></mrow></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">R_{\mathrm{T2I}}=\sum_{k=1}^{K}\omega_{k}R_{k}\left(c_{\mathrm{tgt}};I_{\mathrm{ref}}\right),</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(11)</span></td></tr></tbody>
+</table>
+<p id="Sx4.SSx1.p4.2" class="ltx_p">where <math id="Sx4.SSx1.p4.m2" class="ltx_Math" alttext="\omega_{k}" display="inline" intent=":literal"><semantics><msub><mi>ω</mi><mi>k</mi></msub><annotation encoding="application/x-tex">\omega_{k}</annotation></semantics></math> denotes the weight of the <math id="Sx4.SSx1.p4.m3" class="ltx_Math" alttext="k" display="inline" intent=":literal"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>-th reward model.</p>
+</div>
+<div id="Sx4.SSx1.p5" class="ltx_para">
+<p id="Sx4.SSx1.p5.2" class="ltx_p">We optimize <math id="Sx4.SSx1.p5.m1" class="ltx_Math" alttext="\mathcal{E}_{\mathrm{query}}" display="inline" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">ℰ</mi><mi>query</mi></msub><annotation encoding="application/x-tex">\mathcal{E}_{\mathrm{query}}</annotation></semantics></math> to maximize the expected downstream T2I reward:</p>
+<table id="Sx4.E12" class="ltx_equationgroup ltx_eqn_table">
+<tbody>
+<tr id="Sx4.E12X" class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_td ltx_align_right ltx_eqn_cell"><math id="Sx4.E12X.m2" class="ltx_Math" alttext="\displaystyle J_{\mathrm{T2I}}\left(\mathcal{E}_{\mathrm{query}}\right)=\mathbb{E}_{\begin{subarray}{c}(I_{\mathrm{ref}},q_{\mathrm{edit}})\sim\mathcal{D},\\
+c_{\mathrm{tgt}}\sim\pi_{\mathcal{E}_{\mathrm{query}}}\end{subarray}}R_{\mathrm{T2I}}," display="inline" intent=":literal"><semantics><mrow><mrow><mrow><msub><mi>J</mi><mi>T2I</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo>(</mo><msub><mi class="ltx_font_mathcaligraphic">ℰ</mi><mi>query</mi></msub><mo>)</mo></mrow></mrow><mo>=</mo><mrow><msub><mi>𝔼</mi><mtable rowspacing="0pt"><mtr><mtd><mrow><mrow><mrow><mo stretchy="false">(</mo><msub><mi>I</mi><mi>ref</mi></msub><mo>,</mo><msub><mi>q</mi><mi>edit</mi></msub><mo stretchy="false">)</mo></mrow><mo>∼</mo><mi class="ltx_font_mathcaligraphic">𝒟</mi></mrow><mo>,</mo></mrow></mtd></mtr><mtr><mtd><mrow><msub><mi>c</mi><mi>tgt</mi></msub><mo>∼</mo><msub><mi>π</mi><msub><mi class="ltx_font_mathcaligraphic">ℰ</mi><mi>query</mi></msub></msub></mrow></mtd></mtr></mtable></msub><mo lspace="0em" rspace="0em">​</mo><msub><mi>R</mi><mi>T2I</mi></msub></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">\displaystyle J_{\mathrm{T2I}}\left(\mathcal{E}_{\mathrm{query}}\right)=\mathbb{E}_{\begin{subarray}{c}(I_{\mathrm{ref}},q_{\mathrm{edit}})\sim\mathcal{D},\\
+c_{\mathrm{tgt}}\sim\pi_{\mathcal{E}_{\mathrm{query}}}\end{subarray}}R_{\mathrm{T2I}},</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equationgroup ltx_align_right">(12)</span></td></tr></tbody>
+</table>
+</div>
+<div id="Sx4.SSx1.p6" class="ltx_para">
+<p id="Sx4.SSx1.p6.1" class="ltx_p">Because <math id="Sx4.SSx1.p6.m1" class="ltx_Math" alttext="c_{\mathrm{tgt}}" display="inline" intent=":literal"><semantics><msub><mi>c</mi><mi>tgt</mi></msub><annotation encoding="application/x-tex">c_{\mathrm{tgt}}</annotation></semantics></math> is obtained through discrete token sampling, the downstream reward cannot be directly differentiated through the generated sequence. We therefore optimize <math id="Sx4.SSx1.p6.m2" class="ltx_Math" alttext="q_{\mathrm{edit}}" display="inline" intent=":literal"><semantics><msub><mi>q</mi><mi>edit</mi></msub><annotation encoding="application/x-tex">q_{\mathrm{edit}}</annotation></semantics></math> using policy gradient.
+<br class="ltx_break"><span id="Sx4.SSx1.p6.1.1" class="ltx_text ltx_font_bold">Offline Token-level Distribution Alignment.</span>
+Although the fixed system prompt explicitly specifies the target-description task reward-only optimization can still induce semantic drift with token-level mismatch. To provide an additional semantic anchor, we employ a strong offline MLLM (e.g., GPT or Gemini) to generate a high-quality reference description <math id="Sx4.SSx1.p6.m3" class="ltx_Math" alttext="c_{\mathrm{tgt}}^{*}" display="inline" intent=":literal"><semantics><msubsup><mi>c</mi><mi>tgt</mi><mo>∗</mo></msubsup><annotation encoding="application/x-tex">c_{\mathrm{tgt}}^{*}</annotation></semantics></math> for a small set of training samples.</p>
+</div>
+<div id="Sx4.SSx1.p7" class="ltx_para">
+<p id="Sx4.SSx1.p7.1" class="ltx_p">Specifically, we construct an offline supervision set</p>
+<table id="Sx4.E13" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx4.E13.m1" class="ltx_Math" alttext="\mathcal{D}_{\mathrm{gold}}=\left\{\left(I_{\mathrm{ref}}^{(i)},q_{\mathrm{edit}}^{(i)},c_{\mathrm{tgt}}^{*(i)}\right)\right\}_{i=1}^{N}," display="block" intent=":literal"><semantics><mrow><mrow><msub><mi class="ltx_font_mathcaligraphic">𝒟</mi><mi>gold</mi></msub><mo>=</mo><msubsup><mrow><mo>{</mo><mrow><mo>(</mo><msubsup><mi>I</mi><mi>ref</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>,</mo><msubsup><mi>q</mi><mi>edit</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>,</mo><msubsup><mi>c</mi><mi>tgt</mi><mrow><mphantom></mphantom><mo lspace="0.222em" rspace="0.222em">∗</mo><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></mrow></msubsup><mo>)</mo></mrow><mo>}</mo></mrow><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></msubsup></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">\mathcal{D}_{\mathrm{gold}}=\left\{\left(I_{\mathrm{ref}}^{(i)},q_{\mathrm{edit}}^{(i)},c_{\mathrm{tgt}}^{*(i)}\right)\right\}_{i=1}^{N},</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(13)</span></td></tr></tbody>
+</table>
+<p id="Sx4.SSx1.p7.2" class="ltx_p">where
+<math id="Sx4.SSx1.p7.m1" class="ltx_Math" alttext="C_{\mathrm{tgt}}^{*}=(c_{1}^{*},\ldots,c_{L^{*}}^{*})" display="inline" intent=":literal"><semantics><mrow><msubsup><mi>C</mi><mi>tgt</mi><mo>∗</mo></msubsup><mo>=</mo><mrow><mo stretchy="false">(</mo><msubsup><mi>c</mi><mn>1</mn><mo>∗</mo></msubsup><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msubsup><mi>c</mi><msup><mi>L</mi><mo>∗</mo></msup><mo>∗</mo></msubsup><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">C_{\mathrm{tgt}}^{*}=(c_{1}^{*},\ldots,c_{L^{*}}^{*})</annotation></semantics></math>
+denotes the reference description generated by the offline MLLM. At decoding step <math id="Sx4.SSx1.p7.m2" class="ltx_Math" alttext="t" display="inline" intent=":literal"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>, we represent the reference token <math id="Sx4.SSx1.p7.m3" class="ltx_Math" alttext="c_{t}^{*}" display="inline" intent=":literal"><semantics><msubsup><mi>c</mi><mi>t</mi><mo>∗</mo></msubsup><annotation encoding="application/x-tex">c_{t}^{*}</annotation></semantics></math> using the empirical one-hot target distribution</p>
+<table id="Sx4.E14" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx4.E14.m1" class="ltx_math_unparsed" alttext="\mathcal{E}_{\mathrm{gold},t}(v)=\mathbb{I}\left[v=c_{t}^{*}\right],\qquad v\in\mathcal{V}," display="block" intent=":literal"><semantics><mrow><msub><mi class="ltx_font_mathcaligraphic">ℰ</mi><mrow><mi>gold</mi><mo>,</mo><mi>t</mi></mrow></msub><mrow><mo stretchy="false">(</mo><mi>v</mi><mo stretchy="false">)</mo></mrow><mo>=</mo><mi>𝕀</mi><mrow><mo>[</mo><mi>v</mi><mo>=</mo><msubsup><mi>c</mi><mi>t</mi><mo>∗</mo></msubsup><mo>]</mo></mrow><mo rspace="2.167em">,</mo><mi>v</mi><mo>∈</mo><mi class="ltx_font_mathcaligraphic">𝒱</mi><mo>,</mo></mrow><annotation encoding="application/x-tex">\mathcal{E}_{\mathrm{gold},t}(v)=\mathbb{I}\left[v=c_{t}^{*}\right],\qquad v\in\mathcal{V},</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(14)</span></td></tr></tbody>
+</table>
+<p id="Sx4.SSx1.p7.3" class="ltx_p">where <math id="Sx4.SSx1.p7.m4" class="ltx_Math" alttext="\mathcal{V}" display="inline" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒱</mi><annotation encoding="application/x-tex">\mathcal{V}</annotation></semantics></math> denotes the VLM vocabulary. For compactness, we use <math id="Sx4.SSx1.p7.m5" class="ltx_Math" alttext="\mathbb{E}_{\mathcal{D}_{\mathrm{gold}}}[\cdot]" display="inline" intent=":literal"><semantics><mrow><msub><mi>𝔼</mi><msub><mi class="ltx_font_mathcaligraphic">𝒟</mi><mi>gold</mi></msub></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">[</mo><mo lspace="0em" rspace="0em">⋅</mo><mo stretchy="false">]</mo></mrow></mrow><annotation encoding="application/x-tex">\mathbb{E}_{\mathcal{D}_{\mathrm{gold}}}[\cdot]</annotation></semantics></math> to denote expectation over samples from <math id="Sx4.SSx1.p7.m6" class="ltx_Math" alttext="\mathcal{D}_{\mathrm{gold}}" display="inline" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">𝒟</mi><mi>gold</mi></msub><annotation encoding="application/x-tex">\mathcal{D}_{\mathrm{gold}}</annotation></semantics></math>.</p>
+</div>
+<div id="Sx4.SSx1.p8" class="ltx_para">
+<p id="Sx4.SSx1.p8.2" class="ltx_p">We regularize the query-conditioned policy toward this empirical semantic target through</p>
+<table id="Sx4.E15" class="ltx_equationgroup ltx_eqn_table">
+<tbody>
+<tr id="Sx4.E15X" class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_td ltx_align_right ltx_eqn_cell"><math id="Sx4.E15X.m2" class="ltx_Math" alttext="\displaystyle\mathcal{L}_{\mathrm{SFT}}=\mathbb{E}_{\mathcal{D}_{\mathrm{gold}}}\Bigg[\frac{1}{L^{*}}\sum_{t=1}^{L^{*}}D_{\mathrm{KL}}\Big(\mathcal{E}_{\mathrm{gold},t}\,\|\,\pi_{\mathcal{E}_{\mathrm{query}}}\big(\cdot\mid I_{\mathrm{ref}}," display="inline" intent=":literal"><semantics><mrow><mi class="ltx_font_mathcaligraphic">ℒ</mi><msub><mrow></mrow><mi>SFT</mi></msub><mo>=</mo><mi>𝔼</mi><msub><mrow></mrow><msub><mi class="ltx_font_mathcaligraphic">𝒟</mi><mi>gold</mi></msub></msub><mo maxsize="2.600em" minsize="2.600em">[</mo><mstyle displaystyle="true"><mfrac><mn>1</mn><msup><mi>L</mi><mo>∗</mo></msup></mfrac></mstyle><mstyle displaystyle="true"><mo movablelimits="false">∑</mo></mstyle><msub><mrow></mrow><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow></msub><msup><mrow></mrow><msup><mi>L</mi><mo>∗</mo></msup></msup><mi>D</mi><msub><mrow></mrow><mi>KL</mi></msub><mo maxsize="1.600em" minsize="1.600em">(</mo><mi class="ltx_font_mathcaligraphic">ℰ</mi><msub><mrow></mrow><mrow><mi>gold</mi><mo>,</mo><mi>t</mi></mrow></msub><mo lspace="0em" rspace="0.337em">∥</mo><mi>π</mi><msub><mrow></mrow><msub><mi class="ltx_font_mathcaligraphic">ℰ</mi><mi>query</mi></msub></msub><mo maxsize="1.200em" minsize="1.200em">(</mo><mo lspace="0em" rspace="0em">⋅</mo><mo lspace="0em" rspace="0.167em">∣</mo><mi>I</mi><msub><mrow></mrow><mi>ref</mi></msub><mo>,</mo></mrow><annotation encoding="application/x-tex">\displaystyle\mathcal{L}_{\mathrm{SFT}}=\mathbb{E}_{\mathcal{D}_{\mathrm{gold}}}\Bigg[\frac{1}{L^{*}}\sum_{t=1}^{L^{*}}D_{\mathrm{KL}}\Big(\mathcal{E}_{\mathrm{gold},t}\,\|\,\pi_{\mathcal{E}_{\mathrm{query}}}\big(\cdot\mid I_{\mathrm{ref}},</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="2" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equationgroup ltx_align_right">(15)</span></td></tr>
+<tr id="Sx4.E15Xa" class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_td ltx_align_right ltx_eqn_cell"><math id="Sx4.E15Xa.m2" class="ltx_Math" alttext="\displaystyle p_{\mathrm{sys}}\oplus q_{\mathrm{edit}},c_{\mathrm{tgt},&lt;t}^{*}\big)\Big)\Bigg]." display="inline" intent=":literal"><semantics><mrow><mi>p</mi><msub><mrow></mrow><mi>sys</mi></msub><mo>⊕</mo><mi>q</mi><msub><mrow></mrow><mi>edit</mi></msub><mo>,</mo><mi>c</mi><msub><mrow></mrow><mrow><mrow><mi>tgt</mi><mo>,</mo><mphantom></mphantom></mrow><mo>&lt;</mo><mi>t</mi></mrow></msub><msup><mrow></mrow><mo>∗</mo></msup><mo maxsize="1.200em" minsize="1.200em">)</mo><mo maxsize="1.600em" minsize="1.600em">)</mo><mo maxsize="2.600em" minsize="2.600em">]</mo><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">\displaystyle p_{\mathrm{sys}}\oplus q_{\mathrm{edit}},c_{\mathrm{tgt},&lt;t}^{*}\big)\Big)\Bigg].</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td></tr></tbody>
+</table>
+<p id="Sx4.SSx1.p8.3" class="ltx_p">Because <math id="Sx4.SSx1.p8.m1" class="ltx_Math" alttext="\mathcal{E}_{\mathrm{gold},t}" display="inline" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">ℰ</mi><mrow><mi>gold</mi><mo>,</mo><mi>t</mi></mrow></msub><annotation encoding="application/x-tex">\mathcal{E}_{\mathrm{gold},t}</annotation></semantics></math> is a one-hot distribution concentrated on <math id="Sx4.SSx1.p8.m2" class="ltx_Math" alttext="c_{t}^{*}" display="inline" intent=":literal"><semantics><msubsup><mi>c</mi><mi>t</mi><mo>∗</mo></msubsup><annotation encoding="application/x-tex">c_{t}^{*}</annotation></semantics></math>, the KL objective reduces exactly to the token-level negative log-likelihood used in standard SFT in eq. <a href="#Sx4.E16" title="In T2I Query Alignment ‣ Proposed Method ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_tag">16</span></a>.</p>
+</div>
+<div id="Sx4.SSx1.p9" class="ltx_para">
+<table id="Sx4.E16" class="ltx_equationgroup ltx_eqn_table">
+<tbody>
+<tr id="Sx4.E16X" class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_td ltx_align_right ltx_eqn_cell"><math id="Sx4.E16X.m2" class="ltx_Math" alttext="\displaystyle\mathcal{L}_{\mathrm{SFT}}=\mathbb{E}_{\mathcal{D}_{\mathrm{gold}}}\Bigg[\frac{1}{L^{*}}\sum_{t=1}^{L^{*}}\log\pi_{\mathcal{E}_{\mathrm{query}}}\Big(c_{t}^{*}\mid I_{\mathrm{ref}}," display="inline" intent=":literal"><semantics><mrow><mi class="ltx_font_mathcaligraphic">ℒ</mi><msub><mrow></mrow><mi>SFT</mi></msub><mo>=</mo><mi>𝔼</mi><msub><mrow></mrow><msub><mi class="ltx_font_mathcaligraphic">𝒟</mi><mi>gold</mi></msub></msub><mo maxsize="2.600em" minsize="2.600em">[</mo><mstyle displaystyle="true"><mfrac><mn>1</mn><msup><mi>L</mi><mo>∗</mo></msup></mfrac></mstyle><mstyle displaystyle="true"><mo movablelimits="false">∑</mo></mstyle><msub><mrow></mrow><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow></msub><msup><mrow></mrow><msup><mi>L</mi><mo>∗</mo></msup></msup><mi>log</mi><mi>π</mi><msub><mrow></mrow><msub><mi class="ltx_font_mathcaligraphic">ℰ</mi><mi>query</mi></msub></msub><mo maxsize="1.600em" minsize="1.600em">(</mo><mi>c</mi><msub><mrow></mrow><mi>t</mi></msub><msup><mrow></mrow><mo>∗</mo></msup><mo lspace="0em" rspace="0.167em">∣</mo><mi>I</mi><msub><mrow></mrow><mi>ref</mi></msub><mo>,</mo></mrow><annotation encoding="application/x-tex">\displaystyle\mathcal{L}_{\mathrm{SFT}}=\mathbb{E}_{\mathcal{D}_{\mathrm{gold}}}\Bigg[\frac{1}{L^{*}}\sum_{t=1}^{L^{*}}\log\pi_{\mathcal{E}_{\mathrm{query}}}\Big(c_{t}^{*}\mid I_{\mathrm{ref}},</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="2" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equationgroup ltx_align_right">(16)</span></td></tr>
+<tr id="Sx4.E16Xa" class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_td ltx_align_right ltx_eqn_cell"><math id="Sx4.E16Xa.m2" class="ltx_Math" alttext="\displaystyle p_{\mathrm{sys}}\oplus q_{\mathrm{edit}},c_{\mathrm{tgt},&lt;t}^{*}\Big)\Bigg]." display="inline" intent=":literal"><semantics><mrow><mi>p</mi><msub><mrow></mrow><mi>sys</mi></msub><mo>⊕</mo><mi>q</mi><msub><mrow></mrow><mi>edit</mi></msub><mo>,</mo><mi>c</mi><msub><mrow></mrow><mrow><mrow><mi>tgt</mi><mo>,</mo><mphantom></mphantom></mrow><mo>&lt;</mo><mi>t</mi></mrow></msub><msup><mrow></mrow><mo>∗</mo></msup><mo maxsize="1.600em" minsize="1.600em">)</mo><mo maxsize="2.600em" minsize="2.600em">]</mo><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">\displaystyle p_{\mathrm{sys}}\oplus q_{\mathrm{edit}},c_{\mathrm{tgt},&lt;t}^{*}\Big)\Bigg].</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td></tr></tbody>
+</table>
+</div>
+<div id="Sx4.SSx1.p10" class="ltx_para">
+<p id="Sx4.SSx1.p10.1" class="ltx_p">In all, the two objectives provide complementary supervision. Combining downstream reward alignment with offline semantic supervision, the overall objective of Stage 1 is</p>
+<table id="Sx4.E17" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx4.E17.m1" class="ltx_Math" alttext="\boxed{\mathcal{L}_{\mathrm{Stage1}}=\mathcal{L}_{\mathrm{PG}}+\lambda_{\mathrm{SFT}}\mathcal{L}_{\mathrm{SFT}}}," display="block" intent=":literal"><semantics><mrow><menclose notation="box"><mrow><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mi>Stage1</mi></msub><mo>=</mo><mrow><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mi>PG</mi></msub><mo>+</mo><mrow><msub><mi>λ</mi><mi>SFT</mi></msub><mo lspace="0em" rspace="0em">​</mo><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mi>SFT</mi></msub></mrow></mrow></mrow></menclose><mo>,</mo></mrow><annotation encoding="application/x-tex">\boxed{\mathcal{L}_{\mathrm{Stage1}}=\mathcal{L}_{\mathrm{PG}}+\lambda_{\mathrm{SFT}}\mathcal{L}_{\mathrm{SFT}}},</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(17)</span></td></tr></tbody>
+</table>
+<p id="Sx4.SSx1.p10.2" class="ltx_p">Policy gradient <math id="Sx4.SSx1.p10.m1" class="ltx_Math" alttext="\mathcal{L}_{\mathrm{PG}}" display="inline" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mi>PG</mi></msub><annotation encoding="application/x-tex">\mathcal{L}_{\mathrm{PG}}</annotation></semantics></math> increases the likelihood of description alignment that receives high downstream T2I rewards in embedding level, while <math id="Sx4.SSx1.p10.m2" class="ltx_Math" alttext="\mathcal{L}_{\mathrm{SFT}}" display="inline" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mi>SFT</mi></msub><annotation encoding="application/x-tex">\mathcal{L}_{\mathrm{SFT}}</annotation></semantics></math> regularizes the policy toward semantically reliable descriptions generated by the offline MLLM. The latter, therefore, mitigates semantic drift and potential hacking introduced by reward-driven optimization.</p>
+</div>
+</section>
+<section id="Sx4.SSx2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Reward-aligned Finetuning</h3>
+
+<div id="Sx4.SSx2.p1" class="ltx_para">
+<p id="Sx4.SSx2.p1.1" class="ltx_p">Stage 1 freezes the image editing backbone and performs RL rollouts over the VLM-generated target descriptions <math id="Sx4.SSx2.p1.m1" class="ltx_Math" alttext="c_{\mathrm{tgt}}" display="inline" intent=":literal"><semantics><msub><mi>c</mi><mi>tgt</mi></msub><annotation encoding="application/x-tex">c_{\mathrm{tgt}}</annotation></semantics></math>, yielding a set of learnable query embeddings <math id="Sx4.SSx2.p1.m2" class="ltx_Math" alttext="\mathcal{E}_{\mathrm{query}}" display="inline" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">ℰ</mi><mi>query</mi></msub><annotation encoding="application/x-tex">\mathcal{E}_{\mathrm{query}}</annotation></semantics></math> directly aligned with multiple T2I rewards. In Stage 2, the resulting query embeddings serve as a plug-and-play reward-alignment module that provides effective reward signals across different image-editing backbones and fine-tuning paradigms. Additionally, the corresponding VLM prefill embedding of <math id="Sx4.SSx2.p1.m3" class="ltx_Math" alttext="\mathcal{E}_{\mathrm{query}}" display="inline" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">ℰ</mi><mi>query</mi></msub><annotation encoding="application/x-tex">\mathcal{E}_{\mathrm{query}}</annotation></semantics></math> has been contextualized with both visual and textual inputs. Therefore, additional reward-aligned multi-modal condition can be introduced into the image edit finetuning process.</p>
+</div>
+</section>
+</section>
+<section id="Sx5" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Experiments</h2>
+
+<figure id="Sx5.T1" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 1: </span>Comparison of different methods across image editing evaluation metrics on Lever-Bench and GEdit <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib18" title="" class="ltx_ref">13</a>)</cite>.</figcaption>
+<table id="Sx5.T1.1" class="ltx_tabular ltx_centering ltx_align_middle">
+<tr id="Sx5.T1.1.1" class="ltx_tr">
+<td id="Sx5.T1.1.1.1" class="ltx_td ltx_border_tt" style="padding:0.4pt 3.0pt;"></td>
+<td id="Sx5.T1.1.1.2" class="ltx_td ltx_align_center ltx_border_tt" style="padding:0.4pt 3.0pt;">Consistency</td>
+<td id="Sx5.T1.1.1.3" class="ltx_td ltx_align_center ltx_border_tt" style="padding:0.4pt 3.0pt;">Aesthetics</td>
+<td id="Sx5.T1.1.1.4" class="ltx_td ltx_align_center ltx_border_tt" style="padding:0.4pt 3.0pt;" colspan="3">EditScore</td>
+<td id="Sx5.T1.1.1.5" class="ltx_td ltx_align_center ltx_border_tt" style="padding:0.4pt 3.0pt;">T2I Naturalness</td>
+<td id="Sx5.T1.1.1.6" class="ltx_td ltx_align_center ltx_border_tt" style="padding:0.4pt 3.0pt;" colspan="3">GEdit</td></tr>
+<tr id="Sx5.T1.1.2" class="ltx_tr">
+<td id="Sx5.T1.1.2.1" class="ltx_td ltx_align_left" style="padding:0.4pt 3.0pt;">Method</td>
+<td id="Sx5.T1.1.2.2" class="ltx_td ltx_align_center ltx_border_t" style="padding:0.4pt 3.0pt;">SigLIP</td>
+<td id="Sx5.T1.1.2.3" class="ltx_td ltx_align_center ltx_border_t" style="padding:0.4pt 3.0pt;">HPSv3</td>
+<td id="Sx5.T1.1.2.4" class="ltx_td ltx_align_center ltx_border_t" style="padding:0.4pt 3.0pt;"><span id="Sx5.T1.1.2.4.1" class="ltx_text"></span> <span id="Sx5.T1.1.2.4.2" class="ltx_text">
+<span id="Sx5.T1.1.2.4.2.1" class="ltx_tabular ltx_align_middle">
+<span id="Sx5.T1.1.2.4.2.1.1" class="ltx_tr">
+<span id="Sx5.T1.1.2.4.2.1.1.1" class="ltx_td ltx_nopad_r ltx_align_center" style="padding:0.4pt 3.0pt;">Consistency</span></span>
+</span></span><span id="Sx5.T1.1.2.4.3" class="ltx_text"></span></td>
+<td id="Sx5.T1.1.2.5" class="ltx_td ltx_align_center ltx_border_t" style="padding:0.4pt 3.0pt;"><span id="Sx5.T1.1.2.5.1" class="ltx_text"></span> <span id="Sx5.T1.1.2.5.2" class="ltx_text">
+<span id="Sx5.T1.1.2.5.2.1" class="ltx_tabular ltx_align_middle">
+<span id="Sx5.T1.1.2.5.2.1.1" class="ltx_tr">
+<span id="Sx5.T1.1.2.5.2.1.1.1" class="ltx_td ltx_nopad_r ltx_align_center" style="padding:0.4pt 3.0pt;">Naturalness</span></span>
+</span></span><span id="Sx5.T1.1.2.5.3" class="ltx_text"></span></td>
+<td id="Sx5.T1.1.2.6" class="ltx_td ltx_align_center ltx_border_t" style="padding:0.4pt 3.0pt;"><span id="Sx5.T1.1.2.6.1" class="ltx_text"></span> <span id="Sx5.T1.1.2.6.2" class="ltx_text">
+<span id="Sx5.T1.1.2.6.2.1" class="ltx_tabular ltx_align_middle">
+<span id="Sx5.T1.1.2.6.2.1.1" class="ltx_tr">
+<span id="Sx5.T1.1.2.6.2.1.1.1" class="ltx_td ltx_nopad_r ltx_align_center" style="padding:0.4pt 3.0pt;">Execution</span></span>
+</span></span><span id="Sx5.T1.1.2.6.3" class="ltx_text"></span></td>
+<td id="Sx5.T1.1.2.7" class="ltx_td ltx_align_center ltx_border_t" style="padding:0.4pt 3.0pt;"><span id="Sx5.T1.1.2.7.1" class="ltx_text"></span> <span id="Sx5.T1.1.2.7.2" class="ltx_text">
+<span id="Sx5.T1.1.2.7.2.1" class="ltx_tabular ltx_align_middle">
+<span id="Sx5.T1.1.2.7.2.1.1" class="ltx_tr">
+<span id="Sx5.T1.1.2.7.2.1.1.1" class="ltx_td ltx_nopad_r ltx_align_center" style="padding:0.4pt 3.0pt;">RealGen v1</span></span>
+</span></span><span id="Sx5.T1.1.2.7.3" class="ltx_text"></span></td>
+<td id="Sx5.T1.1.2.8" class="ltx_td ltx_align_center ltx_border_t" style="padding:0.4pt 3.0pt;">S</td>
+<td id="Sx5.T1.1.2.9" class="ltx_td ltx_align_center ltx_border_t" style="padding:0.4pt 3.0pt;">Q</td>
+<td id="Sx5.T1.1.2.10" class="ltx_td ltx_nopad_r ltx_align_center ltx_border_t" style="padding:0.4pt 3.0pt;">O</td></tr>
+<tr id="Sx5.T1.1.3" class="ltx_tr">
+<td id="Sx5.T1.1.3.1" class="ltx_td ltx_align_left ltx_border_t" style="padding:0.4pt 3.0pt;">w/o Alignment</td>
+<td id="Sx5.T1.1.3.2" class="ltx_td ltx_align_center ltx_border_t" style="padding:0.4pt 3.0pt;">0.0769</td>
+<td id="Sx5.T1.1.3.3" class="ltx_td ltx_align_center ltx_border_t" style="padding:0.4pt 3.0pt;">5.2742</td>
+<td id="Sx5.T1.1.3.4" class="ltx_td ltx_align_center ltx_border_t" style="padding:0.4pt 3.0pt;">0.8726</td>
+<td id="Sx5.T1.1.3.5" class="ltx_td ltx_align_center ltx_border_t" style="padding:0.4pt 3.0pt;">0.8811</td>
+<td id="Sx5.T1.1.3.6" class="ltx_td ltx_align_center ltx_border_t" style="padding:0.4pt 3.0pt;">0.6311</td>
+<td id="Sx5.T1.1.3.7" class="ltx_td ltx_align_center ltx_border_t" style="padding:0.4pt 3.0pt;">1.1958</td>
+<td id="Sx5.T1.1.3.8" class="ltx_td ltx_align_center ltx_border_t" style="padding:0.4pt 3.0pt;">6.181</td>
+<td id="Sx5.T1.1.3.9" class="ltx_td ltx_align_center ltx_border_t" style="padding:0.4pt 3.0pt;">6.330</td>
+<td id="Sx5.T1.1.3.10" class="ltx_td ltx_nopad_r ltx_align_center ltx_border_t" style="padding:0.4pt 3.0pt;">5.763</td></tr>
+<tr id="Sx5.T1.1.4" class="ltx_tr">
+<td id="Sx5.T1.1.4.1" class="ltx_td ltx_align_left" style="padding:0.4pt 3.0pt;"><span id="Sx5.T1.1.4.1.1" class="ltx_text ltx_font_bold">Lever</span> Pure Edit</td>
+<td id="Sx5.T1.1.4.2" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">0.0772</td>
+<td id="Sx5.T1.1.4.3" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">5.9823</td>
+<td id="Sx5.T1.1.4.4" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">0.9044</td>
+<td id="Sx5.T1.1.4.5" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;"><span id="Sx5.T1.1.4.5.1" class="ltx_text ltx_underline ltx_font_bold">0.8974</span></td>
+<td id="Sx5.T1.1.4.6" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;"><span id="Sx5.T1.1.4.6.1" class="ltx_text ltx_underline ltx_font_bold">0.7307</span></td>
+<td id="Sx5.T1.1.4.7" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">1.2119</td>
+<td id="Sx5.T1.1.4.8" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">6.345</td>
+<td id="Sx5.T1.1.4.9" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">6.330</td>
+<td id="Sx5.T1.1.4.10" class="ltx_td ltx_nopad_r ltx_align_center" style="padding:0.4pt 3.0pt;">5.755</td></tr>
+<tr id="Sx5.T1.1.5" class="ltx_tr">
+<td id="Sx5.T1.1.5.1" class="ltx_td ltx_align_left" style="padding:0.4pt 3.0pt;"><span id="Sx5.T1.1.5.1.1" class="ltx_text ltx_font_bold">Lever</span> Pure VLM</td>
+<td id="Sx5.T1.1.5.2" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">0.0771</td>
+<td id="Sx5.T1.1.5.3" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">7.3152</td>
+<td id="Sx5.T1.1.5.4" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">0.9244</td>
+<td id="Sx5.T1.1.5.5" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">0.8837</td>
+<td id="Sx5.T1.1.5.6" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">0.6249</td>
+<td id="Sx5.T1.1.5.7" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">1.1946</td>
+<td id="Sx5.T1.1.5.8" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">6.058</td>
+<td id="Sx5.T1.1.5.9" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;"><span id="Sx5.T1.1.5.9.1" class="ltx_text ltx_underline ltx_font_bold">6.661</span></td>
+<td id="Sx5.T1.1.5.10" class="ltx_td ltx_nopad_r ltx_align_center" style="padding:0.4pt 3.0pt;">5.706</td></tr>
+<tr id="Sx5.T1.1.6" class="ltx_tr">
+<td id="Sx5.T1.1.6.1" class="ltx_td ltx_align_left" style="padding:0.4pt 3.0pt;"><span id="Sx5.T1.1.6.1.1" class="ltx_text ltx_font_bold">Lever</span> Offline SOTA</td>
+<td id="Sx5.T1.1.6.2" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">0.0763</td>
+<td id="Sx5.T1.1.6.3" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">8.2645</td>
+<td id="Sx5.T1.1.6.4" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">0.9252</td>
+<td id="Sx5.T1.1.6.5" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">0.8896</td>
+<td id="Sx5.T1.1.6.6" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">0.7191</td>
+<td id="Sx5.T1.1.6.7" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">1.1995</td>
+<td id="Sx5.T1.1.6.8" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">6.042</td>
+<td id="Sx5.T1.1.6.9" class="ltx_td ltx_align_center" style="padding:0.4pt 3.0pt;">6.389</td>
+<td id="Sx5.T1.1.6.10" class="ltx_td ltx_nopad_r ltx_align_center" style="padding:0.4pt 3.0pt;">5.517</td></tr>
+<tr id="Sx5.T1.1.7" class="ltx_tr">
+<td id="Sx5.T1.1.7.1" class="ltx_td ltx_align_left ltx_border_bb" style="padding:0.4pt 3.0pt;"><span id="Sx5.T1.1.7.1.1" class="ltx_text ltx_font_bold ltx_font_italic">Lever-Edit</span></td>
+<td id="Sx5.T1.1.7.2" class="ltx_td ltx_align_center ltx_border_bb" style="padding:0.4pt 3.0pt;"><span id="Sx5.T1.1.7.2.1" class="ltx_text ltx_underline ltx_font_bold">0.0788</span></td>
+<td id="Sx5.T1.1.7.3" class="ltx_td ltx_align_center ltx_border_bb" style="padding:0.4pt 3.0pt;"><span id="Sx5.T1.1.7.3.1" class="ltx_text ltx_underline ltx_font_bold">14.9762</span></td>
+<td id="Sx5.T1.1.7.4" class="ltx_td ltx_align_center ltx_border_bb" style="padding:0.4pt 3.0pt;"><span id="Sx5.T1.1.7.4.1" class="ltx_text ltx_underline ltx_font_bold">0.9263</span></td>
+<td id="Sx5.T1.1.7.5" class="ltx_td ltx_align_center ltx_border_bb" style="padding:0.4pt 3.0pt;">0.8822</td>
+<td id="Sx5.T1.1.7.6" class="ltx_td ltx_align_center ltx_border_bb" style="padding:0.4pt 3.0pt;">0.7040</td>
+<td id="Sx5.T1.1.7.7" class="ltx_td ltx_align_center ltx_border_bb" style="padding:0.4pt 3.0pt;"><span id="Sx5.T1.1.7.7.1" class="ltx_text ltx_underline ltx_font_bold">1.2532</span></td>
+<td id="Sx5.T1.1.7.8" class="ltx_td ltx_align_center ltx_border_bb" style="padding:0.4pt 3.0pt;"><span id="Sx5.T1.1.7.8.1" class="ltx_text ltx_underline ltx_font_bold">6.364</span></td>
+<td id="Sx5.T1.1.7.9" class="ltx_td ltx_align_center ltx_border_bb" style="padding:0.4pt 3.0pt;">6.362</td>
+<td id="Sx5.T1.1.7.10" class="ltx_td ltx_nopad_r ltx_align_center ltx_border_bb" style="padding:0.4pt 3.0pt;"><span id="Sx5.T1.1.7.10.1" class="ltx_text ltx_underline ltx_font_bold">5.788</span></td></tr>
+</table>
+</figure>
+<section id="Sx5.SSx1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Experiment Setup</h3>
+
+<div id="Sx5.SSx1.p1" class="ltx_para">
+<p id="Sx5.SSx1.p1.1" class="ltx_p"><span id="Sx5.SSx1.p1.1.1" class="ltx_text ltx_font_bold">Datasets.</span> We evaluate our method on both a failure-focused benchmark constructed for T2I-reward transfer and existing public image editing benchmarks. Specifically, we construct <span id="Sx5.SSx1.p1.1.2" class="ltx_text ltx_font_bold">Lever-Bench</span> to evaluate the transfer of T2I rewards for image editing. Rather than uniformly sampling common editing cases, we curate 1,880 image-instruction pairs <math id="Sx5.SSx1.p1.m1" class="ltx_Math" alttext="(I_{\mathrm{in}},q_{\mathrm{edit}})" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">(</mo><msub><mi>I</mi><mi>in</mi></msub><mo>,</mo><msub><mi>q</mi><mi>edit</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(I_{\mathrm{in}},q_{\mathrm{edit}})</annotation></semantics></math> from multiple sources, including Arena <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib12" title="" class="ltx_ref">7</a>)</cite>, Counting Edit <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib13" title="" class="ltx_ref">3</a>)</cite>, and EditScore-RL-Data <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib19" title="" class="ltx_ref">15</a>)</cite>, focusing on failure cases of existing image editing models. Lever-Bench spans four broad categories of editing scenarios: <em id="Sx5.SSx1.p1.1.3" class="ltx_emph ltx_font_italic">local edits</em>, including object removal, replacement, and material or attribute modification; <em id="Sx5.SSx1.p1.1.4" class="ltx_emph ltx_font_italic">human-centric edits</em>, including portrait, pose, action, and facial-expression changes; <em id="Sx5.SSx1.p1.1.5" class="ltx_emph ltx_font_italic">global edits</em>, such as background and style modification; and <em id="Sx5.SSx1.p1.1.6" class="ltx_emph ltx_font_italic">compositional edits</em> involving object counting and relational reasoning. To complement these targeted failure cases and evaluate generalization beyond our curated benchmark, we additionally report results on the open-source benchmarks: GEdit <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib18" title="" class="ltx_ref">13</a>)</cite> and EditReward-Bench <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib19" title="" class="ltx_ref">15</a>)</cite>.</p>
+</div>
+<div id="Sx5.SSx1.p2" class="ltx_para">
+<p id="Sx5.SSx1.p2.1" class="ltx_p"><span id="Sx5.SSx1.p2.1.1" class="ltx_text ltx_font_bold">Rewards and Metrics.</span> Both training rewards and evaluation metrics are selected to cover three complementary dimensions of image editing quality: perceptual quality, edit execution, and reference consistency. For both Stage 1 and Stage 2, we employ HPSv3 <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib7" title="" class="ltx_ref">16</a>)</cite> and RealGen <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib6" title="" class="ltx_ref">28</a>)</cite> as T2I rewards. HPSv3 provides reward signals for edit execution, consistency, and aesthetics, while RealGen emphasizes realism and consistency. For evaluation, we separately assess the major quality dimensions to obtain a more comprehensive view of model performance. We measure perceptual quality from both aesthetic and realism perspectives. To evaluate semantic consistency, we use SigLIP <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib31" title="" class="ltx_ref">29</a>)</cite> to measure the correspondence between the edited image and its textual condition. We further use EditScore <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib19" title="" class="ltx_ref">15</a>)</cite> to assess instruction execution and consistency between the input and edited images. These metrics jointly characterize perceptual quality, instruction following, and source consistency.</p>
+</div>
+<div id="Sx5.SSx1.p3" class="ltx_para">
+<p id="Sx5.SSx1.p3.1" class="ltx_p"><span id="Sx5.SSx1.p3.1.1" class="ltx_text ltx_font_bold">Models and Baselines.</span> We instantiate <span id="Sx5.SSx1.p3.1.2" class="ltx_text ltx_font_italic">Lever-Edit</span> on FLUX.1-Kontext-dev <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib1" title="" class="ltx_ref">9</a>)</cite> and apply
+DiffusionNFT <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib27" title="" class="ltx_ref">31</a>)</cite>.
+Therefore, our baselines are designed to distinguish the effect of reward-aligned target description generation from the benefit of simply providing an alternative textual condition. In addition to the original image editing model without alignment, we compare four prompt constructions: (i) directly using the original edit instruction <math id="Sx5.SSx1.p3.m1" class="ltx_Math" alttext="q_{\mathrm{edit}}" display="inline" intent=":literal"><semantics><msub><mi>q</mi><mi>edit</mi></msub><annotation encoding="application/x-tex">q_{\mathrm{edit}}</annotation></semantics></math> (<em id="Sx5.SSx1.p3.1.3" class="ltx_emph ltx_font_italic"><span id="Sx5.SSx1.p3.1.3.1" class="ltx_text ltx_font_bold">Lever</span> Pure Edit</em>); (ii) descriptions generated by the online VLM conditioned on the fixed <math id="Sx5.SSx1.p3.m2" class="ltx_Math" alttext="p_{\mathrm{sys}}" display="inline" intent=":literal"><semantics><msub><mi>p</mi><mi>sys</mi></msub><annotation encoding="application/x-tex">p_{\mathrm{sys}}</annotation></semantics></math>, without reward-driven query optimization (<em id="Sx5.SSx1.p3.1.4" class="ltx_emph ltx_font_italic"><span id="Sx5.SSx1.p3.1.4.1" class="ltx_text ltx_font_bold">Lever</span> Pure VLM</em>); (iii) high-quality descriptions generated offline by a strong closed-source MLLM (<em id="Sx5.SSx1.p3.1.5" class="ltx_emph ltx_font_italic"><span id="Sx5.SSx1.p3.1.5.1" class="ltx_text ltx_font_bold">Lever</span> Offline SOTA</em>); and (iv) reward-aligned descriptions generated by <em id="Sx5.SSx1.p3.1.6" class="ltx_emph ltx_font_bold ltx_font_italic">Lever-Edit</em>. Unless otherwise stated, variants in comparison use the same image-editing backbone, edit instruction set, and training budget.</p>
+</div>
+<figure id="Sx5.F3" class="ltx_figure"><object type="image/svg+xml" data="2608.22780v1/t2ireward_accuracy_evalrealgen.svg" id="Sx5.F3.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="698" height="222"></object>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 3: </span>Effectiveness of T2I rewards transfer. (a) Evaluation of T2I reward and I2I reward (Editscore) on EditReward-Bench. (b) Evaluated T2I reward comparison of different methods. <span id="Sx5.F3.2" class="ltx_text ltx_font_italic">Lever-Edit</span> shows stable and best optimization.</figcaption>
+</figure>
+<figure id="Sx5.F4" class="ltx_figure"><img src="https://arxiv.org/html/2608.22780v1/q_analysis.png" id="Sx5.F4.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="698" height="381" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 4: </span>Qualitative analysis of different methods. <span id="Sx5.F4.2" class="ltx_text ltx_font_italic">Lever-Edit</span> successfully edits the images with strong prompt following and high aesthetics, while maintaining both semantic and source consistency with naturalness. Zoom in for better visualizations.</figcaption>
+</figure>
+<figure id="Sx5.F5" class="ltx_figure"><object type="image/svg+xml" data="2608.22780v1/training_step_ablationv2.svg" id="Sx5.F5.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="698" height="138"></object>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 5: </span>Ablation study across different training steps. <span id="Sx5.F5.2" class="ltx_text ltx_font_italic">Lever-Edit</span> achieves the best aesthetics, semantic alignment, edit consistency, and realism throughout most training steps.</figcaption>
+</figure>
+<figure id="Sx5.T2" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 2: </span>Ablation Study regarding the influence of different prompts for T2I rewards on SigLIP semantic consistency.</figcaption>
+<div id="Sx5.T2.1" class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:505.9pt;height:143.8pt;vertical-align:-67.6pt;"><span class="ltx_transformed_inner" style="transform:translate(105.6pt,-30.0pt) scale(1.71657936555439,1.71657936555439) ;">
+<table id="Sx5.T2.1.1" class="ltx_tabular ltx_align_middle">
+<tr id="Sx5.T2.1.1.1" class="ltx_tr">
+<td id="Sx5.T2.1.1.1.1" class="ltx_td ltx_align_left ltx_border_tt">Method</td>
+<td id="Sx5.T2.1.1.1.2" class="ltx_td ltx_align_center ltx_border_tt">
+<span id="Sx5.T2.1.1.1.2.1" class="ltx_inline-block">
+<span id="Sx5.T2.1.1.1.2.1.1" class="ltx_p">Pure Edit</span>
+<span id="Sx5.T2.1.1.1.2.1.2" class="ltx_p">Prompt</span>
+</span></td>
+<td id="Sx5.T2.1.1.1.3" class="ltx_td ltx_align_center ltx_border_tt">
+<span id="Sx5.T2.1.1.1.3.1" class="ltx_inline-block">
+<span id="Sx5.T2.1.1.1.3.1.1" class="ltx_p">Offline SOTA</span>
+<span id="Sx5.T2.1.1.1.3.1.2" class="ltx_p">Prompt</span>
+</span></td>
+<td id="Sx5.T2.1.1.1.4" class="ltx_td ltx_align_center ltx_border_tt">
+<span id="Sx5.T2.1.1.1.4.1" class="ltx_inline-block">
+<span id="Sx5.T2.1.1.1.4.1.1" class="ltx_p"><span id="Sx5.T2.1.1.1.4.1.1.1" class="ltx_text ltx_font_italic">Lever-Edit</span></span>
+<span id="Sx5.T2.1.1.1.4.1.2" class="ltx_p">Prompt</span>
+</span></td></tr>
+<tr id="Sx5.T2.1.1.2" class="ltx_tr">
+<td id="Sx5.T2.1.1.2.1" class="ltx_td ltx_align_left ltx_border_t">w/o Alignment</td>
+<td id="Sx5.T2.1.1.2.2" class="ltx_td ltx_align_center ltx_border_t">0.0769</td>
+<td id="Sx5.T2.1.1.2.3" class="ltx_td ltx_align_center ltx_border_t">0.0768</td>
+<td id="Sx5.T2.1.1.2.4" class="ltx_td ltx_align_center ltx_border_t">0.0784</td></tr>
+<tr id="Sx5.T2.1.1.3" class="ltx_tr">
+<td id="Sx5.T2.1.1.3.1" class="ltx_td ltx_align_left"><span id="Sx5.T2.1.1.3.1.1" class="ltx_text ltx_font_bold">Lever</span> Pure Edit</td>
+<td id="Sx5.T2.1.1.3.2" class="ltx_td ltx_align_center">0.0772</td>
+<td id="Sx5.T2.1.1.3.3" class="ltx_td ltx_align_center">0.0766</td>
+<td id="Sx5.T2.1.1.3.4" class="ltx_td ltx_align_center">0.0785</td></tr>
+<tr id="Sx5.T2.1.1.4" class="ltx_tr">
+<td id="Sx5.T2.1.1.4.1" class="ltx_td ltx_align_left"><span id="Sx5.T2.1.1.4.1.1" class="ltx_text ltx_font_bold">Lever</span> Pure VLM</td>
+<td id="Sx5.T2.1.1.4.2" class="ltx_td ltx_align_center">0.0770</td>
+<td id="Sx5.T2.1.1.4.3" class="ltx_td ltx_align_center">0.0765</td>
+<td id="Sx5.T2.1.1.4.4" class="ltx_td ltx_align_center">0.0784</td></tr>
+<tr id="Sx5.T2.1.1.5" class="ltx_tr">
+<td id="Sx5.T2.1.1.5.1" class="ltx_td ltx_align_left"><span id="Sx5.T2.1.1.5.1.1" class="ltx_text ltx_font_bold">Lever</span> Offline SOTA</td>
+<td id="Sx5.T2.1.1.5.2" class="ltx_td ltx_align_center">0.0767</td>
+<td id="Sx5.T2.1.1.5.3" class="ltx_td ltx_align_center">0.0763</td>
+<td id="Sx5.T2.1.1.5.4" class="ltx_td ltx_align_center">0.0782</td></tr>
+<tr id="Sx5.T2.1.1.6" class="ltx_tr">
+<td id="Sx5.T2.1.1.6.1" class="ltx_td ltx_align_left ltx_border_bb"><span id="Sx5.T2.1.1.6.1.1" class="ltx_text ltx_font_bold ltx_font_italic">Lever-Edit</span></td>
+<td id="Sx5.T2.1.1.6.2" class="ltx_td ltx_align_center ltx_border_bb"><span id="Sx5.T2.1.1.6.2.1" class="ltx_text ltx_underline ltx_font_bold">0.0777</span></td>
+<td id="Sx5.T2.1.1.6.3" class="ltx_td ltx_align_center ltx_border_bb"><span id="Sx5.T2.1.1.6.3.1" class="ltx_text ltx_underline ltx_font_bold">0.0770</span></td>
+<td id="Sx5.T2.1.1.6.4" class="ltx_td ltx_align_center ltx_border_bb"><span id="Sx5.T2.1.1.6.4.1" class="ltx_text ltx_underline ltx_font_bold">0.0788</span></td></tr>
+</table>
+</span></div>
+</figure>
+</section>
+<section id="Sx5.SSx2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">The Merits of Introducing T2I Rewards</h3>
+
+<div id="Sx5.SSx2.p1" class="ltx_para">
+<p id="Sx5.SSx2.p1.1" class="ltx_p">To verify our central hypothesis that the standard dimensions of editing quality can be mapped into the T2I reward space, we evaluate the transferred reward at two complementary levels. At the reward level, a successful transfer should correctly distinguish preferred edits from inferior ones, even without an editing-specific evaluator that jointly processes the reference image, instruction, and edited output. At the optimization level, it should provide a stable learning signal whose gains translate into better instruction execution, semantic and source consistency, and image quality. We therefore evaluate reward accuracy on annotated preference pairs, analyze reward trajectories during training, and compare downstream editing performance on Lever-Bench, EditReward-Bench <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib19" title="" class="ltx_ref">15</a>)</cite>, and GEdit <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib18" title="" class="ltx_ref">13</a>)</cite>. Together, these evaluations test not only whether a transferred T2I reward assigns meaningful preference scores, but also whether its preference knowledge can serve as effective supervision for image-editing RL.</p>
+</div>
+<div id="Sx5.SSx2.p2" class="ltx_para">
+<p id="Sx5.SSx2.p2.1" class="ltx_p">Our reward-aligned target descriptions enable T2I rewards to provide a stronger editing-preference signal than directly applying them to raw edit instructions. At the reward level, we compare three variants on preference pairs with ground-truth annotations: HPSv3 conditioned on the reward-aligned target descriptions generated by <span id="Sx5.SSx2.p2.1.1" class="ltx_text ltx_font_italic">Lever-Edit</span> (<em id="Sx5.SSx2.p2.1.2" class="ltx_emph ltx_font_italic">HPSv3+Ours</em>), HPSv3 conditioned directly on the raw edit instruction (<em id="Sx5.SSx2.p2.1.3" class="ltx_emph ltx_font_italic">HPSv3+Edit</em>), and the editing-specific reward EditScore. As shown in Fig. <a href="#Sx5.F3" title="Figure 3 ‣ Experiment Setup ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a>(a), <em id="Sx5.SSx2.p2.1.4" class="ltx_emph ltx_font_italic">HPSv3+Ours</em> outperforms EditScore by approximately 9 percentage points in prompt-following accuracy. In contrast, directly conditioning HPSv3 on the edit instruction leads to a pronounced drop in consistency accuracy. This is because a relative edit instruction specifies what should change, but does not explicitly describe the source content that should be preserved. At the optimization level, the Forensic-Chat reward curves in Fig. <a href="#Sx5.F3" title="Figure 3 ‣ Experiment Setup ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a>(b) show that <span id="Sx5.SSx2.p2.1.5" class="ltx_text ltx_font_italic">Lever-Edit</span> consistently receives higher rewards than the alternatives throughout training. These results validate the central role of our target-description interface: converting the relative editing request into a self-contained target state makes mature T2I rewards better suited to evaluating image-editing preferences and, therefore, improves fine-tuning of the image-editing model.</p>
+</div>
+</section>
+<section id="Sx5.SSx3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Effectiveness of Execution and Consistency</h3>
+
+<div id="Sx5.SSx3.p1" class="ltx_para">
+<p id="Sx5.SSx3.p1.1" class="ltx_p">Beyond improving the optimized T2I reward values, T2I-only supervision also yields clear gains on the core edit-aware dimensions of instruction execution and reference consistency.
+Transferring T2I rewards substantially improves instruction execution while also providing strong semantic consistency. As shown in Tab. <a href="#Sx5.T1" title="Table 1 ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>, Lever-based methods on the EditScore Execution (prompt-following) metric consistently outperform the unaligned base image-editing model, indicating that the transferred reward provides an effective learning signal for executing the requested edit. Moreover, Lever-based methods show higher consistency, naturalness and execution on editscore. However, admittedly, a low-quality online target prompt may lead to a lower execution score, as the Editscore-Execution score of <span id="Sx5.SSx3.p1.1.1" class="ltx_text ltx_font_bold">Lever</span> Pure VLM. Lastly, in GEdit, <span id="Sx5.SSx3.p1.1.2" class="ltx_text ltx_font_italic">Lever-Edit</span> achieves the best semantic score and the highest overall score. Since these reward models are also involved in optimization, we use the independent SigLIP consistency and GEdit as the extra evidence for consistency evaluation. As shown in Tab. <a href="#Sx5.T1" title="Table 1 ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>, <span id="Sx5.SSx3.p1.1.3" class="ltx_text ltx_font_italic">Lever-Edit</span> has the best SigLip and GEdit S score (consistency) over all competitors. Therefore, the reward-aligned target descriptions generated by <span id="Sx5.SSx3.p1.1.4" class="ltx_text ltx_font_italic">Lever-Edit</span> prove to provide a more effective semantic representation of the desired edited state than raw or generic textual conditions.</p>
+</div>
+</section>
+<section id="Sx5.SSx4" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Effectiveness of Image Quality</h3>
+
+<div id="Sx5.SSx4.p1" class="ltx_para">
+<p id="Sx5.SSx4.p1.1" class="ltx_p">Here, we show that
+<span id="Sx5.SSx4.p1.1.1" class="ltx_text ltx_font_italic">Lever-Edit</span> achieves the strongest alignment with the transferred T2I quality preferences on Lever-Bench. As reported in Tab. <a href="#Sx5.T1" title="Table 1 ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>, it achieves the highest HPSv3 score by a clear margin and the best RealGen score. The large HPSv3 gain is consistent with the objective of Stage 1: the learned target descriptions explicitly bridge the editing task and the preference space represented by the T2I reward. The corresponding RealGen improvement further shows that the resulting edited images align well with the complementary realism- and consistency-oriented reward signal.</p>
+</div>
+</section>
+<section id="Sx5.SSx5" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Ablation Study</h3>
+
+<div id="Sx5.SSx5.p1" class="ltx_para">
+<p id="Sx5.SSx5.p1.1" class="ltx_p"><span id="Sx5.SSx5.p1.1.1" class="ltx_text ltx_font_italic">Lever-Edit</span> consistently outperforms the compared methods across different training stages regarding metrics such as HPSv3, SigLIP, Editscore consistency, and Realgen v1, as shown in Fig. <a href="#Sx5.F5" title="Figure 5 ‣ Experiment Setup ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a>. To disentangle the effect of description quality from that of the edited images, we recompute SigLIP similarity using four alternative textual conditions: the raw edit instruction, descriptions from the vanilla VLM (<em id="Sx5.SSx5.p1.1.2" class="ltx_emph ltx_font_italic">Pure VLM</em>), descriptions generated by the strong offline model (<em id="Sx5.SSx5.p1.1.3" class="ltx_emph ltx_font_italic">Offline SOTA</em>), and the reward-aligned target descriptions generated by <span id="Sx5.SSx5.p1.1.4" class="ltx_text ltx_font_italic">Lever-Edit</span>. The recomputed SigLIP scores are listed in Tab. <a href="#Sx5.T2" title="Table 2 ‣ Experiment Setup ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a>, which further reveals two clear observations. First, for the same edited image, the target descriptions generated by <span id="Sx5.SSx5.p1.1.5" class="ltx_text ltx_font_italic">Lever-Edit</span> consistently achieve the highest SigLIP scores, indicating better semantic alignment between our descriptions and the intended edited content. Second, under the same textual description, images generated by <span id="Sx5.SSx5.p1.1.6" class="ltx_text ltx_font_italic">Lever-Edit</span> also achieve the highest SigLIP scores, indicating that our edited images better match the intended target semantics. Together, these results demonstrate improvements in target-description quality and image-text semantic alignment.</p>
+</div>
+</section>
+<section id="Sx5.SSx6" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Qualitative Analysis</h3>
+
+<div id="Sx5.SSx6.p1" class="ltx_para">
+<p id="Sx5.SSx6.p1.1" class="ltx_p">Fig. <a href="#Sx5.F4" title="Figure 4 ‣ Experiment Setup ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a> presents qualitative comparisons from four complementary perspectives: execution (prompt-following), aesthetics, consistency, and naturalness. As shown in Fig. <a href="#Sx5.F4" title="Figure 4 ‣ Experiment Setup ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>, for prompt-following, <span id="Sx5.SSx6.p1.1.1" class="ltx_text ltx_font_italic">Lever-Edit</span> successfully transforms only the dog into a statue with marble texture, while the offline-based method loses consistency with the dog’s appearance, and the Pure VLM method mistakenly maintains the original feather texture that contradicts marble property. Moreover, <span id="Sx5.SSx6.p1.1.2" class="ltx_text ltx_font_italic">Lever-Edit</span> places the red sports car in the correct position, and is rendered with higher aesthetics and naturalness. Additionally, <span id="Sx5.SSx6.p1.1.3" class="ltx_text ltx_font_italic">Lever-Edit</span> shows impressive aesthetics across global/local/drawing edits, and aligns ‘surboard’ with the correct objects while maintaining human head pose, demonstrating high semantic and source consistency. Lastly, for the object removal task, <span id="Sx5.SSx6.p1.1.4" class="ltx_text ltx_font_italic">Lever-Edit</span> recovers hidden leaves with higher naturalness quality.</p>
+</div>
+</section>
+</section>
+<section id="Sx6" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Conclusion</h2>
+
+<div id="Sx6.p1" class="ltx_para">
+<p id="Sx6.p1.1" class="ltx_p">We show that the mature T2I reward ecosystem can be effectively transferred to image-editing RL without relying exclusively on editing-specific rewards. We introduce <span id="Sx6.p1.1.1" class="ltx_text ltx_font_italic">Lever-Edit</span>, a two-stage framework that bridges relative editing instructions and the self-contained target descriptions expected by T2I rewards by first learning a reward-aligned target-description policy and then freezing it to guide downstream image-editing optimization. Experiments on Lever-Bench and existing benchmarks show competitive edit alignment and source preservation, while outperforming intuitive transfer baselines based on raw edit instructions, generic VLM descriptions, and offline high-quality prompts. These show that effective image-editing RL does not necessarily require separately designed rewards for every editing objective. Instead, diverse visual preferences in T2I rewards can be reused through an appropriate target-description interface.</p>
+</div>
+</section>
+<section id="bib" class="ltx_bibliography">
+<h2 class="ltx_title ltx_title_bibliography">References</h2>
+
+<ul id="bib.L1" class="ltx_biblist">
+<li id="bib.bib8" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Black <span class="ltx_text ltx_bib_etal">et al.</span> (2023)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">K. Black, M. Janner, Y. Du, I. Kostrikov, and S. Levine</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Training diffusion models with reinforcement learning</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2305.13301</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx1.p1.1" title="Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Introduction</span></a>,
+<a href="#Sx2.SSx1.p1.1" title="Reinforcement Learning for Image Editing ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reinforcement Learning for Image Editing</span></a>.
+</span></li>
+<li id="bib.bib10" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Fan <span class="ltx_text ltx_bib_etal">et al.</span> (2023)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Y. Fan, O. Watkins, Y. Du, H. Liu, M. Ryu, C. Boutilier, P. Abbeel, M. Ghavamzadeh, K. Lee, and K. Lee</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Dpok: reinforcement learning for fine-tuning text-to-image diffusion models</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">Advances in Neural Information Processing Systems</span> <span class="ltx_text ltx_bib_volume">36</span>, <span class="ltx_text ltx_bib_pages">pp. 79858–79885</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx1.p1.1" title="Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Introduction</span></a>,
+<a href="#Sx2.SSx1.p1.1" title="Reinforcement Learning for Image Editing ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reinforcement Learning for Image Editing</span></a>.
+</span></li>
+<li id="bib.bib13" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Ghosh <span class="ltx_text ltx_bib_etal">et al.</span> (2023)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">D. Ghosh, H. Hajishirzi, and L. Schmidt</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Geneval: an object-focused framework for evaluating text-to-image alignment</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">NeurIPS</span> <span class="ltx_text ltx_bib_volume">36</span>, <span class="ltx_text ltx_bib_pages">pp. 52132–52152</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx5.SSx1.p1.1" title="Experiment Setup ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Experiment Setup</span></a>.
+</span></li>
+<li id="bib.bib22" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Guo <span class="ltx_text ltx_bib_etal">et al.</span> (2026)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">H. Guo, J. Wu, J. Liu, Y. Gao, Z. Ye, L. Yuan, X. Wang, Y. Yu, and W. Huang</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Leveraging verifier-based reinforcement learning in image editing</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2604.27505</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx1.p1.1" title="Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Introduction</span></a>,
+<a href="#Sx2.SSx1.p1.1" title="Reinforcement Learning for Image Editing ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reinforcement Learning for Image Editing</span></a>.
+</span></li>
+<li id="bib.bib32" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Huang <span class="ltx_text ltx_bib_etal">et al.</span> (2026)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">R. Huang, Q. Zhang, Z. Liu, Y. Gao, J. Wu, and H. Zhao</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Read it back: pretrained mllms are zero-shot reward models for text-to-image generation</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2607.11886</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx1.p2.1" title="Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Introduction</span></a>,
+<a href="#Sx2.SSx2.p1.1" title="Reward Modeling in Image RL ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reward Modeling in Image RL</span></a>.
+</span></li>
+<li id="bib.bib11" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Huang <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Y. Huang, J. Huang, Y. Liu, M. Yan, J. Lv, J. Liu, W. Xiong, H. Zhang, L. Cao, and S. Chen</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Diffusion model-based image editing: a survey</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">IEEE Transactions on Pattern Analysis and Machine Intelligence</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx1.p1.1" title="Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Introduction</span></a>.
+</span></li>
+<li id="bib.bib12" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Jiang <span class="ltx_text ltx_bib_etal">et al.</span> (2024)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">D. Jiang, M. Ku, T. Li, Y. Ni, S. Sun, R. Fan, and W. Chen</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Genai arena: an open evaluation platform for generative models</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">Advances in Neural Information Processing Systems</span> <span class="ltx_text ltx_bib_volume">37</span>, <span class="ltx_text ltx_bib_pages">pp. 79889–79908</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx5.SSx1.p1.1" title="Experiment Setup ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Experiment Setup</span></a>.
+</span></li>
+<li id="bib.bib4" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Kirstain <span class="ltx_text ltx_bib_etal">et al.</span> (2023)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Y. Kirstain, A. Polyak, U. Singer, S. Matiana, J. Penna, and O. Levy</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Pick-a-pic: an open dataset of user preferences for text-to-image generation</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">Advances in Neural Information Processing Systems</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx1.p2.1" title="Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Introduction</span></a>,
+<a href="#Sx2.SSx2.p1.1" title="Reward Modeling in Image RL ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reward Modeling in Image RL</span></a>.
+</span></li>
+<li id="bib.bib1" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Labs <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">B. F. Labs, S. Batifol, A. Blattmann, F. Boesel, S. Consul, C. Diagne, T. Dockhorn, J. English, Z. English, P. Esser, <span class="ltx_text ltx_bib_etal">et al.</span></span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Flux. 1 kontext: flow matching for in-context image generation and editing in latent space</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2506.15742</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx5.SSx1.p3.1" title="Experiment Setup ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Experiment Setup</span></a>.
+</span></li>
+<li id="bib.bib15" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Lamba <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">P. Lamba, K. Ravish, A. Kushwaha, and P. Kumar</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Alignment and safety of diffusion models via reinforcement learning and reward modeling: a survey</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2505.17352</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx1.p2.1" title="Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Introduction</span></a>.
+</span></li>
+<li id="bib.bib25" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Liu <span class="ltx_text ltx_bib_etal">et al.</span> (2025a)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">J. Liu, G. Liu, J. Liang, Y. Li, J. Liu, X. Wang, P. Wan, D. Zhang, and W. Ouyang</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Flow-grpo: training flow matching models via online rl</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2505.05470</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx2.SSx1.p1.1" title="Reinforcement Learning for Image Editing ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reinforcement Learning for Image Editing</span></a>.
+</span></li>
+<li id="bib.bib24" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Liu <span class="ltx_text ltx_bib_etal">et al.</span> (2026)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">J. Liu, Z. Ye, L. Yuan, S. Zhu, Y. Gao, J. Wu, K. Li, X. Wang, X. Nie, W. Huang, <span class="ltx_text ltx_bib_etal">et al.</span></span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Unigrpo: unified policy optimization for reasoning-driven visual generation</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2603.23500</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx1.p1.1" title="Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Introduction</span></a>.
+</span></li>
+<li id="bib.bib18" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Liu <span class="ltx_text ltx_bib_etal">et al.</span> (2025b)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">S. Liu, Y. Han, P. Xing, F. Yin, R. Wang, W. Cheng, J. Liao, Y. Wang, H. Fu, C. Han, <span class="ltx_text ltx_bib_etal">et al.</span></span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Step1x-edit: a practical framework for general image editing</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2504.17761</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx1.p1.1" title="Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Introduction</span></a>,
+<a href="#Sx5.SSx1.p1.1" title="Experiment Setup ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Experiment Setup</span></a>,
+<a href="#Sx5.SSx2.p1.1" title="The Merits of Introducing T2I Rewards ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">The Merits of Introducing T2I Rewards</span></a>,
+<a href="#Sx5.T1" title="In Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_tag">Table 1</span></a>.
+</span></li>
+<li id="bib.bib23" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Long <span class="ltx_text ltx_bib_etal">et al.</span> (2026)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Y. Long, Y. Yang, H. Wei, W. Chen, T. Zhang, H. Fan, C. Liu, K. Jiang, J. Chen, K. Tang, B. Wen, F. Yang, T. Gao, H. Li, and S. Yang</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">SpatialReward: bridging the perception gap in online rl for image editing via explicit spatial reasoning</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Forty-third International Conference on Machine Learning</span>,
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx1.p1.1" title="Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Introduction</span></a>,
+<a href="#Sx2.SSx2.p1.1" title="Reward Modeling in Image RL ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reward Modeling in Image RL</span></a>.
+</span></li>
+<li id="bib.bib19" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Luo <span class="ltx_text ltx_bib_etal">et al.</span> (2026)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">X. Luo, J. Wang, C. Wu, S. Xiao, X. Jiang, D. Lian, J. Zhang, D. Liu, and Z. Liu</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Editscore: unlocking online rl for image editing via high-fidelity reward modeling</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">International Conference on Learning Representations</span>,
+</span>
+<span class="ltx_bibblock">Vol. <span class="ltx_text ltx_bib_volume">2026</span>, <span class="ltx_text ltx_bib_pages">pp. 33027–33056</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx1.p1.1" title="Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Introduction</span></a>,
+<a href="#Sx2.SSx1.p1.1" title="Reinforcement Learning for Image Editing ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reinforcement Learning for Image Editing</span></a>,
+<a href="#Sx2.SSx2.p1.1" title="Reward Modeling in Image RL ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reward Modeling in Image RL</span></a>,
+<a href="#Sx3.SSx2.p1.1" title="Mapping Editing Quality to the T2I Reward Space ‣ Problem Formulation ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Mapping Editing Quality to the T2I Reward Space</span></a>,
+<a href="#Sx5.SSx1.p1.1" title="Experiment Setup ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Experiment Setup</span></a>,
+<a href="#Sx5.SSx1.p2.1" title="Experiment Setup ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Experiment Setup</span></a>,
+<a href="#Sx5.SSx2.p1.1" title="The Merits of Introducing T2I Rewards ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">The Merits of Introducing T2I Rewards</span></a>.
+</span></li>
+<li id="bib.bib7" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Ma <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Y. Ma, X. Wu, K. Sun, and H. Li</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Hpsv3: towards wide-spectrum human preference score</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">2025 IEEE/CVF International Conference on Computer Vision (ICCV)</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages">pp. 15086–15095</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx5.SSx1.p2.1" title="Experiment Setup ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Experiment Setup</span></a>.
+</span></li>
+<li id="bib.bib2" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Nichol <span class="ltx_text ltx_bib_etal">et al.</span> (2021)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">A. Nichol, P. Dhariwal, A. Ramesh, P. Shyam, P. Mishkin, B. McGrew, I. Sutskever, and M. Chen</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Glide: towards photorealistic image generation and editing with text-guided diffusion models</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2112.10741</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx1.p1.1" title="Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Introduction</span></a>.
+</span></li>
+<li id="bib.bib30" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Wang <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Y. Wang, Y. Zang, H. Li, C. Jin, and J. Wang</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Unified reward model for multimodal understanding and generation</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2503.05236</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx1.p2.1" title="Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Introduction</span></a>,
+<a href="#Sx2.SSx2.p1.1" title="Reward Modeling in Image RL ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reward Modeling in Image RL</span></a>.
+</span></li>
+<li id="bib.bib21" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Wu <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">K. Wu, S. Jiang, M. Ku, P. Nie, M. Liu, and W. Chen</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Editreward: a human-aligned reward model for instruction-guided image editing</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2509.26346</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx1.p1.1" title="Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Introduction</span></a>,
+<a href="#Sx2.SSx2.p1.1" title="Reward Modeling in Image RL ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reward Modeling in Image RL</span></a>.
+</span></li>
+<li id="bib.bib5" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Wu <span class="ltx_text ltx_bib_etal">et al.</span> (2023a)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">X. Wu, Y. Hao, K. Sun, Y. Chen, F. Zhu, R. Zhao, and H. Li</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Human preference score v2: a solid benchmark for evaluating human preferences of text-to-image synthesis</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2306.09341</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx2.SSx2.p1.1" title="Reward Modeling in Image RL ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reward Modeling in Image RL</span></a>.
+</span></li>
+<li id="bib.bib9" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Wu <span class="ltx_text ltx_bib_etal">et al.</span> (2023b)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">X. Wu, K. Sun, F. Zhu, R. Zhao, and H. Li</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Human preference score: better aligning text-to-image models with human preference</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">International Conference on Computer Vision</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages">pp. 2096–2105</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx1.p2.1" title="Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Introduction</span></a>,
+<a href="#Sx2.SSx2.p1.1" title="Reward Modeling in Image RL ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reward Modeling in Image RL</span></a>.
+</span></li>
+<li id="bib.bib3" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Xu <span class="ltx_text ltx_bib_etal">et al.</span> (2023)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">J. Xu, X. Liu, Y. Wu, Y. Tong, Q. Li, M. Ding, J. Tang, and Y. Dong</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Imagereward: learning and evaluating human preferences for text-to-image generation</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">Advances in Neural Information Processing Systems</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx1.p2.1" title="Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Introduction</span></a>,
+<a href="#Sx2.SSx2.p1.1" title="Reward Modeling in Image RL ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reward Modeling in Image RL</span></a>.
+</span></li>
+<li id="bib.bib28" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Xue <span class="ltx_text ltx_bib_etal">et al.</span> (2026)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">S. Xue, C. Ge, S. Zhang, Y. Li, and Z. Ma</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Advantage weighted matching: aligning rl with pretraining in diffusion models</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">International Conference on Machine Learning</span>,
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx2.SSx1.p1.1" title="Reinforcement Learning for Image Editing ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reinforcement Learning for Image Editing</span></a>.
+</span></li>
+<li id="bib.bib26" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Xue <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Z. Xue, J. Wu, Y. Gao, F. Kong, L. Zhu, M. Chen, Z. Liu, W. Liu, Q. Guo, W. Huang, and P. Luo</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">DanceGRPO: unleashing grpo on visual generation</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2505.07818</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx2.SSx1.p1.1" title="Reinforcement Learning for Image Editing ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reinforcement Learning for Image Editing</span></a>.
+</span></li>
+<li id="bib.bib14" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Yan <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">R. Yan, J. Cheng, Y. Gan, S. Sun, Y. Wu, Y. Yang, L. Ling, J. Lin, Y. Zhu, J. Zhou, <span class="ltx_text ltx_bib_etal">et al.</span></span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Entropy-adaptive diffusion policy optimization with dynamic step alignment</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the IEEE/CVF International Conference on Computer Vision</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages">pp. 1924–1934</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx2.SSx1.p1.1" title="Reinforcement Learning for Image Editing ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reinforcement Learning for Image Editing</span></a>.
+</span></li>
+<li id="bib.bib17" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Yan <span class="ltx_text ltx_bib_etal">et al.</span> (2026a)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">R. Yan, J. Cheng, S. Sun, Y. Sun, Y. Wu, W. Peng, Z. Wang, L. Liang, J. Xing, and Y. Cai</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Do less, achieve more: do we need every-step optimization for rl fine-tuning of diffusion models?</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2605.15855</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx2.SSx1.p1.1" title="Reinforcement Learning for Image Editing ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reinforcement Learning for Image Editing</span></a>.
+</span></li>
+<li id="bib.bib16" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Yan <span class="ltx_text ltx_bib_etal">et al.</span> (2026b)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">R. Yan, J. Cheng, Y. Wu, L. Liang, W. Peng, A. V. Vasilakos, Q. Zhao, Y. Zhang, E. Adeli, K. M. Pohl, <span class="ltx_text ltx_bib_etal">et al.</span></span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Pixel-space diffusion transformers</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2607.17585</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx1.p1.1" title="Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Introduction</span></a>.
+</span></li>
+<li id="bib.bib6" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Ye <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">J. Ye, L. Zhu, Y. Guo, D. Jiang, Z. Huang, Y. Zhang, Z. Yan, H. Fu, C. He, and W. Li</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Realgen: photorealistic text-to-image generation via detector-guided rewards</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2512.00473</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx1.p2.1" title="Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Introduction</span></a>,
+<a href="#Sx2.SSx2.p1.1" title="Reward Modeling in Image RL ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reward Modeling in Image RL</span></a>,
+<a href="#Sx5.SSx1.p2.1" title="Experiment Setup ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Experiment Setup</span></a>.
+</span></li>
+<li id="bib.bib31" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Zhai <span class="ltx_text ltx_bib_etal">et al.</span> (2023)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">X. Zhai, B. Mustafa, A. Kolesnikov, and L. Beyer</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Sigmoid loss for language image pre-training</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">International Conference on Computer Vision</span>,
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx2.SSx2.p1.1" title="Reward Modeling in Image RL ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reward Modeling in Image RL</span></a>,
+<a href="#Sx5.SSx1.p2.1" title="Experiment Setup ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Experiment Setup</span></a>.
+</span></li>
+<li id="bib.bib20" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Zhao <span class="ltx_text ltx_bib_etal">et al.</span> (2026)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">X. Zhao, P. Zhang, J. Lin, T. Liang, Y. Duan, S. Ding, C. Tian, Y. Zang, J. Yan, and X. Yang</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Trust your critic: robust reward modeling and reinforcement learning for faithful image editing and generation</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2603.12247</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx1.p1.1" title="Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Introduction</span></a>,
+<a href="#Sx2.SSx1.p1.1" title="Reinforcement Learning for Image Editing ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reinforcement Learning for Image Editing</span></a>,
+<a href="#Sx2.SSx2.p1.1" title="Reward Modeling in Image RL ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reward Modeling in Image RL</span></a>,
+<a href="#Sx3.SSx2.p1.1" title="Mapping Editing Quality to the T2I Reward Space ‣ Problem Formulation ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Mapping Editing Quality to the T2I Reward Space</span></a>.
+</span></li>
+<li id="bib.bib27" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Zheng <span class="ltx_text ltx_bib_etal">et al.</span> (2026)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">K. Zheng, H. Chen, H. Ye, H. Wang, Q. Zhang, K. Jiang, H. Su, S. Ermon, J. Zhu, and M. Liu</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">DiffusionNFT: online diffusion reinforcement with forward process</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">International Conference on Learning Representations</span>,
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx2.SSx1.p1.1" title="Reinforcement Learning for Image Editing ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reinforcement Learning for Image Editing</span></a>,
+<a href="#Sx5.SSx1.p3.1" title="Experiment Setup ‣ Experiments ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Experiment Setup</span></a>.
+</span></li>
+<li id="bib.bib29" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Zhu <span class="ltx_text ltx_bib_etal">et al.</span> (2026)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">H. Zhu, Y. Liu, X. Wu, A. Wang, H. Feng, D. Yang, C. Feng, C. Huang, J. Tang, and X. Bai</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">TextPecker: rewarding structural anomaly quantification for enhancing visual text rendering</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Computer Vision and Pattern Recognition</span>,
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#Sx1.p2.1" title="Introduction ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Introduction</span></a>,
+<a href="#Sx2.SSx2.p1.1" title="Reward Modeling in Image RL ‣ Related Works ‣ Can We Perform Online RL for Image Editing without Editing Rewards?" class="ltx_ref"><span class="ltx_text ltx_ref_title">Reward Modeling in Image RL</span></a>.
+</span></li>
+</ul>
+</section>
+</article>
+    </div>
+  </section>
+  <section class="pane pane-zh">
+    <div class="pane-head">中文精读翻译</div>
+    <div class="pane-body" id="zhBody"><div class="md" id="mdRoot"></div></div>
+  </section>
+</main>
+<script type="text/markdown" id="zhSrc"># 《Can We Perform Online RL for Image Editing without Editing Rewards?》中文精读翻译
+
+## 论文信息
+
+- **英文标题**：Can We Perform Online RL for Image Editing without Editing Rewards?
+- **中文标题**：我们能否在没有编辑奖励的情况下进行图像编辑的在线强化学习？
+- **作者**：Qichao Ma、Jikang Cheng（项目负责人）、Ling Liang、Zhaofei Yu、Tiejun Huang、Renye Yan（通讯作者）
+- **机构**：北京大学（Peking University）
+- **arXiv 链接**：<https://arxiv.org/abs/2608.22780>
+- **提出的框架**：Lever-Edit
+
+## 一句话核心总结
+
+Lever-Edit 通过"学习一个与冻结的 T2I 奖励对齐的轻量描述器（前缀微调的连续查询嵌入），把相对编辑指令转写为自包含的反事实目标描述"这一杠杆机制，使成熟的文生图（T2I）奖励生态无需任何图像编辑专用奖励模型，即可为图像编辑的在线强化学习提供有效监督信号。
+
+---
+
+## 摘要
+
+强化学习（Reinforcement Learning, RL）可以借助编辑专用奖励（editing-specific reward）对图像编辑进行直接的偏好优化，但这类奖励因昂贵的三元组监督（triplet supervision）与复杂的任务依赖校准而发展相对滞后。与之形成鲜明对比的是，文生图（text-to-image, T2I）生成拥有一个成熟且多样的奖励生态，覆盖语义对齐、美学、真实感、字形（glyph shape）以及其他视觉偏好。若能将这一生态扩展到图像编辑，将大幅拓宽基于 RL 优化所能触及的视觉偏好范围，由此引出本文的核心问题：**我们能否在不使用编辑奖励的情况下进行图像编辑强化学习？**
+
+本文论证：标准的图像编辑评价维度具有映射到 T2I 奖励空间的潜力——图像质量可以直接迁移；提示遵循（prompt following）可以通过对"期望视觉状态"的描述来对齐；参考一致性（reference consistency）则可通过将需保留的源内容编码进该描述，完成一次粗粒度的语义转换。然而，编辑指令指定的是**相对变化**，而 T2I 奖励需要**自包含的目标描述**；此外，通用视觉-语言模型（Vision-Language Model, VLM）生成的语义上合法的描述，也可能与被冻结的奖励模型不兼容。为此，本文进一步提出 **Lever-Edit**：一个两阶段框架——先学习一个面向反事实目标描述（counterfactual target description）的奖励对齐描述器（captioner）并将其冻结，随后仅用迁移而来的 T2I 奖励优化编辑策略。实验表明，该方法在编辑对齐与源内容保持上可与基于编辑奖励的微调相竞争，并显著优于直觉式迁移基线。
+
+---
+
+## 1 引言
+
+指令引导的图像编辑（instruction-guided image editing）允许用户通过自然语言指令修改一张现有图像，同时保留与所请求变化无关的内容（Huang et al., 2025）。尽管近期的扩散与流匹配（flow-based）编辑器已取得长足进展（Nichol et al., 2021; Liu et al., 2025b; Yan et al., 2026b），监督微调（Supervised Fine-Tuning, SFT）优化的是精选编辑样本对上的似然，而非任务层面的人类偏好。强化学习则转而对采样结果直接优化标量或带推理依据的反馈（Black et al., 2023; Fan et al., 2023; Guo et al., 2026; Liu et al., 2026）。
+
+编辑 RL 的核心在于奖励。然而，构建一个可靠的编辑奖励需要联合推理参考图像（reference image）、编辑指令（editing instruction）与编辑输出，且需要昂贵的三元组级监督；"执行指令"与"保持源内容"之间所期望的平衡还随编辑类型而变化，使奖励的校准与泛化更加复杂（Wu et al., 2025; Luo et al., 2026; Zhao et al., 2026; Long et al., 2026）。
+
+编辑质量通常沿三个维度刻画：**纯图像质量**（pure image quality）、**编辑执行**（edit execution）与**参考一致性**（reference consistency）（Luo et al., 2026; Zhao et al., 2026）。纯图像质量关注编辑输出的内在属性；编辑执行衡量所请求的变换是否被实现；参考一致性衡量与编辑无关的源内容是否得到保持。令人意外的是，本文发现这三个维度都表现出向 T2I 奖励空间映射的潜力：图像质量可直接评估；编辑执行可被重新表述为与"期望视觉状态描述"的对齐；参考一致性则可通过把应保留的源语义纳入该描述，实现粗粒度投影（如图 1 所示）。
+
+> **图 1**：T2I 到编辑的奖励迁移动机。Lever-Edit 充当一个在线"杠杆"，撬动广阔 T2I 奖励社区的集体力量，把其成熟多样的视觉偏好迁移为图像编辑 RL 的有效监督。
+
+这就引出一个核心问题：**我们能否在不使用编辑奖励、而只用 T2I 奖励的情况下进行图像编辑 RL？** 这一表述带来两点好处。其一，它使编辑 RL 可以直接接入成熟多样的图像生成奖励生态，包括语义对齐、美学、真实感、OCR、安全以及其他视觉偏好的奖励（Xu et al., 2023; Wu et al., 2023b; Kirstain et al., 2023; Ye et al., 2025; Zhu et al., 2026; Wang et al., 2025; Huang et al., 2026; Lamba et al., 2025）；这些奖励的后续改进也因此无需重新设计对齐目标即可迁移到编辑任务。其二，它免除了对昂贵的编辑评测器开发与部署的依赖。
+
+然而，将 T2I 奖励直接用于图像编辑颇具挑战。**第一，两种任务的条件语义存在本质差异**：编辑指令定义的是相对于参考图像的变换，而 T2I 奖励期望的是对目标图像的自包含描述；直接使用指令虽然保留了所请求的变化，却遗漏了应保持不变的源语义，因此需要一种参考感知的转换，得到反事实目标描述。**第二，语义合法的目标描述未必与冻结的 T2I 奖励兼容**：现成的 VLM 可能生成看似合理的描述，其表示却与奖励模型的评估空间校准不佳，从而削弱优化信号。因此，有效的奖励迁移需要同时完成"编辑目标转换"与"显式奖励对齐"，这仍是一个有挑战的问题。
+
+本文提出 **Lever-Edit**——一个奖励迁移框架，其中一个轻量的奖励对齐描述器充当**杠杆（lever）**：它使成熟的 T2I 奖励能够为图像编辑 RL 提供有效监督，而无需构建或调用任何编辑奖励。具体而言，Lever-Edit 采用两阶段设计：
+
+- **第一阶段**：通过前缀微调（prefix tuning）适配一个 VLM，将参考图像与编辑指令映射为反事实目标描述。该描述联合刻画预期的修改与应保留的源语义；同时将描述器的表示与冻结的 T2I 奖励对齐，产出"奖励兼容的条件"，而非泛泛的图像描述。
+- **第二阶段**：冻结该描述器，仅用迁移的 T2I 奖励优化扩散编辑策略；策略微调全程不使用任何编辑奖励。
+
+该设计将奖励迁移与策略优化解耦，可作为插件应用于不同的 VLM 与图像编辑主干网络。
+
+**本文贡献**如下：
+
+1. 从奖励迁移的视角重新审视编辑质量的标准维度，识别其与通用图像评价的潜在对应关系，提出无需编辑专用奖励的图像编辑 RL；
+2. 提出 Lever-Edit——一个两阶段框架，将参考条件化的编辑目标转换为奖励对齐的目标描述，并仅用冻结的 T2I 奖励微调编辑策略；
+3. 通过实验证明：在策略微调阶段不使用图-图（image-to-image）奖励模型的情况下，迁移的 T2I 奖励即可提供有竞争力的编辑对齐与源内容保持能力。
+
+---
+
+## 2 相关工作
+
+### 2.1 图像编辑的强化学习
+
+强化学习无需密集的任务专属标注即可对视觉生成进行直接的偏好优化。DDPO（Black et al., 2023）与 DPOK（Fan et al., 2023）开创了文生图扩散模型的 RL 微调；DanceGRPO（Xue et al., 2025）与 Flow-GRPO（Liu et al., 2025a）随后将这一范式拓展到当代扩散与流匹配主干，确立了在线 RL 作为视觉生成通用后训练（post-training）框架的地位。后续工作通过前向过程策略更新、与预训练对齐的目标、熵自适应探索以及沿去噪轨迹的选择性干预等手段改进优化效率与稳定性（Zheng et al., 2026; Xue et al., 2026; Yan et al., 2025; Yan et al., 2026a）。
+
+为 T2I 生成发展的 RL 范式随后被成功适配到指令引导图像编辑的偏好优化。在该 setting 下，RL 旨在进一步提升提示遵循、参考一致性与整体视觉质量，近期方法在这些维度上展现出可观的收益（Luo et al., 2026; Zhao et al., 2026; Guo et al., 2026）。
+
+### 2.2 图像强化学习中的奖励建模
+
+**图像生成**。文生图的奖励建模已演化为一个多样生态，涵盖通用人类偏好与任务专属标准。ImageReward（Xu et al., 2023）、HPS（Wu et al., 2023b; Wu et al., 2023a）与 PickScore（Kirstain et al., 2023）捕捉语义对齐与视觉吸引力等广泛判断；专门化奖励包括面向真实感的 RealGen（Ye et al., 2025）、面向视觉文本保真度的 TextPecker（Zhu et al., 2026）；UnifiedReward（Wang et al., 2025）支持逐点与成对的多模态评测，SigLIP（Zhai et al., 2023）提供通用的文本-图像对应性分数。此外，SpectraReward（Huang et al., 2026）将预训练 MLLM 以免训练的零样本方式改造为奖励模型（通过图像条件化的提示似然）。这种广度使 T2I 奖励生态成为更广泛视觉对齐任务的一个极具吸引力的监督来源。
+
+**图像编辑**。编辑奖励针对三元组 $(I_{\mathrm{ref}}, q_{\mathrm{edit}}, I_{\mathrm{edit}})$，从输出质量、编辑执行与参考一致性三方面评估。EditReward（Wu et al., 2025）构建了超过 20 万条专家标注的偏好对并训练多维不确定性感知排序器；EditScore（Luo et al., 2026）遵循"基准构建→奖励数据制备→奖励模型训练→自集成→在线 RL"的完整流水线；FIRM Reward（Zhao et al., 2026）采用差异优先（difference-first）的 MLLM 流水线、专门化奖励模型训练与一致性调制奖励融合；SpatialReward（Long et al., 2026）进一步引入多阶段空间定位与验证流水线，辅以渐进式 SFT 与 GRPO 训练。这类分阶段构建是"评估相对编辑"内在困难的必然结果，伴随可观的设计与实现成本。而且，这些奖励大多仍聚焦于编辑执行与参考一致性，对 T2I 奖励所支持的更广泛对齐偏好覆盖有限——受限的奖励空间约束了图像编辑 RL 的优化潜力。
+
+---
+
+## 3 问题形式化
+
+### 3.1 奖励迁移鸿沟（The Reward-Transfer Gap）
+
+记 $I_{\mathrm{ref}}$ 为参考图像，$q_{\mathrm{edit}}$ 为编辑指令，$I_{\mathrm{edit}}$ 为从编辑策略采样的输出：
+
+$$
+I_{\mathrm{edit}} \sim \pi_\theta(\cdot \mid I_{\mathrm{ref}}, q_{\mathrm{edit}}). \tag{1}
+$$
+
+常规图像编辑 RL 优化定义在完整编辑三元组上的任务专属奖励：
+
+$$
+\max_\theta \; \mathbb{E}\!\left[R_{\mathrm{edit}}(I_{\mathrm{ref}}, q_{\mathrm{edit}}, I_{\mathrm{edit}})\right]. \tag{2}
+$$
+
+参考图像使 $R_{\mathrm{edit}}$ 得以同时判定"什么应当改变"与"什么应当保持不变"。相比之下，T2I 奖励遵循图-文接口：
+
+$$
+R_{\mathrm{T2I}}(I, c), \tag{3}
+$$
+
+其中 $c$ 被期望是对图像 $I$ 中视觉内容的**自包含描述**。因此，直接用 $q_{\mathrm{edit}}$ 替换 $c$ 会造成根本性的条件失配（conditioning mismatch）：编辑指令指定的是相对变换（例如"把汽车改成红色"），其目标状态依赖于具体参考图像；它既不描述完整的目标图像，也不暴露应被保留的源语义。其后果是，$R_{\mathrm{T2I}}(I_{\mathrm{edit}}, q_{\mathrm{edit}})$ 可能奖励了所请求的属性，却对参考特有内容的丢失不敏感。
+
+因此，奖励迁移需要一个条件转换器（condition converter）$g:\mathcal{I}\times\mathcal{Q}\rightarrow\mathcal{C}$，将参考图像与相对编辑指令映射为自包含的目标描述：
+
+$$
+c_{\mathrm{tgt}} = g(I_{\mathrm{ref}}, q_{\mathrm{edit}}). \tag{4}
+$$
+
+编辑输出随后由 $R_{\mathrm{T2I}}(I_{\mathrm{edit}}, c_{\mathrm{tgt}})$ 评估。核心问题在于：$g$ 能否在保留编辑评估所需信息的同时，产出对冻结 T2I 奖励仍然有效的条件？
+
+### 3.2 编辑质量三维度到 T2I 奖励空间的映射
+
+编辑质量通常沿三个维度评估：纯图像质量、编辑执行与参考一致性（Luo et al., 2026; Zhao et al., 2026）。我们将其在概念上表示为：
+
+$$
+\mathbf{r}_{\mathrm{edit}}=
+\begin{bmatrix}
+r_{\mathrm{qual}}(I_{\mathrm{edit}})\\
+r_{\mathrm{exec}}(I_{\mathrm{ref}}, q_{\mathrm{edit}}, I_{\mathrm{edit}})\\
+r_{\mathrm{cons}}(I_{\mathrm{ref}}, q_{\mathrm{edit}}, I_{\mathrm{edit}})
+\end{bmatrix}, \tag{5}
+$$
+
+且不假设三者的某种特定标量化（scalarization）方式。尽管其原生形式是参考条件化的，每一维度都与 T2I 奖励空间存在对应关系。
+
+在三个维度中，**纯图像质量**可即时迁移：它是 $I_{\mathrm{edit}}$ 的内在属性，无需参照源图像或编辑指令即可评估。表面上的困难在于编辑执行与参考一致性——二者常规上都相对于 $I_{\mathrm{ref}}$ 定义。但对**编辑执行**而言，这种依赖主要源于条件的形式：指令 $q_{\mathrm{edit}}$ 描述的是相对变化，而评估目标关心的是"对应视觉状态是否出现在结果中"。一旦把预期结果表达为绝对的编辑后描述（absolute post-edit description），编辑执行就变成了 T2I 奖励已然解决的图-文对齐问题。**参考一致性**看似障碍最大，因为它显式关注 $I_{\mathrm{ref}}$ 与 $I_{\mathrm{edit}}$ 之间的关系。尽管如此，应保持不变的源语义可以与所请求的修改一起被纳入目标描述。目标条件因此可视为如下复合：
+
+$$
+c_{\mathrm{tgt}} = c_{\mathrm{change}} \oplus c_{\mathrm{preserve}}, \tag{6}
+$$
+
+其中 $c_{\mathrm{change}}$ 指明预期的修改，$c_{\mathrm{preserve}}$ 编码应保留的源语义。该表述把编辑执行与参考一致性重新塑造为 $I_{\mathrm{edit}}$ 与一个统一目标描述之间的对齐，使其可由 T2I 奖励联合评估。
+
+需要强调的是，这一映射应被理解为一种**语义投影（semantic projection）**，而非 T2I 评估与图对评估之间的等价关系。文本条件无法完全编码低层身份信息或像素级精确保持，但它能够表示图像质量、编辑执行与参考一致性背后的主要语义。因此，尽管直接奖励迁移在接口层面是不适定的（ill-posed），核心编辑目标在原则上是可迁移的。实践挑战在于构建能忠实实现这一对应关系的目标条件。
+
+### 3.3 三种直觉奖励迁移协议
+
+式 (4) 提示了若干直接的迁移协议。本文介绍三种代表性变体，其差异在于如何实例化 $g$。
+
+#### （1）直接编辑提示（Direct Edit Prompt）
+
+最简单的协议直接令 $c_{\mathrm{tgt}} = q_{\mathrm{edit}}$。它没有转换成本并保留了所请求的变换，但把一条相对指令当作了绝对的图像描述：得到的奖励条件遗漏了参考特有语境，也没有对"应保留内容"的显式说明。
+
+#### （2）在线 VLM 改写（Online VLM Rewriting）
+
+也可以用一个通用 VLM 按需生成目标条件：
+
+$$
+c_{\mathrm{tgt}} = g_{\mathrm{VLM}}(I_{\mathrm{ref}}, q_{\mathrm{edit}}). \tag{7}
+$$
+
+该协议引入了参考感知，能更完整地表达预期的编辑后状态。但在奖励计算过程中反复调用 VLM 会带来推理开销；且其泛用描述是为一般语义描述而生，并未针对所选 T2I 奖励的评估行为进行校准。
+
+#### （3）离线专有 MLLM 改写（Offline Proprietary-MLLM Rewriting）
+
+可以使用强大的专有 MLLM 离线预计算目标描述。凭借其指令遵循与视觉推理能力，所得描述在人类语义视角下可以准确表达预期的编辑与保留内容。但离线改写使这些条件独立于下游 T2I 奖励而被固定，对奖励模型的选择或后续优化需求缺乏弹性，还引入了对闭源模型的依赖。更根本的是，面向人类读者的语义质量并不保证奖励兼容性：一段准确的描述可能恰好强调该奖励表示薄弱的属性，或落在其偏好的条件分布之外。
+
+综合来看，这些协议指出了有效奖励迁移的两项要求：**目标描述必须忠实编码所请求的修改与应保留的源语义，并且必须与冻结的 T2I 奖励保持兼容**。直接使用编辑指令无法指定完整目标状态，而泛用的 VLM/MLLM 改写无法保证针对特定奖励的对齐。这些观察动机了下文提出的奖励对齐转换机制。
+
+---
+
+## 4 方法（Lever-Edit）
+
+本节介绍 Lever-Edit 的整体流水线与方法设计。Lever-Edit 包含两个阶段：
+
+- **阶段 1** 解决引入 T2I 奖励时的文本表示失配问题：联合优化一个可学习前缀（learnable prefix）与一个固定系统提示（system prompt），在**嵌入层**与**文本层**同时对齐多个 T2I 奖励信号——以显式文本保证执行与一致性信号，以隐藏嵌入保证质量信号。
+- **阶段 2** 将学得的对齐融入图像编辑优化：一方面冻结阶段 1 学得的参数，使该模块可作为插件无缝嵌入现有图像编辑微调框架，而不修改其原有训练目标；另一方面，将嵌入级的对齐信号作为辅助监督注入图像编辑轨迹，为平衡提示遵循与编辑一致性提供互补引导。
+
+> **图 2**：Lever-Edit 的整体两阶段 T2I 奖励迁移流水线。
+
+### 4.1 T2I 查询对齐（T2I Query Alignment）
+
+如 图 2 右侧所示，阶段 1 的目标是：**在不更新图像编辑主干、也不更新 VLM 本体的前提下**，使 VLM 生成的目标描述与下游 T2I 奖励模型的偏好对齐。为此，两个模型均被冻结，仅通过前缀微调优化一组可学习的连续查询嵌入（continuous query embeddings）$\mathcal{E}_{\mathrm{query}}$。同时，一个固定的系统提示与原始编辑指令显式拼接，在语义层面约束生成任务。在参考图像 $I_{\mathrm{ref}}$、显式文本指令 $p_{\mathrm{sys}} \oplus q_{\mathrm{edit}}$ 与连续编辑查询 $\mathcal{E}_{\mathrm{query}}$ 的条件下，VLM 自回归地生成目标描述 $c_{\mathrm{tgt}}$。随后由多个互补的 T2I 奖励模型评估该描述，其聚合奖励作为策略梯度信号来优化 $\mathcal{E}_{\mathrm{query}}$。由此，阶段 1 在保持原模型参数不变的同时，将文本生成策略适配向下游 T2I 奖励偏好。
+
+#### 4.1.1 语义保持的嵌入级前缀微调（Semantic-Preserving Embedding-level Prefix Tuning）
+
+奖励驱动的适配应当改善下游 T2I 兼容性，而不改变底层生成任务。给定参考图像 $I_{\mathrm{ref}}$ 及其编辑指令，将固定系统提示 $p_{\mathrm{sys}}$ 与编辑指令显式拼接：
+
+$$
+c_{\mathrm{in}} = [p_{\mathrm{sys}} \oplus q_{\mathrm{edit}}], \tag{8}
+$$
+
+其中 $\oplus$ 表示沿 token 维度的拼接。系统提示显式指示 VLM 依据 $I_{\mathrm{ref}}$ 与 $q_{\mathrm{edit}}$ 描述"假想的编辑后图像"，因此在整个奖励优化过程中为目标描述任务提供了固定、离散的规约。
+
+除显式文本指令外，引入一个可学习的连续前缀：
+
+$$
+\mathcal{E}_{\mathrm{query}} = [\mathcal{E}_1, \ldots, \mathcal{E}_{N_q}] \in \mathbb{R}^{N_q \times d}, \tag{9}
+$$
+
+其中 $N_q$ 为可学习查询 token 的数量，$d$ 为 VLM 的隐藏维度。记 $\mathcal{E}_{\mathrm{VLM}}^{text}(\cdot)$ 为 VLM 最终的文本域输入嵌入，则输入构造为：
+
+$$
+\mathcal{E}_{VLM}^{text} = \Big[\mathcal{E}_{\mathrm{query}} \,;\, \mathcal{E}_{\mathrm{text}}\big([p_{\mathrm{sys}} \oplus q_{\mathrm{edit}}]\big)\Big]. \tag{10}
+$$
+
+于是，$p_{\mathrm{sys}} \oplus q_{\mathrm{edit}}$ 在离散文本空间显式规约生成任务，而 $\mathcal{E}_{\mathrm{query}}$ 在连续嵌入空间提供可训练的自由度。（译注：原文此处两处写作 $q_{\mathrm{edit}}$，结合上下文"仅优化查询嵌入、VLM 参数全程冻结"的表述，应为 $\mathcal{E}_{\mathrm{query}}$，疑系笔误。）在整个阶段 1 中，VLM 的全部原始参数保持冻结，仅优化 $\mathcal{E}_{\mathrm{query}}$。与直接微调 VLM 相比，该设计把奖励驱动的适配限制在一个轻量的前缀空间中，从而限制了对预训练语言与语义能力的干扰，同时仍提供足够灵活性，以捕捉超出固定手工提示之外的、T2I 奖励所偏好的生成模式。
+
+对每个采样的目标描述，采用 $K$ 个互补的 T2I 奖励模型评估其与下游图像生成目标的兼容性，其输出聚合为：
+
+$$
+R_{\mathrm{T2I}} = \sum_{k=1}^{K} \omega_k R_k\left(c_{\mathrm{tgt}}; I_{\mathrm{ref}}\right), \tag{11}
+$$
+
+其中 $\omega_k$ 为第 $k$ 个奖励模型的权重。优化 $\mathcal{E}_{\mathrm{query}}$ 以最大化期望下游 T2I 奖励：
+
+$$
+J_{\mathrm{T2I}}\left(\mathcal{E}_{\mathrm{query}}\right) = \mathbb{E}_{\substack{(I_{\mathrm{ref}}, q_{\mathrm{edit}}) \sim \mathcal{D}, \\ c_{\mathrm{tgt}} \sim \pi_{\mathcal{E}_{\mathrm{query}}}}} R_{\mathrm{T2I}}, \tag{12}
+$$
+
+由于 $c_{\mathrm{tgt}}$ 经由离散 token 采样获得，下游奖励无法对生成序列直接求导，因此采用策略梯度（policy gradient）优化 $\mathcal{E}_{\mathrm{query}}$。
+
+#### 4.1.2 离线 token 级分布对齐（Offline Token-level Distribution Alignment）
+
+尽管固定系统提示显式规约了目标描述任务，**纯奖励优化仍可能引发语义漂移（semantic drift）与 token 级失配**。为提供额外的语义锚点，本文使用一个强大的离线 MLLM（如 GPT 或 Gemini）为一小部分训练样本生成高质量参考描述 $c_{\mathrm{tgt}}^{*}$。
+
+具体地，构建离线监督集：
+
+$$
+\mathcal{D}_{\mathrm{gold}} = \left\{\left(I_{\mathrm{ref}}^{(i)}, q_{\mathrm{edit}}^{(i)}, c_{\mathrm{tgt}}^{*(i)}\right)\right\}_{i=1}^{N}, \tag{13}
+$$
+
+其中 $c_{\mathrm{tgt}}^{*} = (c_1^*, \ldots, c_{L^*}^*)$ 表示由离线 MLLM 生成的参考描述。在解码步 $t$，用经验性 one-hot 目标分布表示参考 token $c_t^*$：
+
+$$
+\mathcal{E}_{\mathrm{gold},t}(v) = \mathbb{I}\left[v = c_t^*\right], \qquad v \in \mathcal{V}, \tag{14}
+$$
+
+其中 $\mathcal{V}$ 表示 VLM 词表。为紧凑起见，用 $\mathbb{E}_{\mathcal{D}_{\mathrm{gold}}}[\cdot]$ 表示对 $\mathcal{D}_{\mathrm{gold}}$ 中样本的期望。
+
+通过下式将查询条件化的策略正则到该经验语义目标上：
+
+$$
+\mathcal{L}_{\mathrm{SFT}} = \mathbb{E}_{\mathcal{D}_{\mathrm{gold}}}\Bigg[\frac{1}{L^*}\sum_{t=1}^{L^*} D_{\mathrm{KL}}\Big(\mathcal{E}_{\mathrm{gold},t} \,\Big\|\, \pi_{\mathcal{E}_{\mathrm{query}}}\big(\cdot \mid I_{\mathrm{ref}},\, p_{\mathrm{sys}} \oplus q_{\mathrm{edit}},\, c_{\mathrm{tgt},<t}^*\big)\Big)\Bigg]. \tag{15}
+$$
+
+由于 $\mathcal{E}_{\mathrm{gold},t}$ 是集中于 $c_t^*$ 的 one-hot 分布，该 KL 目标可精确退化为标准 SFT 中使用的 token 级负对数似然（negative log-likelihood）：
+
+$$
+\mathcal{L}_{\mathrm{SFT}} = -\,\mathbb{E}_{\mathcal{D}_{\mathrm{gold}}}\Bigg[\frac{1}{L^*}\sum_{t=1}^{L^*} \log \pi_{\mathcal{E}_{\mathrm{query}}}\Big(c_t^* \mid I_{\mathrm{ref}},\, p_{\mathrm{sys}} \oplus q_{\mathrm{edit}},\, c_{\mathrm{tgt},<t}^*\Big)\Bigg]. \tag{16}
+$$
+
+两个目标提供互补监督。将下游奖励对齐与离线语义监督结合，阶段 1 的总目标为：
+
+$$
+\boxed{\mathcal{L}_{\mathrm{Stage1}} = \mathcal{L}_{\mathrm{PG}} + \lambda_{\mathrm{SFT}} \mathcal{L}_{\mathrm{SFT}}} \tag{17}
+$$
+
+其中策略梯度项 $\mathcal{L}_{\mathrm{PG}}$ 在嵌入层提高"获得高下游 T2I 奖励的描述对齐"的可能性；$\mathcal{L}_{\mathrm{SFT}}$ 则将策略正则向离线 MLLM 生成的语义可靠描述靠拢，从而缓解奖励驱动优化带来的语义漂移与潜在的奖励作弊（reward hacking）。
+
+### 4.2 奖励对齐微调（Reward-aligned Finetuning）
+
+阶段 1 冻结图像编辑主干，并在 VLM 生成的目标描述 $c_{\mathrm{tgt}}$ 上进行 RL rollout，产出一组与多个 T2I 奖励直接对齐的可学习查询嵌入 $\mathcal{E}_{\mathrm{query}}$。在阶段 2 中，所得查询嵌入作为一个**即插即用（plug-and-play）的奖励对齐模块**，可跨不同图像编辑主干与微调范式提供有效奖励信号。此外，$\mathcal{E}_{\mathrm{query}}$ 对应的 VLM prefill 嵌入已经同时被视觉与文本输入上下文化，因此可以把这一额外的奖励对齐多模态条件引入图像编辑微调过程，作为辅助监督在编辑轨迹上平衡提示遵循与编辑一致性。
+
+---
+
+## 5 实验
+
+### 5.1 实验设置
+
+**数据集**。评估同时覆盖一个为 T2I 奖励迁移专门构建的、聚焦失败案例的基准，以及现有公开图像编辑基准。具体地，本文构建 **Lever-Bench** 来评估 T2I 奖励向图像编辑的迁移：并非均匀采样常见编辑案例，而是从多个来源精选 **1,880 对**图像-指令对 $(I_{\mathrm{in}}, q_{\mathrm{edit}})$——来源包括 Arena（Jiang et al., 2024）、Counting Edit（Ghosh et al., 2023）与 EditScore-RL-Data（Luo et al., 2026）——并聚焦现有图像编辑模型的失败案例。Lever-Bench 覆盖四大类编辑场景：**局部编辑**（local edits，含物体移除、替换、材质或属性修改）；**以人为中心的编辑**（human-centric edits，含肖像、姿态、动作与面部表情变化）；**全局编辑**（global edits，如背景与风格修改）；以及涉及物体计数与关系推理的**组合编辑**（compositional edits）。为补充这些针对性失败案例并评估超出该基准的泛化能力，另在开源基准 GEdit（Liu et al., 2025b）与 EditReward-Bench（Luo et al., 2026）上汇报结果。
+
+**奖励与指标**。训练奖励与评估指标均选取覆盖图像编辑质量的三个互补维度：感知质量、编辑执行与参考一致性。阶段 1 与阶段 2 均采用 **HPSv3**（Ma et al., 2025）与 **RealGen**（Ye et al., 2025）作为 T2I 奖励：HPSv3 为编辑执行、一致性与美学提供奖励信号，RealGen 强调真实感与一致性。评估层面对主要质量维度分别测评以获得更全面的视图：感知质量从美学与真实感两方面衡量；语义一致性用 **SigLIP**（Zhai et al., 2023）度量编辑图像与其文本条件之间的对应性；另用 **EditScore**（Luo et al., 2026）评估指令执行以及输入图与编辑图之间的一致性。这些指标共同刻画感知质量、指令遵循与源一致性。
+
+**模型与基线**。Lever-Edit 在 **FLUX.1-Kontext-dev**（Labs et al., 2025）上实例化，并应用 **DiffusionNFT**（Zheng et al., 2026）作为编辑微调算法。基线设计旨在区分"奖励对齐的目标描述生成"与"仅仅提供另一种文本条件"的收益。除未对齐的原始图像编辑模型（w/o Alignment）外，比较四种提示构造方式：
+
+1. 直接使用原始编辑指令 $q_{\mathrm{edit}}$（**Lever Pure Edit**）；
+2. 由在线 VLM 在固定 $p_{\mathrm{sys}}$ 条件下生成、但不做奖励驱动查询优化的描述（**Lever Pure VLM**）；
+3. 由强大闭源 MLLM 离线生成的高质量描述（**Lever Offline SOTA**）；
+4. 由 **Lever-Edit** 生成的奖励对齐描述。
+
+除非特别说明，对比各变体使用相同的图像编辑主干、编辑指令集与训练预算。
+
+**主要结果（表 1）**：
+
+**表 1**：不同方法在 Lever-Bench 与 GEdit（Liu et al., 2025b）上的图像编辑评估指标比较（加粗为最优）。
+
+| 方法 | SigLIP ↑（一致性） | HPSv3 ↑（美学） | EditScore 一致性 ↑ | EditScore 自然度 ↑ | EditScore 执行度 ↑ | RealGen v1 ↑（T2I 自然度） | GEdit S ↑ | GEdit Q ↑ | GEdit O ↑ |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| w/o Alignment | 0.0769 | 5.2742 | 0.8726 | 0.8811 | 0.6311 | 1.1958 | 6.181 | 6.330 | 5.763 |
+| Lever Pure Edit | 0.0772 | 5.9823 | 0.9044 | **0.8974** | **0.7307** | 1.2119 | 6.345 | 6.330 | 5.755 |
+| Lever Pure VLM | 0.0771 | 7.3152 | 0.9244 | 0.8837 | 0.6249 | 1.1946 | 6.058 | **6.661** | 5.706 |
+| Lever Offline SOTA | 0.0763 | 8.2645 | 0.9252 | 0.8896 | 0.7191 | 1.1995 | 6.042 | 6.389 | 5.517 |
+| Lever-Edit | **0.0788** | **14.9762** | **0.9263** | 0.8822 | 0.7040 | **1.2532** | **6.364** | 6.362 | **5.788** |
+
+### 5.2 引入 T2I 奖励的益处（The Merits of Introducing T2I Rewards）
+
+为验证核心假设——"编辑质量的标准维度可以映射到 T2I 奖励空间"，本文在两个互补层面对迁移奖励进行评估。**奖励层面**：成功的迁移应能正确区分"更优编辑"与"更差编辑"，即使不存在一个联合处理参考图像、指令与编辑输出的编辑专用评测器。**优化层面**：它应提供稳定的学习信号，其收益能转化为更好的指令执行、语义与源一致性以及图像质量。为此，本文在带真值标注的偏好对上评估奖励准确率、分析训练中的奖励轨迹，并在 Lever-Bench、EditReward-Bench（Luo et al., 2026）与 GEdit（Liu et al., 2025b）上比较下游编辑性能。这些评估共同检验：迁移的 T2I 奖励不仅能给出有意义的偏好分数，其偏好知识还能充当图像编辑 RL 的有效监督。
+
+本文的奖励对齐目标描述使 T2I 奖励能比"直接应用于原始编辑指令"提供更强的编辑偏好信号。在奖励层面，在带真值标注的偏好对上比较三种变体：以 Lever-Edit 生成的奖励对齐目标描述为条件的 HPSv3（**HPSv3+Ours**）、直接以原始编辑指令为条件的 HPSv3（**HPSv3+Edit**）、以及编辑专用奖励 EditScore。如 图 3(a) 所示（在 EditReward-Bench 上评估），HPSv3+Ours 在提示遵循准确率上比 EditScore 高出约 **9 个百分点**；相反，直接以编辑指令为条件的 HPSv3 在一致性准确率上显著下降。原因在于：相对编辑指令只指明"什么该变"，却未显式描述应保留的源内容。在优化层面，训练过程中的奖励曲线（原文称 "Forensic-Chat reward curves"；Forensic-Chat 为 RealGen（Ye et al., 2025）所用的 MLLM 图像检测器，此处即指基于该检测器的 RealGen 真实感奖励曲线）显示 Lever-Edit 在整个训练过程中始终获得高于其他方法的奖励（图 3(b)）。这些结果验证了目标描述接口的核心作用：把相对编辑请求转换为自包含的目标状态，使成熟 T2I 奖励更适合评估图像编辑偏好，进而改进图像编辑模型的微调。
+
+> **图 3**：T2I 奖励迁移的有效性。(a) 在 EditReward-Bench 上评估 T2I 奖励与 I2I 奖励（EditScore）；(b) 不同方法的 T2I 奖励对比，Lever-Edit 展现稳定且最优的优化表现。
+
+### 5.3 执行与一致性的有效性（Effectiveness of Execution and Consistency）
+
+除提升被优化的 T2I 奖励数值外，纯 T2I 监督在编辑感知的核心维度——指令执行与参考一致性——上也带来明确收益。如 表 1 所示，Lever 系列方法在 EditScore 执行度（提示遵循）指标上一致优于未对齐的基础编辑模型，表明迁移奖励为执行所请求编辑提供了有效学习信号；同时 Lever 系列方法在 EditScore 的一致性、自然度与执行度上整体更高。但需要承认，低质量的在线目标提示可能导致更低的执行度分数（如 Lever Pure VLM 的 EditScore 执行度仅 0.6249）。在 GEdit 上，Lever-Edit 取得最佳语义分（S）与最高总分（O）。由于部分奖励模型也参与了优化，本文采用独立的 SigLIP 一致性与 GEdit 作为一致性评估的额外证据：如表 1 所示，Lever-Edit 在所有竞争者中取得最佳的 SigLIP 与 GEdit S 分（一致性）。因此，Lever-Edit 生成的奖励对齐目标描述被证明比原始或泛用文本条件能更有效地表达期望编辑状态的语义。
+
+### 5.4 图像质量的有效性（Effectiveness of Image Quality）
+
+Lever-Edit 在 Lever-Bench 上与迁移的 T2I 质量偏好实现最强对齐。如表 1 所示，它以明显优势取得最高 HPSv3 分数（14.9762，次优为 8.2645），并取得最佳 RealGen 分数（1.2532）。HPSv3 的大幅增益与阶段 1 的目标一致：学得的目标描述显式地架起了编辑任务与 T2I 奖励所表示偏好空间之间的桥梁；RealGen 的相应提升进一步表明所得编辑图像与"真实感+一致性"导向的互补奖励信号对齐良好。
+
+### 5.5 消融实验（Ablation Study）
+
+如 图 5 所示，在不同训练步数上，Lever-Edit 在 HPSv3、SigLIP、EditScore 一致性与 RealGen v1 等指标上一致优于对比方法。为把"描述质量"的影响与"编辑图像质量"的影响解耦，本文使用四种替代文本条件重新计算 SigLIP 相似度：原始编辑指令、原始 VLM 生成的描述（Pure VLM）、离线强模型生成的描述（Offline SOTA）、以及 Lever-Edit 生成的奖励对齐目标描述。重算的 SigLIP 分数列于 表 2，揭示两点明确观察：**其一**，对同一张编辑图像，Lever-Edit 生成的目标描述始终取得最高 SigLIP 分数，表明本文描述与预期编辑内容的语义对齐更好；**其二**，在同一文本描述下，Lever-Edit 生成的图像也取得最高 SigLIP 分数，表明本文编辑图像与预期目标语义更匹配。二者共同证明了目标描述质量与图-文语义对齐的双重提升。
+
+> **图 5**：不同训练步数下的消融研究。Lever-Edit 在绝大多数训练步数上取得最佳的美学、语义对齐、编辑一致性与真实感。
+
+**表 2**：不同 T2I 奖励提示对 SigLIP 语义一致性影响的消融研究（加粗为最优）。
+
+| 方法 \ 评估所用提示 | Pure Edit 提示 | Offline SOTA 提示 | Lever-Edit 提示 |
+| --- | --- | --- | --- |
+| w/o Alignment | 0.0769 | 0.0768 | 0.0784 |
+| Lever Pure Edit | 0.0772 | 0.0766 | 0.0785 |
+| Lever Pure VLM | 0.0770 | 0.0765 | 0.0784 |
+| Lever Offline SOTA | 0.0767 | 0.0763 | 0.0782 |
+| Lever-Edit | **0.0777** | **0.0770** | **0.0788** |
+
+### 5.6 定性分析（Qualitative Analysis）
+
+图 4 从四个互补视角进行定性比较：执行（提示遵循）、美学、一致性与自然度。在提示遵循方面，Lever-Edit 成功地只把狗转换为带大理石纹理的雕像，而基于离线描述的方法失去了与狗原外观的一致性，Pure VLM 方法则错误地保留了与大理石属性相矛盾的原始羽毛纹理。此外，Lever-Edit 将红色跑车放置在正确位置，且渲染质量具有更高的美学与自然感。Lever-Edit 在全局/局部/绘画类编辑中均展现出色的美学表现，在将"冲浪板"与正确物体对齐的同时保持人物头部姿态，体现出高语义与源一致性。最后，在物体移除任务中，Lever-Edit 以更高的自然度质量恢复了被遮挡的树叶。
+
+> **图 4**：不同方法的定性比较。Lever-Edit 在保持语义与源一致性及自然度的同时，以强提示遵循与高美学成功完成图像编辑（放大查看效果更佳）。
+
+---
+
+## 6 结论
+
+本文表明：成熟的 T2I 奖励生态可以被有效迁移到图像编辑 RL，而无需排他性地依赖编辑专用奖励。本文提出 Lever-Edit——一个两阶段框架，通过先学习奖励对齐的目标描述策略、再将其冻结以指导下游图像编辑优化，在相对编辑指令与 T2I 奖励所期望的自包含目标描述之间架起桥梁。在 Lever-Bench 与既有基准上的实验表明：其编辑对齐与源保持能力具有竞争力，同时优于基于原始编辑指令、泛用 VLM 描述与离线高质量提示的直觉迁移基线。这些结果表明：有效的图像编辑 RL 并不一定需要为每个编辑目标单独设计奖励；通过恰当的目标描述接口，T2I 奖励中多样的视觉偏好即可被复用。
+
+---
+
+## 创新点提炼
+
+1. **提出并系统论证"无需编辑奖励的图像编辑在线 RL"这一问题路径**。本文首次从奖励迁移视角重新审视编辑质量三维度（纯图像质量、编辑执行、参考一致性），论证其均可映射到 T2I 奖励空间，从而把"为编辑任务单独构建奖励模型"这一默认前提转变为一个可被绕过的选项。
+
+2. **反事实目标描述接口：$c_{\mathrm{tgt}} = c_{\mathrm{change}} \oplus c_{\mathrm{preserve}}$**。将"改什么"与"保什么"统一编码进一段自包含目标文本，使原本需要图-图对比的编辑执行与参考一致性评估，转化为 T2I 奖励已擅长求解的图-文对齐问题。这是全文最核心的概念贡献，也是"杠杆"得以撬动 T2I 奖励生态的支点。
+
+3. **语义保持的嵌入级前缀微调**。冻结 VLM 与编辑主干，仅训练连续查询前缀 $\mathcal{E}_{\mathrm{query}}$：固定系统提示在离散文本空间锁定任务语义，可学习前缀在连续嵌入空间提供奖励适配自由度。这既避免了全参数微调对预训练语言/语义能力的破坏，又超越了固定手工提示的表达上限，并显式解决了"语义合法的描述未必与冻结奖励兼容"这一被直觉协议忽视的问题。
+
+4. **奖励对齐与离线 token 级分布对齐的双重监督（式 17）**。策略梯度项 $\mathcal{L}_{\mathrm{PG}}$ 最大化多奖励聚合的 T2I 奖励，KL 退化为 token 级 NLL 的 $\mathcal{L}_{\mathrm{SFT}}$ 项则以离线强 MLLM 的金标准描述为锚，有效抑制了纯奖励优化固有的语义漂移与奖励作弊风险。
+
+5. **两阶段解耦、即插即用的模块化架构**。阶段 1 产出的查询嵌入（及其已上下文化的 VLM prefill 嵌入）可作为独立插件，适配不同 VLM、不同图像编辑主干与微调范式（文中实例为 FLUX.1-Kontext-dev + DiffusionNFT）；阶段 2 仅用迁移的 T2I 奖励优化策略，全程无图-图编辑奖励模型，还额外获得嵌入级多模态条件作为平衡提示遵循与编辑一致性的辅助监督。
+
+6. **面向失败案例的 Lever-Bench 基准**。从 Arena、Counting Edit 与 EditScore-RL-Data 精选 1,880 对现有编辑模型的失败样本，覆盖局部、以人为中心、全局与组合四大类编辑场景，为"奖励迁移是否真正有效"提供了针对性、高难度的测试床；配合双层面评估（奖励层面的偏好对准确率 + 优化层面的下游编辑性能），实验设计本身也具有方法论参考价值。
+
+---
+
+*注：本翻译基于 ar5iv（LaTeXML）转换的 Markdown 版本，已忽略站点导航残留与 LaTeX 转义符；参考文献列表从略，正文引用保留 (作者, 年份) 格式。原文中个别疑似笔误（如 $\mathcal{E}_{\mathrm{query}}$ 误作 $q_{\mathrm{edit}}$、"Forensic-Chat reward curves" 等）已在相应位置以译注形式标明。*
+</script>
+<script src="../assets/app.js?v=5"></script>
+</body>
+</html>

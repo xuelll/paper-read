@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>11 · 能力驱动的数据基础设施 — 中英对照精读</title>
+<link rel="stylesheet" href="../assets/style.css?v=6">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="back" href="../index.html">← 首页</a>
+  <div class="tb-title"><span class="num">11</span>能力驱动的数据基础设施</div>
+  <div class="tb-controls">
+    <a class="tb-link" href="https://arxiv.org/abs/2608.18076" target="_blank" rel="noopener">arXiv</a>
+    <label class="sync"><input type="checkbox" id="syncToggle"> 滚动同步</label>
+  </div>
+</header>
+<main class="reader">
+  <section class="pane pane-en">
+    <div class="pane-head">ENGLISH 原文 (arXiv HTML)</div>
+    <div class="pane-body" id="enBody">
+<article class="ltx_document ltx_authors_1line">
+<h1 class="ltx_title ltx_title_document">
+From Corpora to Co-Evolving Capabilities:
+<br class="ltx_break">Capability-Centric Data Design for Generalist Image Generation</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Xingjian Wang<sup id="id1" class="ltx_sup">*</sup>
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Zhao Wang<sup id="id2" class="ltx_sup">*</sup>
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Taihang Hu<sup id="id3" class="ltx_sup">*</sup>
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Jun Zheng<sup id="id4" class="ltx_sup">*</sup>
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Zhengrui Chen<sup id="id5" class="ltx_sup">*</sup>
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Qinye Zhou<sup id="id6" class="ltx_sup">*</sup>
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Zhengtao Wu<sup id="id7" class="ltx_sup">*</sup>
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Yongchao Du
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Zuan Gao
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Chao Lin
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Yefeng Shen
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Yuan Wang
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Xiaoli Xu
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Zhengze Xu
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Hao Yan
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Denghui Yang
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Yuhang Yu
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Huayu Zhang
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Mingzhou Zhang
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Mengting Chen<sup id="id8" class="ltx_sup">†</sup>
+</span><span class="ltx_author_notes"><span class="ltx_author_notes_content">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_contact_name">Affiliation: </span><sup id="id9" class="ltx_sup">*</sup>Equal contribution.  <sup id="id10" class="ltx_sup">†</sup>Corresponding author.
+</span>
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_contact_name">Affiliation: </span><span id="id11" class="ltx_text ltx_font_bold">Alibaba Group</span>
+</span></span></span></span></div>
+<div class="ltx_dates">August 25, 2026</div>
+
+<div id="abstract1" class="ltx_abstract"><h6 class="ltx_title ltx_title_abstract">Abstract</h6>
+    
+<p id="abstract1.1" class="ltx_p">Large-scale image generation has benefited from advances in data scale, quality, rebalancing, and recaptioning, yet conventional pipelines typically optimize task-specific datasets in isolation.
+A central challenge is not only how to curate each task-specific corpus, but also how to organize heterogeneous supervision according to the dependencies among generative capabilities.
+We present a <span id="abstract1.1.1" class="ltx_text ltx_font_bold">capability-driven data infrastructure</span> that couples capability-specific supervision construction with capability-aligned curriculum scheduling.
+Its three specialized yet interoperable data engines build complementary relational supervision for text-image grounding, inter-image transformation, and image-knowledge association, while caption experts align T2I and editing supervision across tasks and granularities.
+A multi-stage curriculum jointly evolves task composition, visual-concept distribution, data quality, and image resolution along the dependency order of capability acquisition, with capability-aware evaluation closing the loop through targeted retrieval, expert construction, and gap-aware resampling.
+At scale, the framework curates a 440M-image T2I corpus, 120M editing pairs, and over 27M image-entity pairs.
+With this infrastructure, we train multimodal diffusion models at two scales from scratch, with 3B and 6B sizes respectively.
+We conduct quantitative evaluation on CPI-Bench, along with qualitative evaluations across diverse text-to-image and editing scenarios.
+Experimental results present broad visual coverage, versatile rendering, and effective transfer across generative capabilities.</p>
+  
+</div>
+<div id="p1" class="ltx_para ltx_align_bottom">
+<blockquote id="p1.1" class="ltx_quote"><span class="ltx_rule" style="width:0.0pt;height:6.0pt;--ltx-bg-color:black;display:inline-block;"></span>
+</blockquote>
+</div>
+<section id="S1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">1 </span>Introduction</h2>
+
+<div id="S1.p1" class="ltx_para ltx_noindent">
+<p id="S1.p1.1" class="ltx_p">Recent advances in image generation, spanning both text-to-image (T2I) synthesis and image-to-image (I2I) transformation, have been accompanied by a parallel evolution in data construction.
+Recent progress in diffusion models has been supported by increasingly large datasets such as LAION-5B, COYO-700M, and MMC4 <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib15" title="" class="ltx_ref">Schuhmann et al., 2022</a>, <a href="#bib.bib16" title="" class="ltx_ref">Byeon et al., 2022</a>, <a href="#bib.bib17" title="" class="ltx_ref">Zhu et al., 2023</a>]</cite>.
+Furthermore, some studies have shown that data quality, semantic diversity, and caption density materially affect alignment and learning efficiency <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib32" title="" class="ltx_ref">Li et al., 2024a</a>, <a href="#bib.bib34" title="" class="ltx_ref">Chen et al., 2026</a>]</cite>.
+Therefore, modern data pipelines like Qwen-Image <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib4" title="" class="ltx_ref">Wu et al., 2025</a>]</cite> and Seedream <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib3" title="" class="ltx_ref">Seedream et al., 2025</a>]</cite> invest heavily in expanding data coverage, filtering, semantic balancing, and recaptioning.
+These advances answer how to construct a better corpus in aggregate, but leave a different question underexplored, i.e., <em id="S1.p1.1.1" class="ltx_emph ltx_font_bold ltx_font_italic">how should data be organized to develop a collection of interdependent generative capabilities ?</em></p>
+</div>
+<div id="S1.p2" class="ltx_para ltx_noindent">
+<p id="S1.p2.1" class="ltx_p">This question becomes central for generalist image generators.
+Different generative capabilities do not emerge simultaneously from scratch <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib23" title="" class="ltx_ref">Deng et al., 2025</a>]</cite>.
+Instead, they develop in a clear dependency order, which closely aligns with the stages of the model’s curriculum learning.
+For example, semantic alignment of T2I data provides reusable concepts for structured generation and image editing <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib20" title="" class="ltx_ref">Xia et al., 2025</a>]</cite>, and coarse or simple content provides a foundation for learning at higher resolutions and with more complex structures <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib7" title="" class="ltx_ref">Cai et al., 2025</a>, <a href="#bib.bib6" title="" class="ltx_ref">Team et al., 2025</a>, <a href="#bib.bib8" title="" class="ltx_ref">Team et al., 2026</a>]</cite>.
+Consequently, the utility of a training sample depends not only on its quality, but also on the capability it targets and its intrinsic relationships with other samples.
+Many conventional data pipelines treat datasets as task-specific design units, such as image-caption pairs for T2I or source-target pairs for editing, and optimize them largely in isolation <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib28" title="" class="ltx_ref">Betker et al., 2023</a>, <a href="#bib.bib30" title="" class="ltx_ref">Hui et al., 2024</a>, <a href="#bib.bib22" title="" class="ltx_ref">Qian et al., 2026</a>]</cite>, which can limit supervision sharing across tasks.</p>
+</div>
+<div id="S1.p3" class="ltx_para ltx_noindent">
+<p id="S1.p3.1" class="ltx_p">To address this issue, we treat data curation as a capability-driven infrastructure to provide complementary supervision across heterogeneous tasks and jointly build transferable generation capabilities.
+Our framework coordinates two complementary components, namely <span id="S1.p3.1.1" class="ltx_text ltx_font_bold">capability-specific data pipeline</span> and <span id="S1.p3.1.2" class="ltx_text ltx_font_bold">capability-aligned curriculum scheduling strategy</span>.
+As shown in Figure <a href="#S1.F1" title="Figure 1 ‣ 1 Introduction ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>, we design specialized data engines for capability-oriented task separation, and stage-wise data stratification with an active refinement loop.
+Together, these two components form a unified data infrastructure in which specialized data engines tailor supervision to individual capabilities and their mutual dependency, while the training curriculum dynamically composes their outputs as the model’s capabilities evolve.</p>
+</div>
+<div id="S1.p4" class="ltx_para ltx_noindent">
+<p id="S1.p4.1" class="ltx_p">We first propose a capability-specific data pipeline comprising three interoperable engines for text-to-image generation, image editing, and knowledge-grounded generation.
+Together, they instantiate complementary forms of relational visual supervision to develop multi-dimension capabilities.
+The <span id="S1.p4.1.1" class="ltx_text ltx_font_bold">T2I data engine</span> builds text-image grounding by expanding concept coverage, rebalancing long-tailed distributions, and aligning images with captions at multiple levels of granularity.
+The <span id="S1.p4.1.2" class="ltx_text ltx_font_bold">image-editing data engine</span> constructs supervision through a suite of specialized editing pipelines tailored to different editing operation types, while incorporating realistic associations mined from naturally related images and expert-generated examples for sparsely covered tasks.
+The <span id="S1.p4.1.3" class="ltx_text ltx_font_bold">knowledge-grounded data engine</span> links visual patterns to named entities and structured knowledge through knowledge-graph-guided acquisition.
+This capability-oriented data organization enables independent measurement and optimization of specific capabilities, facilitating cross-task transfer.
+Moreover, each data type covers a distinct subset of visual concepts, eliminating the need for every task-specific dataset to exhaustively cover all concepts.
+For example, text-rendering capabilities acquired from synthetic T2I supervision can transfer to image editing, reducing the need to duplicate the same concept coverage in task-specific editing data <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib19" title="" class="ltx_ref">Tuo et al., 2024</a>]</cite>.</p>
+</div>
+<div id="S1.p5" class="ltx_para ltx_noindent">
+<p id="S1.p5.1" class="ltx_p">Furthermore, specialization does not imply isolation.
+A shared data-wrangling infrastructure and annotation conventions make the engine outputs interoperable, allowing visual concepts introduced in one pathway to be reused by another <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib18" title="" class="ltx_ref">Fu et al., 2025</a>, <a href="#bib.bib21" title="" class="ltx_ref">Tian et al., 2025</a>]</cite>.
+In particular, we align editing instructions with T2I captions in both visual vocabulary and descriptive structure.
+Moreover, we develop dense captions as precise supervision to accelerate training convergence on text-rich or structurally complex images.
+Concepts already covered by T2I data can thereby transfer to editing supervision for better training convergence.</p>
+</div>
+<div id="S1.p6" class="ltx_para ltx_noindent">
+<p id="S1.p6.1" class="ltx_p">As for capability-aligned curriculum scheduling, we design a five-stage curriculum following the dependency order of capability acquisition.
+The data <em id="S1.p6.1.1" class="ltx_emph ltx_font_bold ltx_font_italic">evolves along four coupled axes, including task composition, visual concept distribution, data quality, and image resolution</em>, jointly aligned with the learning trajectory of our model.
+Training begins with large-scale T2I data to establish broad visual-semantic alignment and basic generation, then incorporates structurally complex, knowledge-grounded, and text-rich examples to develop capabilities in structural composition, knowledge grounding, and text rendering.
+Once a stable T2I prior has emerged, editing data adds reference preservation and controlled transformation while reusing the visual concepts already acquired from T2I supervision.
+Continual training (CT) and supervised fine-tuning (SFT) subsequently shift the mixture toward smaller, balanced, and visually refined subsets, with image resolution scaled to content complexity so that additional computation is matched by richer supervision.
+Notably, the schedule is not prescribed once and held fixed.
+Capability-aware evaluation maps observed failures to targeted retrieval, expert construction, and resampling in the corresponding engines, and the refined data are incorporated into subsequent mixtures according to the model’s current capability profile.</p>
+</div>
+<div id="S1.p7" class="ltx_para ltx_noindent">
+<p id="S1.p7.1" class="ltx_p">By coupling specialized supervision construction with dependency-aware curriculum scheduling, the framework promotes transfer across tasks and training stages, and turns otherwise isolated datasets into an adaptive data infrastructure for generalist image generation.</p>
+</div>
+<div id="S1.p8" class="ltx_para ltx_noindent">
+<p id="S1.p8.1" class="ltx_p">Our contributions are threefold.</p>
+<ul id="S1.I1" class="ltx_itemize ltx_leftmargin_flush">
+<li id="S1.I1.i1" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I1.i1.p1" class="ltx_para ltx_noindent">
+<p id="S1.I1.i1.p1.1" class="ltx_p">We introduce a <span id="S1.I1.i1.p1.1.1" class="ltx_text ltx_font_bold">capability-specific data pipeline</span> that separates data construction by target capability while preserving transfer through shared data preprocessing and caption experts. Three specialized engines expand long-tail and defect-aware T2I coverage, mine natural visual associations for realistic editing supervision, and ground generation in structured knowledge. At scale, the pipeline curates a 440M-image T2I corpus from a billion-scale pool, over 120M high-quality image-editing pairs, and approximately 27M image-entity pairs for structured knowledge.</p>
+</div></li>
+<li id="S1.I1.i2" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I1.i2.p1" class="ltx_para ltx_noindent">
+<p id="S1.I1.i2.p1.1" class="ltx_p">We propose a <span id="S1.I1.i2.p1.1.1" class="ltx_text ltx_font_bold">capability-aligned curriculum scheduling</span> strategy that follows the dependency order of capability acquisition rather than maintaining a fixed data mixture. Its multi-stage schedule jointly evolves task composition, visual-concept distribution, data quality, and resolution from 256px T2I pre-training to 1024px supervised fine-tuning, while capability-aware evaluation feeds residual gaps back into targeted retrieval, expert construction, and adaptive resampling.</p>
+</div></li>
+<li id="S1.I1.i3" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I1.i3.p1" class="ltx_para">
+<p id="S1.I1.i3.p1.1" class="ltx_p">We develop a <span id="S1.I1.i3.p1.1.1" class="ltx_text ltx_font_bold">captioning framework that bridges tasks and granularities</span>. Designed for billion-scale annotation, VLM-based captioner aligns editing instructions with the vocabulary and descriptive structure of T2I captions, provides multi-style supervision from entity tags to long-form descriptions, and generates verified dense captions for structured and text-rich images. This shared language interface promotes concept transfer across generation and editing while providing precise supervision from coarse semantics to fine-grained visual structure.</p>
+</div></li>
+</ul>
+</div>
+<figure id="S1.F1" class="ltx_figure"><img src="https://arxiv.org/html/2608.18076v2/data_pipeline.png" id="S1.F1.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:476/183;" width="476" height="183" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 1: </span>Capability-specific data construction in our framework. Shared collection and wrangling feed three specialized but interoperable engines for visual expression, editing association, and knowledge-grounded reasoning.</figcaption>
+</figure>
+</section>
+<section id="S2" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">2 </span>Related Work</h2>
+
+<section id="S2.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">2.1 </span>Large-Scale Visual Data Curation</h3>
+
+<div id="S2.SS1.p1" class="ltx_para ltx_noindent">
+<p id="S2.SS1.p1.1" class="ltx_p">Web-scale image-text corpora, including LAION-5B, COYO-700M, and MMC4, have provided the data foundation for large-scale visual representation learning and image generation <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib15" title="" class="ltx_ref">Schuhmann et al., 2022</a>, <a href="#bib.bib16" title="" class="ltx_ref">Byeon et al., 2022</a>, <a href="#bib.bib17" title="" class="ltx_ref">Zhu et al., 2023</a>]</cite>.
+Subsequent work has established data design as a central scaling dimension rather than a by-product of model training.
+DataComp systematically studies filtering and selection over a fixed candidate pool <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib10" title="" class="ltx_ref">Gadre et al., 2023</a>]</cite>, while controlled scaling analyses show that data quality, semantic diversity, and text-conditioning density materially affect alignment and sample efficiency <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib32" title="" class="ltx_ref">Li et al., 2024a</a>, <a href="#bib.bib33" title="" class="ltx_ref">Lai et al., 2025</a>, <a href="#bib.bib34" title="" class="ltx_ref">Chen et al., 2026</a>]</cite>.
+Another line of work improves supervision by replacing noisy web alt-text with synthetic descriptions.
+DALL-E 3 demonstrates that highly descriptive captions substantially improve prompt following <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib28" title="" class="ltx_ref">Betker et al., 2023</a>]</cite>, and Recap-DataComp-1B scales VLM-based recaptioning to over one billion web images <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib11" title="" class="ltx_ref">Li et al., 2024b</a>]</cite>.
+Recent systems such as Qwen-Image and Seedream further integrate large-scale collection, filtering, recaptioning, semantic balancing, and targeted construction into end-to-end data pipelines <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib4" title="" class="ltx_ref">Wu et al., 2025</a>, <a href="#bib.bib3" title="" class="ltx_ref">Seedream et al., 2025</a>, <a href="#bib.bib38" title="" class="ltx_ref">Zhao et al., 2026</a>]</cite>.
+Knowledge-aware multimodal datasets additionally associate visual observations with named entities and structured facts for grounding and reasoning <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib37" title="" class="ltx_ref">Gong et al., 2024</a>]</cite>.</p>
+</div>
+<div id="S2.SS1.p2" class="ltx_para ltx_noindent">
+<p id="S2.SS1.p2.1" class="ltx_p">These efforts substantially improve the quality and coverage of visual corpora.
+Our work further shifts the unit of data design from the corpus to the capability.
+We separate T2I, image-editing, and knowledge-grounded supervision into specialized yet interoperable engines, while shared semantic metadata and annotation interfaces allow concepts acquired in one pathway to support another.
+This formulation makes capability-specific coverage gaps explicit without requiring each task-specific dataset to reproduce the full visual-concept distribution.</p>
+</div>
+</section>
+<section id="S2.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">2.2 </span>Image-Editing Data Curation</h3>
+
+<div id="S2.SS2.p1" class="ltx_para ltx_noindent">
+<p id="S2.SS2.p1.1" class="ltx_p">Instruction-based image editing is commonly learned from triplets comprising a source image, an editing instruction, and a target image.
+Because naturally paired triplets are scarce, existing datasets largely scale supervision through synthesized transformations, model-generated targets, and automatic quality filtering <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib30" title="" class="ltx_ref">Hui et al., 2024</a>, <a href="#bib.bib24" title="" class="ltx_ref">Chen et al., 2025</a>, <a href="#bib.bib22" title="" class="ltx_ref">Qian et al., 2026</a>]</cite>.
+AnyEdit expands this paradigm with a fine-grained editing taxonomy and task-adaptive construction pipelines <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib12" title="" class="ltx_ref">Yu et al., 2025</a>]</cite>, while OmniEdit distills supervision from task specialists to cover diverse editing operations <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib36" title="" class="ltx_ref">Wei et al., 2025</a>]</cite>.
+DreamOmni similarly constructs accurate editing pairs with operation-specific synthesis for unified generation and editing <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib20" title="" class="ltx_ref">Xia et al., 2025</a>]</cite>.
+These approaches have substantially improved the scale and diversity of editing data, yet their supervision remains dominated by transformations produced within a synthetic pipeline, which may simplify real-world relations or inherit artifacts from the generator.
+Complementary studies derive manipulation cues from naturally occurring observations, for example by learning image transformations from temporal changes in videos <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib35" title="" class="ltx_ref">Cao et al., 2025</a>]</cite>.</p>
+</div>
+<div id="S2.SS2.p2" class="ltx_para ltx_noindent">
+<p id="S2.SS2.p2.1" class="ltx_p">In parallel, generalist models increasingly unify T2I generation and instruction-based editing within a shared architecture and training objective <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib1" title="" class="ltx_ref">Xiao et al., 2025</a>, <a href="#bib.bib20" title="" class="ltx_ref">Xia et al., 2025</a>, <a href="#bib.bib18" title="" class="ltx_ref">Fu et al., 2025</a>, <a href="#bib.bib21" title="" class="ltx_ref">Tian et al., 2025</a>, <a href="#bib.bib3" title="" class="ltx_ref">Seedream et al., 2025</a>]</cite>.
+Efficient supervision across different tasks is required.
+Thus, we combine operation-specific construction with editing relations mined from naturally associated images and expert-generated examples for sparsely covered tasks.
+Meanwhile, editing instructions inherit the visual vocabulary and descriptive structure of T2I captions, allowing the editing corpus to focus on reference preservation and transformation rather than duplicating visual concepts already established by T2I supervision.</p>
+</div>
+</section>
+<section id="S2.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">2.3 </span>Curriculum Learning and Adaptive Data Scheduling</h3>
+
+<div id="S2.SS3.p1" class="ltx_para ltx_noindent">
+<p id="S2.SS3.p1.1" class="ltx_p">Curriculum learning organizes training examples in a meaningful order so that simpler concepts provide a foundation for learning more complex ones <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib13" title="" class="ltx_ref">Bengio et al., 2009</a>]</cite>.
+Beyond example ordering, data-mixture optimization studies how training distributions should be composed across domains.
+DoReMi, for instance, uses a proxy model and distributionally robust optimization to estimate domain weights for large-scale pre-training <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib14" title="" class="ltx_ref">Xie et al., 2023</a>]</cite>.
+Modern image-generation systems also employ multi-stage recipes that progressively vary resolution, data quality, task composition, or content complexity <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib4" title="" class="ltx_ref">Wu et al., 2025</a>, <a href="#bib.bib6" title="" class="ltx_ref">Team et al., 2025</a>, <a href="#bib.bib7" title="" class="ltx_ref">Cai et al., 2025</a>, <a href="#bib.bib8" title="" class="ltx_ref">Team et al., 2026</a>, <a href="#bib.bib38" title="" class="ltx_ref">Zhao et al., 2026</a>]</cite>.
+Studies of unified multimodal pre-training further show that different generative and understanding capabilities emerge at different points in training rather than appearing simultaneously <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib23" title="" class="ltx_ref">Deng et al., 2025</a>]</cite>.
+Based on existing curricula design, our scheduling jointly evolves task composition, concept distribution, data quality, and resolution along the capability acquisition order, while capability-aware evaluation guides targeted data construction and resampling for subsequent stages.</p>
+</div>
+<figure id="S2.F2" class="ltx_figure"><img src="https://arxiv.org/html/2608.18076v2/t2i_dist.png" id="S2.F2.g1" class="ltx_graphics ltx_centering ltx_img_square" style="aspect-ratio:381/333;" width="381" height="333" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 2: </span>Distribution of the curated T2I corpus. The inner ring distinguishes collected and constructed data, while the outer ring reports the composition of visual domains retained for training.</figcaption>
+</figure>
+</section>
+</section>
+<section id="S3" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">3 </span>Capability-specific Data Pipeline</h2>
+
+<div id="S3.p1" class="ltx_para ltx_noindent">
+<p id="S3.p1.1" class="ltx_p">Motivated by the observation that capabilities learned from heterogeneous tasks can transfer across tasks <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib3" title="" class="ltx_ref">Seedream et al., 2025</a>, <a href="#bib.bib18" title="" class="ltx_ref">Fu et al., 2025</a>]</cite>, we partition data construction into three specialized yet interoperable engines for T2I generation, image editing, and knowledge-grounded generation.
+Each engine adopts construction and annotation mechanisms tailored to its target capability, while shared processing and supervision interfaces preserve concept transfer across tasks.
+This organization makes capability-specific deficiencies independently measurable and actionable without requiring every task-specific dataset to exhaustively cover the same visual concepts.
+Notably, the engines share the same data wrangling process, which illustrated in Appendix <a href="#A1" title="Appendix A Shared Data Wrangling ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">A</span></a>.</p>
+</div>
+<section id="S3.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">3.1 </span>T2I Data Engine for Visual-Semantic Grounding</h3>
+
+<div id="S3.SS1.p1" class="ltx_para ltx_noindent">
+<p id="S3.SS1.p1.1" class="ltx_p">We develop a scalable T2I data engine to transform a billion-scale image pool into a high-quality and distribution-balanced training corpus of 440 million images.
+The engine jointly optimizes data quality, semantic diversity, text-image alignment, and long-tail concept coverage.</p>
+</div>
+<div id="S3.SS1.p2" class="ltx_para ltx_noindent">
+<p id="S3.SS1.p2.1" class="ltx_p"><span id="S3.SS1.p2.1.1" class="ltx_text ltx_font_bold">Scaling the T2I Corpus.</span>
+We curate billions of noisy image-text pairs from heterogeneous sources, including public datasets <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib15" title="" class="ltx_ref">Schuhmann et al., 2022</a>, <a href="#bib.bib16" title="" class="ltx_ref">Byeon et al., 2022</a>, <a href="#bib.bib17" title="" class="ltx_ref">Zhu et al., 2023</a>]</cite>, image-rich websites, web-search engines, and e-commerce platforms.
+All samples are processed by the shared data-wrangling pipeline described in Appendix <a href="#A1" title="Appendix A Shared Data Wrangling ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">A</span></a>.
+Aesthetic quality, visual clarity, and AIGC detection serve as important filtering dimensions for T2I data <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib3" title="" class="ltx_ref">Seedream et al., 2025</a>, <a href="#bib.bib38" title="" class="ltx_ref">Zhao et al., 2026</a>]</cite>.
+Each retained image is associated with semantic tags, quality attributes, and provenance information, allowing subsequent training stages to construct source-aware and distribution-aware mixtures.</p>
+</div>
+<div id="S3.SS1.p3" class="ltx_para ltx_noindent">
+<p id="S3.SS1.p3.1" class="ltx_p"><span id="S3.SS1.p3.1.1" class="ltx_text ltx_font_bold">Capability-Oriented Coverage Expansion.</span>
+T2I pre-training determines not only fundamental generation quality but also the visual concepts and world knowledge available to downstream capabilities <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib7" title="" class="ltx_ref">Cai et al., 2025</a>, <a href="#bib.bib6" title="" class="ltx_ref">Team et al., 2025</a>]</cite>.
+We therefore expand T2I coverage along two complementary dimensions, namely entity-level concept coverage and coverage of both desirable and undesirable visual patterns.
+For the former, we develop proactive acquisition pipelines that retrieve authentic user-created and professionally designed images, as well as targeted samples from long-tail visual domains, rather than relying solely on the natural distribution of web-scale corpora.
+We additionally construct specialized collections of text-rich images, web pages, graphic designs, posters, social-media graphics, and commercial product images.
+These collections establish visual-semantic correspondences for rare entities and structured visual content during T2I pre-training, which can subsequently be activated by downstream tasks.
+For the latter, we avoid overly aggressive aesthetic filtering and retain a controlled proportion of imperfect images while explicitly describing their defects in captions.
+This treatment turns otherwise discarded artifacts into identifiable visual concepts, enabling the model to recognize and avoid reproducing them.
+Figure <a href="#S2.F2" title="Figure 2 ‣ 2.3 Curriculum Learning and Adaptive Data Scheduling ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> summarizes the resulting T2I distribution.</p>
+</div>
+</section>
+<section id="S3.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">3.2 </span>Image-Editing Data Engine for Relational Supervision</h3>
+
+<div id="S3.SS2.p1" class="ltx_para ltx_noindent">
+<p id="S3.SS2.p1.1" class="ltx_p">High-quality image-editing pairs are substantially scarcer than unpaired images.
+Existing studies primarily scale editing supervision through synthetically generated transformations <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib30" title="" class="ltx_ref">Hui et al., 2024</a>, <a href="#bib.bib22" title="" class="ltx_ref">Qian et al., 2026</a>, <a href="#bib.bib24" title="" class="ltx_ref">Chen et al., 2025</a>]</cite>, which can oversimplify real-world changes and inherit artifacts from the generation pipeline.
+We construct a mixture of complementary pipelines that recover editing associations from both actively constructed operations and naturally associated images.
+All collected pairs are processed by the shared data-wrangling pipeline, rebalanced across operation types and image tags, and annotated by the editing-instruction captioner described in Sec. <a href="#S3.SS4" title="3.4 Caption as Bridge to Align Across Tasks and Learn Across Granularities ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3.4</span></a>.
+In total, the engine constructs 120M editing pairs spanning both single-image and multi-image editing tasks, as summarized in Figure <a href="#S3.F3" title="Figure 3 ‣ 3.2 Image-Editing Data Engine for Relational Supervision ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a>.</p>
+</div>
+<figure id="S3.F3" class="ltx_figure"><img src="https://arxiv.org/html/2608.18076v2/i2i_dist.png" id="S3.F3.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:476/247;" width="476" height="247" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 3: </span>Composition of the image-editing corpus. The left Sankey diagram shows the relative mixture of single-image and multi-image editing tasks, and the right panels illustrate representative task families.</figcaption>
+</figure>
+<div id="S3.SS2.p2" class="ltx_para ltx_noindent">
+<p id="S3.SS2.p2.1" class="ltx_p"><span id="S3.SS2.p2.1.1" class="ltx_text ltx_font_bold">Operation-Specific Pair Construction.</span>
+We construct basic editing pairs by reversing observable changes in high-quality images.
+A VLM first decomposes the scene and selects editable subjects, while SAM3 <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib31" title="" class="ltx_ref">Carion et al., 2025</a>]</cite> provides object-level masks for localized manipulation.
+Starting from an image containing a target object, we remove or replace the selected region to obtain its counterpart.
+Reversing the source and target order naturally produces complementary addition, removal, replacement, and attribute-modification pairs.
+We also incorporate reference imitation <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib43" title="" class="ltx_ref">Chen et al., 2024b</a>]</cite> to construct reference-conditioned supervision.</p>
+</div>
+<div id="S3.SS2.p3" class="ltx_para ltx_noindent">
+<p id="S3.SS2.p3.1" class="ltx_p"><span id="S3.SS2.p3.1.1" class="ltx_text ltx_font_bold">Mining Natural Visual Associations.</span>
+Purely synthesized pairs often make edited content appear pasted onto the input and fail to capture realistic combinations of transformations.
+To improve realism, we mine editing relations from naturally associated images.
+Explicit associations are predefined or actively retrieved, such as images of the same person, product, or object identified through visual embeddings and textual metadata.
+Implicit associations are discovered from co-occurring images on the same web page, temporally adjacent video frames, e-commerce collections, and social-media posts.
+Candidate pairs are retained only when identity consistency and semantic relevance are sufficiently high and a meaningful visual change is present.</p>
+</div>
+<div id="S3.SS2.p4" class="ltx_para ltx_noindent">
+<p id="S3.SS2.p4.1" class="ltx_p">We further recover latent relations from multi-panel layouts and composite images common in e-commerce and design data.
+After splitting a composite image into individual regions, a VLM identifies the relation between panels.
+This process recovers naturally paired examples such as product states before and after use, garments or cosmetics before and after application, product bundles and their components, and different states of the same object.
+Compared with task-specific synthesis, these pairs provide realistic and hybrid editing operations that better reflect practical application scenarios.</p>
+</div>
+<div id="S3.SS2.p5" class="ltx_para ltx_noindent">
+<p id="S3.SS2.p5.1" class="ltx_p"><span id="S3.SS2.p5.1.1" class="ltx_text ltx_font_bold">Expert Expansion and Quantitative Supervision.</span>
+For difficult or underrepresented tasks, we first curate a small amount of domain-specific data and fine-tune base models such as Qwen-Image-2512 <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib4" title="" class="ltx_ref">Wu et al., 2025</a>]</cite> or FLUX.2 <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib5" title="" class="ltx_ref">Black Forest Labs, 2025</a>]</cite> into task experts.
+These experts generate candidate pairs for virtual try-on <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib2" title="" class="ltx_ref">Chen et al., 2024a</a>]</cite>, beauty and makeup editing, product marketing image creation, reference-based editing, and other specialized tasks.
+Video experts such as Wan 2.2 <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib46" title="" class="ltx_ref">Wan et al., 2025</a>]</cite> are also used to generate controllable paired samples for challenging editing tasks <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib44" title="" class="ltx_ref">Xu et al., 2024</a>, <a href="#bib.bib45" title="" class="ltx_ref">Chen et al., 2024c</a>, <a href="#bib.bib42" title="" class="ltx_ref">Yao et al., 2025</a>, <a href="#bib.bib41" title="" class="ltx_ref">Zheng et al., 2026</a>, <a href="#bib.bib40" title="" class="ltx_ref">Song et al., 2026</a>, <a href="#bib.bib39" title="" class="ltx_ref">Sun et al., 2026</a>]</cite>.
+Candidate outputs are filtered according to instruction alignment, reference-identity preservation, and AIGC likelihood, converting limited high-quality supervision into a larger task-specific corpus.</p>
+</div>
+<div id="S3.SS2.p6" class="ltx_para ltx_noindent">
+<p id="S3.SS2.p6.1" class="ltx_p">We additionally construct pairs for quantitative transformations and visual-perception tasks.
+The former include controlled object displacement, camera and photographic parameter adjustment, local color modification, and changes to text attributes.
+For the latter, we form bidirectional pairs between RGB images and structural representations, including depth, edge, normal, and human-pose maps.
+These data provide supervision for spatially and numerically precise editing.</p>
+</div>
+</section>
+<section id="S3.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">3.3 </span>Knowledge-Grounded Data Engine for Entity and Structured Knowledge</h3>
+
+<div id="S3.SS3.p1" class="ltx_para ltx_noindent">
+<p id="S3.SS3.p1.1" class="ltx_p">To strengthen visual grounding and reasoning over knowledge-intensive entities, we curate knowledge-grounded visual data through two complementary pipelines, namely image-centric acquisition with fine-grained labeling and entity-centric retrieval guided by structured knowledge graphs.</p>
+</div>
+<div id="S3.SS3.p2" class="ltx_para ltx_noindent">
+<p id="S3.SS3.p2.1" class="ltx_p"><span id="S3.SS3.p2.1.1" class="ltx_text ltx_font_bold">Knowledge-Graph-Guided Entity Acquisition.</span>
+Starting from over 100 million Wikidata entities, we compute PageRank over the entity hyperlink graph to measure conceptual prominence and discard negligible-score candidates.
+A VLM further assesses whether each remaining entity constitutes a meaningful knowledge concept and estimates its public recognition level.
+This process yields approximately 3 million high-salience entity names.
+For each entity, we retrieve web images and apply VLM-based visual-referential alignment to retain accurate depictions.
+The same pipeline also captures structured knowledge representations, including theorem diagrams, mechanistic explanations, and scientific processes.
+These data establish associations between visual patterns, real-world entities, and structured knowledge, supporting knowledge-intensive generation and complex editing scenarios that require abstract or structured reasoning.</p>
+</div>
+<div id="S3.SS3.p3" class="ltx_para ltx_noindent">
+<p id="S3.SS3.p3.1" class="ltx_p"><span id="S3.SS3.p3.1.1" class="ltx_text ltx_font_bold">Image-Centric Entity Curation.</span>
+Based on established entity set, we collect images from diverse online sources and apply domain-aware filtering to retain clearly identifiable entities across five major categories, including celebrities, landmarks, plants, animals, and popular IPs.
+After stringent quality filtering, we obtain over 27 million high-quality image-entity pairs covering common knowledge concepts.</p>
+</div>
+</section>
+<section id="S3.SS4" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">3.4 </span>Caption as Bridge to Align Across Tasks and Learn Across Granularities</h3>
+
+<div id="S3.SS4.p1" class="ltx_para ltx_noindent">
+<p id="S3.SS4.p1.1" class="ltx_p">We regard T2I captions and editing instructions as shared supervision interfaces that connect tasks and organize visual concepts across levels of granularity.
+Across tasks, editing instructions inherit the visual vocabulary and descriptive structure of T2I captions, allowing concepts learned from T2I generation to transfer to reference-based editing.
+Across granularities, the same image is annotated from entity-level concepts and concise prompts to long-form and dense descriptions, associating coarse intent with fine-grained visual control.</p>
+</div>
+<div id="S3.SS4.p2" class="ltx_para ltx_noindent">
+<p id="S3.SS4.p2.1" class="ltx_p"><span id="S3.SS4.p2.1.1" class="ltx_text ltx_font_bold">Multi-Granularity T2I Recaptioning.</span>
+The original metadata obtained during data collection is inadequate for learning fine-grained correspondences between language and visual elements.
+Prior work has shown that descriptive synthetic captions substantially improve text-image alignment and prompt following <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib28" title="" class="ltx_ref">Betker et al., 2023</a>]</cite>.
+We therefore recaption each curated image, first producing a comprehensive annotation that covers all visually grounded content.
+Beyond the main subjects and their attributes, the annotation describes global composition, photographic and artistic style, illumination, color, fine-grained entities, spatial relations, relative subject scales, and visible OCR text when applicable.</p>
+</div>
+<div id="S3.SS4.p3" class="ltx_para ltx_noindent">
+<p id="S3.SS4.p3.1" class="ltx_p">Starting from the comprehensive annotation and the image itself, we construct captions with multiple granularities and expressions, including entity descriptions, unordered tags, short prompts, medium-length captions, long captions, and dense descriptions, as shown in Figure <a href="#S3.F4" title="Figure 4 ‣ 3.4 Caption as Bridge to Align Across Tasks and Learn Across Granularities ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>.
+We additionally construct both Chinese and English variants.
+Sampling across these caption styles exposes the model to heterogeneous prompting patterns and improves the diversity of text-image alignment.</p>
+</div>
+<figure id="S3.F4" class="ltx_figure"><img src="https://arxiv.org/html/2608.18076v2/caption.png" id="S3.F4.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:476/174;" width="476" height="174" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 4: </span>Multi-granularity T2I supervision. Starting from a comprehensive annotation of an image, we construct entity descriptions, tags, short prompts, and long-form captions at multiple levels of details.</figcaption>
+</figure>
+<div id="S3.SS4.p4" class="ltx_para ltx_noindent">
+<p id="S3.SS4.p4.1" class="ltx_p"><span id="S3.SS4.p4.1.1" class="ltx_text ltx_font_bold">T2I-Aligned Editing Instructions.</span>
+We train a VLM-based captioner to convert raw editing pairs into a unified supervision format.
+As illustrated in Figure <a href="#S3.F5" title="Figure 5 ‣ 3.4 Caption as Bridge to Align Across Tasks and Learn Across Granularities ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a>, we treat image editing as conditional T2I generation in which the target description inherits the vocabulary and descriptive style learned from T2I data, while the instruction additionally expresses image references, transformations, and preservation constraints.
+The captioner first generates a reconstruction-level dense description of the target image without observing any source image.
+It then jointly examines the source and target images through fine-grained comparison to identify their visual differences.
+Regions or entities in the target description that can be directly preserved from a source image are replaced with the corresponding <span id="S3.SS4.p4.1.2" class="ltx_text ltx_font_typewriter">[image N]</span> reference.
+Visual information already present in a source is therefore expressed by reference rather than repeated in text, while only attributes that differ between the source and target remain as explicit descriptions.
+Based on this aligned representation, we construct multiple instruction variants, including detailed editing instructions, concise commands, and simulated user requests, without changing the underlying visual transformation.</p>
+</div>
+<figure id="S3.F5" class="ltx_figure"><img src="https://arxiv.org/html/2608.18076v2/T2I_aligned_I2I.png" id="S3.F5.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:476/293;" width="476" height="293" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 5: </span>Pipeline for constructing T2I-aligned editing instructions. Dual-view perception produces a target-image caption and a raw editing instruction; task-specific actors align local or global changes with reusable T2I descriptions, followed by consistency verification and iterative revision.</figcaption>
+</figure>
+<div id="S3.SS4.p5" class="ltx_para ltx_noindent">
+<p id="S3.SS4.p5.1" class="ltx_p"><span id="S3.SS4.p5.1.1" class="ltx_text ltx_font_bold">Specialized Caption Experts.</span>
+To perform billion-scale annotation with consistent quality, we develop two VLM-based caption experts, namely a general captioner and a dense captioner, initialized from Qwen3.5-27B.
+We first apply prompt engineering to improve caption accuracy and granularity, incorporating comprehensive annotation-dimension design, self-reflection, and in-context learning.
+We then collect high-quality T2I captions and editing instructions generated by strong teacher models to establish detailed and fluent captioning behavior.
+The captioner is fine-tuned on a unified T2I and editing dataset covering diverse image and editing types; higher weights are assigned to difficult tokens, including spatial terms and OCR content.
+We further apply reinforcement learning with rewards for visual-content coverage, hallucination, and linguistic clarity.
+For text-rich images such as posters and product advertisements, long-form OCR accuracy is assessed jointly by VLM-based scoring and rule-based verification.
+An anti-hacking reward penalizes subjective judgments, unsupported interpretations, redundant statements, and other content that does not contribute to training supervision.</p>
+</div>
+<div id="S3.SS4.p6" class="ltx_para ltx_noindent">
+<p id="S3.SS4.p6.1" class="ltx_p">Dense captions specify layouts, OCR text, and visible elements, allowing DiT models to learn associations between textual conditions and structured visual content <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib29" title="" class="ltx_ref">Peng et al., 2025</a>]</cite>.
+For each image, the dense captioner first identifies its visual type and constructs a corresponding description outline.
+Photographic images are organized from the main subjects to scene, composition, lighting, color, and background, whereas structured or text-rich images are organized by layout regions, text blocks, and decorative elements.
+The captioner verifies object identities and counts, attributes, spatial relations, relative scales, OCR text, and peripheral content item by item, and expresses uncertain details at a safer level of specificity.
+The verified elements are then assembled from global structure to local details.
+To jointly improve accuracy and exhaustiveness, we train the dense captioner with a self-verification reasoning process followed by dense-caption generation.
+The training traces exploit natural disagreements among multiple teacher models to construct trajectories of initial assessment, uncertainty, and correction, thereby internalizing reflection without relying on an external verifier at inference time.
+After supervised fine-tuning, reinforcement learning with multi-dimensional rewards further optimizes factual accuracy, visual coverage, and structural organization.</p>
+</div>
+</section>
+</section>
+<section id="S4" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">4 </span>Capability-aligned Curriculum Scheduling</h2>
+
+<div id="S4.p1" class="ltx_para ltx_noindent">
+<p id="S4.p1.1" class="ltx_p">We construct a multi-stage data curriculum spanning foundational pre-training, continual training, and supervised fine-tuning.
+Rather than maintaining a fixed data mixture, the curriculum follows the dependency order of capability acquisition and evolves along four coupled axes, i.e., task composition, visual-concept distribution, data quality, and image resolution.
+The pipeline first establishes broad semantic coverage from large-scale T2I data, then introduces structurally complex, knowledge-grounded, text-rich, and image-editing supervision, and finally transitions toward balanced and refined subsets.</p>
+</div>
+<figure id="S4.F6" class="ltx_figure"><img src="https://arxiv.org/html/2608.18076v2/loop_framework.png" id="S4.F6.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:476/103;" width="476" height="103" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 6: </span>Capability-gap-driven active feedback loop. Capability-aware evaluation identifies failure cases, which seed neighboring-data retrieval and expert-driven construction. Gap-aware resampling then increases the weights of persistent failures and down-weights resolved gaps in subsequent training.</figcaption>
+</figure>
+<section id="S4.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.1 </span>Dependency-Aligned Multi-Stage Curriculum Strategy</h3>
+
+<div id="S4.SS1.p1" class="ltx_para ltx_noindent">
+<p id="S4.SS1.p1.1" class="ltx_p">All samples produced by the capability-specific data engines are maintained in a shared data reservoir and indexed using multi-dimension attributes.
+We use these attributes to determine the data clusters eligible at different stage and the corresponding sampling weight.</p>
+</div>
+<section id="S4.SS1.SSS0.Px1" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Stage 1: 256px T2I Pre-training.</h4>
+
+<div id="S4.SS1.SSS0.Px1.p1" class="ltx_para ltx_noindent">
+<p id="S4.SS1.SSS0.Px1.p1.1" class="ltx_p">The first stage uses large-scale 256px T2I data to maximize semantic coverage and preserve the authentic long-tail distribution of real-world visual content.
+We adopt an inclusive filtering strategy based primarily on image metadata and heuristic rules, avoiding aggressive aesthetic filtering that may remove visually imperfect but semantically useful samples such as old photographs.
+With accurate captions, a controlled subset of images containing visual imperfections is retained so that the model can explicitly learn the distribution of such defects and avoid them in subsequent generation.
+The corpus is organized into aspect-ratio buckets to prevent excessive cropping or deformation, and rare concepts receive moderately increased sampling weights.</p>
+</div>
+</section>
+<section id="S4.SS1.SSS0.Px2" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Stage 2: 256px/512px Complex T2I Pre-training.</h4>
+
+<div id="S4.SS1.SSS0.Px2.p1" class="ltx_para ltx_noindent">
+<p id="S4.SS1.SSS0.Px2.p1.1" class="ltx_p">Building on the broad T2I corpus from Stage 1, Stage 2 progressively extends the target resolution from 256px to 512px.
+We introduce content whose visual structure cannot be modeled effectively at 256px, particularly dense text-rendering images, layout-sensitive samples, and knowledge-grounded visual content.
+This stage couples increased resolution with increased content complexity to improve structural and detail fidelity.</p>
+</div>
+</section>
+<section id="S4.SS1.SSS0.Px3" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Stage 3: Joint 512px T2I&amp;Edit Pre-training.</h4>
+
+<div id="S4.SS1.SSS0.Px3.p1" class="ltx_para ltx_noindent">
+<p id="S4.SS1.SSS0.Px3.p1.1" class="ltx_p">After 512px T2I generation has stabilized, Stage 3 introduces both natural and synthetic editing pairs.
+Editing samples are balanced across instruction categories, while the T2I branch preserves broad semantic and stylistic coverage.
+The two sources are combined under a unified pre-training setting, allowing the model to reuse concepts acquired from T2I supervision while learning reference preservation and controlled transformation.</p>
+</div>
+</section>
+<section id="S4.SS1.SSS0.Px4" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Stage 4: 512px/1024px T2I&amp;Edit Continual Training.</h4>
+
+<div id="S4.SS1.SSS0.Px4.p1" class="ltx_para ltx_noindent">
+<p id="S4.SS1.SSS0.Px4.p1.1" class="ltx_p">During continual training (CT), the target resolution progressively increases from 512px to 1024px.
+To improve visual quality while preserving world knowledge, the data distribution shifts from broad but noisy pre-training data toward cleaner and more visually refined sources.
+We remove web-crawled sources with low quality bounds and increase sampling from high-fidelity sources and professional visual domains.
+A VLM assigns multi-level semantic categories to control the distribution shift through global resampling and proportional balancing.
+Editing data undergoes a second round of source filtering and is rebalanced across instruction categories to maintain stable coverage under multi-task training.</p>
+</div>
+</section>
+<section id="S4.SS1.SSS0.Px5" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Stage 5: 1024px T2I&amp;Edit Supervised Fine-Tuning.</h4>
+
+<div id="S4.SS1.SSS0.Px5.p1" class="ltx_para ltx_noindent">
+<p id="S4.SS1.SSS0.Px5.p1.1" class="ltx_p">The supervised fine-tuning (SFT) stage constructs a small-scale and highly curated dataset that guides the model toward a high-quality sub-manifold of the CT distribution with stronger visual fidelity and instruction alignment.
+We sample from rigorously defined top-tier sources and apply a two-step review pipeline consisting of VLM-based preliminary screening followed by human re-evaluation.
+Samples with visible defects or weak text-image alignment are removed, and global category balancing prevents overfitting to dominant domains and mitigates forgetting of long-tail concepts.</p>
+</div>
+</section>
+</section>
+<section id="S4.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.2 </span>Capability-Gap-Driven Active Feedback Loop</h3>
+
+<div id="S4.SS2.p1" class="ltx_para ltx_noindent">
+<p id="S4.SS2.p1.1" class="ltx_p">A fixed data distribution cannot continuously match the evolving capabilities of the model.
+We therefore treat data curation as an evaluation-driven optimization process in which evaluation results from preceding training stages identify underperforming task types and semantic concepts.
+As shown in Figure <a href="#S4.F6" title="Figure 6 ‣ 4 Capability-aligned Curriculum Scheduling ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a>, these capability gaps drive targeted data retrieval, expert construction, and gap-aware resampling for subsequent stages.</p>
+</div>
+<figure id="S4.F7" class="ltx_figure"><img src="https://arxiv.org/html/2608.18076v2/t2i_cases.png" id="S4.F7.g1" class="ltx_graphics ltx_centering ltx_img_portrait" style="aspect-ratio:476/615;" width="476" height="615" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 7: </span>Qualitative T2I results across illustration, graphic design, knowledge visualization, portraiture, landscapes, multi panel composition, and photographic style control.</figcaption>
+</figure>
+<div id="S4.SS2.p2" class="ltx_para ltx_noindent">
+<p id="S4.SS2.p2.1" class="ltx_p"><span id="S4.SS2.p2.1.1" class="ltx_text ltx_font_bold">Capability-Aware Failure Discovery</span>
+We assess each intermediate checkpoint with capability-stratified evaluation covering both T2I generation and image editing.
+Each failed sample below its capability-wise quality threshold <math id="S4.SS2.p2.m1" class="ltx_Math" alttext="T_{i}" display="inline" intent=":literal"><semantics><msub><mi>T</mi><mi>i</mi></msub><annotation encoding="application/x-tex">T_{i}</annotation></semantics></math> is annotated with its task type, hierarchical semantic tags, and failure dimensions.
+This process converts individual failure cases into measurable capability gaps and prioritizes recurring failure modes.</p>
+</div>
+<div id="S4.SS2.p3" class="ltx_para ltx_noindent">
+<p id="S4.SS2.p3.1" class="ltx_p"><span id="S4.SS2.p3.1.1" class="ltx_text ltx_font_bold">Distribution Update and Loop Closure</span>
+Recurring failure modes attributable to data are used as retrieval seeds to search for or construct neighboring samples with diverse prompt formulations.
+For T2I data, when suitable real data are insufficient, we invoke capability-specific construction pipelines or expert generation to synthesize candidates.
+For editing data, especially underrepresented instruction types, we retrieve appropriate reference images and either mine naturally associated pairs or construct expert-generated pairs.
+A subset of the newly added data undergoes VLM-based preliminary assessment followed by human review before entering the SFT pool.</p>
+</div>
+<div id="S4.SS2.p4" class="ltx_para ltx_noindent">
+<p id="S4.SS2.p4.1" class="ltx_p">Accepted supplementary samples are organized into task- and source-specific buckets, whose sampling weights are adjusted according to the capability gaps of the evolving model.
+Buckets associated with persistent failures receive higher weights, whereas resolved gaps are down-weighted; unresolved cases are returned to the data-mining queue.
+In this way, evaluation is converted from a terminal measurement into an active control signal for continuously improving the T2I and editing distributions.</p>
+</div>
+<figure id="S4.F8" class="ltx_figure"><img src="https://arxiv.org/html/2608.18076v2/single_img_edit.png" id="S4.F8.g1" class="ltx_graphics ltx_centering ltx_img_square" style="aspect-ratio:429/352;" width="429" height="352" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 8: </span>Qualitative comparison on challenging single image editing cases. The examples cover hybrid editing, reasoning based transformation, object segmentation, and style transfer.</figcaption>
+</figure>
+<figure id="S4.F9" class="ltx_figure"><img src="https://arxiv.org/html/2608.18076v2/negtive_aware_generation.png" id="S4.F9.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:476/176;" width="476" height="176" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 9: </span>Visualization of degradation-aware restoration for different degradation types.</figcaption>
+</figure>
+</section>
+</section>
+<section id="S5" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">5 </span>Experiments</h2>
+
+<section id="S5.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">5.1 </span>Text-to-Image Generation</h3>
+
+<div id="S5.SS1.p1" class="ltx_para ltx_noindent">
+<p id="S5.SS1.p1.1" class="ltx_p">We present qualitative T2I results across a broad range of visual styles and formats in Figure <a href="#S4.F7" title="Figure 7 ‣ 4.2 Capability-Gap-Driven Active Feedback Loop ‣ 4 Capability-aligned Curriculum Scheduling ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">7</span></a>.
+These results indicate that the model performs well in complex T2I generation, such as designed illustrations, multi-panel images, knowledge-structure visualization, and photographic style control.
+Our scalable T2I data engine contributes this by producing images rich in text and structured layouts, which providing supervision for posters, interfaces, diagrams, and multi panel composition.
+The capability aligned curriculum then introduces complex structure and higher resolution supervision after broad visual grounding, allowing diversity, compositional accuracy, and rendering quality to improve together.</p>
+</div>
+</section>
+<section id="S5.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">5.2 </span>Image Editing.</h3>
+
+<div id="S5.SS2.p1" class="ltx_para ltx_noindent">
+<p id="S5.SS2.p1.1" class="ltx_p"><span id="S5.SS2.p1.1.1" class="ltx_text ltx_font_bold">Quantitative Evaluation.</span> We evaluate image editing on CPI-General-Bench and CPI-Practical-Bench, two subsets of CPI-Bench <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib9" title="" class="ltx_ref">Zhou et al., 2026</a>]</cite>.
+CPI-Bench is a comprehensive, practical, and intelligent benchmark for image editing in real-world settings and comprises three complementary subsets.
+Specifically, CPI-General-Bench provides broad coverage of fundamental editing capabilities, including CPI-Practical-Bench focuses on frequently encountered real-world application scenarios, and CPI-Intelligent-Bench evaluates editing instructions that require advanced reasoning.
+CPI-General-Bench contains 2,039 examples spanning 30 fundamental tasks (20 single image and 10 multi image tasks).
+CPI-Practical-Bench contains 558 examples covering 51 common application types across the four domains of portrait enhancement, electronic commerce and advertising creativity, residential and interior design, and content creation.
+Using the proposed data pipeline and curriculum, we train MM-DiT models with 3B and 6B sizes, and evaluate on multiple tasks.
+The evaluation results on CPI-General-Bench and CPI-Practical-Bench are shown in Table <a href="#S5.T1" title="Table 1 ‣ 5.2 Image Editing. ‣ 5 Experiments ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>.
+Metrics are assessed via VLM across multiple distinct dimensions, as illustrated in <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib9" title="" class="ltx_ref">Zhou et al., 2026</a>]</cite>, with scores ranging from 1 to 5.</p>
+</div>
+<figure id="S5.T1" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 1: </span>Image editing quantitative evaluation on CPI-General-Bench and CPI-Practical-Bench. Overall denotes their arithmetic mean.</figcaption>
+<table id="S5.T1.2" class="ltx_tabular ltx_centering ltx_align_middle">
+<tr id="S5.T1.2.1" class="ltx_tr">
+<td id="S5.T1.2.1.1" class="ltx_td ltx_align_left ltx_border_tt" style="padding:2.5pt 20.0pt;">  <span id="S5.T1.2.1.1.1" class="ltx_text ltx_font_bold">Model</span></td>
+<td id="S5.T1.2.1.2" class="ltx_td ltx_align_center ltx_border_tt" style="padding:2.5pt 20.0pt;">  <span id="S5.T1.2.1.2.1" class="ltx_text ltx_font_bold">Parameters</span></td>
+<td id="S5.T1.2.1.3" class="ltx_td ltx_align_center ltx_border_tt" style="padding:2.5pt 20.0pt;">  <span id="S5.T1.2.1.3.1" class="ltx_text ltx_font_bold">CPI-General</span></td>
+<td id="S5.T1.2.1.4" class="ltx_td ltx_align_center ltx_border_tt" style="padding:2.5pt 20.0pt;">  <span id="S5.T1.2.1.4.1" class="ltx_text ltx_font_bold">CPI-Practical</span></td>
+<td id="S5.T1.2.1.5" class="ltx_td ltx_align_center ltx_border_tt" style="padding:2.5pt 20.0pt;">  <span id="S5.T1.2.1.5.1" class="ltx_text ltx_font_bold">Overall<math id="S5.T1.m1" class="ltx_Math" alttext="\uparrow" display="inline" intent=":literal"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math></span></td></tr>
+<tr id="S5.T1.2.2" class="ltx_tr">
+<td id="S5.T1.2.2.1" class="ltx_td ltx_align_left ltx_border_t" style="padding:2.5pt 20.0pt;">  Our Model-3B</td>
+<td id="S5.T1.2.2.2" class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 20.0pt;">  3B</td>
+<td id="S5.T1.2.2.3" class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 20.0pt;">  3.95</td>
+<td id="S5.T1.2.2.4" class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 20.0pt;">  3.91</td>
+<td id="S5.T1.2.2.5" class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 20.0pt;">  3.93</td></tr>
+<tr id="S5.T1.2.3" class="ltx_tr">
+<td id="S5.T1.2.3.1" class="ltx_td ltx_align_left ltx_border_bb" style="padding:2.5pt 20.0pt;">  Our Model-6B</td>
+<td id="S5.T1.2.3.2" class="ltx_td ltx_align_center ltx_border_bb" style="padding:2.5pt 20.0pt;">  6B</td>
+<td id="S5.T1.2.3.3" class="ltx_td ltx_align_center ltx_border_bb" style="padding:2.5pt 20.0pt;">  3.96</td>
+<td id="S5.T1.2.3.4" class="ltx_td ltx_align_center ltx_border_bb" style="padding:2.5pt 20.0pt;">  3.92</td>
+<td id="S5.T1.2.3.5" class="ltx_td ltx_align_center ltx_border_bb" style="padding:2.5pt 20.0pt;">  3.94</td></tr>
+</table>
+</figure>
+<div id="S5.SS2.p2" class="ltx_para ltx_noindent">
+<p id="S5.SS2.p2.1" class="ltx_p"><span id="S5.SS2.p2.1.1" class="ltx_text ltx_font_bold">Qualitative Evaluation.</span>
+We present challenging single-image editing cases in Figure <a href="#S4.F8" title="Figure 8 ‣ 4.2 Capability-Gap-Driven Active Feedback Loop ‣ 4 Capability-aligned Curriculum Scheduling ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">8</span></a> that span hybrid transformation, reasoning editing, etc.
+These cases require the model to infer the intended visual state and preserve content beyond direct appearance matching.
+Such capabilities benefit from abundant editing pairs mined from natural sources, where the transformation reflects relationships that occur in everyday settings.
+These naturally occurring relations provide realistic supervision to learn complex image transformations.</p>
+</div>
+<figure id="S5.F10" class="ltx_figure"><img src="https://arxiv.org/html/2608.18076v2/multi_img_edit.png" id="S5.F10.g1" class="ltx_graphics ltx_centering ltx_img_portrait" style="aspect-ratio:476/613;" width="476" height="613" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 10: </span>Qualitative comparison on multi image editing. The examples evaluate viewpoint alignment, reference relation understanding, and composition capabilities. Comparison cases are grouped by with/without explicit image index reference.</figcaption>
+</figure>
+<div id="S5.SS2.p3" class="ltx_para ltx_noindent">
+<p id="S5.SS2.p3.1" class="ltx_p">Figure <a href="#S4.F9" title="Figure 9 ‣ 4.2 Capability-Gap-Driven Active Feedback Loop ‣ 4 Capability-aligned Curriculum Scheduling ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">9</span></a> shows restoration from old photographs, low clarity, and motion blur.
+Learning this behavior requires retaining a small and controlled portion of degraded images together with explicit descriptions of their degradation states.
+This supervision enables the model to recognize defects in an input image, and also helps the model distinguish undesirable visual degradation from valid content, which supports higher generation quality.</p>
+</div>
+<div class="ltx_pagination ltx_role_newpage"></div>
+<div id="S5.SS2.p4" class="ltx_para ltx_noindent">
+<p id="S5.SS2.p4.1" class="ltx_p">Furthermore, we present complex cases involving viewpoint transfer, reference relation understanding, text rendering, and composition from multiple source images, as shown in Figure <a href="#S5.F10" title="Figure 10 ‣ 5.2 Image Editing. ‣ 5 Experiments ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">10</span></a>.
+The model identifies which visual attributes belong to each reference and binds them to the corresponding parts of the instruction.
+This requires image captions and editing instructions to maintain explicit correspondences between textual semantics and visual elements.
+Explicit cross-task alignment allows the model to combine subjects, attributes, layouts, and rendered text without confusing their sources.</p>
+</div>
+</section>
+</section>
+<section id="S6" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">6 </span>Conclusion</h2>
+
+<div id="S6.p1" class="ltx_para ltx_noindent">
+<p id="S6.p1.1" class="ltx_p">In this work, we present a capability-driven data infrastructure for generalist image generation and editing.
+Three specialized yet interoperable engines construct complementary supervision for visual-text grounding, inter-image transformation, and image-knowledge association, while a shared captioning interface enables concept transfer across tasks and granularities.
+A capability-aligned curriculum then jointly evolves task composition, visual-concept distribution, data quality, and image resolution, while evaluation-driven retrieval, expert construction, and resampling close the refinement loop.
+At scale, the infrastructure curates a 440M-image T2I corpus, 120M editing pairs, and over 27M image-entity pairs, enabling the training of a MM-DiT model from scratch.
+Qualitative results illustrate the breadth of generation and editing capabilities supported by the resulting models.
+Overall, our study establishes data organization as a complementary scaling axis and reframes data curation as an adaptive supervision system rather than a collection of isolated task-specific pipelines.</p>
+</div>
+</section>
+<section id="bib" class="ltx_bibliography">
+<h2 class="ltx_title ltx_title_bibliography">References</h2>
+
+<ul id="bib.L1" class="ltx_biblist">
+<li id="bib.bib13" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Bengio <span class="ltx_text ltx_bib_etal">et al.</span> (2009)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Y. Bengio, J. Louradour, R. Collobert, and J. Weston</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Curriculum learning</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the 26th Annual International Conference on Machine Learning</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages">pp. 41–48</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS3.p1.1" title="2.3 Curriculum Learning and Adaptive Data Scheduling ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.3</span></a>.
+</span></li>
+<li id="bib.bib28" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Betker <span class="ltx_text ltx_bib_etal">et al.</span> (2023)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">J. Betker, G. Goh, L. Jing, T. Brooks, J. Wang, L. Li, L. Ouyang, J. Zhuang, J. Lee, Y. Guo, <span class="ltx_text ltx_bib_etal">et al.</span></span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Improving image generation with better captions</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">Computer Science. https://cdn. openai. com/papers/dall-e-3. pdf</span> <span class="ltx_text ltx_bib_volume">2</span> (<span class="ltx_text ltx_bib_number">3</span>), <span class="ltx_text ltx_bib_pages">pp. 8</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S1.p2.1" title="1 Introduction ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="#S2.SS1.p1.1" title="2.1 Large-Scale Visual Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.1</span></a>,
+<a href="#S3.SS4.p2.1" title="3.4 Caption as Bridge to Align Across Tasks and Learn Across Granularities ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.4</span></a>.
+</span></li>
+<li id="bib.bib5" class="ltx_bibitem ltx_bib_misc"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Black Forest Labs (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Black Forest Labs</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">FLUX.2-klein: towards interactive visual intelligence</span>.
+</span>
+<span class="ltx_bibblock">Note: <span class="ltx_text ltx_bib_note">Accessed: 2026-03-18</span>
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a href="https://bfl.ai/blog/flux2-klein-towards-interactive-visual-intelligence" title="" class="ltx_ref ltx_bib_external">Link</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S3.SS2.p5.1" title="3.2 Image-Editing Data Engine for Relational Supervision ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+</span></li>
+<li id="bib.bib16" class="ltx_bibitem ltx_bib_misc"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Byeon <span class="ltx_text ltx_bib_etal">et al.</span> (2022)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">M. Byeon, B. Park, H. Kim, S. Lee, W. Baek, and S. Kim</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">COYO-700m: image-text pair dataset</span>.
+</span>
+<span class="ltx_bibblock">Note: <span class="ltx_text ltx_bib_note"><a href="https://github.com/kakaobrain/coyo-dataset" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://github.com/kakaobrain/coyo-dataset</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S1.p1.1" title="1 Introduction ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="#S2.SS1.p1.1" title="2.1 Large-Scale Visual Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.1</span></a>,
+<a href="#S3.SS1.p2.1" title="3.1 T2I Data Engine for Visual-Semantic Grounding ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.1</span></a>.
+</span></li>
+<li id="bib.bib7" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Cai <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">H. Cai, S. Cao, R. Du, P. Gao, S. Hoi, Z. Hou, S. Huang, D. Jiang, X. Jin, L. Li, <span class="ltx_text ltx_bib_etal">et al.</span></span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Z-image: an efficient image generation foundation model with single-stream diffusion transformer</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2511.22699</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S1.p2.1" title="1 Introduction ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="#S2.SS3.p1.1" title="2.3 Curriculum Learning and Adaptive Data Scheduling ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.3</span></a>,
+<a href="#S3.SS1.p3.1" title="3.1 T2I Data Engine for Visual-Semantic Grounding ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.1</span></a>.
+</span></li>
+<li id="bib.bib35" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Cao <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">M. Cao, X. Zhang, Y. Zheng, and Z. Xia</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Instruction-based image manipulation by watching how things move</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages">pp. 2704–2713</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS2.p1.1" title="2.2 Image-Editing Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.2</span></a>.
+</span></li>
+<li id="bib.bib31" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Carion <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">N. Carion, L. Gustafson, Y. Hu, S. Debnath, R. Hu, D. Suris, C. Ryali, K. V. Alwala, H. Khedr, A. Huang, <span class="ltx_text ltx_bib_etal">et al.</span></span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Sam 3: segment anything with concepts</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2511.16719</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S3.SS2.p2.1" title="3.2 Image-Editing Data Engine for Relational Supervision ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+</span></li>
+<li id="bib.bib24" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Chen <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">J. Chen, Z. Cai, P. Chen, S. Chen, K. Ji, X. Wang, Y. Yang, and B. Wang</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Sharegpt-4o-image: aligning multimodal models with gpt-4o-level image generation</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2506.18095</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS2.p1.1" title="2.2 Image-Editing Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.2</span></a>,
+<a href="#S3.SS2.p1.1" title="3.2 Image-Editing Data Engine for Relational Supervision ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+</span></li>
+<li id="bib.bib2" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Chen <span class="ltx_text ltx_bib_etal">et al.</span> (2024a)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">M. Chen, X. Chen, Z. Zhai, C. Ju, X. Hong, J. Lan, and S. Xiao</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Wear-any-way: manipulable virtual try-on via sparse correspondence alignment</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">European Conference on Computer Vision</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages">pp. 124–142</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S3.SS2.p5.1" title="3.2 Image-Editing Data Engine for Relational Supervision ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+</span></li>
+<li id="bib.bib43" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Chen <span class="ltx_text ltx_bib_etal">et al.</span> (2024b)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">X. Chen, Y. Feng, M. Chen, Y. Wang, S. Zhang, Y. Liu, Y. Shen, and H. Zhao</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Zero-shot image editing with reference imitation</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">Advances in Neural Information Processing Systems</span> <span class="ltx_text ltx_bib_volume">37</span>, <span class="ltx_text ltx_bib_pages">pp. 84010–84032</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S3.SS2.p2.1" title="3.2 Image-Editing Data Engine for Relational Supervision ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+</span></li>
+<li id="bib.bib45" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Chen <span class="ltx_text ltx_bib_etal">et al.</span> (2024c)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">X. Chen, Z. Liu, M. Chen, Y. Feng, Y. Liu, Y. Shen, and H. Zhao</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Livephoto: real image animation with text-guided motion control</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">European Conference on Computer Vision</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages">pp. 475–491</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S3.SS2.p5.1" title="3.2 Image-Editing Data Engine for Relational Supervision ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+</span></li>
+<li id="bib.bib34" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Chen <span class="ltx_text ltx_bib_etal">et al.</span> (2026)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Z. Chen, C. Deng, K. Li, H. Yuan, and H. Fan</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Scaling properties of text conditioning in visual generation</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2607.29679</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S1.p1.1" title="1 Introduction ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="#S2.SS1.p1.1" title="2.1 Large-Scale Visual Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+</span></li>
+<li id="bib.bib23" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Deng <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">C. Deng, D. Zhu, K. Li, C. Gou, F. Li, Z. Wang, S. Zhong, W. Yu, X. Nie, Z. Song, <span class="ltx_text ltx_bib_etal">et al.</span></span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Emerging properties in unified multimodal pretraining</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2505.14683</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S1.p2.1" title="1 Introduction ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="#S2.SS3.p1.1" title="2.3 Curriculum Learning and Adaptive Data Scheduling ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.3</span></a>.
+</span></li>
+<li id="bib.bib27" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Douze <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">M. Douze, A. Guzhva, C. Deng, J. Johnson, G. Szilvasy, P. Mazaré, M. Lomeli, L. Hosseini, and H. Jégou</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">The faiss library</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">IEEE Transactions on Big Data</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#A1.SS1.SSS0.Px4.p1.1" title="Deduplication. ‣ A.1 Filtering and Quality Control ‣ Appendix A Shared Data Wrangling ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§A.1</span></a>.
+</span></li>
+<li id="bib.bib18" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Fu <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">T. Fu, Y. Qian, C. Chen, W. Hu, Z. Gan, and Y. Yang</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">UniVG: a generalist diffusion model for unified image generation and editing</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages">pp. 17160–17170</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S1.p5.1" title="1 Introduction ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="#S2.SS2.p2.1" title="2.2 Image-Editing Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.2</span></a>,
+<a href="#S3.p1.1" title="3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3</span></a>.
+</span></li>
+<li id="bib.bib10" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Gadre <span class="ltx_text ltx_bib_etal">et al.</span> (2023)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">S. Y. Gadre, G. Ilharco, A. Fang, J. Hayase, G. Smyrnis, T. Nguyen, R. Marten, M. Wortsman, D. Ghosh, J. Zhang, <span class="ltx_text ltx_bib_etal">et al.</span></span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">DataComp: in search of the next generation of multimodal datasets</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Advances in Neural Information Processing Systems</span>,
+</span>
+<span class="ltx_bibblock">Vol. <span class="ltx_text ltx_bib_volume">36</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS1.p1.1" title="2.1 Large-Scale Visual Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+</span></li>
+<li id="bib.bib37" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Gong <span class="ltx_text ltx_bib_etal">et al.</span> (2024)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">B. Gong, S. Tan, Y. Feng, X. Xie, Y. Li, C. Chen, K. Zheng, Y. Shen, and D. Zhao</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">UKnow: a unified knowledge protocol with multimodal knowledge graph datasets for reasoning and vision-language pre-training</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Advances in Neural Information Processing Systems Datasets and Benchmarks Track</span>,
+</span>
+<span class="ltx_bibblock">Vol. <span class="ltx_text ltx_bib_volume">37</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS1.p1.1" title="2.1 Large-Scale Visual Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+</span></li>
+<li id="bib.bib30" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Hui <span class="ltx_text ltx_bib_etal">et al.</span> (2024)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">M. Hui, S. Yang, B. Zhao, Y. Shi, H. Wang, P. Wang, Y. Zhou, and C. Xie</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Hq-edit: a high-quality dataset for instruction-based image editing</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2404.09990</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S1.p2.1" title="1 Introduction ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="#S2.SS2.p1.1" title="2.2 Image-Editing Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.2</span></a>,
+<a href="#S3.SS2.p1.1" title="3.2 Image-Editing Data Engine for Relational Supervision ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+</span></li>
+<li id="bib.bib33" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Lai <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Z. Lai, V. Saveris, C. Chen, H. Chen, H. Zhang, B. Zhang, W. Hu, J. Tebar, Z. Gan, P. Grasch, M. Cao, and Y. Yang</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Revisit large-scale image-caption data in pre-training multimodal foundation models</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">International Conference on Learning Representations</span>,
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS1.p1.1" title="2.1 Large-Scale Visual Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+</span></li>
+<li id="bib.bib32" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Li <span class="ltx_text ltx_bib_etal">et al.</span> (2024a)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">H. Li, Y. Zou, Y. Wang, O. Majumder, Y. Xie, R. Manmatha, A. Swaminathan, Z. Tu, S. Ermon, and S. Soatto</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">On the scalability of diffusion-based text-to-image generation</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages">pp. 9400–9409</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S1.p1.1" title="1 Introduction ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="#S2.SS1.p1.1" title="2.1 Large-Scale Visual Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+</span></li>
+<li id="bib.bib11" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Li <span class="ltx_text ltx_bib_etal">et al.</span> (2024b)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">X. Li, H. Tu, M. Hui, Z. Wang, B. Zhao, J. Xiao, S. Ren, J. Mei, Q. Liu, H. Zheng, <span class="ltx_text ltx_bib_etal">et al.</span></span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">What if we recaption billions of web images with LLaMA-3?</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2406.08478</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS1.p1.1" title="2.1 Large-Scale Visual Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+</span></li>
+<li id="bib.bib25" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Mittal <span class="ltx_text ltx_bib_etal">et al.</span> (2012)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">A. Mittal, A. K. Moorthy, and A. C. Bovik</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">No-reference image quality assessment in the spatial domain</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">IEEE Transactions on image processing</span> <span class="ltx_text ltx_bib_volume">21</span> (<span class="ltx_text ltx_bib_number">12</span>), <span class="ltx_text ltx_bib_pages">pp. 4695–4708</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#A1.SS1.SSS0.Px2.p1.1" title="Technical Quality Filtering. ‣ A.1 Filtering and Quality Control ‣ Appendix A Shared Data Wrangling ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§A.1</span></a>.
+</span></li>
+<li id="bib.bib29" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Peng <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Y. Peng, S. Xiao, K. Wu, Q. Liao, B. Chen, K. Lin, D. Huang, J. Li, and Y. Yuan</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">BizGen: advancing article-level visual text rendering for infographics generation</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages">pp. 23615–23624</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S3.SS4.p6.1" title="3.4 Caption as Bridge to Align Across Tasks and Learn Across Granularities ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.4</span></a>.
+</span></li>
+<li id="bib.bib22" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Qian <span class="ltx_text ltx_bib_etal">et al.</span> (2026)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Y. Qian, E. Bocek-Rivele, L. Song, J. Tong, Y. Yang, J. Lu, W. Hu, and Z. Gan</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Pico-banana-400k: a large-scale dataset for text-guided image editing</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages">pp. 37226–37235</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S1.p2.1" title="1 Introduction ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="#S2.SS2.p1.1" title="2.2 Image-Editing Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.2</span></a>,
+<a href="#S3.SS2.p1.1" title="3.2 Image-Editing Data Engine for Relational Supervision ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+</span></li>
+<li id="bib.bib15" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Schuhmann <span class="ltx_text ltx_bib_etal">et al.</span> (2022)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">C. Schuhmann, R. Beaumont, R. Vencu, C. Gordon, R. Wightman, M. Cherti, T. Coombes, A. Katta, C. Mullis, M. Wortsman, <span class="ltx_text ltx_bib_etal">et al.</span></span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Laion-5b: an open large-scale dataset for training next generation image-text models</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">Advances in neural information processing systems</span> <span class="ltx_text ltx_bib_volume">35</span>, <span class="ltx_text ltx_bib_pages">pp. 25278–25294</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S1.p1.1" title="1 Introduction ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="#S2.SS1.p1.1" title="2.1 Large-Scale Visual Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.1</span></a>,
+<a href="#S3.SS1.p2.1" title="3.1 T2I Data Engine for Visual-Semantic Grounding ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.1</span></a>.
+</span></li>
+<li id="bib.bib3" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Seedream <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">T. Seedream, Y. Chen, Y. Gao, L. Gong, M. Guo, Q. Guo, Z. Guo, X. Hou, W. Huang, Y. Huang, <span class="ltx_text ltx_bib_etal">et al.</span></span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Seedream 4.0: toward next-generation multimodal image generation</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2509.20427</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S1.p1.1" title="1 Introduction ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="#S2.SS1.p1.1" title="2.1 Large-Scale Visual Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.1</span></a>,
+<a href="#S2.SS2.p2.1" title="2.2 Image-Editing Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.2</span></a>,
+<a href="#S3.SS1.p2.1" title="3.1 T2I Data Engine for Visual-Semantic Grounding ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.1</span></a>,
+<a href="#S3.p1.1" title="3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3</span></a>.
+</span></li>
+<li id="bib.bib26" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Siméoni <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">O. Siméoni, H. V. Vo, M. Seitzer, F. Baldassarre, M. Oquab, C. Jose, V. Khalidov, M. Szafraniec, S. Yi, M. Ramamonjisoa, <span class="ltx_text ltx_bib_etal">et al.</span></span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Dinov3</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2508.10104</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#A1.SS1.SSS0.Px4.p1.1" title="Deduplication. ‣ A.1 Filtering and Quality Control ‣ Appendix A Shared Data Wrangling ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§A.1</span></a>.
+</span></li>
+<li id="bib.bib40" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Song <span class="ltx_text ltx_bib_etal">et al.</span> (2026)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Q. Song, Y. Shen, M. Chen, H. Sun, J. Lan, X. Zhu, B. Zheng, and L. Cao</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">FashionChameleon: towards real-time and interactive human-garment video customization</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2605.15824</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S3.SS2.p5.1" title="3.2 Image-Editing Data Engine for Relational Supervision ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+</span></li>
+<li id="bib.bib39" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Sun <span class="ltx_text ltx_bib_etal">et al.</span> (2026)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">H. Sun, H. Yan, M. Chen, Q. Song, Y. Li, J. Cao, J. Lan, X. Zhu, B. Zheng, and S. Tang</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">TryOnCrafter: unleashing camera trajectories for realistic video virtual try-on via a renderable 4d try-on proxy</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2606.26092</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S3.SS2.p5.1" title="3.2 Image-Editing Data Engine for Relational Supervision ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+</span></li>
+<li id="bib.bib6" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Team <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">M. L. Team, H. Ma, H. Tan, J. Huang, J. Wu, J. He, L. Gao, S. Xiao, X. Wei, X. Ma, <span class="ltx_text ltx_bib_etal">et al.</span></span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Longcat-image technical report</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2512.07584</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S1.p2.1" title="1 Introduction ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="#S2.SS3.p1.1" title="2.3 Curriculum Learning and Adaptive Data Scheduling ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.3</span></a>,
+<a href="#S3.SS1.p3.1" title="3.1 T2I Data Engine for Visual-Semantic Grounding ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.1</span></a>.
+</span></li>
+<li id="bib.bib8" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Team <span class="ltx_text ltx_bib_etal">et al.</span> (2026)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">S. I. Team, C. Qiao, C. Hui, C. Li, C. Wang, D. Song, J. Zhang, J. Li, Q. Xiang, R. Wang, <span class="ltx_text ltx_bib_etal">et al.</span></span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Firered-image-edit-1.0 technical report</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2602.13344</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S1.p2.1" title="1 Introduction ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="#S2.SS3.p1.1" title="2.3 Curriculum Learning and Adaptive Data Scheduling ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.3</span></a>.
+</span></li>
+<li id="bib.bib21" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Tian <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">X. Tian, W. Li, B. Xu, Y. Yuan, Y. Wang, and H. Shen</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">MIGE: mutually enhanced multimodal instruction-based image generation and editing</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the 33rd ACM International Conference on Multimedia</span>,
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a href="https://dx.doi.org/10.1145/3746027.3755811" title="" class="ltx_ref doi ltx_bib_external">Document</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S1.p5.1" title="1 Introduction ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="#S2.SS2.p2.1" title="2.2 Image-Editing Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.2</span></a>.
+</span></li>
+<li id="bib.bib19" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Tuo <span class="ltx_text ltx_bib_etal">et al.</span> (2024)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Y. Tuo, W. Xiang, J. He, Y. Geng, and X. Xie</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">AnyText: multilingual visual text generation and editing</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">The Twelfth International Conference on Learning Representations</span>,
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S1.p4.1" title="1 Introduction ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+</span></li>
+<li id="bib.bib46" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Wan <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">T. Wan, T. Wan, A. Wang, B. Ai, B. Wen, C. Mao, C. Xie, D. Chen, F. Yu, H. Zhao, J. Yang, J. Zeng, J. Wang, J. Zhang, J. Zhou, J. Wang, and et al.</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Wan: open and advanced large-scale video generative models</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2503.20314</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S3.SS2.p5.1" title="3.2 Image-Editing Data Engine for Relational Supervision ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+</span></li>
+<li id="bib.bib36" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Wei <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">C. Wei, Z. Xiong, W. Ren, X. Du, G. Zhang, and W. Chen</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">OmniEdit: building image editing generalist models through specialist supervision</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">International Conference on Learning Representations</span>,
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS2.p1.1" title="2.2 Image-Editing Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.2</span></a>.
+</span></li>
+<li id="bib.bib4" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Wu <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">C. Wu, J. Li, J. Zhou, J. Lin, K. Gao, K. Yan, S. Yin, S. Bai, X. Xu, Y. Chen, <span class="ltx_text ltx_bib_etal">et al.</span></span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Qwen-image technical report</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2508.02324</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S1.p1.1" title="1 Introduction ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="#S2.SS1.p1.1" title="2.1 Large-Scale Visual Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.1</span></a>,
+<a href="#S2.SS3.p1.1" title="2.3 Curriculum Learning and Adaptive Data Scheduling ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.3</span></a>,
+<a href="#S3.SS2.p5.1" title="3.2 Image-Editing Data Engine for Relational Supervision ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+</span></li>
+<li id="bib.bib20" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Xia <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">B. Xia, Y. Zhang, J. Li, C. Wang, Y. Wang, X. Wu, B. Yu, and J. Jia</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">DreamOmni: unified image generation and editing</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages">pp. 28533–28543</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S1.p2.1" title="1 Introduction ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="#S2.SS2.p1.1" title="2.2 Image-Editing Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.2</span></a>,
+<a href="#S2.SS2.p2.1" title="2.2 Image-Editing Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.2</span></a>.
+</span></li>
+<li id="bib.bib1" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Xiao <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">S. Xiao, Y. Wang, J. Zhou, H. Yuan, X. Xing, R. Yan, C. Li, S. Wang, T. Huang, and Z. Liu</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">OmniGen: unified image generation</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages">pp. 13294–13304</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS2.p2.1" title="2.2 Image-Editing Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.2</span></a>.
+</span></li>
+<li id="bib.bib14" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Xie <span class="ltx_text ltx_bib_etal">et al.</span> (2023)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">S. M. Xie, H. Pham, X. Dong, N. Du, H. Liu, Y. Lu, P. Liang, Q. V. Le, T. Ma, and A. W. Yu</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">DoReMi: optimizing data mixtures speeds up language model pretraining</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Advances in Neural Information Processing Systems</span>,
+</span>
+<span class="ltx_bibblock">Vol. <span class="ltx_text ltx_bib_volume">36</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS3.p1.1" title="2.3 Curriculum Learning and Adaptive Data Scheduling ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.3</span></a>.
+</span></li>
+<li id="bib.bib44" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Xu <span class="ltx_text ltx_bib_etal">et al.</span> (2024)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Z. Xu, M. Chen, Z. Wang, L. Xing, Z. Zhai, N. Sang, J. Lan, S. Xiao, and C. Gao</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Tunnel try-on: excavating spatial-temporal tunnels for high-quality virtual try-on in videos</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the 32nd ACM International Conference on Multimedia</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages">pp. 3199–3208</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S3.SS2.p5.1" title="3.2 Image-Editing Data Engine for Relational Supervision ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+</span></li>
+<li id="bib.bib42" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Yao <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">M. Yao, M. Chen, Q. Zhou, Y. Zhang, M. Liu, X. Li, S. Liu, C. Ju, S. Xiao, Q. Liu, <span class="ltx_text ltx_bib_etal">et al.</span></span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Beyond static scenes: camera-controllable background generation for human motion</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2504.02004</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S3.SS2.p5.1" title="3.2 Image-Editing Data Engine for Relational Supervision ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+</span></li>
+<li id="bib.bib12" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Yu <span class="ltx_text ltx_bib_etal">et al.</span> (2025)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Q. Yu, W. Chow, Z. Yue, K. Pan, Y. Wu, X. Wan, J. Li, S. Tang, H. Zhang, and Y. Zhuang</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">AnyEdit: mastering unified high-quality image editing for any idea</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages">pp. 26125–26135</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS2.p1.1" title="2.2 Image-Editing Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.2</span></a>.
+</span></li>
+<li id="bib.bib38" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Zhao <span class="ltx_text ltx_bib_etal">et al.</span> (2026)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">B. Zhao, C. Wu, D. Li, H. Meng, J. Li, J. Zhang, J. Zhou, J. Lin, K. Gao, K. Cao, <span class="ltx_text ltx_bib_etal">et al.</span></span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Qwen-image-2.0 technical report</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2605.10730</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S2.SS1.p1.1" title="2.1 Large-Scale Visual Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.1</span></a>,
+<a href="#S2.SS3.p1.1" title="2.3 Curriculum Learning and Adaptive Data Scheduling ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.3</span></a>,
+<a href="#S3.SS1.p2.1" title="3.1 T2I Data Engine for Visual-Semantic Grounding ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.1</span></a>.
+</span></li>
+<li id="bib.bib41" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Zheng <span class="ltx_text ltx_bib_etal">et al.</span> (2026)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">J. Zheng, Z. Xu, M. Chen, J. Wang, J. Lan, X. Zhu, K. Zhang, B. Zheng, and X. Liang</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">ITryOn: mastering interactive video virtual try-on with spatial-semantic guidance</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2605.21431</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S3.SS2.p5.1" title="3.2 Image-Editing Data Engine for Relational Supervision ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+</span></li>
+<li id="bib.bib9" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Zhou <span class="ltx_text ltx_bib_etal">et al.</span> (2026)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Q. Zhou, J. Zheng, Y. Du, Y. Wang, Z. Chen, Z. Gao, T. Hu, C. Lin, Y. Shen, X. Wang, Z. Wang, Z. Wu, X. Xu, Z. Xu, H. Yan, D. Yang, Y. Yu, H. Zhang, M. Zhang, and M. Chen</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">CPI-bench: a comprehensive,practical and intelligent benchmark for real-world image editing</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">arXiv preprint arXiv:2608.14546</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S5.SS2.p1.1" title="5.2 Image Editing. ‣ 5 Experiments ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§5.2</span></a>.
+</span></li>
+<li id="bib.bib17" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Zhu <span class="ltx_text ltx_bib_etal">et al.</span> (2023)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">W. Zhu, J. Hessel, A. Awadalla, S. Y. Gadre, J. Dodge, A. Fang, Y. Yu, L. Schmidt, W. Y. Wang, and Y. Choi</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Multimodal c4: an open, billion-scale corpus of images interleaved with text</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">Advances in Neural Information Processing Systems</span> <span class="ltx_text ltx_bib_volume">36</span>, <span class="ltx_text ltx_bib_pages">pp. 8958–8974</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="#S1.p1.1" title="1 Introduction ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="#S2.SS1.p1.1" title="2.1 Large-Scale Visual Data Curation ‣ 2 Related Work ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.1</span></a>,
+<a href="#S3.SS1.p2.1" title="3.1 T2I Data Engine for Visual-Semantic Grounding ‣ 3 Capability-specific Data Pipeline ‣ From Corpora to Co-Evolving Capabilities:Capability-Centric Data Design for Generalist Image Generation" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.1</span></a>.
+</span></li>
+</ul>
+</section>
+<div class="ltx_pagination ltx_role_newpage"></div>
+<section id="Ax1" class="ltx_appendix">
+<h2 class="ltx_title ltx_title_appendix">Appendix</h2>
+
+<div id="Ax1.p1" class="ltx_para ltx_noindent"><span class="ltx_rule" style="width:345.0pt;height:0.4pt;--ltx-bg-color:black;display:inline-block;"> </span>
+</div>
+</section>
+<section id="A1" class="ltx_appendix">
+<h2 class="ltx_title ltx_title_appendix"><span class="ltx_tag ltx_tag_appendix">Appendix A </span>Shared Data Wrangling</h2>
+
+<div id="A1.p1" class="ltx_para ltx_noindent">
+<p id="A1.p1.1" class="ltx_p">Basic data-wrangling strategies are shared across the capability-specific data engines.
+The shared pipeline standardizes data validity and quality, extracts comparable semantic metadata, and provides the attributes required for stage-specific filtering and rebalancing in the curriculum scheduling.</p>
+</div>
+<section id="A1.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">A.1 </span>Filtering and Quality Control</h3>
+
+<section id="A1.SS1.SSS0.Px1" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Basic Rule Filtering.</h4>
+
+<div id="A1.SS1.SSS0.Px1.p1" class="ltx_para ltx_noindent">
+<p id="A1.SS1.SSS0.Px1.p1.1" class="ltx_p">We first convert all images to RGB format and profile each sample using basic metadata.
+Images that cannot be decoded because of file corruption are removed.
+We impose a strict resolution lower bound and discard images containing fewer than <math id="A1.SS1.SSS0.Px1.p1.m1" class="ltx_Math" alttext="256^{2}" display="inline" intent=":literal"><semantics><msup><mn>256</mn><mn>2</mn></msup><annotation encoding="application/x-tex">256^{2}</annotation></semantics></math> total pixels.
+Samples with extreme aspect ratios are filtered according to stage-specific requirements.</p>
+</div>
+</section>
+<section id="A1.SS1.SSS0.Px2" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Technical Quality Filtering.</h4>
+
+<div id="A1.SS1.SSS0.Px2.p1" class="ltx_para ltx_noindent">
+<p id="A1.SS1.SSS0.Px2.p1.1" class="ltx_p">We develop dedicated pipelines to detect blur and severe compression.
+Severe blur is detected by combining Laplacian variance with BRISQUE <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib25" title="" class="ltx_ref">Mittal et al., 2012</a>]</cite> scores, while file entropy and JPEG-quality estimation reject images with excessive compression and pronounced block artifacts.
+Pixel variance identifies solid-color or nearly blank images.
+For white-background images common in e-commerce and stock-media data, we combine RGB entropy with the proportion of black and white pixels for controlled downsampling, preserving their conceptual value while preventing them from dominating the pre-training distribution.</p>
+</div>
+</section>
+<section id="A1.SS1.SSS0.Px3" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Perceptual Quality Filtering.</h4>
+
+<div id="A1.SS1.SSS0.Px3.p1" class="ltx_para ltx_noindent">
+<p id="A1.SS1.SSS0.Px3.p1.1" class="ltx_p">We train clarity and aesthetic predictors to evaluate visual clarity and perceptual quality.
+The filtering thresholds vary across training stages so that early pre-training preserves semantic diversity while later stages progressively emphasize visual quality.</p>
+</div>
+</section>
+<section id="A1.SS1.SSS0.Px4" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Deduplication.</h4>
+
+<div id="A1.SS1.SSS0.Px4.p1" class="ltx_para ltx_noindent">
+<p id="A1.SS1.SSS0.Px4.p1.1" class="ltx_p">We employ a three-level deduplication pipeline spanning exact, near-duplicate, and semantic matching.
+MD5 and file hashes first remove identical samples at low computational cost.
+pHash then detects near-duplicate images produced by minor cropping, watermarking, or resizing.
+Finally, DINOv3 <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib26" title="" class="ltx_ref">Siméoni et al., 2025</a>]</cite> extracts image-level embeddings for high-dimensional clustering with FAISS <cite class="ltx_cite ltx_citemacro_citep">[<a href="#bib.bib27" title="" class="ltx_ref">Douze et al., 2025</a>]</cite>.
+For samples whose intra-cluster cosine similarity exceeds <math id="A1.SS1.SSS0.Px4.p1.m1" class="ltx_Math" alttext="0.99" display="inline" intent=":literal"><semantics><mn>0.99</mn><annotation encoding="application/x-tex">0.99</annotation></semantics></math>, we retain the highest-quality image as determined jointly by resolution and sharpness.</p>
+</div>
+</section>
+<section id="A1.SS1.SSS0.Px5" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Watermark and Text Detection.</h4>
+
+<div id="A1.SS1.SSS0.Px5.p1" class="ltx_para ltx_noindent">
+<p id="A1.SS1.SSS0.Px5.p1.1" class="ltx_p">Specialized detectors identify watermarks, logos, subtitles, and overlaid text.
+Images dominated by watermarks and text-rich images are marked separately for subsequent filtering and captioning rather than treated as a single category.</p>
+</div>
+</section>
+<section id="A1.SS1.SSS0.Px6" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">AIGC Detection and Content Safety.</h4>
+
+<div id="A1.SS1.SSS0.Px6.p1" class="ltx_para ltx_noindent">
+<p id="A1.SS1.SSS0.Px6.p1.1" class="ltx_p">AI-generated images may contain latent artifacts that limit the upper bound of generation quality.
+We train an AIGC classifier to identify synthetic images in naturally sourced corpora and remove high-confidence AIGC samples from the pre-training pool.
+An NSFW detector and metadata-based unsafe-keyword filtering are additionally applied for content safety.</p>
+</div>
+</section>
+</section>
+<section id="A1.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">A.2 </span>Hierarchical Metadata Extraction and Rebalancing</h3>
+
+<div id="A1.SS2.p1" class="ltx_para ltx_noindent">
+<p id="A1.SS2.p1.1" class="ltx_p">After filtering, the remaining web-scale pool still exhibits a long-tailed semantic distribution dominated by frequent concepts.
+We therefore extract hierarchical semantic metadata and rebalance the data with schedules tailored to different training stages.</p>
+</div>
+<section id="A1.SS2.SSS0.Px1" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Taxonomy Construction.</h4>
+
+<div id="A1.SS2.SSS0.Px1.p1" class="ltx_para ltx_noindent">
+<p id="A1.SS2.SSS0.Px1.p1.1" class="ltx_p">We adopt the leaf nodes of an established visual classification hierarchy as over 280K fine-grained semantic tags.
+These tags are organized into a four-level taxonomy whose three upper levels contain 15, 74, and 331 categories, respectively.
+Each fine-grained tag is mapped to a leaf node, enabling both coarse- and fine-grained distribution control.</p>
+</div>
+</section>
+<section id="A1.SS2.SSS0.Px2" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Tag Assignment.</h4>
+
+<div id="A1.SS2.SSS0.Px2.p1" class="ltx_para ltx_noindent">
+<p id="A1.SS2.SSS0.Px2.p1.1" class="ltx_p">For each image, we compare its caption embedding with tag embeddings by cosine similarity to retrieve the top-1000 candidate tags.
+An adaptive filter combines semantic similarity with hierarchical relations to retain up to 15 representative and semantically diverse tags per image, providing compact metadata across multiple conceptual dimensions.</p>
+</div>
+</section>
+<section id="A1.SS2.SSS0.Px3" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Data Rebalancing.</h4>
+
+<div id="A1.SS2.SSS0.Px3.p1" class="ltx_para ltx_noindent">
+<p id="A1.SS2.SSS0.Px3.p1.1" class="ltx_p">We perform hierarchical resampling according to two principles.
+First, all semantic tags are represented in the final corpus, with additional attention to rare and long-tail concepts.
+Second, sample counts are approximately balanced across first-level categories and recursively among child categories under the same parent down to the third level.
+This hierarchical strategy reduces the dominance of frequent concepts while preserving semantic diversity at multiple granularities.</p>
+</div>
+</section>
+</section>
+</section>
+</article>
+    </div>
+  </section>
+  <section class="pane pane-zh">
+    <div class="pane-head">中文精读翻译</div>
+    <div class="pane-body" id="zhBody"><div class="md" id="mdRoot"></div></div>
+  </section>
+</main>
+<script type="text/markdown" id="zhSrc"># 中文精读翻译：从语料库到共演化能力
+
+> **论文标题（英文）**：From Corpora to Co-Evolving Capabilities: Capability-Centric Data Design for Generalist Image Generation
+>
+> **论文标题（中文）**：从语料库到共演化能力：面向通才图像生成的能力中心数据设计
+>
+> **作者**：Xingjian Wang\*、Zhao Wang\*、Taihang Hu\*、Jun Zheng\*、Zhengrui Chen\*、Qinye Zhou\*、Zhengtao Wu\*、Yongchao Du、Zuan Gao、Chao Lin、Yefeng Shen、Yuan Wang、Xiaoli Xu、Zhengze Xu、Hao Yan、Denghui Yang、Yuhang Yu、Huayu Zhang、Mingzhou Zhang、Mengting Chen†（\*共同贡献，†通讯作者）
+>
+> **机构**：阿里巴巴集团（Alibaba Group）
+>
+> **arXiv 链接**：<https://arxiv.org/abs/2608.18076>（2026年9月16日）
+>
+> **一句话核心总结**：本文将图像生成数据的组织单元从"任务专用语料库"提升为"生成能力"，提出由三个可互操作的专用数据引擎（T2I 440M 图像、图像编辑 120M 配对、知识接地 2700万+ 图-实体对）与 caption 专家、以及能力对齐的五阶段课程调度（256px T2I 预训练 → 1024px SFT）和能力缺口驱动的主动反馈闭环组成的能力驱动数据基础设施（capability-driven data infrastructure），并据此从零训练出 3B/6B 两种规模的 MM-DiT 通才图像生成与编辑模型。
+
+---
+
+## 摘要
+
+大规模图像生成已经从数据规模、数据质量、数据重平衡（rebalancing）与重标注（recaptioning）的进步中获益，但传统数据管线通常是在彼此孤立的状态下优化任务专用数据集。一个核心挑战不仅在于如何策划（curate）每个任务专用的语料库，还在于如何依据各项生成能力之间的依赖关系来组织异构监督（heterogeneous supervision）。
+
+本文提出一种**能力驱动的数据基础设施（capability-driven data infrastructure）**，将**能力专用的监督构造（capability-specific supervision construction）**与**能力对齐的课程调度（capability-aligned curriculum scheduling）**耦合在一起。其三个专用但可互操作的数据引擎，分别为文本-图像接地（text-image grounding）、图像间变换（inter-image transformation）与图像-知识关联（image-knowledge association）构建互补的关系监督；同时 caption 专家在跨任务、跨粒度层面对齐 T2I 监督与编辑监督。一个多阶段课程沿能力获得的依赖顺序，联合演化任务组成、视觉概念分布、数据质量与图像分辨率这四个轴；能力感知评估（capability-aware evaluation）则通过定向检索、专家构造与缺口感知重采样（gap-aware resampling）闭合整个回路。
+
+在规模化层面，该框架策划出 440M（4.4 亿）图像的 T2I 语料库、120M（1.2 亿）编辑配对，以及超过 2700 万的图-实体对。基于这一基础设施，作者从零训练了两种规模的多模态扩散模型（3B 与 6B）。他们在 CPI-Bench 上进行定量评估，并在多样的文生图与图像编辑场景下开展定性评估。实验结果展示了广泛的视觉覆盖、多样的渲染能力，以及在各项生成能力之间的有效迁移。
+
+---
+
+## 1 引言
+
+### 1.1 从"更好的语料库"到"数据应如何组织"
+
+图像生成的最新进展——横跨文生图（text-to-image, T2I）合成与图生图（image-to-image, I2I）变换——伴随着数据构造的平行演化。扩散模型的进展得到日益庞大的数据集支撑，如 LAION-5B、COYO-700M 与 MMC4 (Schuhmann et al., 2022; Byeon et al., 2022; Zhu et al., 2023)。此外，一些研究表明数据质量、语义多样性与 caption 密度会实质性地影响对齐效果与学习效率 (Li et al., 2024a; Chen et al., 2026)。因此，Qwen-Image (Wu et al., 2025)、Seedream (Seedream et al., 2025) 等现代数据管线在扩展数据覆盖、过滤、语义平衡与重标注上投入巨大。这些进展回答了"如何整体构造一个更好的语料库"，但留下另一个问题未被充分探索——**数据应当如何组织，才能发展出一组相互依赖的生成能力？**
+
+### 1.2 能力按依赖顺序演化，数据组织必须与之对齐
+
+这个问题对通才图像生成器（generalist image generator）而言居于核心地位。不同的生成能力并不会从零同时涌现 (Deng et al., 2025)，而是按清晰的依赖顺序发展，且这一顺序与模型课程学习的阶段紧密对齐。例如：
+
+- T2I 数据的语义对齐为结构化生成与图像编辑提供了可复用的概念 (Xia et al., 2025)；
+- 粗粒度或简单内容为在更高分辨率、更复杂结构下学习提供了基础 (Cai et al., 2025; Team et al., 2025; Team et al., 2026)。
+
+因此，一个训练样本的效用不仅取决于其质量，还取决于它所瞄准的能力，以及它与其他样本之间的内在关系。许多传统数据管线把数据集当作任务专用的设计单元——例如 T2I 用"图像-caption 对"、编辑用"源-目标对"——并在很大程度上孤立地优化它们 (Betker et al., 2023; Hui et al., 2024; Qian et al., 2026)，这会限制跨任务的监督共享。
+
+### 1.3 本文方案：能力驱动的基础设施
+
+为解决该问题，本文将数据策划视为一种**能力驱动的基础设施**，在异构任务间提供互补监督，并共同构建可迁移的生成能力。该框架协调两个互补组件：**能力专用数据管线（capability-specific data pipeline）**与**能力对齐课程调度策略（capability-aligned curriculum scheduling strategy）**。如图 1 所示，作者设计了面向能力拆分的专用数据引擎，以及带主动精炼回流的分阶段数据分层。二者共同构成统一的数据基础设施：专用引擎为单项能力及其相互依赖量身定制监督，而训练课程随模型能力演化动态组合其输出。
+
+**（1）能力专用数据管线。** 其包含三个面向 T2I 生成、图像编辑与知识接地生成（knowledge-grounded generation）的可互操作引擎，共同实例化互补形式的关系型视觉监督以发展多维度能力：
+
+- **T2I 数据引擎**通过扩展概念覆盖、重平衡长尾分布、在多个粒度层级对齐图像与 caption，来构建文本-图像接地；
+- **图像编辑数据引擎**通过一套针对不同编辑操作类型量身定制的专用编辑管线构造监督，同时引入从自然关联图像中挖掘的真实关联，以及面向稀疏覆盖任务的专家生成样本；
+- **知识接地数据引擎**通过知识图谱引导的获取，将视觉模式与命名实体及结构化知识关联起来。
+
+这种面向能力的数据组织使特定能力可以被独立测量与优化，促进跨任务迁移。此外，每种数据类型覆盖一个不同的视觉概念子集，从而**不需要**每个任务专用数据集都穷尽覆盖所有概念。例如，从合成 T2I 监督中获得的文本渲染能力可以迁移到图像编辑，减少在任务专用编辑数据中重复覆盖相同概念的必要性 (Tuo et al., 2024)。
+
+**（2）专业化不等于孤立。** 共享的数据整理（data-wrangling）基础设施与标注约定使各引擎输出可互操作，允许某条路径引入的视觉概念被另一条路径复用 (Fu et al., 2025; Tian et al., 2025)。特别地，作者让编辑指令与 T2I caption 在视觉词汇与描述结构上对齐；并开发稠密 caption（dense caption）作为精确监督，以加速文本丰富或结构复杂图像上的训练收敛。T2I 数据已覆盖的概念因此可以迁移到编辑监督中，获得更好的训练收敛。
+
+**（3）能力对齐课程调度。** 作者设计了遵循能力获得依赖顺序的**五阶段课程**。数据沿四个耦合轴演化——**任务组成、视觉概念分布、数据质量与图像分辨率**——与模型的学习轨迹共同对齐。训练先以大规模 T2I 数据建立广泛的视觉-语义对齐与基础生成能力，随后引入结构复杂、知识接地与文本丰富的样本，发展结构构图、知识接地与文本渲染能力。一旦稳定的 T2I 先验形成，编辑数据便加入参考保持（reference preservation）与受控变换（controlled transformation）能力，同时复用已从 T2I 监督中习得的视觉概念。持续训练（Continual Training, CT）与监督微调（Supervised Fine-Tuning, SFT）随后将数据混合转向更小、更平衡、视觉上更精炼的子集，并把图像分辨率按内容复杂度扩展，使额外的算力配得上更丰富的监督。值得注意的是，调度并非一次性规定后固定不变：能力感知评估将观察到的失败映射到对应引擎中的定向检索、专家构造与重采样，精炼后的数据依据模型当前的能力画像进入后续混合。
+
+通过将专用监督构造与依赖感知的课程调度耦合，该框架促进了任务间与训练阶段间的迁移，把原本孤立的数据集转变为面向通才图像生成的自适应数据基础设施。
+
+### 1.4 三大贡献
+
+1. **能力专用数据管线**：按目标能力拆分数据构造，同时通过共享数据预处理与 caption 专家保持迁移性。三个专用引擎从十亿级候选池中扩展长尾与缺陷感知的 T2I 覆盖、为真实编辑监督挖掘自然视觉关联、并将生成接地到结构化知识。规模化产出：440M 图像的 T2I 语料、超过 120M 的高质量图像编辑对、约 2700 万的图-实体对。
+2. **能力对齐课程调度策略**：遵循能力获得的依赖顺序，而非维持固定数据混合。多阶段调度从 256px T2I 预训练到 1024px 监督微调，联合演化任务组成、视觉概念分布、数据质量与分辨率；能力感知评估将残余缺口反馈到定向检索、专家构造与自适应重采样。
+3. **桥接任务与粒度的 caption 框架**：面向十亿级标注设计，基于 VLM 的 captioner 将编辑指令与 T2I caption 的词汇和描述结构对齐，提供从实体标签到长描述的多风格监督，并为结构化与文本丰富图像生成经校验的稠密 caption。这一共享语言接口在从粗语义到细粒度视觉结构的范围内，既促进了生成与编辑间的概念迁移，又提供了精确监督。
+
+> **图 1（数据管线总览）**：框架中的能力专用数据构造。共享的采集与整理流程接入三个专用但可互操作的引擎，分别服务于视觉表达、编辑关联与知识接地推理。
+
+---
+
+## 2 相关工作
+
+### 2.1 大规模视觉数据策划
+
+网络规模的图文语料库（LAION-5B、COYO-700M、MMC4）为大规模视觉表征学习与图像生成提供了数据基础 (Schuhmann et al., 2022; Byeon et al., 2022; Zhu et al., 2023)。后续工作将数据设计确立为核心扩展维度而非模型训练的副产品：DataComp 系统研究了在固定候选池上的过滤与选择 (Gadre et al., 2023)；受控缩放分析表明数据质量、语义多样性与文本条件密度会实质影响对齐与样本效率 (Li et al., 2024a; Lai et al., 2025; Chen et al., 2026)。另一条路线以合成描述替换嘈杂的网络 alt-text 来改进监督：DALL-E 3 证明高描述性 caption 显著改善提示遵循（prompt following）(Betker et al., 2023)；Recap-DataComp-1B 将基于 VLM 的重标注扩展到超过十亿张网络图像 (Li et al., 2024b)。Qwen-Image、Seedream 等近期系统进一步将大规模采集、过滤、重标注、语义平衡与定向构造整合为端到端数据管线 (Wu et al., 2025; Seedream et al., 2025; Zhao et al., 2026)；知识感知的多模态数据集则额外将视觉观测与命名实体及结构化事实关联，以支持接地与推理 (Gong et al., 2024)。
+
+这些工作显著提升了视觉语料的质量与覆盖。**本文进一步将数据设计的单元从"语料库"转移到"能力"**：将 T2I、图像编辑与知识接地监督拆分为专用但可互操作的引擎，同时以共享的语义元数据与标注接口让一条路径习得的概念支撑另一条路径。这一表述使能力专用的覆盖缺口显式化，而不要求每个任务专用数据集复现完整的视觉概念分布。
+
+### 2.2 图像编辑数据策划
+
+基于指令的图像编辑通常从"源图像 + 编辑指令 + 目标图像"三元组中学习。由于自然配对的三元组稀缺，现有数据集主要靠合成变换、模型生成目标与自动质量过滤来扩展监督 (Hui et al., 2024; Chen et al., 2025; Qian et al., 2026)。AnyEdit 以细粒度编辑分类法与任务自适应构造管线扩展了该范式 (Yu et al., 2025)；OmniEdit 从任务专家蒸馏监督以覆盖多样编辑操作 (Wei et al., 2025)；DreamOmni 为统一的生成与编辑进行操作专用合成，构造精确编辑对 (Xia et al., 2025)。这些方法大幅提升了编辑数据的规模与多样性，但其监督仍以合成管线内的变换为主——可能简化真实世界的关系，或继承生成器的伪影。互补研究则从自然发生的观测中派生操作线索，例如从视频的时间变化中学习图像变换 (Cao et al., 2025)。
+
+与此同时，通才模型日益在共享架构与训练目标下统一 T2I 生成与指令编辑 (Xiao et al., 2025; Xia et al., 2025; Fu et al., 2025; Tian et al., 2025; Seedream et al., 2025)，因而需要跨任务的高效监督。**本文将操作专用构造、从自然关联图像中挖掘的编辑关系、以及面向稀疏覆盖任务的专家生成样本相结合**；同时让编辑指令继承 T2I caption 的视觉词汇与描述结构，使编辑语料专注于参考保持与变换本身，而不是重复 T2I 监督已经建立的视觉概念。
+
+### 2.3 课程学习与自适应数据调度
+
+课程学习（curriculum learning）按有意义的顺序组织训练样本，使简单概念为复杂概念的学习奠定基础 (Bengio et al., 2009)。在样本排序之外，数据混合优化研究训练分布应如何跨领域组合，例如 DoReMi 用代理模型与分布式鲁棒优化估计大规模预训练的领域权重 (Xie et al., 2023)。现代图像生成系统也采用渐进变化分辨率、数据质量、任务组成或内容复杂度的多阶段配方 (Wu et al., 2025; Team et al., 2025; Cai et al., 2025; Team et al., 2026; Zhao et al., 2026)。统一多模态预训练的研究进一步表明，不同的生成与理解能力在训练的不同时点涌现，而非同时出现 (Deng et al., 2025)。
+
+在已有课程设计的基础上，**本文的调度沿能力获得顺序联合演化任务组成、概念分布、数据质量与分辨率**，并由能力感知评估为后续阶段指导定向数据构造与重采样。
+
+> **图 2（T2I 语料分布）**：策划后 T2I 语料库的分布。内环区分采集数据与构造数据，外环报告保留用于训练的视觉领域构成。
+
+---
+
+## 3 能力专用数据管线
+
+受到"从异构任务学到的能力可以跨任务迁移"这一观察的启发 (Seedream et al., 2025; Fu et al., 2025)，作者将数据构造划分为面向 T2I 生成、图像编辑与知识接地生成的三个专用但可互操作的引擎。每个引擎采用针对其目标能力定制的构造与标注机制，而共享的处理与监督接口保持跨任务的概念迁移。这一组织使能力专用的不足可以被独立测量与独立改进，而不要求每个任务专用数据集穷尽覆盖同样的视觉概念。值得注意，各引擎共享同一套数据整理（data wrangling）流程，详见附录 A（见本文末"附录 A 摘要"）。
+
+### 3.1 T2I 数据引擎：面向视觉-语义接地
+
+作者开发了可扩展的 T2I 数据引擎，将十亿级图像池转化为 4.4 亿张图像的高质量、分布平衡的训练语料。该引擎联合优化数据质量、语义多样性、文本-图像对齐与长尾概念覆盖。
+
+**扩展 T2I 语料（Scaling the T2I Corpus）。** 从异构来源策划数十亿带噪图文对，包括公开数据集 (Schuhmann et al., 2022; Byeon et al., 2022; Zhu et al., 2023)、图像丰富的网站、网页搜索引擎与电商平台。所有样本经过附录 A 所述的共享数据整理管线处理。美学质量、视觉清晰度与 AIGC 检测（AI-generated content detection）是 T2I 数据的重要过滤维度 (Seedream et al., 2025; Zhao et al., 2026)。每张保留的图像都关联语义标签、质量属性与来源信息，使后续训练阶段能构造"感知来源"与"感知分布"的数据混合。
+
+**面向能力的覆盖扩展（Capability-Oriented Coverage Expansion）。** T2I 预训练不仅决定基础生成质量，还决定下游能力可用的视觉概念与世界知识 (Cai et al., 2025; Team et al., 2025)。因此作者沿两个互补维度扩展 T2I 覆盖：
+
+1. **实体级概念覆盖**：开发主动获取管线，检索真实用户创作与专业设计的图像，以及来自长尾视觉领域的定向样本，而非只依赖网络级语料的自然分布。此外构建了文本丰富图像、网页、平面设计、海报、社交媒体图形与商业产品图像的专用集合。这些集合在 T2I 预训练阶段为稀有实体与结构化视觉内容建立视觉-语义对应，之后可被下游任务激活。
+2. **期望与不期望视觉模式的双重覆盖**：避免过于激进的美学过滤，保留受控比例的不完美图像，并在 caption 中显式描述其缺陷。这一处理把原本会被丢弃的伪影转化为可识别的视觉概念，使模型能够识别并避免复现它们。
+
+图 2 总结了最终的 T2I 分布。
+
+### 3.2 图像编辑数据引擎：面向关系监督
+
+高质量的图像编辑对远比未配对图像稀缺。现有研究主要通过合成生成的变换扩展编辑监督 (Hui et al., 2024; Qian et al., 2026; Chen et al., 2025)，这可能过度简化真实世界的变化并继承生成管线的伪影。本文构造了一组互补管线的混合，从"主动构造的操作"与"自然关联的图像"两个来源恢复编辑关联。所有收集的配对经共享数据整理管线处理、按操作类型与图像标签重平衡，并由 3.4 节所述的编辑指令 captioner 标注。该引擎总计构造了 1.2 亿（120M）编辑对，覆盖单图与多图编辑任务（图 3）。
+
+> **图 3（编辑语料构成）**：左侧桑基图展示单图与多图编辑任务的相对混合，右侧面板展示代表性任务族。
+
+**操作专用配对构造（Operation-Specific Pair Construction）。** 通过"逆转高质量图像中可观察的变化"来构造基础编辑对：VLM 先分解场景并选择可编辑主体，SAM3 (Carion et al., 2025) 提供对象级掩码用于局部操作。从包含目标对象的图像出发，移除或替换选定区域即得到其对应物；再逆转源与目标的顺序，自然产生互补的添加、移除、替换与属性修改配对。作者还引入参考模仿（reference imitation）(Chen et al., 2024b) 构造参考条件监督。
+
+**挖掘自然视觉关联（Mining Natural Visual Associations）。** 纯合成配对常使编辑内容看起来像"贴"在输入图上，且无法捕捉现实中组合式的变换。为提升真实性，作者从自然关联图像中挖掘编辑关系：
+
+- **显式关联**：预定义或主动检索，例如通过视觉嵌入与文本元数据识别的同一人物、同一产品或同一对象的图像；
+- **隐式关联**：从同一网页的共现图像、时间相邻的视频帧、电商商品集合与社交媒体帖子中发现。
+
+候选配对只有在身份一致性与语义相关性足够高、且存在有意义的视觉变化时才被保留。
+
+作者还进一步从电商与设计数据中常见的多面板布局（multi-panel layout）与复合图像中恢复潜在关系：将复合图像切分为独立区域后，由 VLM 识别面板之间的关系。该过程恢复了诸如"产品使用前后的状态""服装或化妆品上妆前后""产品捆绑套装及其组件""同一对象的不同状态"等自然配对样本。相比任务专用合成，这些配对提供了更贴近实际应用场景的真实且混合的编辑操作。
+
+**专家扩展与定量监督（Expert Expansion and Quantitative Supervision）。** 面向困难或样本稀缺的任务，作者先策划少量领域专用数据，将 Qwen-Image-2512 (Wu et al., 2025) 或 FLUX.2 (Black Forest Labs, 2025) 等基础模型微调为任务专家。这些专家为虚拟试穿（virtual try-on）(Chen et al., 2024a)、美妆编辑、产品营销图创作、参考编辑等专门任务生成候选配对；Wan 2.2 (Wan et al., 2025) 等视频专家也被用于为高难度编辑任务生成可控配对样本 (Xu et al., 2024; Chen et al., 2024c; Yao et al., 2025; Zheng et al., 2026; Song et al., 2026; Sun et al., 2026)。候选输出按指令对齐度、参考身份保持度与 AIGC 可能性过滤，将有限的高质量监督转化为更大的任务专用语料。
+
+此外，作者还为定量变换与视觉感知任务构造配对：前者包括受控的对象位移、相机与摄影参数调整、局部颜色修改与文本属性变化；后者在 RGB 图像与结构表示（深度图、边缘图、法线图、人体姿态图）之间构成双向配对。这些数据为空间与数值上精确的编辑提供监督。
+
+### 3.3 知识接地数据引擎：面向实体与结构化知识
+
+为加强对知识密集型实体的视觉接地与推理，作者通过两条互补管线策划知识接地的视觉数据：以图像为中心（细粒度标注）的获取，以及由结构化知识图谱引导的以实体为中心的检索。
+
+**知识图谱引导的实体获取（Knowledge-Graph-Guided Entity Acquisition）。** 从超过 1 亿个 Wikidata 实体出发，在实体超链接图上计算 PageRank 以度量概念显著性，并丢弃分数可忽略的候选；VLM 进一步评估每个剩余实体是否构成有意义的知识概念，并估计其公众认知水平。该过程产出约 300 万个高显著性实体名。对每个实体，检索网络图像并应用基于 VLM 的视觉-指称对齐（visual-referential alignment）以保留准确描绘。同一管线还捕获结构化知识表示，包括定理图示、机理解释与科学过程。这些数据在视觉模式、真实世界实体与结构化知识之间建立关联，支撑需要抽象或结构化推理的知识密集型生成与复杂编辑场景。
+
+**以图像为中心的实体策划（Image-Centric Entity Curation）。** 基于已确立的实体集，从多样在线来源收集图像，并应用领域感知过滤，保留五大类别——名人、地标、植物、动物与流行 IP——中可清晰识别的实体。经过严格质量过滤后，获得超过 2700 万张覆盖常见知识概念的高质量图-实体对。
+
+### 3.4 Caption 作为桥梁：跨任务对齐、跨粒度学习
+
+作者将 T2I caption 与编辑指令视为连接任务、并按粒度层级组织视觉概念的**共享监督接口**。在任务维度上，编辑指令继承 T2I caption 的视觉词汇与描述结构，使从 T2I 生成学到的概念能迁移到基于参考的编辑；在粒度维度上，同一图像被从实体级概念与简洁提示一直标注到长形式与稠密描述，把粗粒度意图与细粒度视觉控制关联起来。
+
+**多粒度 T2I 重标注（Multi-Granularity T2I Recaptioning）。** 数据采集获得的原始元数据不足以学习语言与视觉元素之间的细粒度对应。此前工作表明，描述性合成 caption 能显著改善文本-图像对齐与提示遵循 (Betker et al., 2023)。因此作者对每张策划后的图像重新标注：首先产出覆盖所有视觉接地内容的综合标注（comprehensive annotation）——除主要主体及其属性外，还描述全局构图、摄影与艺术风格、光照、色彩、细粒度实体、空间关系、主体相对尺度，以及可见的 OCR 文本。
+
+在此综合标注与图像本身的基础上，构造多种粒度与表达形式的 caption，包括实体描述、无序标签、短提示、中等长度 caption、长 caption 与稠密描述（图 4），并同时构造中文与英文变体。跨 caption 风格的采样让模型暴露于异构的提示模式，提升文本-图像对齐的多样性。
+
+> **图 4（多粒度 T2I 监督）**：从图像的综合标注出发，构造实体描述、标签、短提示与多个细节层级的长形式 caption。
+
+**T2I 对齐的编辑指令（T2I-Aligned Editing Instructions）。** 作者训练基于 VLM 的 captioner，把原始编辑对转换为统一的监督格式。如图 5 所示，其将图像编辑视为**条件 T2I 生成**：目标描述继承从 T2I 数据学到的词汇与描述风格，而指令额外表达图像参考、变换与保持约束。具体流程为：
+
+1. captioner 先在**不观察任何源图像**的情况下，生成目标图像的"重构级"稠密描述；
+2. 随后联合检查源图与目标图，通过细粒度比较识别二者的视觉差异；
+3. 目标描述中可直接从某张源图保留的区域或实体，被替换为对应的 `[image N]` 参考。
+
+于是，源图中已有的视觉信息通过参考表达而非文本重复，只有源与目标之间不同的属性才保留为显式描述。基于这一对齐表示，再构造多种指令变体——详细编辑指令、简洁命令、模拟用户请求——而不改变底层的视觉变换。
+
+> **图 5（T2I 对齐编辑指令的构造管线）**：双视角感知产出目标图像 caption 与原始编辑指令；任务专用执行器将局部或全局变更与可复用的 T2I 描述对齐，随后进行一致性校验与迭代修订。
+
+**专用 caption 专家（Specialized Caption Experts）。** 为以一致质量完成十亿级标注，作者开发了两个基于 VLM 的 caption 专家——通用 captioner 与稠密 captioner——均从 Qwen3.5-27B 初始化。训练要点：
+
+- 先用 prompt 工程提升 caption 准确性与粒度，包含综合标注维度设计、自反思（self-reflection）与上下文学习；
+- 收集强教师模型生成的高质量 T2I caption 与编辑指令，建立详细且流畅的标注行为；
+- 在覆盖多样图像与编辑类型的统一 T2I + 编辑数据集上微调，并对困难 token（如空间术语与 OCR 内容）赋予更高权重；
+- 进一步施加强化学习，奖励覆盖视觉内容覆盖度、幻觉（hallucination）抑制与语言清晰度；
+- 对海报、产品广告等文本丰富图像，长形式 OCR 准确性由 VLM 评分与规则校验共同评估；
+- 反作弊（anti-hacking）奖励惩罚主观判断、无依据解释、冗余陈述等对训练监督无贡献的内容。
+
+**稠密 caption。** 稠密 caption 指定布局、OCR 文本与可见元素，使 DiT 模型能学习文本条件与结构化视觉内容之间的关联 (Peng et al., 2025)。对每张图像，稠密 captioner 先识别其视觉类型并构造描述大纲：摄影图像按"主要主体 → 场景 → 构图 → 光照 → 色彩 → 背景"组织；结构化或文本丰富图像按"布局区域 → 文本块 → 装饰元素"组织。captioner 逐项校验对象身份与计数、属性、空间关系、相对尺度、OCR 文本与外围内容，并对不确定的细节采用更保守（更安全）的具体度表述；校验后的元素再从全局结构到局部细节组装成文。为同时提升准确性与穷尽性，稠密 captioner 以"自验证推理 + 稠密 caption 生成"的方式训练：训练轨迹利用多个教师模型之间的自然分歧，构造"初始评估 → 不确定性 → 修正"的轨迹，从而将反思内化，推理时无需外部验证器。监督微调之后，再用多维奖励的强化学习进一步优化事实准确性、视觉覆盖与结构组织。
+
+---
+
+## 4 能力对齐课程调度
+
+作者构建了跨越基础预训练、持续训练（CT）与监督微调（SFT）的多阶段数据课程。该课程不维持固定的数据混合，而是遵循能力获得的依赖顺序，沿四个耦合轴演化：**任务组成、视觉概念分布、数据质量与图像分辨率**。管线先以大规模 T2I 数据建立广泛语义覆盖，继而引入结构复杂、知识接地、文本丰富与图像编辑监督，最终过渡到平衡且精炼的子集。
+
+> **图 6（能力缺口驱动的主动反馈闭环）**：能力感知评估识别失败案例，作为邻近数据检索与专家构造的种子；缺口感知重采样随后在后续训练中提升持续失败案例的权重、下调已解决缺口的权重。
+
+### 4.1 依赖对齐的多阶段课程策略
+
+能力专用数据引擎产出的全部样本维护在一个共享数据池（data reservoir）中，并用多维属性索引。这些属性决定了不同阶段可选的数据簇及相应采样权重。
+
+**阶段 1：256px T2I 预训练。** 第一阶段使用大规模 256px T2I 数据，以最大化语义覆盖并保留真实世界视觉内容的真实长尾分布。采用以图像元数据与启发式规则为主的包容性过滤策略，避免可能剔除"视觉不完美但语义有用"样本（如老照片）的激进美学过滤。在 caption 准确的前提下，保留一个包含视觉缺陷的受控子集，使模型能显式学习此类缺陷的分布并在后续生成中规避。语料按宽高比分桶（aspect-ratio buckets）组织以防过度裁剪或变形，稀有概念获得适度上调的采样权重。
+
+**阶段 2：256px/512px 复杂 T2I 预训练。** 在阶段 1 的广泛 T2I 语料之上，本阶段将目标分辨率从 256px 渐进扩展到 512px，并引入在 256px 下无法有效建模其视觉结构的内容，尤其是稠密文本渲染图像、布局敏感样本与知识接地的视觉内容。该阶段将分辨率提升与内容复杂度提升相耦合，以改进结构与细节保真度。
+
+**阶段 3：512px T2I & 编辑联合预训练。** 当 512px T2I 生成稳定后，引入自然与合成两类编辑配对。编辑样本跨指令类别保持平衡，T2I 分支则保持广泛的语义与风格覆盖。两个来源在统一的预训练设置下组合，使模型在复用 T2I 监督已习得概念的同时，学习参考保持与受控变换。
+
+**阶段 4：512px/1024px T2I & 编辑持续训练（CT）。** 持续训练阶段目标分辨率从 512px 渐进升至 1024px。为在保持世界知识的同时提升视觉质量，数据分布从"宽泛但嘈杂"的预训练数据转向更干净、视觉更精炼的来源：移除质量下界较低的网页爬取来源，提高对高保真来源与专业视觉领域的采样。由 VLM 赋予多级语义类别，通过全局重采样与比例平衡控制分布偏移。编辑数据经过第二轮来源过滤，并跨指令类别重新平衡，以在多任务训练下保持稳定覆盖。
+
+**阶段 5：1024px T2I & 编辑监督微调（SFT）。** SFT 阶段构造小规模、高度精选的数据集，将模型引向 CT 分布中具有更强视觉保真与指令对齐的高质量子流形（sub-manifold）。样本取自严格定义的顶级来源，并经"VLM 初筛 + 人工复审"的两步审查管线；带可见缺陷或文本-图像对齐较弱的样本被移除；全局类别平衡防止对主导领域的过拟合并缓解长尾概念遗忘。
+
+### 4.2 能力缺口驱动的主动反馈闭环
+
+固定的数据分布无法持续匹配不断演化的模型能力。因此作者将数据策划视为**评估驱动的优化过程**：先前训练阶段的评估结果识别出表现不佳的任务类型与语义概念，这些能力缺口（capability gap）驱动面向后续阶段的定向数据检索、专家构造与缺口感知重采样（图 6）。
+
+**能力感知的失败发现（Capability-Aware Failure Discovery）。** 对每个中间检查点执行能力分层评估（capability-stratified evaluation），同时覆盖 T2I 生成与图像编辑。每个低于其能力维度质量阈值 $T_i$ 的失败样本，都被标注任务类型、层次化语义标签与失败维度。该过程把个别失败案例转化为可度量的能力缺口，并对反复出现的失败模式赋予优先级。
+
+**分布更新与闭环（Distribution Update and Loop Closure）。** 可归因于数据的反复失败模式被用作检索种子，去搜索或构造具有多样提示表述的邻近样本：
+
+- 对 T2I 数据，当合适的真实数据不足时，调用能力专用构造管线或专家生成来合成候选；
+- 对编辑数据（尤其是欠表示的指令类型），检索合适的参考图像，并挖掘自然关联配对或构造专家生成配对；
+- 新增数据的一个子集须经 VLM 初评加人工复审后才进入 SFT 数据池。
+
+被采纳的补充样本被组织进任务与来源专用的桶（bucket），其采样权重依据演化中模型的能力缺口调整：与持续失败关联的桶获得更高权重，已解决的缺口被降权，未解决的案例则返回数据挖掘队列。如此一来，**评估从终端测量转变为持续改进 T2I 与编辑分布的主动控制信号**。
+
+> **图 7（定性 T2I 结果）**：覆盖插画、平面设计、知识可视化、人像、风景、多面板构图与摄影风格控制的定性 T2I 结果。
+>
+> **图 8（单图编辑定性对比）**：挑战性单图编辑案例，涵盖混合编辑、基于推理的变换、对象分割与风格迁移。
+>
+> **图 9（退化感知修复）**：不同退化类型下降级感知修复的可视化。
+
+---
+
+## 5 实验
+
+### 5.1 文生图（T2I）生成
+
+图 7 展示了覆盖广泛视觉风格与格式的定性 T2I 结果。这些结果表明模型在复杂 T2I 生成上表现良好，例如设计插画、多面板图像、知识结构可视化与摄影风格控制。这得益于可扩展 T2I 数据引擎产出的大量富含文本与结构布局的图像，为海报、界面、图表与多面板构图提供了监督。能力对齐课程则在广泛视觉接地建立之后，再引入复杂结构与更高分辨率监督，使多样性、构图准确性与渲染质量得以同步提升。
+
+### 5.2 图像编辑
+
+**定量评估。** 作者在 CPI-General-Bench 与 CPI-Practical-Bench（CPI-Bench (Zhou et al., 2026) 的两个子集）上评估图像编辑。CPI-Bench 是面向真实世界图像编辑的综合（comprehensive）、实用（practical）、智能（intelligent）基准，包含三个互补子集：CPI-General-Bench 广泛覆盖基础编辑能力；CPI-Practical-Bench 聚焦常见真实应用场景；CPI-Intelligent-Bench 评估需要高级推理的编辑指令。其中：
+
+- **CPI-General-Bench**：2,039 个样本，覆盖 30 个基础任务（20 个单图任务 + 10 个多图任务）；
+- **CPI-Practical-Bench**：558 个样本，覆盖人像增强、电商与广告创意、住宅与室内设计、内容创作四大领域共 51 种常见应用类型。
+
+利用所提出的数据管线与课程，作者训练了 3B 与 6B 两种规模的 MM-DiT 模型。指标由 VLM 跨多个不同维度评估，分数范围为 1–5 (Zhou et al., 2026)。结果如下表：
+
+| 模型 | 参数量 | CPI-General | CPI-Practical | Overall ↑ |
+| --- | --- | --- | --- | --- |
+| Our Model-3B | 3B | 3.95 | 3.91 | 3.93 |
+| Our Model-6B | 6B | 3.96 | 3.92 | 3.94 |
+
+（Overall 为 CPI-General 与 CPI-Practical 的算术平均。）
+
+**定性评估。** 图 8 展示了涵盖混合变换、推理编辑等的挑战性单图编辑案例。这些案例要求模型推断预期的视觉状态，并保持超出直接外观匹配的内容。这类能力得益于从自然来源挖掘的丰富编辑对——其中的变换反映了日常场景中真实发生的关系，为学习复杂图像变换提供了现实的监督。
+
+图 9 展示了从老照片、低清晰度与运动模糊中的修复。学习这种行为需要保留一小部分受控的退化图像，并显式描述其退化状态。这种监督使模型能够识别输入图像中的缺陷，也帮助模型把不良的视觉退化与有效内容区分开来，从而支撑更高的生成质量。
+
+此外，图 10 展示了涉及视点迁移、参考关系理解、文本渲染与多源图像构图的复杂案例。模型能识别每个参考各自拥有哪些视觉属性，并将其绑定到指令的对应部分。这要求图像 caption 与编辑指令在文本语义与视觉元素之间维持显式对应——显式的跨任务对齐使模型能够组合主体、属性、布局与渲染文本而不混淆其来源（案例按"有/无显式图像索引参考"分组）。
+
+---
+
+## 6 结论
+
+本文提出了面向通才图像生成与编辑的**能力驱动数据基础设施**。三个专用但可互操作的引擎为视觉-文本接地、图像间变换与图像-知识关联构造互补监督；共享的 caption 接口支持跨任务与跨粒度的概念迁移。能力对齐课程随后联合演化任务组成、视觉概念分布、数据质量与图像分辨率，同时评估驱动的检索、专家构造与重采样闭合了精炼回路。在规模化层面，该基础设施策划出 440M 图像的 T2I 语料、120M 编辑对与超过 2700 万的图-实体对，支撑了从零训练 MM-DiT 模型。定性结果展示了所得模型支持的广泛生成与编辑能力。总体而言，本研究将**数据组织确立为一条互补的扩展轴（scaling axis）**，并将数据策划从"孤立任务专用管线的集合"重塑为**自适应的监督系统**。
+
+---
+
+## 附录 A 摘要：共享数据整理（Shared Data Wrangling）
+
+> 正文多处引用附录 A，此处摘要其技术要点。
+
+**A.1 过滤与质量控制。** 各能力专用引擎共享基础数据整理策略，标准化数据有效性与质量、提取可比语义元数据，为课程调度中的分阶段过滤与重平衡提供属性。
+
+- **基本规则过滤**：统一转 RGB、以基础元数据画像；剔除无法解码的损坏文件；施加严格分辨率下界（丢弃少于 256² 像素的图像）；按阶段要求过滤极端宽高比。
+- **技术质量过滤**：拉普拉斯方差 + BRISQUE (Mittal et al., 2012) 检测严重模糊；文件熵与 JPEG 质量估计拒绝过度压缩与块效应图像；像素方差识别纯色/近空白图；对电商与图库常见的白底图，结合 RGB 熵与黑白像素占比做受控降采样，保留其概念价值同时防止主导预训练分布。
+- **感知质量过滤**：训练清晰度与美学预测器，过滤阈值随训练阶段变化——早期预训练保语义多样性，后期阶段逐步强调视觉质量。
+- **去重（三级）**：MD5/文件哈希精确去重 → pHash 检测裁剪、水印、缩放产生的近重复 → DINOv3 (Siméoni et al., 2025) 提取图像级嵌入并用 FAISS (Douze et al., 2025) 高维聚类；簇内余弦相似度超过 0.99 时，仅保留分辨率与清晰度综合最高的图像。
+- **水印与文本检测**：专门检测器识别水印、logo、字幕与叠加文本；水印主导图像与文本丰富图像分开标记，供后续过滤与标注。
+- **AIGC 检测与内容安全**：训练 AIGC 分类器识别自然来源语料中的合成图像，并将高置信 AIGC 样本移出预训练池；另加 NSFW 检测器与基于元数据的不安全关键词过滤。
+
+**A.2 层次化元数据提取与重平衡。** 过滤后的网络级池仍呈由高频概念主导的长尾分布，因此提取层次化语义元数据并按阶段定制重平衡：
+
+- **分类法构造**：以既有视觉分类层次的叶节点作为 28 万+ 细粒度语义标签，组织为四层分类法（上三层分别为 15、74、331 类），每个细粒度标签映射到叶节点，实现粗/细粒度的分布控制。
+- **标签分配**：将图像 caption 嵌入与标签嵌入做余弦相似度比较，检索 top-1000 候选标签；自适应过滤器结合语义相似度与层次关系，为每张图像保留至多 15 个代表性且语义多样的标签。
+- **数据重平衡**：按两条原则层次化重采样——(1) 所有语义标签在最终语料中都有代表，并对稀有长尾概念额外关注；(2) 一级类别间样本数近似平衡，并在同一父节点下递归平衡至第三层。该层次化策略降低高频概念的主导性，同时在多个粒度保留语义多样性。
+
+---
+
+## 创新点提炼
+
+1. **数据设计单元从"语料库"跃迁为"能力"**：区别于 DataComp/Qwen-Image/Seedream 等"把单个任务语料做得更好"的路线，本文显式按目标能力（T2I 接地、编辑变换、知识关联）拆分数据构造为三个专用引擎，且通过共享整理管线与标注接口保持可互操作。这使能力专用覆盖缺口可被独立测量与补足，无需每个任务数据集复现完整概念分布，从组织层面解决了跨任务监督共享不足的问题。
+
+2. **Caption 作为跨任务、跨粒度的统一监督语言**：编辑指令被构造成"条件 T2I 生成"——目标描述继承 T2I caption 的词汇与风格，源图已有信息用 `[image N]` 参考表达而非文本重复，只显式描述源-目标差异属性。配合从实体标签到稠密描述的多粒度 caption 谱系，实现了 T2I 概念向编辑的迁移，以及粗意图到细粒度控制的连续监督。
+
+3. **从自然视觉关联中挖掘真实编辑监督**：针对纯合成编辑对"贴图感"强、继承生成伪影的问题，从同人/同产品的显式关联、网页共现与视频相邻帧等隐式关联、以及电商多面板复合图像中恢复自然配对，再叠加任务专家（微调 Qwen-Image-2512/FLUX.2、视频专家 Wan 2.2）生成稀缺任务数据，构成 120M 对的真实+专家混合编辑语料。
+
+4. **能力对齐的五阶段课程调度（四轴共演化）**：训练不使用固定数据混合，而是沿任务组成、视觉概念分布、数据质量、分辨率四个耦合轴，依能力依赖顺序从 256px T2I 预训练推进到 1024px SFT；每阶段的分辨率提升与内容复杂度提升相耦合，CT/SFT 逐级收窄到干净、平衡、精炼的子集。
+
+5. **能力缺口驱动的主动反馈闭环**：能力分层评估将失败案例转化为带任务类型与语义标签的可度量缺口，作为检索种子驱动定向检索、专家构造与缺口感知重采样——持续失败的桶升权、已解决的降权。评估由训练结束后的"终端测量"变为持续改进数据分布的"主动控制信号"，实现数据与能力的共演化。
+
+6. **缺陷/退化感知的数据保留策略**：刻意保留受控比例的视觉缺陷图像并在 caption 中显式描述缺陷，把"本会被过滤丢弃的伪影"转化为可识别的视觉概念，使模型既能识别并规避缺陷，也支撑了老照片、模糊等退化感知修复能力；同时以包容性过滤保住老照片等"不完美但语义有价值"的长尾样本。
+</script>
+<script src="../assets/app.js?v=5"></script>
+</body>
+</html>

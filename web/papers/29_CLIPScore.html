@@ -1,0 +1,2258 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>29 · CLIPScore 免参考图文评估 — 中英对照精读</title>
+<link rel="stylesheet" href="../assets/style.css?v=6">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="back" href="../index.html">← 首页</a>
+  <div class="tb-title"><span class="num">29</span>CLIPScore 免参考图文评估</div>
+  <div class="tb-controls">
+    <a class="tb-link" href="https://arxiv.org/abs/2104.08718" target="_blank" rel="noopener">arXiv</a>
+    <label class="sync"><input type="checkbox" id="syncToggle"> 滚动同步</label>
+  </div>
+</header>
+<main class="reader">
+  <section class="pane pane-en">
+    <div class="pane-head">ENGLISH 原文 (arXiv HTML)</div>
+    <div class="pane-body" id="enBody">
+<article class="ltx_document ltx_authors_1line">
+<h1 class="ltx_title ltx_title_document"><span id="id1" class="ltx_text ltx_font_typewriter">CLIPScore</span>:
+<br class="ltx_break">A Reference-free Evaluation Metric for Image Captioning</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Jack Hessel<sup id="id2" class="ltx_sup">†</sup>   Ari Holtzman<sup id="id3" class="ltx_sup">‡</sup>   Maxwell Forbes<sup id="id4" class="ltx_sup">‡</sup>   Ronan Le Bras<sup id="id5" class="ltx_sup">†</sup>   Yejin Choi<sup id="id6" class="ltx_sup">†‡</sup>
+</span><span class="ltx_author_notes"><span class="ltx_author_notes_content">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_contact_name">Affiliation: </span><sup id="id7" class="ltx_sup">†</sup>Allen Institute for AI
+</span>
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_contact_name">Affiliation: </span><sup id="id8" class="ltx_sup">‡</sup>Paul G. Allen School of Computer Science &amp; Engineering, University of Washington
+</span>
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_contact_name">Affiliation: </span><span id="id9" class="ltx_text ltx_font_typewriter">{jackh,ronanlb}@allenai.org {ahai,mbforbes,yejin}@cs.washington.edu</span>
+</span></span></span></span></div>
+
+<div id="abstract1" class="ltx_abstract"><h6 class="ltx_title ltx_title_abstract">Abstract</h6>
+    
+<p id="abstract1.1" class="ltx_p">Image captioning has conventionally relied on <em id="abstract1.1.1" class="ltx_emph ltx_font_italic">reference-based </em> automatic evaluations, where machine captions are compared against captions written by humans. This is in
+contrast to the <em id="abstract1.1.2" class="ltx_emph ltx_font_italic">reference-free</em> manner in which humans assess caption quality.</p>
+    
+<p id="abstract1.2" class="ltx_p">In this paper, we report the surprising empirical finding that CLIP <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib46" title="" class="ltx_ref">Radford et al. (2021)</a></cite>, a cross-modal model pretrained on 400M image+caption pairs from the web, can be used for robust automatic evaluation of image captioning without the need for references. Experiments spanning several corpora demonstrate that our new reference-free metric, <span id="abstract1.2.1" class="ltx_text ltx_font_typewriter">CLIPScore</span>, achieves the highest correlation with human judgements, outperforming existing reference-based metrics like CIDEr and SPICE.
+Information gain experiments demonstrate that <span id="abstract1.2.2" class="ltx_text ltx_font_typewriter">CLIPScore</span>, with its tight focus on <em id="abstract1.2.3" class="ltx_emph ltx_font_italic">image–text</em> compatibility,
+is complementary to existing reference-based metrics that emphasize <em id="abstract1.2.4" class="ltx_emph ltx_font_italic">text–text</em> similarities. Thus, we also present a reference-augmented version, <span id="abstract1.2.5" class="ltx_text ltx_font_typewriter">RefCLIPScore</span>, which achieves even higher correlation.
+Beyond literal description tasks, several case studies reveal domains where <span id="abstract1.2.6" class="ltx_text ltx_font_typewriter">CLIPScore</span> performs well (clip-art images, alt-text rating), but also where it is relatively weaker in comparison to reference-based metrics, e.g., news captions that require richer contextual knowledge.</p>
+  
+</div>
+<div id="p1" class="ltx_para ltx_align_bottom">
+<p id="p1.1" class="ltx_p ltx_align_center" style="width:345.0pt;"><span id="p1.1.1" class="ltx_text ltx_inline-block" style="width:0.0pt;">
+</span></p>
+</div>
+<section id="S1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">1 </span>Introduction</h2>
+
+<figure id="S1.F1" class="ltx_figure"><img src="https://arxiv.org/html/2104.08718v3/figure1-narrow-v1.png" id="S1.F1.g1" class="ltx_graphics ltx_centering ltx_img_portrait" style="aspect-ratio:452/597;" width="452" height="597" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 1: </span>
+<span id="S1.F1.8" class="ltx_text ltx_font_bold">Top:</span> <span id="S1.F1.9" class="ltx_text ltx_font_typewriter">CLIPScore</span> uses CLIP to assess image-caption compatibility <em id="S1.F1.10" class="ltx_emph ltx_font_italic">without</em> using references, just like humans. <span id="S1.F1.11" class="ltx_text ltx_font_bold">Bottom:</span> This frees <span id="S1.F1.12" class="ltx_text ltx_font_typewriter">CLIPScore</span> from the well-known shortcomings of <math id="S1.F1.m2" class="ltx_Math" alttext="n" display="inline" intent=":literal"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>-gram matching metrics, which disfavor good captions with new words (top) and favor <em id="S1.F1.13" class="ltx_emph ltx_font_italic">any</em> captions with familiar words (bottom). Attribution: Paperclip, robot icons by Hasanudin, Adiyogi (resp.) from the Noun Project.
+</figcaption>
+</figure>
+<div id="S1.p1" class="ltx_para">
+<p id="S1.p1.1" class="ltx_p">For most text generation tasks, reference-based <math id="S1.p1.m1" class="ltx_Math" alttext="n" display="inline" intent=":literal"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>-gram overlap methods are still the dominant means of automatic evaluation. For image caption generation, recent reference-based metrics have sought to transcend overlap by considering richer models of reference-candidate similarity: e.g., approximate scene graphs <cite class="ltx_cite ltx_citemacro_cite"><a href="#biba.bib1" title="" class="ltx_ref">Anderson et al. (2016)</a></cite>, allowing reference-based methods to incorporate the image <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib20" title="" class="ltx_ref">Jiang et al. (2019)</a>; <a href="#bib.bib25" title="" class="ltx_ref">Lee et al. (2020)</a></cite>. But, references can be expensive to collect and comparing against even <em id="S1.p1.1.1" class="ltx_emph ltx_font_italic">multiple</em> human-authored captions for each image is often insufficient (see <a href="#S1.F1" title="Figure 1 ‣ 1 Introduction ‣ CLIPScore:A Reference-free Evaluation Metric for Image Captioning" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Figure 1</span></a>). As a result, for many corpora, a significant gap remains between reference-based scoring and human quality judgments.<span id="footnote1" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">1</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">1</sup>
+            <span class="ltx_tag ltx_tag_note">1</span>
+            
+            
+            
+          See <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib14" title="" class="ltx_ref">Elliott and Keller (2014)</a></cite> and <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib23" title="" class="ltx_ref">Kilickaya et al. (2017)</a></cite> for thorough comparisons of caption generation metrics.</span></span></span></p>
+</div>
+<div id="S1.p2" class="ltx_para">
+<p id="S1.p2.1" class="ltx_p">Should we need references for the evaluation of image captions? After all, when humans assess the appropriateness of an image caption, we do so just by looking at the image and reading the candidate’s text.</p>
+</div>
+<div id="S1.p3" class="ltx_para">
+<p id="S1.p3.1" class="ltx_p">A recent trend in machine translation serves as inspiration: there, a key hurdle for reference-free evaluation (sometimes called <em id="S1.p3.1.1" class="ltx_emph ltx_font_italic">quality estimation</em>) has been estimating cross-lingual similarity between source+candidate pairs <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib8" title="" class="ltx_ref">Blatz et al. (2004)</a>; <a href="#bib.bib54" title="" class="ltx_ref">Specia et al. (2010)</a>; <a href="#bib.bib38" title="" class="ltx_ref">Mehdad et al. (2012)</a>; <a href="#bib.bib55" title="" class="ltx_ref">Specia and Shah (2018)</a></cite>. But recent work <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib30" title="" class="ltx_ref">Lo (2019)</a>; <a href="#bib.bib64" title="" class="ltx_ref">Yankovskaya et al. (2019)</a>; <a href="#bib.bib68" title="" class="ltx_ref">Zhao et al. (2020)</a></cite> has improved correlation with human judgment not by gathering more monolingual references, but instead by utilizing cross-lingual representations learned by large-scale, pre-trained, multilingual models e.g., LASER <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib4" title="" class="ltx_ref">Artetxe and Schwenk (2019)</a></cite> or M-BERT <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib12" title="" class="ltx_ref">Devlin et al. (2019)</a></cite>. <span id="footnote2" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">2</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">2</sup>
+            <span class="ltx_tag ltx_tag_note">2</span>
+            
+            
+            
+          <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib21" title="" class="ltx_ref">K et al. (2020)</a></cite>, <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib45" title="" class="ltx_ref">Pires et al. (2019)</a></cite>, and <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib63" title="" class="ltx_ref">Wu and Dredze (2019)</a></cite> explore how M-BERT learns and utilizes cross-lingual information.</span></span></span></p>
+</div>
+<div id="S1.p4" class="ltx_para">
+<p id="S1.p4.1" class="ltx_p">We hypothesize that the relationships learned by pretrained vision+language models (e.g., ALIGN <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib19" title="" class="ltx_ref">Jia et al. (2021)</a></cite> and CLIP <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib46" title="" class="ltx_ref">Radford et al. (2021)</a></cite>) could similarly support reference-free evaluation in the image captioning case. Indeed, they can: we show that a relatively direct application of CLIP to (image, generated caption) pairs results in surprisingly high correlation with human judgments on a suite of standard image description benchmarks (e.g., MSCOCO <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib28" title="" class="ltx_ref">Lin et al. (2014)</a></cite>). We call this process <span id="S1.p4.1.1" class="ltx_text ltx_font_typewriter">CLIPScore</span> (abbreviated to CLIP-S). Beyond direct correlation with human judgments, an information gain analysis reveals that CLIP-S is complementary both to commonly reported metrics (like BLEU-4, SPICE, and CIDEr) and to newly proposed reference-based metrics (e.g., ViLBERTScore-F <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib25" title="" class="ltx_ref">Lee et al. (2020)</a></cite>).</p>
+</div>
+<div id="S1.p5" class="ltx_para">
+<p id="S1.p5.1" class="ltx_p">We additionally (1) propose a reference-augmented version of <span id="S1.p5.1.1" class="ltx_text ltx_font_typewriter">CLIPScore</span>, <span id="S1.p5.1.2" class="ltx_text ltx_font_typewriter">RefCLIPScore</span>, that achieves even higher human correlation, (2) verify that CLIP-S is sensitive to adversarially constructed image captions, where one noun-phrase has been swapped for a plausible (but incorrect) distractor; and (3) construct a corpus of images that have never been posted publicly online to verify that CLIP-S is able to reconstruct human judgments on never-before-seen images.</p>
+</div>
+<div id="S1.p6" class="ltx_para">
+<p id="S1.p6.1" class="ltx_p">Finally, we assess CLIP-S in the context of four case studies that diverge from context-free, literal photograph description. In two cases, CLIP-S works well: it achieves high correlation with alt-text quality rating on Twitter, and demonstrates surprising capacity to reason about clipart images+captions. For news caption generation, reference-based methods correlate best with human judgments. And, for emotive captions inspired by language use on social media, even reference-based metrics fall short.</p>
+</div>
+</section>
+<section id="S2" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">2 </span>Related Work</h2>
+
+<section id="S2.SS0.SSS0.Px1" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Reference-only image caption evaluation</h4>
+
+<div id="S2.SS0.SSS0.Px1.p1" class="ltx_para">
+<p id="S2.SS0.SSS0.Px1.p1.1" class="ltx_p">In general, image caption generation models are evaluated by a suite of 5 reference based metrics: BLEU-4 <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib42" title="" class="ltx_ref">Papineni et al. (2002)</a></cite> (which measures a version of precision between a candidate and the references), ROUGE-L <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib27" title="" class="ltx_ref">Lin (2004)</a></cite> (which measures a version of recall), METEOR <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib5" title="" class="ltx_ref">Banerjee and Lavie (2005)</a></cite> (which computes a word-level alignment), CIDEr <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib60" title="" class="ltx_ref">Vedantam et al. (2015)</a></cite> (which combines n-gram tf-idf weighting and stemming) and SPICE <cite class="ltx_cite ltx_citemacro_cite"><a href="#biba.bib1" title="" class="ltx_ref">Anderson et al. (2016)</a></cite> (which applies a semantic parser to a set of references, and computes similarity using the predicted scene graph).<span id="footnote3" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">3</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">3</sup>
+              <span class="ltx_tag ltx_tag_note">3</span>
+              
+              
+              
+            For comparison with these metrics, we use the standard COCO evaluation tools available at <a href="https://github.com/tylin/coco-caption" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://github.com/tylin/coco-caption</a>.</span></span></span> <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib65" title="" class="ltx_ref">Yi et al. (2020)</a></cite> give a method for re-weighting BERTScore <cite class="ltx_cite ltx_citemacro_cite"><a href="#biba.bib5" title="" class="ltx_ref">Zhang et al. (2020)</a></cite> specifically tuned to the image caption generation domain (we refer to their method as BERT-S++).</p>
+</div>
+</section>
+<section id="S2.SS0.SSS0.Px2" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Reference+image caption evaluation</h4>
+
+<div id="S2.SS0.SSS0.Px2.p1" class="ltx_para">
+<p id="S2.SS0.SSS0.Px2.p1.1" class="ltx_p">Recent metrics incorporate image-text grounding features in addition to references: TIGEr <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib20" title="" class="ltx_ref">Jiang et al. (2019)</a></cite> uses a pretrained SCAN model <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib26" title="" class="ltx_ref">Lee et al. (2018)</a></cite>, and ViLBERTScore-F <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib25" title="" class="ltx_ref">Lee et al. (2020)</a></cite> uses a pretrained ViLBERT model <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib32" title="" class="ltx_ref">Lu et al. (2019)</a></cite> that is also fine-tuned on 12 downstream vision and language tasks <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib33" title="" class="ltx_ref">Lu et al. (2020)</a></cite>. Our work provides perspective on the next logical extension: instead of incorporating visual-textual interactions in addition to references, can we ignore references entirely?</p>
+</div>
+</section>
+<section id="S2.SS0.SSS0.Px3" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Self-retrieval for image captioning</h4>
+
+<div id="S2.SS0.SSS0.Px3.p1" class="ltx_para">
+<p id="S2.SS0.SSS0.Px3.p1.1" class="ltx_p">Prior works have proposed incorporating a <em id="S2.SS0.SSS0.Px3.p1.1.1" class="ltx_emph ltx_font_italic">self-retrieval</em> loss into caption generation, with the intuition that good captions should be able to uniquely identify their images with high accuracy <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib11" title="" class="ltx_ref">Dai and Lin (2017)</a>; <a href="#bib.bib35" title="" class="ltx_ref">Luo et al. (2018)</a>; <a href="#bib.bib29" title="" class="ltx_ref">Liu et al. (2018)</a></cite>; monitoring this type of loss
+can provide insight into how distinctive the captions are according to the model itself. CLIP-S is similar in spirit, but distinct for its utility as an extrinsic evaluation metric like BLEU-4 or CIDEr.</p>
+</div>
+</section>
+<section id="S2.SS0.SSS0.Px4" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Reference-free evaluation</h4>
+
+<div id="S2.SS0.SSS0.Px4.p1" class="ltx_para">
+<p id="S2.SS0.SSS0.Px4.p1.1" class="ltx_p">In addition to the machine translation cases highlighted in the introduction, reference-free evaluations have been proposed for other generation tasks, including summarization <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib31" title="" class="ltx_ref">Louis and Nenkova (2013)</a>; <a href="#bib.bib44" title="" class="ltx_ref">Peyrard and Gurevych (2018)</a>; <a href="#bib.bib57" title="" class="ltx_ref">Sun and Nenkova (2019)</a></cite> and dialogue <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib58" title="" class="ltx_ref">Tao et al. (2018)</a>; <a href="#bib.bib39" title="" class="ltx_ref">Mehri and Eskenazi (2020)</a></cite>. These metrics can be supervised, relying on human judgments for quality estimation, or less-supervised, relying on pre-trained model representations. For image captioning, a version of VIFIDEL <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib37" title="" class="ltx_ref">Madhyastha et al. (2019)</a></cite> was proposed for reference-free evaluation; however, VIFIDEL, computed based on a list of detected objects in the image from a fixed object vocabulary, generally produces less correlation with human ratings vs. reference-based metrics.</p>
+</div>
+</section>
+</section>
+<section id="S3" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">3 </span><span id="S3.2" class="ltx_text ltx_font_typewriter">CLIPScore</span></h2>
+
+<section id="S3.SS0.SSS0.Px1" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Model Details.</h4>
+
+<div id="S3.SS0.SSS0.Px1.p1" class="ltx_para">
+<p id="S3.SS0.SSS0.Px1.p1.1" class="ltx_p">CLIP <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib46" title="" class="ltx_ref">Radford et al. (2021)</a></cite> is a cross-modal retrieval model trained on 400M (image, caption) pairs gathered from the web. 500K search queries, consisting of common unigram/bigrams, named entities, etc., were executed on a search engine. For each query, up to 20K (image, caption) pairs were collected.</p>
+</div>
+<div id="S3.SS0.SSS0.Px1.p2" class="ltx_para">
+<p id="S3.SS0.SSS0.Px1.p2.1" class="ltx_p">The model we use is the <span id="S3.SS0.SSS0.Px1.p2.1.1" class="ltx_text ltx_font_typewriter">ViT-B/32</span> version.<span id="footnote4" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">4</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">4</sup>
+              <span class="ltx_tag ltx_tag_note">4</span>
+              
+              
+              
+            We expect that more powerful, larger versions of the model, if released at a later date, could perform better.</span></span></span> It represents images via a Vision Transformer <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib59" title="" class="ltx_ref">Vaswani et al. (2017)</a>; <a href="#bib.bib13" title="" class="ltx_ref">Dosovitskiy et al. (2021)</a></cite>, which forgoes convolutional filters in favor of self-attention maps computed between a 7 by 7 grid of image patches, which evenly divides a 224 by 224 pixel input image. This model has 12 transformer layers and 86M parameters. The text is similarly represented by a 12-layer transformer trained over a vocab of 49K BPE token types <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib50" title="" class="ltx_ref">Sennrich et al. (2016)</a></cite> (and is more fully described in <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib47" title="" class="ltx_ref">Radford et al. (2019)</a></cite>). Both the text and image networks output a single vector; these vectors aim to represent the content of an input caption or an image, respectively. In the case of <span id="S3.SS0.SSS0.Px1.p2.1.2" class="ltx_text ltx_font_typewriter">ViT-B/32</span>, these vectors are 512-D. The model’s weights are trained to maximize the scaled cosine similarity of truly corresponding image/caption pairs while simultaneously minimizing the similarity of mismatched image/caption pairs using InfoNCE <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib53" title="" class="ltx_ref">Sohn (2016)</a>; <a href="#bib.bib41" title="" class="ltx_ref">Oord et al. (2018)</a></cite>. We hold fixed this set of weights for our experiments.</p>
+</div>
+</section>
+<section id="S3.SS0.SSS0.Px2" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Evaluating Caption Generations with CLIP.</h4>
+
+<div id="S3.SS0.SSS0.Px2.p1" class="ltx_para">
+<p id="S3.SS0.SSS0.Px2.p1.1" class="ltx_p">To assess the quality of a candidate generation, we pass both the image and the candidate caption through their respective feature extractors. Then, we compute the cosine similarity of the resultant embeddings.<span id="footnote5" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">5</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">5</sup>
+              <span class="ltx_tag ltx_tag_note">5</span>
+              
+              
+              
+            More sophisticated CLIP configurations, e.g., region-level/token-level correspondence models, did not achieve better performance.</span></span></span> We found that prefixing candidates with the prompt: “A photo depicts" improved correlations slightly (and is our recommended/standard configuration), though “A photo of", the recommended prompt from <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib46" title="" class="ltx_ref">Radford et al. (2021)</a></cite>, worked well too. Following <cite class="ltx_cite ltx_citemacro_citet"><a href="#biba.bib5" title="" class="ltx_ref">Zhang et al. (2020)</a></cite>, we perform a re-scaling operation.<span id="footnote6" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">6</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">6</sup>
+              <span class="ltx_tag ltx_tag_note">6</span>
+              
+              
+              
+            While the cosine similarity, in theory, can range from <math id="footnote6.m1" class="ltx_Math" alttext="[-1,1]" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">[</mo><mrow><mrow><mo>−</mo><mn>1</mn></mrow><mo>,</mo><mn>1</mn></mrow><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[-1,1]</annotation></semantics></math> (1) we never observed a negative cosine similarity; and (2) we generally observe values ranging from roughly zero to roughly <math id="footnote6.m2" class="ltx_Math" alttext=".4" display="inline" intent=":literal"><semantics><mn>.4</mn><annotation encoding="application/x-tex">.4</annotation></semantics></math>. The particular value of <math id="footnote6.m3" class="ltx_Math" alttext="w" display="inline" intent=":literal"><semantics><mi>w</mi><annotation encoding="application/x-tex">w</annotation></semantics></math> we advocate for, <math id="footnote6.m4" class="ltx_Math" alttext="w=2.5" display="inline" intent=":literal"><semantics><mrow><mi>w</mi><mo>=</mo><mn>2.5</mn></mrow><annotation encoding="application/x-tex">w=2.5</annotation></semantics></math>, attempts to stretch the range of the score distribution to <math id="footnote6.m5" class="ltx_Math" alttext="[0,1]" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0,1]</annotation></semantics></math>. For more details and justification for our re-scaling, including a demonstration of generality across several corpora, see <a href="#A2" title="Appendix B Rescaling CLIPScore ‣ CLIPScore:A Reference-free Evaluation Metric for Image Captioning" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Appendix B</span></a>).</span></span></span> For an image with visual CLIP embedding <math id="S3.SS0.SSS0.Px2.p1.m1" class="ltx_Math" alttext="v" display="inline" intent=":literal"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math> and a candidate caption with textual CLIP embedding <math id="S3.SS0.SSS0.Px2.p1.m2" class="ltx_Math" alttext="c" display="inline" intent=":literal"><semantics><mi>c</mi><annotation encoding="application/x-tex">c</annotation></semantics></math>, we set <math id="S3.SS0.SSS0.Px2.p1.m3" class="ltx_Math" alttext="w=2.5" display="inline" intent=":literal"><semantics><mrow><mi>w</mi><mo>=</mo><mn>2.5</mn></mrow><annotation encoding="application/x-tex">w=2.5</annotation></semantics></math> and compute CLIP-S as:</p>
+<table id="S3.EGx1" class="ltx_equationgroup ltx_eqn_align ltx_eqn_table">
+
+<tbody id="S3.Ex1"><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_td ltx_align_right ltx_eqn_cell"><math id="S3.Ex1.m1" class="ltx_Math" alttext="\displaystyle\texttt{{CLIP-S} }({\color[rgb]{0,0,0}\textbf{c}},{\color[rgb]{0,0,0}\textbf{v}})=w*\max(cos({\color[rgb]{0,0,0}\textbf{c}},{\color[rgb]{0,0,0}\textbf{v}}),0)" display="inline" intent=":literal"><semantics><mrow><mrow><mtext class="ltx_mathvariant_monospace">CLIP-S </mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mtext class="ltx_mathvariant_bold">c</mtext><mo>,</mo><mtext class="ltx_mathvariant_bold">v</mtext><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><mi>w</mi><mo lspace="0.222em" rspace="0.222em">∗</mo><mrow><mi>max</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mrow><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>s</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mtext class="ltx_mathvariant_bold">c</mtext><mo>,</mo><mtext class="ltx_mathvariant_bold">v</mtext><mo stretchy="false">)</mo></mrow></mrow><mo>,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow><annotation encoding="application/x-tex">\displaystyle\texttt{{CLIP-S} }({\color[rgb]{0,0,0}\textbf{c}},{\color[rgb]{0,0,0}\textbf{v}})=w*\max(cos({\color[rgb]{0,0,0}\textbf{c}},{\color[rgb]{0,0,0}\textbf{v}}),0)</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td></tr></tbody>
+</table>
+<p id="S3.SS0.SSS0.Px2.p1.2" class="ltx_p">To compute corpus-level CLIP-S, we simply average
+over (candidate, image) pairs.
+Note that this evaluation <em id="S3.SS0.SSS0.Px2.p1.2.1" class="ltx_emph ltx_font_italic">does not depend on underlying references.</em> The runtime of CLIP-S with the <span id="S3.SS0.SSS0.Px2.p1.2.2" class="ltx_text ltx_font_typewriter">ViT-B/32</span> backbone is fast: on our single consumer GPU and hard drive, roughly 4K image-candidate pairings can be processed per minute.</p>
+</div>
+</section>
+<section id="S3.SS0.SSS0.Px3" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph"><span id="S3.SS0.SSS0.Px3.1" class="ltx_text ltx_font_typewriter">RefCLIPScore</span> </h4>
+
+<div id="S3.SS0.SSS0.Px3.p1" class="ltx_para">
+<p id="S3.SS0.SSS0.Px3.p1.1" class="ltx_p">CLIP-S can additionally be extended to incorporate references, if they are available. We extract vector representations of each available reference by passing them through CLIP’s text transformer; the result is the set of vector representation of all references, <math id="S3.SS0.SSS0.Px3.p1.m1" class="ltx_Math" alttext="R" display="inline" intent=":literal"><semantics><mi>R</mi><annotation encoding="application/x-tex">R</annotation></semantics></math>. Then, <span id="S3.SS0.SSS0.Px3.p1.1.1" class="ltx_text ltx_font_typewriter">RefCLIPScore</span> is computed as a harmonic mean of CLIP-S, and the maximal reference cosine similarity, i.e.,</p>
+<table id="S3.EGx2" class="ltx_equationgroup ltx_eqn_align ltx_eqn_table">
+
+<tbody id="S3.Ex2"><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_td ltx_eqn_cell"></td>
+<td class="ltx_td ltx_align_left ltx_eqn_cell"><math id="S3.Ex2.m1" class="ltx_Math" alttext="\displaystyle\texttt{{RefCLIP-S} }({\color[rgb]{0,0,0}\textbf{c}},{\color[rgb]{0,0,0}\textbf{R}},{\color[rgb]{0,0,0}\textbf{v}})=" display="inline" intent=":literal"><semantics><mrow><mrow><mtext class="ltx_mathvariant_monospace">RefCLIP-S </mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mtext class="ltx_mathvariant_bold">c</mtext><mo>,</mo><mtext class="ltx_mathvariant_bold">R</mtext><mo>,</mo><mtext class="ltx_mathvariant_bold">v</mtext><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mphantom></mphantom></mrow><annotation encoding="application/x-tex">\displaystyle\texttt{{RefCLIP-S} }({\color[rgb]{0,0,0}\textbf{c}},{\color[rgb]{0,0,0}\textbf{R}},{\color[rgb]{0,0,0}\textbf{v}})=</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td></tr></tbody>
+<tbody id="S3.Ex3"><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_td ltx_eqn_cell"></td>
+<td class="ltx_td ltx_align_left ltx_eqn_cell"><math id="S3.Ex3.m1" class="ltx_Math" alttext="\displaystyle\text{H-Mean}(\texttt{{CLIP-S} }({\color[rgb]{0,0,0}\textbf{c}},{\color[rgb]{0,0,0}\textbf{v}}),\max(\max_{{\color[rgb]{0,0,0}\textbf{r}}\in{\color[rgb]{0,0,0}\textbf{R}}}cos({\color[rgb]{0,0,0}\textbf{c}},{\color[rgb]{0,0,0}\textbf{r}}),0))" display="inline" intent=":literal"><semantics><mrow><mtext>H-Mean</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mtext class="ltx_mathvariant_monospace">CLIP-S </mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mtext class="ltx_mathvariant_bold">c</mtext><mo>,</mo><mtext class="ltx_mathvariant_bold">v</mtext><mo stretchy="false">)</mo></mrow></mrow><mo>,</mo><mrow><mi>max</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mrow><mrow><munder><mi>max</mi><mrow><mtext class="ltx_mathvariant_bold">r</mtext><mo>∈</mo><mtext class="ltx_mathvariant_bold">R</mtext></mrow></munder><mo lspace="0.167em">⁡</mo><mi>c</mi></mrow><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>s</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mtext class="ltx_mathvariant_bold">c</mtext><mo>,</mo><mtext class="ltx_mathvariant_bold">r</mtext><mo stretchy="false">)</mo></mrow></mrow><mo>,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow></mrow><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\displaystyle\text{H-Mean}(\texttt{{CLIP-S} }({\color[rgb]{0,0,0}\textbf{c}},{\color[rgb]{0,0,0}\textbf{v}}),\max(\max_{{\color[rgb]{0,0,0}\textbf{r}}\in{\color[rgb]{0,0,0}\textbf{R}}}cos({\color[rgb]{0,0,0}\textbf{c}},{\color[rgb]{0,0,0}\textbf{r}}),0))</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td></tr></tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="S4" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">4 </span>Benchmark Captioning Evaluations</h2>
+
+<div id="S4.p1" class="ltx_para">
+<p id="S4.p1.1" class="ltx_p">We first evaluate on a set of literal description corpora. Broadly, the captions in these corpora aim to identify and highlight the literal, salient objects/actions in a photographic image, presented without additional context.<span id="footnote7" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">7</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">7</sup>
+            <span class="ltx_tag ltx_tag_note">7</span>
+            
+            
+            
+          See <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib6" title="" class="ltx_ref">Berg et al. (2012)</a></cite> for a statistical exploration of salience in a such a corpus.</span></span></span></p>
+</div>
+<section id="S4.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.1 </span>Caption-level likert judgments</h3>
+
+<div id="S4.SS1.p1" class="ltx_para">
+<p id="S4.SS1.p1.1" class="ltx_p">We first explore three corpora consisting of human likert-scale judgments at the level of individual image/caption pairs. Flickr8K-Expert <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib18" title="" class="ltx_ref">Hodosh et al. (2013)</a></cite> contains 17K “expert" human judgments between 5664 images: humans graded captions on a scale of 1 to 4 (4=“caption describes the image without any errors"; 1=“caption is unrelated to the image"). Flickr8K-CF is a set of 145K binary quality judgments gathered from CrowdFlower over 48K (image, caption) pairs (1K unique images). Each pair has at least 3 binary judgments, and we take the mean proportion of “yes" annotations as a score for each pair to compute correlations.</p>
+</div>
+<div id="S4.SS1.p2" class="ltx_para">
+<p id="S4.SS1.p2.1" class="ltx_p">Composite <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib1" title="" class="ltx_ref">Aditya et al. (2015)</a></cite> contains 12K human judgments between images from MSCOCO (2007 images), Flickr8k (997 images), and Flickr30k <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib66" title="" class="ltx_ref">Young et al. (2014)</a></cite> (991 images). Each image originally has five references, but one of the references was selected to be rated by humans in the set (and so we remove it from the reference set when computing metrics; this differs from some prior work, see <a href="#A1" title="Appendix A Evaluation and Replication Details ‣ CLIPScore:A Reference-free Evaluation Metric for Image Captioning" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Appendix A</span></a> for why we consider the more difficult setting). For Composite and Flickr8K judgments, we compute correlation between each metric and the human ratings using Kendall <math id="S4.SS1.p2.m1" class="ltx_Math" alttext="\tau" display="inline" intent=":literal"><semantics><mi>τ</mi><annotation encoding="application/x-tex">\tau</annotation></semantics></math>.</p>
+</div>
+<figure id="S4.T1" class="ltx_table">
+<div id="S4.T1.2" class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:241.5pt;height:119.9pt;vertical-align:-58.3pt;"><span class="ltx_transformed_inner" style="transform:translate(-62.0pt,30.8pt) scale(0.660634614955964,0.660634614955964) ;">
+<table id="S4.T1.2.1" class="ltx_tabular ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S4.T1.2.1.1" class="ltx_tr">
+<th id="S4.T1.2.1.1.1" class="ltx_td ltx_th ltx_th_row ltx_border_tt"></th>
+<th id="S4.T1.2.1.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><math id="S4.T1.m1" class="ltx_Math" alttext="\tau_{c}" display="inline" intent=":literal"><semantics><msub><mi>τ</mi><mi>c</mi></msub><annotation encoding="application/x-tex">\tau_{c}</annotation></semantics></math></th></tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S4.T1.2.1.2" class="ltx_tr">
+<th id="S4.T1.2.1.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">BLEU-1</th>
+<td id="S4.T1.2.1.2.2" class="ltx_td ltx_align_center ltx_border_t">32.3</td></tr>
+<tr id="S4.T1.2.1.3" class="ltx_tr">
+<th id="S4.T1.2.1.3.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">BLEU-4</th>
+<td id="S4.T1.2.1.3.2" class="ltx_td ltx_align_center">30.8</td></tr>
+<tr id="S4.T1.2.1.4" class="ltx_tr">
+<th id="S4.T1.2.1.4.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">ROUGE-L</th>
+<td id="S4.T1.2.1.4.2" class="ltx_td ltx_align_center">32.3</td></tr>
+<tr id="S4.T1.2.1.5" class="ltx_tr">
+<th id="S4.T1.2.1.5.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">BERT-S (RoBERTa-F)</th>
+<td id="S4.T1.2.1.5.2" class="ltx_td ltx_align_center">39.2</td></tr>
+<tr id="S4.T1.2.1.6" class="ltx_tr">
+<th id="S4.T1.2.1.6.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">METEOR</th>
+<td id="S4.T1.2.1.6.2" class="ltx_td ltx_align_center">41.8</td></tr>
+<tr id="S4.T1.2.1.7" class="ltx_tr">
+<th id="S4.T1.2.1.7.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">CIDEr</th>
+<td id="S4.T1.2.1.7.2" class="ltx_td ltx_align_center">43.9</td></tr>
+<tr id="S4.T1.2.1.8" class="ltx_tr">
+<th id="S4.T1.2.1.8.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">SPICE</th>
+<td id="S4.T1.2.1.8.2" class="ltx_td ltx_align_center">44.9</td></tr>
+<tr id="S4.T1.2.1.9" class="ltx_tr">
+<th id="S4.T1.2.1.9.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">LEIC (<math id="S4.T1.m2" class="ltx_Math" alttext="\tau_{b}" display="inline" intent=":literal"><semantics><msub><mi>τ</mi><mi>b</mi></msub><annotation encoding="application/x-tex">\tau_{b}</annotation></semantics></math>)* <cite class="ltx_cite ltx_citemacro_cite"><a href="#biba.bib3" title="" class="ltx_ref">Cui et al. (2018)</a></cite></th>
+<td id="S4.T1.2.1.9.2" class="ltx_td ltx_align_center">46.6</td></tr>
+<tr id="S4.T1.2.1.10" class="ltx_tr">
+<th id="S4.T1.2.1.10.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">BERT-S++ <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib65" title="" class="ltx_ref">Yi et al. (2020)</a></cite></th>
+<td id="S4.T1.2.1.10.2" class="ltx_td ltx_align_center">46.7</td></tr>
+<tr id="S4.T1.2.1.11" class="ltx_tr">
+<th id="S4.T1.2.1.11.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">TIGEr <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib20" title="" class="ltx_ref">Jiang et al. (2019)</a></cite></th>
+<td id="S4.T1.2.1.11.2" class="ltx_td ltx_align_center">49.3</td></tr>
+<tr id="S4.T1.2.1.12" class="ltx_tr">
+<th id="S4.T1.2.1.12.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">NUBIA * <cite class="ltx_cite ltx_citemacro_cite"><a href="#biba.bib4" title="" class="ltx_ref">Kane et al. (2020)</a></cite></th>
+<td id="S4.T1.2.1.12.2" class="ltx_td ltx_align_center">49.5</td></tr>
+<tr id="S4.T1.2.1.13" class="ltx_tr">
+<th id="S4.T1.2.1.13.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">ViLBERTScore-F <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib25" title="" class="ltx_ref">Lee et al. (2020)</a></cite></th>
+<td id="S4.T1.2.1.13.2" class="ltx_td ltx_align_center">50.1</td></tr>
+<tr id="S4.T1.2.1.14" class="ltx_tr">
+<th id="S4.T1.2.1.14.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">CLIP-S (no refs)</th>
+<td id="S4.T1.2.1.14.2" class="ltx_td ltx_align_center ltx_border_t">51.2</td></tr>
+<tr id="S4.T1.2.1.15" class="ltx_tr">
+<th id="S4.T1.2.1.15.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb">RefCLIP-S</th>
+<td id="S4.T1.2.1.15.2" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T1.2.1.15.2.1" class="ltx_text ltx_font_bold">53.0</span></td></tr>
+</tbody>
+</table>
+</span></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 1: </span>Flickr8K-Expert correlations with human judgment. All metrics use 4-5 ground truth references, except for CLIP-S (which uses none). * indicates a result reported in prior work.</figcaption>
+</figure>
+<section id="S4.SS1.SSS0.Px1" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Results</h4>
+
+<div id="S4.SS1.SSS0.Px1.p1" class="ltx_para">
+<p id="S4.SS1.SSS0.Px1.p1.1" class="ltx_p">The results for Flickr8K-Expert are given in <a href="#S4.T1" title="Table 1 ‣ 4.1 Caption-level likert judgments ‣ 4 Benchmark Captioning Evaluations ‣ CLIPScore:A Reference-free Evaluation Metric for Image Captioning" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Table 1</span></a>, for Flickr8K-CF are given in <a href="#S4.T2" title="Table 2 ‣ Results ‣ 4.1 Caption-level likert judgments ‣ 4 Benchmark Captioning Evaluations ‣ CLIPScore:A Reference-free Evaluation Metric for Image Captioning" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Table 2</span></a> (in <math id="S4.SS1.SSS0.Px1.p1.m1" class="ltx_Math" alttext="\tau_{b}" display="inline" intent=":literal"><semantics><msub><mi>τ</mi><mi>b</mi></msub><annotation encoding="application/x-tex">\tau_{b}</annotation></semantics></math>, following <cite class="ltx_cite ltx_citemacro_citet"><a href="#biba.bib3" title="" class="ltx_ref">Cui et al. (2018)</a></cite>), and for Composite are given in <a href="#S4.T3" title="Table 3 ‣ 4.3 System-level correlation for MSCOCO ‣ 4 Benchmark Captioning Evaluations ‣ CLIPScore:A Reference-free Evaluation Metric for Image Captioning" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Table 3</span></a>. For the caption-level corpora we consider, CLIP-S without references achieves higher correlation with human judgment compared to previously proposed metrics that rely on references. Additionally, in all cases, RefCLIP-S improves correlation even further. This provides strong evidence that, in terms of correlating with human judgment at the caption-level for these literal photographic image description tasks, a relatively direct application of CLIP can serve as a strong automatic evaluation metric.</p>
+</div>
+<figure id="S4.T2" class="ltx_table">
+<div id="S4.T2.2" class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:189.8pt;height:157.9pt;vertical-align:-75.7pt;"><span class="ltx_transformed_inner" style="transform:translate(21.8pt,-18.2pt) scale(1.29867583474648,1.29867583474648) ;">
+<table id="S4.T2.2.1" class="ltx_tabular ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S4.T2.2.1.1" class="ltx_tr">
+<th id="S4.T2.2.1.1.1" class="ltx_td ltx_th ltx_th_row ltx_border_tt"></th>
+<th id="S4.T2.2.1.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><math id="S4.T2.m1" class="ltx_Math" alttext="\tau_{b}" display="inline" intent=":literal"><semantics><msub><mi>τ</mi><mi>b</mi></msub><annotation encoding="application/x-tex">\tau_{b}</annotation></semantics></math></th></tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S4.T2.2.1.2" class="ltx_tr">
+<th id="S4.T2.2.1.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">BLEU-4</th>
+<td id="S4.T2.2.1.2.2" class="ltx_td ltx_align_center ltx_border_t">16.9</td></tr>
+<tr id="S4.T2.2.1.3" class="ltx_tr">
+<th id="S4.T2.2.1.3.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">CIDEr</th>
+<td id="S4.T2.2.1.3.2" class="ltx_td ltx_align_center">24.6</td></tr>
+<tr id="S4.T2.2.1.4" class="ltx_tr">
+<th id="S4.T2.2.1.4.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">METEOR</th>
+<td id="S4.T2.2.1.4.2" class="ltx_td ltx_align_center">22.2</td></tr>
+<tr id="S4.T2.2.1.5" class="ltx_tr">
+<th id="S4.T2.2.1.5.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">ROUGE-L</th>
+<td id="S4.T2.2.1.5.2" class="ltx_td ltx_align_center">19.9</td></tr>
+<tr id="S4.T2.2.1.6" class="ltx_tr">
+<th id="S4.T2.2.1.6.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">SPICE</th>
+<td id="S4.T2.2.1.6.2" class="ltx_td ltx_align_center">24.4</td></tr>
+<tr id="S4.T2.2.1.7" class="ltx_tr">
+<th id="S4.T2.2.1.7.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">BERT-S (RoBERTa-F)</th>
+<td id="S4.T2.2.1.7.2" class="ltx_td ltx_align_center">22.8</td></tr>
+<tr id="S4.T2.2.1.8" class="ltx_tr">
+<th id="S4.T2.2.1.8.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">LEIC *</th>
+<td id="S4.T2.2.1.8.2" class="ltx_td ltx_align_center">29.5</td></tr>
+<tr id="S4.T2.2.1.9" class="ltx_tr">
+<th id="S4.T2.2.1.9.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">CLIP-S (no refs)</th>
+<td id="S4.T2.2.1.9.2" class="ltx_td ltx_align_center ltx_border_t">34.4</td></tr>
+<tr id="S4.T2.2.1.10" class="ltx_tr">
+<th id="S4.T2.2.1.10.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb">RefCLIP-S</th>
+<td id="S4.T2.2.1.10.2" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T2.2.1.10.2.1" class="ltx_text ltx_font_bold">36.4</span></td></tr>
+</tbody>
+</table>
+</span></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 2: </span>Flickr8K-CF correlations with human judgment. * indicates a result reported in prior work.</figcaption>
+</figure>
+</section>
+</section>
+<section id="S4.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.2 </span>Pairwise ranking on Pascal-50S</h3>
+
+<div id="S4.SS2.p1" class="ltx_para">
+<p id="S4.SS2.p1.1" class="ltx_p">In Pascal-50S <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib60" title="" class="ltx_ref">Vedantam et al. (2015)</a></cite>, raters made pairwise preference judgments between pairs of sentences. There are 4K sentence pairs total, split evenly across four categories, e.g., two human captions, two machine captions, etc. For each pair, 48 human pairwise judgments were gathered.<span id="footnote8" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">8</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">8</sup>
+              <span class="ltx_tag ltx_tag_note">8</span>
+              
+              
+              
+            Instead of being presented with the image, annotators were presented only with a reference (and the two candidates to rank).</span></span></span> Following prior work, instead of computing correlation coefficients, we compute accuracy, i.e., we consider the caption preferred by a majority of annotators to be correct, and measure how often the evaluation metric assigns a higher score to that member of the pair. Ties are broken randomly. Due to random selection of 5 references among the 48 candidates to serve as ground-truth for the reference-based metrics, the results may differ slightly from prior work (we average over 5 random draws of references).</p>
+</div>
+<div id="S4.SS2.p2" class="ltx_para">
+<p id="S4.SS2.p2.1" class="ltx_p">The results are given in <a href="#S4.T4" title="Table 4 ‣ 4.3 System-level correlation for MSCOCO ‣ 4 Benchmark Captioning Evaluations ‣ CLIPScore:A Reference-free Evaluation Metric for Image Captioning" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Table 4</span></a>. Evaluation is split across four categories of caption pairs (detailed in the table caption). CLIP-S and RefCLIP-S generally achieve high performance in all categories.</p>
+</div>
+</section>
+<section id="S4.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.3 </span>System-level correlation for MSCOCO</h3>
+
+<div id="S4.SS3.p1" class="ltx_para">
+<p id="S4.SS3.p1.1" class="ltx_p">CLIP-S achieves high correlation with human judgments at the system-level as well: we evaluate the outputs of systems submitted to the 2015 MSCOCO Image Captioning Challenge <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib61" title="" class="ltx_ref">Vinyals et al. (2016)</a></cite>. We have some concerns with standard evaluation setup on this corpus, mostly related to the fact that it consists of only 12 datapoints (see supplementary for more discussion). Nonetheless, following the standard procedure, we correlate CLIP-S and RefCLIP-S with two metrics: “the percentage of captions that are evaluated as better or equal to a human caption (M1)" and percentage of captions that pass the “Turing Test" (M2), respectively. CLIP-S achieves Spearman <math id="S4.SS3.p1.m1" class="ltx_Math" alttext="\rho_{M1}/\rho_{M2}=.59/.63" display="inline" intent=":literal"><semantics><mrow><mrow><msub><mi>ρ</mi><mrow><mi>M</mi><mo lspace="0em" rspace="0em">​</mo><mn>1</mn></mrow></msub><mo>/</mo><msub><mi>ρ</mi><mrow><mi>M</mi><mo lspace="0em" rspace="0em">​</mo><mn>2</mn></mrow></msub></mrow><mo>=</mo><mrow><mn>.59</mn><mo>/</mo><mn>.63</mn></mrow></mrow><annotation encoding="application/x-tex">\rho_{M1}/\rho_{M2}=.59/.63</annotation></semantics></math> and RefCLIP-S achieves <math id="S4.SS3.p1.m2" class="ltx_Math" alttext="\rho_{M1}/\rho_{M2}=.69/.74" display="inline" intent=":literal"><semantics><mrow><mrow><msub><mi>ρ</mi><mrow><mi>M</mi><mo lspace="0em" rspace="0em">​</mo><mn>1</mn></mrow></msub><mo>/</mo><msub><mi>ρ</mi><mrow><mi>M</mi><mo lspace="0em" rspace="0em">​</mo><mn>2</mn></mrow></msub></mrow><mo>=</mo><mrow><mn>.69</mn><mo>/</mo><mn>.74</mn></mrow></mrow><annotation encoding="application/x-tex">\rho_{M1}/\rho_{M2}=.69/.74</annotation></semantics></math> (all <math id="S4.SS3.p1.m3" class="ltx_Math" alttext="p&lt;.05" display="inline" intent=":literal"><semantics><mrow><mi>p</mi><mo>&lt;</mo><mn>.05</mn></mrow><annotation encoding="application/x-tex">p&lt;.05</annotation></semantics></math>) with these system-level metrics.</p>
+</div>
+<figure id="S4.T3" class="ltx_table">
+<table id="S4.T3.2" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S4.T3.2.1" class="ltx_tr">
+<th id="S4.T3.2.1.1" class="ltx_td ltx_th ltx_th_row ltx_border_tt"></th>
+<th id="S4.T3.2.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><math id="S4.T3.m1" class="ltx_Math" alttext="\tau_{c}" display="inline" intent=":literal"><semantics><msub><mi>τ</mi><mi>c</mi></msub><annotation encoding="application/x-tex">\tau_{c}</annotation></semantics></math></th></tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S4.T3.2.2" class="ltx_tr">
+<th id="S4.T3.2.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">BLEU-1</th>
+<td id="S4.T3.2.2.2" class="ltx_td ltx_align_center ltx_border_t">31.3</td></tr>
+<tr id="S4.T3.2.3" class="ltx_tr">
+<th id="S4.T3.2.3.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">BLEU-4</th>
+<td id="S4.T3.2.3.2" class="ltx_td ltx_align_center">30.6</td></tr>
+<tr id="S4.T3.2.4" class="ltx_tr">
+<th id="S4.T3.2.4.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">ROUGE-L</th>
+<td id="S4.T3.2.4.2" class="ltx_td ltx_align_center">32.4</td></tr>
+<tr id="S4.T3.2.5" class="ltx_tr">
+<th id="S4.T3.2.5.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">BERT-S (RoBERTa-F)</th>
+<td id="S4.T3.2.5.2" class="ltx_td ltx_align_center">30.1</td></tr>
+<tr id="S4.T3.2.6" class="ltx_tr">
+<th id="S4.T3.2.6.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">METEOR</th>
+<td id="S4.T3.2.6.2" class="ltx_td ltx_align_center">38.9</td></tr>
+<tr id="S4.T3.2.7" class="ltx_tr">
+<th id="S4.T3.2.7.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">CIDEr</th>
+<td id="S4.T3.2.7.2" class="ltx_td ltx_align_center">37.7</td></tr>
+<tr id="S4.T3.2.8" class="ltx_tr">
+<th id="S4.T3.2.8.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">SPICE</th>
+<td id="S4.T3.2.8.2" class="ltx_td ltx_align_center">40.3</td></tr>
+<tr id="S4.T3.2.9" class="ltx_tr">
+<th id="S4.T3.2.9.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">BERT-S++ *</th>
+<td id="S4.T3.2.9.2" class="ltx_td ltx_align_center">44.9</td></tr>
+<tr id="S4.T3.2.10" class="ltx_tr">
+<th id="S4.T3.2.10.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">TIGEr</th>
+<td id="S4.T3.2.10.2" class="ltx_td ltx_align_center">45.4</td></tr>
+<tr id="S4.T3.2.11" class="ltx_tr">
+<th id="S4.T3.2.11.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">ViLBERTScore-F</th>
+<td id="S4.T3.2.11.2" class="ltx_td ltx_align_center">52.4</td></tr>
+<tr id="S4.T3.2.12" class="ltx_tr">
+<th id="S4.T3.2.12.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">CLIP-S (no refs)</th>
+<td id="S4.T3.2.12.2" class="ltx_td ltx_align_center ltx_border_t">53.8</td></tr>
+<tr id="S4.T3.2.13" class="ltx_tr">
+<th id="S4.T3.2.13.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb">RefCLIP-S</th>
+<td id="S4.T3.2.13.2" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T3.2.13.2.1" class="ltx_text ltx_font_bold">55.4</span></td></tr>
+</tbody>
+</table>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 3: </span>Composite correlations with human judgment. All metrics use between 4 and 5 ground truth references, except for CLIP-S (which uses none). In contrast to some prior work, we consider a harder setting, and remove the candidate from the reference set (see <a href="#A1" title="Appendix A Evaluation and Replication Details ‣ CLIPScore:A Reference-free Evaluation Metric for Image Captioning" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Appendix A</span></a> for details; for comparison purposes, RefCLIP-S achieves <math id="S4.T3.m3" class="ltx_Math" alttext="\tau_{c}=60.0" display="inline" intent=":literal"><semantics><mrow><msub><mi>τ</mi><mi>c</mi></msub><mo>=</mo><mn>60.0</mn></mrow><annotation encoding="application/x-tex">\tau_{c}=60.0</annotation></semantics></math> in the easier setting). * indicates a result reported in prior work.</figcaption>
+</figure>
+<figure id="S4.T4" class="ltx_table">
+<div id="S4.T4.2" class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:345.0pt;height:192.7pt;vertical-align:-93.3pt;"><span class="ltx_transformed_inner" style="transform:translate(31.0pt,-17.3pt) scale(1.21932156406128,1.21932156406128) ;">
+<table id="S4.T4.2.1" class="ltx_tabular ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S4.T4.2.1.1" class="ltx_tr">
+<th id="S4.T4.2.1.1.1" class="ltx_td ltx_th ltx_th_column ltx_th_row ltx_border_tt"></th>
+<th id="S4.T4.2.1.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt">HC</th>
+<th id="S4.T4.2.1.1.3" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt">HI</th>
+<th id="S4.T4.2.1.1.4" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt">HM</th>
+<th id="S4.T4.2.1.1.5" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r ltx_border_tt">MM</th>
+<th id="S4.T4.2.1.1.6" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt">Mean</th></tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S4.T4.2.1.2" class="ltx_tr">
+<th id="S4.T4.2.1.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">length</th>
+<td id="S4.T4.2.1.2.2" class="ltx_td ltx_align_center ltx_border_t">51.7</td>
+<td id="S4.T4.2.1.2.3" class="ltx_td ltx_align_center ltx_border_t">52.3</td>
+<td id="S4.T4.2.1.2.4" class="ltx_td ltx_align_center ltx_border_t">63.6</td>
+<td id="S4.T4.2.1.2.5" class="ltx_td ltx_align_center ltx_border_r ltx_border_t">49.6</td>
+<td id="S4.T4.2.1.2.6" class="ltx_td ltx_align_center ltx_border_t">54.3</td></tr>
+<tr id="S4.T4.2.1.3" class="ltx_tr">
+<th id="S4.T4.2.1.3.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">BLEU-4</th>
+<td id="S4.T4.2.1.3.2" class="ltx_td ltx_align_center">60.4</td>
+<td id="S4.T4.2.1.3.3" class="ltx_td ltx_align_center">90.6</td>
+<td id="S4.T4.2.1.3.4" class="ltx_td ltx_align_center">84.9</td>
+<td id="S4.T4.2.1.3.5" class="ltx_td ltx_align_center ltx_border_r">54.7</td>
+<td id="S4.T4.2.1.3.6" class="ltx_td ltx_align_center">72.6</td></tr>
+<tr id="S4.T4.2.1.4" class="ltx_tr">
+<th id="S4.T4.2.1.4.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">SPICE</th>
+<td id="S4.T4.2.1.4.2" class="ltx_td ltx_align_center">63.6</td>
+<td id="S4.T4.2.1.4.3" class="ltx_td ltx_align_center">96.3</td>
+<td id="S4.T4.2.1.4.4" class="ltx_td ltx_align_center">86.7</td>
+<td id="S4.T4.2.1.4.5" class="ltx_td ltx_align_center ltx_border_r">68.3</td>
+<td id="S4.T4.2.1.4.6" class="ltx_td ltx_align_center">78.7</td></tr>
+<tr id="S4.T4.2.1.5" class="ltx_tr">
+<th id="S4.T4.2.1.5.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">METEOR</th>
+<td id="S4.T4.2.1.5.2" class="ltx_td ltx_align_center">63.8</td>
+<td id="S4.T4.2.1.5.3" class="ltx_td ltx_align_center">97.7</td>
+<td id="S4.T4.2.1.5.4" class="ltx_td ltx_align_center">93.7</td>
+<td id="S4.T4.2.1.5.5" class="ltx_td ltx_align_center ltx_border_r">65.4</td>
+<td id="S4.T4.2.1.5.6" class="ltx_td ltx_align_center">80.1</td></tr>
+<tr id="S4.T4.2.1.6" class="ltx_tr">
+<th id="S4.T4.2.1.6.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">ROUGE-L</th>
+<td id="S4.T4.2.1.6.2" class="ltx_td ltx_align_center">63.7</td>
+<td id="S4.T4.2.1.6.3" class="ltx_td ltx_align_center">95.3</td>
+<td id="S4.T4.2.1.6.4" class="ltx_td ltx_align_center">92.3</td>
+<td id="S4.T4.2.1.6.5" class="ltx_td ltx_align_center ltx_border_r">61.2</td>
+<td id="S4.T4.2.1.6.6" class="ltx_td ltx_align_center">78.1</td></tr>
+<tr id="S4.T4.2.1.7" class="ltx_tr">
+<th id="S4.T4.2.1.7.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">CIDEr</th>
+<td id="S4.T4.2.1.7.2" class="ltx_td ltx_align_center">65.1</td>
+<td id="S4.T4.2.1.7.3" class="ltx_td ltx_align_center">98.1</td>
+<td id="S4.T4.2.1.7.4" class="ltx_td ltx_align_center">90.5</td>
+<td id="S4.T4.2.1.7.5" class="ltx_td ltx_align_center ltx_border_r">64.8</td>
+<td id="S4.T4.2.1.7.6" class="ltx_td ltx_align_center">79.6</td></tr>
+<tr id="S4.T4.2.1.8" class="ltx_tr">
+<th id="S4.T4.2.1.8.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">BERT-S (RoBERTa-F)</th>
+<td id="S4.T4.2.1.8.2" class="ltx_td ltx_align_center">65.4</td>
+<td id="S4.T4.2.1.8.3" class="ltx_td ltx_align_center">96.2</td>
+<td id="S4.T4.2.1.8.4" class="ltx_td ltx_align_center">93.3</td>
+<td id="S4.T4.2.1.8.5" class="ltx_td ltx_align_center ltx_border_r">61.4</td>
+<td id="S4.T4.2.1.8.6" class="ltx_td ltx_align_center">79.1</td></tr>
+<tr id="S4.T4.2.1.9" class="ltx_tr">
+<th id="S4.T4.2.1.9.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">TIGEr *</th>
+<td id="S4.T4.2.1.9.2" class="ltx_td ltx_align_center ltx_border_t">56.0</td>
+<td id="S4.T4.2.1.9.3" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T4.2.1.9.3.1" class="ltx_text ltx_font_bold">99.8</span></td>
+<td id="S4.T4.2.1.9.4" class="ltx_td ltx_align_center ltx_border_t">92.8</td>
+<td id="S4.T4.2.1.9.5" class="ltx_td ltx_align_center ltx_border_r ltx_border_t">74.2</td>
+<td id="S4.T4.2.1.9.6" class="ltx_td ltx_align_center ltx_border_t">80.7</td></tr>
+<tr id="S4.T4.2.1.10" class="ltx_tr">
+<th id="S4.T4.2.1.10.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">ViLBERTScore-F *</th>
+<td id="S4.T4.2.1.10.2" class="ltx_td ltx_align_center">49.9</td>
+<td id="S4.T4.2.1.10.3" class="ltx_td ltx_align_center">99.6</td>
+<td id="S4.T4.2.1.10.4" class="ltx_td ltx_align_center">93.1</td>
+<td id="S4.T4.2.1.10.5" class="ltx_td ltx_align_center ltx_border_r"><span id="S4.T4.2.1.10.5.1" class="ltx_text ltx_font_bold">75.8</span></td>
+<td id="S4.T4.2.1.10.6" class="ltx_td ltx_align_center">79.6</td></tr>
+<tr id="S4.T4.2.1.11" class="ltx_tr">
+<th id="S4.T4.2.1.11.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">BERT-S++ *</th>
+<td id="S4.T4.2.1.11.2" class="ltx_td ltx_align_center"><span id="S4.T4.2.1.11.2.1" class="ltx_text ltx_font_bold">65.4</span></td>
+<td id="S4.T4.2.1.11.3" class="ltx_td ltx_align_center">98.1</td>
+<td id="S4.T4.2.1.11.4" class="ltx_td ltx_align_center"><span id="S4.T4.2.1.11.4.1" class="ltx_text ltx_font_bold">96.4</span></td>
+<td id="S4.T4.2.1.11.5" class="ltx_td ltx_align_center ltx_border_r">60.3</td>
+<td id="S4.T4.2.1.11.6" class="ltx_td ltx_align_center">80.1</td></tr>
+<tr id="S4.T4.2.1.12" class="ltx_tr">
+<th id="S4.T4.2.1.12.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">CLIP-S (no refs)</th>
+<td id="S4.T4.2.1.12.2" class="ltx_td ltx_align_center ltx_border_t">56.5</td>
+<td id="S4.T4.2.1.12.3" class="ltx_td ltx_align_center ltx_border_t">99.3</td>
+<td id="S4.T4.2.1.12.4" class="ltx_td ltx_align_center ltx_border_t"><span id="S4.T4.2.1.12.4.1" class="ltx_text ltx_font_bold">96.4</span></td>
+<td id="S4.T4.2.1.12.5" class="ltx_td ltx_align_center ltx_border_r ltx_border_t">70.4</td>
+<td id="S4.T4.2.1.12.6" class="ltx_td ltx_align_center ltx_border_t">80.7</td></tr>
+<tr id="S4.T4.2.1.13" class="ltx_tr">
+<th id="S4.T4.2.1.13.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb">RefCLIP-S</th>
+<td id="S4.T4.2.1.13.2" class="ltx_td ltx_align_center ltx_border_bb">64.5</td>
+<td id="S4.T4.2.1.13.3" class="ltx_td ltx_align_center ltx_border_bb">99.6</td>
+<td id="S4.T4.2.1.13.4" class="ltx_td ltx_align_center ltx_border_bb">95.4</td>
+<td id="S4.T4.2.1.13.5" class="ltx_td ltx_align_center ltx_border_bb ltx_border_r">72.8</td>
+<td id="S4.T4.2.1.13.6" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T4.2.1.13.6.1" class="ltx_text ltx_font_bold">83.1</span></td></tr>
+</tbody>
+</table>
+</span></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 4: </span>Pascal50S accuracy results (5 references). HC = two human correct captions; HI = both captions are human written, but one is wrong; HM = both captions are for the image, but one is written by a human, one by an algorithm; MM = both captions are for the image, and both are written by an algorithm. * indicates a result reported in prior work: the comparability of our results to *-rows is subject to the (arbitrary) sample of references. We average our results over 5 random samples (but CLIP-S doesn’t change because it doesn’t use references). </figcaption>
+</figure>
+<figure id="S4.T5" class="ltx_table">
+<table id="S4.T5.2" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<tbody class="ltx_tbody">
+<tr id="S4.T5.2.1" class="ltx_tr">
+<th id="S4.T5.2.1.1" class="ltx_td ltx_th ltx_th_row ltx_border_tt"></th>
+<td id="S4.T5.2.1.2" class="ltx_td ltx_align_center ltx_border_tt">1-ref</td>
+<td id="S4.T5.2.1.3" class="ltx_td ltx_align_center ltx_border_tt">4-ref</td></tr>
+<tr id="S4.T5.2.2" class="ltx_tr">
+<th id="S4.T5.2.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">length</th>
+<td id="S4.T5.2.2.2" class="ltx_td ltx_align_center ltx_border_t">50.2</td>
+<td id="S4.T5.2.2.3" class="ltx_td ltx_align_center ltx_border_t">50.2</td></tr>
+<tr id="S4.T5.2.3" class="ltx_tr">
+<th id="S4.T5.2.3.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">BLEU-4</th>
+<td id="S4.T5.2.3.2" class="ltx_td ltx_align_center">66.5</td>
+<td id="S4.T5.2.3.3" class="ltx_td ltx_align_center">82.6</td></tr>
+<tr id="S4.T5.2.4" class="ltx_tr">
+<th id="S4.T5.2.4.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">METEOR</th>
+<td id="S4.T5.2.4.2" class="ltx_td ltx_align_center">78.8</td>
+<td id="S4.T5.2.4.3" class="ltx_td ltx_align_center">85.4</td></tr>
+<tr id="S4.T5.2.5" class="ltx_tr">
+<th id="S4.T5.2.5.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">ROUGE-L</th>
+<td id="S4.T5.2.5.2" class="ltx_td ltx_align_center">71.7</td>
+<td id="S4.T5.2.5.3" class="ltx_td ltx_align_center">79.3</td></tr>
+<tr id="S4.T5.2.6" class="ltx_tr">
+<th id="S4.T5.2.6.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">CIDEr</th>
+<td id="S4.T5.2.6.2" class="ltx_td ltx_align_center">82.5</td>
+<td id="S4.T5.2.6.3" class="ltx_td ltx_align_center">90.6</td></tr>
+<tr id="S4.T5.2.7" class="ltx_tr">
+<th id="S4.T5.2.7.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">SPICE</th>
+<td id="S4.T5.2.7.2" class="ltx_td ltx_align_center">75.5</td>
+<td id="S4.T5.2.7.3" class="ltx_td ltx_align_center">86.1</td></tr>
+<tr id="S4.T5.2.8" class="ltx_tr">
+<th id="S4.T5.2.8.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">BERT-S (RoBERTa-F)</th>
+<td id="S4.T5.2.8.2" class="ltx_td ltx_align_center">88.6</td>
+<td id="S4.T5.2.8.3" class="ltx_td ltx_align_center">92.1</td></tr>
+<tr id="S4.T5.2.9" class="ltx_tr">
+<th id="S4.T5.2.9.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">CLIP-S (no refs)</th>
+<td id="S4.T5.2.9.2" class="ltx_td ltx_align_center ltx_border_t">87.2</td>
+<td id="S4.T5.2.9.3" class="ltx_td ltx_align_center ltx_border_t">87.2</td></tr>
+<tr id="S4.T5.2.10" class="ltx_tr">
+<th id="S4.T5.2.10.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb">RefCLIP-S</th>
+<td id="S4.T5.2.10.2" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T5.2.10.2.1" class="ltx_text ltx_font_bold">91.0</span></td>
+<td id="S4.T5.2.10.3" class="ltx_td ltx_align_center ltx_border_bb"><span id="S4.T5.2.10.3.1" class="ltx_text ltx_font_bold">92.6</span></td></tr>
+</tbody>
+</table>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 5: </span>Accuracy of evaluation metrics in the pairwise FOIL hallucination detection setting. All reference-based metrics are given access to either one or four references.</figcaption>
+</figure>
+</section>
+<section id="S4.SS4" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.4 </span>Sensitivity of CLIP-S to hallucination</h3>
+
+<div id="S4.SS4.p1" class="ltx_para">
+<p id="S4.SS4.p1.1" class="ltx_p">Prior work has demonstrated that, for many literal description tasks, humans often prefer <em id="S4.SS4.p1.1.1" class="ltx_emph ltx_font_italic">correctness</em> in captions over specificity <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib48" title="" class="ltx_ref">Rohrbach et al. (2018)</a>; <a href="#bib.bib49" title="" class="ltx_ref">Rohrbach et al. (2017)</a></cite>.<span id="footnote9" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">9</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">9</sup>
+              <span class="ltx_tag ltx_tag_note">9</span>
+              
+              
+              
+            This is not always the case: <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib36" title="" class="ltx_ref">MacLeod et al. (2017)</a></cite> show there is a range of opinion among a sample of low vision and blind users of social media.</span></span></span> Thus, understanding if and how evaluation metrics handle image captions that contain incorrect “hallucinations," e.g., references to objects that are not depicted, is important. We use a sample of image captions from the FOIL dataset, constructed by <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib51" title="" class="ltx_ref">Shekhar et al. (2017)</a></cite>, to test how sensitive CLIP-S is to detecting potentially subtle inaccurate details in descriptions. This corpus consists of modified reference captions from MSCOCO that have a single noun-phrase adversarially swapped out to make the FOIL caption incorrect, e.g., switching “motorcycle" for “bicycle".</p>
+</div>
+<div id="S4.SS4.p2" class="ltx_para">
+<p id="S4.SS4.p2.1" class="ltx_p">To adapt the corpus to our setting, for each of the 32K test images, we sample a (FOIL, true) pair, and compute the accuracy of each evaluation metric in their capacity to assign a higher score to the true candidate versus the FOIL. To compute reference-based metrics, we give access to the MSCOCO reference captions for the image (excluding the the true candidate being assessed against the FOIL). While the paired setting we consider isn’t identical, <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib51" title="" class="ltx_ref">Shekhar et al. (2017)</a></cite> estimate roughly 92% human agreement on the unpaired version of the task, relative to a 50/50 random guessing baseline.</p>
+</div>
+<div id="S4.SS4.p3" class="ltx_para">
+<p id="S4.SS4.p3.1" class="ltx_p"><a href="#S4.T5" title="Table 5 ‣ 4.3 System-level correlation for MSCOCO ‣ 4 Benchmark Captioning Evaluations ‣ CLIPScore:A Reference-free Evaluation Metric for Image Captioning" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Table 5</span></a> contains the results. In this setting, having access to more annotation is quite helpful for reference based metrics, e.g., the accuracy of SPICE and BLEU-4 increase by over ten points when shifting from one to four references. But in the reference-limited setting, CLIP-S, without <em id="S4.SS4.p3.1.1" class="ltx_emph ltx_font_italic">any</em> reference outperforms all metrics except for BERT-S (RoBERTa-F). And, RefCLIP-S works best in all cases.</p>
+</div>
+<div id="S4.SS4.p4" class="ltx_para">
+<p id="S4.SS4.p4.1" class="ltx_p">Overall, we corroborate <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib48" title="" class="ltx_ref">Rohrbach et al. (2018)</a></cite>’s finding that “object hallucination can not be always predicted
+based on the traditional sentence metrics" using a corpus derived from <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib51" title="" class="ltx_ref">Shekhar et al. (2017)</a></cite>, particularly in the case where there are few references available. However, CLIP-S and RefCLIP-S offer a performance improvement in the pairwise setting.</p>
+</div>
+</section>
+<section id="S4.SS5" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.5 </span>Sensitivity of CLIP-S to memorization</h3>
+
+<div id="S4.SS5.p1" class="ltx_para">
+<p id="S4.SS5.p1.1" class="ltx_p">One concern with model-based scoring methods is memorization, i.e., if a model’s weights are pre-trained using a large corpus, there’s a risk that data used at evaluation time have already been seen at pretraining time. While <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib46" title="" class="ltx_ref">Radford et al. (2021)</a></cite> conduct a train-test overlap analysis and find that CLIP is unlikely to succeed because of memorization, we nonetheless conduct an experiment with images CLIP has never seen before.</p>
+</div>
+<div id="S4.SS5.p2" class="ltx_para">
+<p id="S4.SS5.p2.1" class="ltx_p">The authors of this work created a set of 250 images that have never been posted to the Internet by aggregating personal photographs. The set contains a variety of Flickr-like situations, e.g., nature scenes, animals, city streets, objects, etc. For each image, we collect two automatically generated captions: one from a commercial API, Microsoft Azure Cognitive Services (v 3.1)<span id="footnote10" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">10</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">10</sup>
+              <span class="ltx_tag ltx_tag_note">10</span>
+              
+              
+              
+            <a href="https://azure.microsoft.com/en-us/services/cognitive-services/" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://azure.microsoft.com/en-us/services/cognitive-services/</a></span></span></span> and one from <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib35" title="" class="ltx_ref">Luo et al. (2018)</a></cite>’s pretrained model, which is trained to maximize CIDEr score with a self-critical baseline.<span id="footnote11" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">11</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">11</sup>
+              <span class="ltx_tag ltx_tag_note">11</span>
+              
+              
+              
+            We use the ResNet101 pretrained version, which achieves 1.05 CIDEr and 0.19 SPICE on the COCO validation set.</span></span></span> Then, for each image, three authors of this work independently selected which caption described the image content more accurately. Relative to a 50% random baseline (and a 72% length baseline of selecting the <em id="S4.SS5.p2.1.1" class="ltx_emph ltx_font_italic">shorter</em> caption) CLIP-S correctly recovers majority human preference in 86% of cases. Human agreement for this corpus is 93%.<span id="footnote12" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">12</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">12</sup>
+              <span class="ltx_tag ltx_tag_note">12</span>
+              
+              
+              
+            Raters preferred the Microsoft captions to the ResNet101 model 81% of the time.</span></span></span></p>
+</div>
+<div id="S4.SS5.p3" class="ltx_para">
+<p id="S4.SS5.p3.1" class="ltx_p">While this setup cannot definitively refute the notion that CLIP works well because it has memorized images, we hope the results here contribute to the evolving discussion about the nature of generalization for web-scale pretrained models.</p>
+</div>
+</section>
+<section id="S4.SS6" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.6 </span>Which metrics should I report?</h3>
+
+<figure id="S4.F2" class="ltx_figure">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_2">
+<figure id="S4.F2.sf1" class="ltx_figure ltx_figure_panel"><object type="image/svg+xml" data="2104.08718v3/composite_correctness_withoutGT_with_metrics-crop.svg" id="S4.F2.sf1.g1" class="ltx_graphics ltx_centering ltx_img_square" style="aspect-ratio:467/468;" width="467" height="468"></object>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">(a) </span>Composite</figcaption>
+</figure></div><div class="ltx_flex_cell ltx_flex_size_2">
+<figure id="S4.F2.sf2" class="ltx_figure ltx_figure_panel"><object type="image/svg+xml" data="2104.08718v3/flickr8k_with_metrics-crop.svg" id="S4.F2.sf2.g1" class="ltx_graphics ltx_centering ltx_img_square" style="aspect-ratio:467/468;" width="467" height="468"></object>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">(b) </span>Flickr8k-Expert</figcaption>
+</figure></div></div>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure">Figure 2: </span><math id="S4.F2.m2" class="ltx_Math" alttext="R^{2}" display="inline" intent=":literal"><semantics><msup><mi>R</mi><mn>2</mn></msup><annotation encoding="application/x-tex">R^{2}</annotation></semantics></math> for the forward-selection regression of metrics on human Likert ratings for two corpora. Foward-selection tends to identify both <span id="S4.F2.4" class="ltx_text ltx_font_bold" style="--ltx-fg-color:#5E3C99;"> CLIP-S</span> and <span id="S4.F2.5" class="ltx_text ltx_font_bold" style="--ltx-fg-color:#E66101;"> RefCLIP-S</span> early-on: other informative and complementary metrics include ViLBERTScore-F and SPICE.</figcaption>
+</figure>
+<div id="S4.SS6.p1" class="ltx_para">
+<p id="S4.SS6.p1.1" class="ltx_p">Most caption generation works report multiple metrics, each of which (presumably) correlates with human judgment to different degrees. But it’s not always clear if individual metrics capture distinct or redundant dimensions of human judgment. For example, while CLIP-S and ViLBERTScore-F both produce high correlations, are they redundant or complementary?</p>
+</div>
+<div id="S4.SS6.p2" class="ltx_para">
+<p id="S4.SS6.p2.1" class="ltx_p">We seek a (minimal) set of metrics that explains the most variance in human judgment. To find this set, we undertake a forward selection on a set of ten candidate metrics comprising six widely-reported metrics,<span id="footnote13" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">13</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">13</sup>
+              <span class="ltx_tag ltx_tag_note">13</span>
+              
+              
+              
+            BLEU-1, BLEU-4, METEOR, CIDEr, ROUGE-L, SPICE </span></span></span> and four newer metrics,
+BERT-S (RoBERTa-F), TIGEr, ViLBERTScore-F, and CLIP-S (we also include experiments starting with RefCLIP-S instead of CLIP-S, too).
+Starting from an empty set, we perform an iterative greedy selection by picking the most informative additional metric to add.<span id="footnote14" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">14</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">14</sup>
+              <span class="ltx_tag ltx_tag_note">14</span>
+              
+              
+              
+            Our criteria is how much additional <math id="footnote14.m1" class="ltx_Math" alttext="R^{2}" display="inline" intent=":literal"><semantics><msup><mi>R</mi><mn>2</mn></msup><annotation encoding="application/x-tex">R^{2}</annotation></semantics></math> correlation with human judgment a metric adds according to a linear regression. We use <span id="footnote14.2" class="ltx_text ltx_font_typewriter">sklearn</span> <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib43" title="" class="ltx_ref">Pedregosa et al. (2011)</a></cite>’s forward selection, which applies 5-fold cross-validation at each step.</span></span></span> To estimate variance, we repeat the forward-selection process 10 times with bootstrap re-sampled versions of the corpus.</p>
+</div>
+<div id="S4.SS6.p3" class="ltx_para">
+<p id="S4.SS6.p3.1" class="ltx_p"><a href="#S4.F2" title="Figure 2 ‣ 4.6 Which metrics should I report? ‣ 4 Benchmark Captioning Evaluations ‣ CLIPScore:A Reference-free Evaluation Metric for Image Captioning" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Figure 2</span></a> shows the information gain that results from running this experiment on the Composite and Flickr8K-Expert corpora; we also show which metric is most commonly selected at each iteration (earlier = more information gain). For Composite, CLIP-S (or RefCLIP-S) is always selected first, followed by ViLBERTScore-F, and then (most commonly) BERT-S (RoBERTa-F). For Flickr8k-Expert, the top three choices are always CLIP-S (or RefCLIP-S), ViLBERTScore-F, and SPICE. While CLIP-S and ViLBERTScore-F tend to be the most informative metrics, (1) while they are correlated, they are not purely redundant; and (2) image-unaware, reference-based metrics like SPICE can still be useful.</p>
+</div>
+<div id="S4.SS6.p4" class="ltx_para">
+<p id="S4.SS6.p4.1" class="ltx_p">In summary, these results suggest that evaluation metrics like CLIP-S, which take into account visual content, indeed capture axes of human judgment not currently covered by text-only reference-based metrics. <em id="S4.SS6.p4.1.1" class="ltx_emph ltx_font_italic">For the literal image description evaluation settings we consider, a reasonable mix of metrics to report is at least one image-aware metric (e.g., CLIP-S) plus a strong reference-only metric (e.g., SPICE).</em></p>
+</div>
+</section>
+</section>
+<section id="S5" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">5 </span>Case Studies Using <span id="S5.2" class="ltx_text ltx_font_typewriter">CLIPScore</span></h2>
+
+<div id="S5.p1" class="ltx_para">
+<p id="S5.p1.1" class="ltx_p">Our results thus far have demonstrated that CLIP encodes information useful for evaluating literal image description tasks. But, reference-based metrics may <em id="S5.p1.1.1" class="ltx_emph ltx_font_italic">a priori</em> seem more adaptable versus CLIP-S. Does CLIP-S correlate with human judgment beyond cases like MSCOCO and Flickr8K?</p>
+</div>
+<div id="S5.p2" class="ltx_para">
+<p id="S5.p2.1" class="ltx_p">To address this question, we consider four case studies, exploring the correlation between CLIP-S and human judgment across “divergent" image description datasets. These corpora qualitatively differ from the more popular domains explored in §<a href="#S4" title="4 Benchmark Captioning Evaluations ‣ CLIPScore:A Reference-free Evaluation Metric for Image Captioning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>, either because the images are not “everyday" images from Flickr, or because the captions are not literal description (<a href="#S5.F3" title="Figure 3 ‣ 5.1 Alt-Text ratings from Twitter ‣ 5 Case Studies Using CLIPScore ‣ CLIPScore:A Reference-free Evaluation Metric for Image Captioning" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Figure 3</span></a> illustrates).</p>
+</div>
+<section id="S5.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">5.1 </span>Alt-Text ratings from Twitter</h3>
+
+<div id="S5.SS1.p1" class="ltx_para">
+<p id="S5.SS1.p1.1" class="ltx_p">When uploading an image alongside a tweet, users of Twitter have the option of providing alternative text: while few use this feature (<cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib15" title="" class="ltx_ref">Gleason et al. (2019)</a></cite> find that fewer than .1% of image tweets have alt-text), its broader adoption might someday make social media more accessible for low vision and blind users. We measure CLIP-S’s capacity to reconstruct a set of 2.8K human judgments of alt-text quality. This corpus was collected and rated by the authors of <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib15" title="" class="ltx_ref">Gleason et al. (2019)</a>; <a href="#bib.bib16" title="" class="ltx_ref">Gleason et al. (2020)</a></cite>. Each alt-text was rated on a scale of 0 to 3 in terms of its probable utility as an alt-text. While the human-raters raters themselves are sighted thus cannot directly assess the utility of a given alt-text to a low vision or blind user, they are experts in designing and evaluating alt-text systems. Tweets were sampled from a mix of the Twitter FireHose API, and the timelines of low vision and blind users of the site. The images, qualitatively, are a broader mix of web content in comparison to Flickr-like domains, e.g., screenshots, memes, etc. Alt-text candidates are a mix of user-uploaded and machine-generated. The corpus contains no references, but for the purposes of comparison to reference-based metrics, we (programmatically) treat any textual context of the tweet as a reference.</p>
+</div>
+<div id="S5.SS1.p2" class="ltx_para">
+<p id="S5.SS1.p2.1" class="ltx_p">CLIP-S achieves 48.4 <math id="S5.SS1.p2.m1" class="ltx_Math" alttext="\tau_{c}" display="inline" intent=":literal"><semantics><msub><mi>τ</mi><mi>c</mi></msub><annotation encoding="application/x-tex">\tau_{c}</annotation></semantics></math> correlation with the human judgements. In contrast, likely due to the unreliability of Tweet texts as viable alt-texts, reference-based methods struggle: the best performing purely-reference based metric, BERT-S (RoBERTa-F) (which achieves 15 <math id="S5.SS1.p2.m2" class="ltx_Math" alttext="\tau_{c}" display="inline" intent=":literal"><semantics><msub><mi>τ</mi><mi>c</mi></msub><annotation encoding="application/x-tex">\tau_{c}</annotation></semantics></math>) under-performs relative to length baseline (which achieves 25 <math id="S5.SS1.p2.m3" class="ltx_Math" alttext="\tau_{c}" display="inline" intent=":literal"><semantics><msub><mi>τ</mi><mi>c</mi></msub><annotation encoding="application/x-tex">\tau_{c}</annotation></semantics></math>). While gathering high-quality, contextual reference alt-texts is a promising avenue for future work,<span id="footnote15" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">15</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">15</sup>
+              <span class="ltx_tag ltx_tag_note">15</span>
+              
+              
+              
+            See <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib56" title="" class="ltx_ref">Stangl et al. (2020)</a></cite>, who conducted user-studies across six domains.</span></span></span> CLIP-S offers a promising evaluation metric candidate in this domain.</p>
+</div>
+<figure id="S5.F3" class="ltx_figure"><img src="https://arxiv.org/html/2104.08718v3/new_domains.png" id="S5.F3.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:471/197;" width="471" height="197" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 3: </span>Instances from our four case-study corpora.</figcaption>
+</figure>
+</section>
+<section id="S5.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">5.2 </span>Abstract-50S</h3>
+
+<div id="S5.SS2.p1" class="ltx_para">
+<p id="S5.SS2.p1.1" class="ltx_p">We assess CLIP-S’s capacity to generalize to abstract, non-photographic clip-art images using Abstract-50S <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib60" title="" class="ltx_ref">Vedantam et al. (2015)</a></cite>. This dataset pairs clip-art images (originally constructed by <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib69" title="" class="ltx_ref">Zitnick and Parikh (2013)</a></cite>) with 48 human-written reference captions. These images depict two cartoon characters, Mike and Jenny, in various outdoor situations, e.g., playing sports, having a picnic, etc. For 400 human-written candidate caption pairs (200 pairs are from the same image, 200 are from different images), human judgments were collected: annotators were instructed to choose which of the paired captions were more similar to each reference caption, so 48 judgments were collected for each candidate pair (for a total of 19200).</p>
+</div>
+<div id="S5.SS2.p2" class="ltx_para">
+<p id="S5.SS2.p2.1" class="ltx_p">We compare CLIP-S to several reference-based metrics when given access to a random sample of five reference captions. Following our procedure for Pascal-50S, we randomly re-sample 5 times, and report average pairwise accuracy. Two baselines (BL) both achieve 53: length-only (i.e., saying the longer caption is better); and randomly shuffling images as input to CLIP-S (so that it cannot rely on meaningful visual-textual interactions).</p>
+</div>
+<div id="S5.SS2.p3" class="ltx_para">
+<div id="S5.SS2.p3.1" class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:338.1pt;height:26.4pt;vertical-align:-10.5pt;"><span class="ltx_transformed_inner" style="transform:translate(13.1pt,-1.0pt) scale(1.08374415438084,1.08374415438084) ;">
+<table id="S5.SS2.p3.1.1" class="ltx_tabular ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S5.SS2.p3.1.1.1" class="ltx_tr">
+<th id="S5.SS2.p3.1.1.1.1" class="ltx_td ltx_align_center ltx_th ltx_th_column">BL</th>
+<th id="S5.SS2.p3.1.1.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column">BLEU-4</th>
+<th id="S5.SS2.p3.1.1.1.3" class="ltx_td ltx_align_center ltx_th ltx_th_column">CIDEr</th>
+<th id="S5.SS2.p3.1.1.1.4" class="ltx_td ltx_align_center ltx_th ltx_th_column">METEOR</th>
+<th id="S5.SS2.p3.1.1.1.5" class="ltx_td ltx_align_center ltx_th ltx_th_column">BERT-S</th>
+<th id="S5.SS2.p3.1.1.1.6" class="ltx_td ltx_align_center ltx_th ltx_th_column">CLIP-S (no refs)</th></tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S5.SS2.p3.1.1.2" class="ltx_tr">
+<td id="S5.SS2.p3.1.1.2.1" class="ltx_td ltx_align_center ltx_border_t">53</td>
+<td id="S5.SS2.p3.1.1.2.2" class="ltx_td ltx_align_center ltx_border_t">71</td>
+<td id="S5.SS2.p3.1.1.2.3" class="ltx_td ltx_align_center ltx_border_t">79</td>
+<td id="S5.SS2.p3.1.1.2.4" class="ltx_td ltx_align_center ltx_border_t">79</td>
+<td id="S5.SS2.p3.1.1.2.5" class="ltx_td ltx_align_center ltx_border_t">73</td>
+<td id="S5.SS2.p3.1.1.2.6" class="ltx_td ltx_align_center ltx_border_t">68</td></tr>
+</tbody>
+</table>
+</span></div>
+</div>
+<div id="S5.SS2.p4" class="ltx_para">
+<p id="S5.SS2.p4.1" class="ltx_p">Overall, while CLIP-S underperforms relative to the reference-based metrics, it outperforms the baselines by a wide margin. This result suggests that CLIP-S is capable of reasoning about visual-textual interactions, even in non-photographic images.</p>
+</div>
+</section>
+<section id="S5.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">5.3 </span>Personality Captions</h3>
+
+<div id="S5.SS3.p1" class="ltx_para">
+<p id="S5.SS3.p1.1" class="ltx_p">Inspired by language use on social media, <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib52" title="" class="ltx_ref">Shuster et al. (2019)</a></cite> collected image captions by prompting annotators with a “personality" (e.g., dramatic, sympathetic, sad, etc.) and asking them to “write a comment in the context of [a] given personality trait… about an image that someone else would find engaging." To evaluate their models, the authors collected pairwise human judgments, where evaluators were instructed to “to pick which comment is the most engaging". We assess CLIP-S in two capacities: (1) does it prefer literal descriptions, or the less-literal, more engaging, personality captions?; and (2) if it is given two personality captions, can it predict which humans judge to be more engaging?</p>
+</div>
+<div id="S5.SS3.p2" class="ltx_para">
+<p id="S5.SS3.p2.1" class="ltx_p">For (1): Over a set of 2.4K ‘‘traditional" vs. personality captions pairwise ratings, humans rate the personality captions to be more engaging 65% of the time, whereas CLIP-S prefers the traditional 80% of the time.<span id="footnote16" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">16</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">16</sup>
+              <span class="ltx_tag ltx_tag_note">16</span>
+              
+              
+              
+            Preliminary prompt-engineering experiments (e.g., “when I look at this photo, I feel [PERSONALITY] and think [CAPTION]”) could not overcome this.</span></span></span> Our takeaway: when given a direct description and a more engaging, non-literal caption, CLIP-S will generally prefer the literal.</p>
+</div>
+<div id="S5.SS3.p3" class="ltx_para">
+<p id="S5.SS3.p3.1" class="ltx_p">For (2): CLIP-S performs slightly better than random, e.g., 57% over 2.5K human pairwise judgments comparing two neural generator models: TransResNet (ResNeXt-IG-3.5B) vs. TransResNet (ResNet-152) (see <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib52" title="" class="ltx_ref">Shuster et al. (2019)</a></cite> Table 7, Row 5), but no better than a length-only baseline (also 57%). Notably, even reference-based metrics fail to provide correlation with pairwise human judgment of engagingness on this corpus: e.g., BLEU-4, CIDEr, and SPICE agree with human judgment 52%/53%/51% when provided with one personality-primed reference. Our takeaway: when given two engaging, non-literal descriptions, both CLIP-S and traditional reference-based metrics fail to predict which humans will judge to be more engaging.</p>
+</div>
+</section>
+<section id="S5.SS4" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">5.4 </span>News image captioning</h3>
+
+<div id="S5.SS4.p1" class="ltx_para">
+<p id="S5.SS4.p1.1" class="ltx_p"><cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib7" title="" class="ltx_ref">Biten et al. (2019)</a></cite> consider caption generation for images from New York Times articles; their task differs from MSCOCO because 1) 95% of captions contain at least one named entity, e.g., a politician, celebrity, or place; and 2) captions generally “do not describe scene objects, but rather offer a contextualized interpretation of the scene."
+They collected 2.1K pairwise human judgments over 106 images that compare the performance of two news image captioning models. For each image, 20 annotators were instructed to pick which of two model generations was closer to the ground-truth caption (they were also presented with the image itself). We compare metrics in terms of their accuracy in matching human judgment between the two candidates.</p>
+</div>
+<div id="S5.SS4.p2" class="ltx_para">
+<p id="S5.SS4.p2.1" class="ltx_p">Reference-based metrics dominate: METEOR and BLEU-4 achieve the highest accuracies of 93 and 91 respectively, whereas CLIP-S achieves only slightly above random at 65. Qualitatively, CLIP-S succeeds when there are visually-verifiable content, e.g., matching black-and-white photos to older dates (e.g., picking 1933 vs. 1977, in one case), and matching particularly iconic celebrities (e.g., it confidently identifies Muhammad Ali boxing).<span id="footnote17" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">17</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">17</sup>
+              <span class="ltx_tag ltx_tag_note">17</span>
+              
+              
+              
+            <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib34" title="" class="ltx_ref">Luo et al. (2021)</a></cite>’s recent experiments quantitatively demonstrate that CLIP is capable of reasoning about real-world entities within news images.</span></span></span> But, its most common failure case are captions that may simply be unverifiable given only the image content. For example: CLIP-S selects “The dining room at Elle Decor" for an image of a room, but annotators preferred a caption that mentioned “the Junior League of New York;" the ground truth caption reveals why the image was pictured in the first place: “A Manhattan home on a May 7 tour by the Junior League of New York."</p>
+</div>
+<div id="S5.SS4.p3" class="ltx_para">
+<p id="S5.SS4.p3.1" class="ltx_p">Overall, we do not advocate for reference-free evaluation in this case, especially because our results suggest that (at least for this particular set of annotations) reference-based n-gram overlap metrics achieve high correlation with human judgment.</p>
+</div>
+</section>
+</section>
+<section id="S6" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">6 </span>Conclusion</h2>
+
+<div id="S6.p1" class="ltx_para">
+<p id="S6.p1.1" class="ltx_p">For literal image description tasks, <span id="S6.p1.1.1" class="ltx_text ltx_font_typewriter">CLIPScore</span> achieves high correlation with human judgments of caption quality <em id="S6.p1.1.2" class="ltx_emph ltx_font_italic">without</em> references when used in an off-the-shelf fashion. Additional experiments in divergent domains suggest that CLIP can also reason about non-photographic clip-art, and serves as a reasonable option for reference-free evaluation in the alt-text case. Promising future work includes exploring 1) CLIP-S as a reinforcement learning reward for literal caption generators; and 2) whether a small amount of labelled human rating data could help CLIP-S adapt to domains where it struggles, e.g., engagingness prediction. We hope our work can contribute to the ongoing discussion about the role of pretrained models in generation evaluation.</p>
+</div>
+<div id="S6.p2" class="ltx_para">
+<p id="S6.p2.1" class="ltx_p">Reference-free evaluation runs some risks. Much like BERTScore, model-based metrics like CLIP-S reflect the biases of the pre-training data. While we believe that using CLIP-S as an offline evaluation metric for literal caption quality accords with the recommendations of CLIP’s model card<span id="footnote18" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">18</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">18</sup>
+            <span class="ltx_tag ltx_tag_note">18</span>
+            
+            
+            
+          <a href="https://github.com/openai/CLIP/blob/main/model-card.md" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://github.com/openai/CLIP/blob/main/model-card.md</a></span></span></span> <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib40" title="" class="ltx_ref">Mitchell et al. (2019)</a></cite>, <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib2" title="" class="ltx_ref">Agarwal et al. (2021)</a></cite>’s study demonstrates that CLIP can make disproportionate incorrect classifications of people, e.g., “male images were misclassified into classes related to crime.” Exploring potential social biases of candidate generations (as in, e.g., <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib17" title="" class="ltx_ref">Hendricks et al. (2018)</a></cite>) remains paramount, particularly if a system is to be deployed.</p>
+</div>
+<section id="S6.SS0.SSS0.Px1" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Contemporaneous work</h4>
+
+<div id="S6.SS0.SSS0.Px1.p1" class="ltx_para">
+<p id="S6.SS0.SSS0.Px1.p1.1" class="ltx_p">While this work was under submission, two alternate reference-free evaluation metrics for image caption generation were introduced: FAIEr <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib62" title="" class="ltx_ref">Wang et al. (2021)</a></cite> (based on a pretrained object detector, and fine-tuned on MSCOCO) and UMIC <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib24" title="" class="ltx_ref">Lee et al. (2021)</a></cite> (based on UNITER <cite class="ltx_cite ltx_citemacro_cite"><a href="#bib.bib9" title="" class="ltx_ref">Chen et al. (2020)</a></cite>). UMIC, in particular, produces similar correlations with human judgment on the literal image description tasks (§<a href="#S4" title="4 Benchmark Captioning Evaluations ‣ CLIPScore:A Reference-free Evaluation Metric for Image Captioning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>) compared to CLIP-S, but with the complementary approach of fine-tuning on synthetic negative captions. Future work would be well-suited to explore if the textual data augmentations proposed by <cite class="ltx_cite ltx_citemacro_citet"><a href="#bib.bib24" title="" class="ltx_ref">Lee et al. (2021)</a></cite> (1) result in a metric that complements or overlaps with the non-finetuned CLIP-S (§<a href="#S4.SS6" title="4.6 Which metrics should I report? ‣ 4 Benchmark Captioning Evaluations ‣ CLIPScore:A Reference-free Evaluation Metric for Image Captioning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4.6</span></a>); and (2) could be extended beyond cases of literal description (§<a href="#S5" title="5 Case Studies Using CLIPScore ‣ CLIPScore:A Reference-free Evaluation Metric for Image Captioning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a>).</p>
+</div>
+</section>
+</section>
+<section id="Sx1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Acknowledgements</h2>
+
+<div id="Sx1.p1" class="ltx_para">
+<p id="Sx1.p1.1" class="ltx_p">This research is supported in part by DARPA MCS program through NIWC Pacific (N66001-19-2-4031), DARPA SemaFor program, and the Allen Institute for AI. We additionally thank Ximing Lu, Swabha Swayamdipta, Youngjae Yu, and the anonymous EMNLP reviewers for the helpful comments, thoughts, and discussions. Finally, we thank Jin-Hwa Kim, who in March 2022, helped discover a now fixed discrepancy for the Pascal-50S results, see Appendix <a href="#A1.SSx2" title="Composite details ‣ Appendix A Evaluation and Replication Details ‣ CLIPScore:A Reference-free Evaluation Metric for Image Captioning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">A</span></a>.</p>
+</div>
+</section>
+<section id="bib" class="ltx_bibliography">
+<h2 class="ltx_title ltx_title_bibliography">References</h2>
+
+<ul class="ltx_biblist">
+      
+<li id="bib.bib1" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Aditya et al. (2015)</span>
+<span class="ltx_bibblock">
+Somak Aditya, Yezhou Yang, Chitta Baral, Cornelia Fermuller, and Yiannis
+Aloimonos. 2015.
+
+</span>
+<span class="ltx_bibblock">From images to sentences through scene description graphs using
+commonsense reasoning and knowledge.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib1.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:1511.03292</em>.
+
+</span></li>
+      
+<li id="bib.bib2" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Agarwal et al. (2021)</span>
+<span class="ltx_bibblock">
+Sandhini Agarwal, Gretchen Krueger, Jack Clark, Alec Radford, Jong Wook Kim,
+and Miles Brundage. 2021.
+
+</span>
+<span class="ltx_bibblock">Evaluating CLIP: Towards characterization of broader capabilities
+and downstream implications.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib2.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2108.02818</em>.
+
+</span></li>
+      
+<li id="bib.bib3" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Anderson et al. (2016)</span>
+<span class="ltx_bibblock">
+Peter Anderson, Basura Fernando, Mark Johnson, and Stephen Gould. 2016.
+
+</span>
+<span class="ltx_bibblock">Spice: Semantic propositional image caption evaluation.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib3.1" class="ltx_emph ltx_font_italic">ECCV</em>. Springer.
+
+</span></li>
+      
+<li id="bib.bib4" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Artetxe and Schwenk (2019)</span>
+<span class="ltx_bibblock">
+Mikel Artetxe and Holger Schwenk. 2019.
+
+</span>
+<span class="ltx_bibblock">Massively multilingual sentence embeddings for zero-shot
+cross-lingual transfer and beyond.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib4.1" class="ltx_emph ltx_font_italic">TACL</em>, 7:597–610.
+
+</span></li>
+      
+<li id="bib.bib5" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Banerjee and Lavie (2005)</span>
+<span class="ltx_bibblock">
+Satanjeev Banerjee and Alon Lavie. 2005.
+
+</span>
+<span class="ltx_bibblock">METEOR: an automatic metric for mt evaluation with improved
+correlation with human judgments.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib5.1" class="ltx_emph ltx_font_italic">ACL workshop on Evaluation Measures for MT and
+Summarization</em>.
+
+</span></li>
+      
+<li id="bib.bib6" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Berg et al. (2012)</span>
+<span class="ltx_bibblock">
+Alexander C. Berg, Tamara L. Berg, Hal Daumé III, Jesse Dodge, Amit Goyal,
+Xufeng Han, Alyssa Mensch, Margaret Mitchell, Aneesh Sood, Karl Stratos, and
+Kota Yamaguchi. 2012.
+
+</span>
+<span class="ltx_bibblock">Understanding and predicting importance in images.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib6.1" class="ltx_emph ltx_font_italic">CVPR</em>.
+
+</span></li>
+      
+<li id="bib.bib7" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Biten et al. (2019)</span>
+<span class="ltx_bibblock">
+Ali Furkan Biten, Lluis Gomez, Marçal Rusinol, and Dimosthenis Karatzas.
+2019.
+
+</span>
+<span class="ltx_bibblock">Good news, everyone! context driven entity-aware captioning for news
+images.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib7.1" class="ltx_emph ltx_font_italic">CVPR</em>.
+
+</span></li>
+      
+<li id="bib.bib8" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Blatz et al. (2004)</span>
+<span class="ltx_bibblock">
+John Blatz, Erin Fitzgerald, George Foster, Simona Gandrabur, Cyril Goutte,
+Alex Kulesza, Alberto Sanchis, and Nicola Ueffing. 2004.
+
+</span>
+<span class="ltx_bibblock">Confidence estimation for machine translation.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib8.1" class="ltx_emph ltx_font_italic">COLING</em>.
+
+</span></li>
+      
+<li id="bib.bib9" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Chen et al. (2020)</span>
+<span class="ltx_bibblock">
+Yen-Chun Chen, Linjie Li, Licheng Yu, Ahmed El Kholy, Faisal Ahmed, Zhe Gan,
+Yu Cheng, and Jingjing Liu. 2020.
+
+</span>
+<span class="ltx_bibblock">Uniter: Universal image-text representation learning.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib9.1" class="ltx_emph ltx_font_italic">ECCV</em>.
+
+</span></li>
+      
+<li id="bib.bib10" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Cui et al. (2018)</span>
+<span class="ltx_bibblock">
+Yin Cui, Guandao Yang, Andreas Veit, Xun Huang, and Serge Belongie. 2018.
+
+</span>
+<span class="ltx_bibblock">Learning to evaluate image captioning.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib10.1" class="ltx_emph ltx_font_italic">CVPR</em>.
+
+</span></li>
+      
+<li id="bib.bib11" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Dai and Lin (2017)</span>
+<span class="ltx_bibblock">
+Bo Dai and Dahua Lin. 2017.
+
+</span>
+<span class="ltx_bibblock">Contrastive learning for image captioning.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib11.1" class="ltx_emph ltx_font_italic">NeurIPS</em>.
+
+</span></li>
+      
+<li id="bib.bib12" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Devlin et al. (2019)</span>
+<span class="ltx_bibblock">
+Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. 2019.
+
+</span>
+<span class="ltx_bibblock">BERT: pre-training of deep bidirectional transformers for language
+understanding.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib12.1" class="ltx_emph ltx_font_italic">NAACL</em>.
+
+</span></li>
+      
+<li id="bib.bib13" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Dosovitskiy et al. (2021)</span>
+<span class="ltx_bibblock">
+Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn,
+Xiaohua Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg
+Heigold, Sylvain Gelly, Jakob Uszkoreit, and Neil Houlsby. 2021.
+
+</span>
+<span class="ltx_bibblock">An image is worth 16x16 words: Transformers for image recognition at
+scale.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib13.1" class="ltx_emph ltx_font_italic">ICLR</em>.
+
+</span></li>
+      
+<li id="bib.bib14" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Elliott and Keller (2014)</span>
+<span class="ltx_bibblock">
+Desmond Elliott and Frank Keller. 2014.
+
+</span>
+<span class="ltx_bibblock">Comparing automatic evaluation measures for image description.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib14.1" class="ltx_emph ltx_font_italic">ACL</em>.
+
+</span></li>
+      
+<li id="bib.bib15" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Gleason et al. (2019)</span>
+<span class="ltx_bibblock">
+Cole Gleason, Patrick Carrington, Cameron Cassidy, Meredith Ringel Morris,
+Kris M Kitani, and Jeffrey P Bigham. 2019.
+
+</span>
+<span class="ltx_bibblock">“it’s almost like they’re trying to hide it": How user-provided
+image descriptions have failed to make twitter accessible.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib15.1" class="ltx_emph ltx_font_italic">WWW</em>.
+
+</span></li>
+      
+<li id="bib.bib16" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Gleason et al. (2020)</span>
+<span class="ltx_bibblock">
+Cole Gleason, Amy Pavel, Emma McCamey, Christina Low, Patrick Carrington,
+Kris M Kitani, and Jeffrey P Bigham. 2020.
+
+</span>
+<span class="ltx_bibblock">Twitter a11y: A browser extension to make twitter images accessible.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib16.1" class="ltx_emph ltx_font_italic">CHI</em>.
+
+</span></li>
+      
+<li id="bib.bib17" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Hendricks et al. (2018)</span>
+<span class="ltx_bibblock">
+Lisa Anne Hendricks, Kaylee Burns, Kate Saenko, Trevor Darrell, and Anna
+Rohrbach. 2018.
+
+</span>
+<span class="ltx_bibblock">Women also snowboard: Overcoming bias in captioning models.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib17.1" class="ltx_emph ltx_font_italic">Proceedings of the European Conference on Computer Vision
+(ECCV)</em>, pages 771–787.
+
+</span></li>
+      
+<li id="bib.bib18" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Hodosh et al. (2013)</span>
+<span class="ltx_bibblock">
+Micah Hodosh, Peter Young, and Julia Hockenmaier. 2013.
+
+</span>
+<span class="ltx_bibblock">Framing image description as a ranking task: Data, models and
+evaluation metrics.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib18.1" class="ltx_emph ltx_font_italic">JAIR</em>, 47:853–899.
+
+</span></li>
+      
+<li id="bib.bib19" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Jia et al. (2021)</span>
+<span class="ltx_bibblock">
+Chao Jia, Yinfei Yang, Ye Xia, Yi-Ting Chen, Zarana Parekh, Hieu Pham, Quoc V
+Le, Yunhsuan Sung, Zhen Li, and Tom Duerig. 2021.
+
+</span>
+<span class="ltx_bibblock">Scaling up visual and vision-language representation learning with
+noisy text supervision.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib19.1" class="ltx_emph ltx_font_italic">ICML</em>.
+
+</span></li>
+      
+<li id="bib.bib20" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Jiang et al. (2019)</span>
+<span class="ltx_bibblock">
+Ming Jiang, Qiuyuan Huang, Lei Zhang, Xin Wang, Pengchuan Zhang, Zhe Gan, Jana
+Diesner, and Jianfeng Gao. 2019.
+
+</span>
+<span class="ltx_bibblock">TIGEr: text-to-image grounding for image caption evaluation.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib20.1" class="ltx_emph ltx_font_italic">EMNLP</em>.
+
+</span></li>
+      
+<li id="bib.bib21" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">K et al. (2020)</span>
+<span class="ltx_bibblock">
+Karthikeyan K, Zihan Wang, Stephen Mayhew, and Dan Roth. 2020.
+
+</span>
+<span class="ltx_bibblock">Cross-lingual ability of multilingual BERT: An empirical study.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib21.1" class="ltx_emph ltx_font_italic">ICLR</em>.
+
+</span></li>
+      
+<li id="bib.bib22" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Kane et al. (2020)</span>
+<span class="ltx_bibblock">
+Hassan Kane, Muhammed Yusuf Kocyigit, Ali Abdalla, Pelkins Ajanoh, and Mohamed
+Coulibali. 2020.
+
+</span>
+<span class="ltx_bibblock">NUBIA: NeUral based interchangeability assessor for text
+generation.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib22.1" class="ltx_emph ltx_font_italic">1st Workshop on Evaluating NLG Evaluation</em>.
+
+</span></li>
+      
+<li id="bib.bib23" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Kilickaya et al. (2017)</span>
+<span class="ltx_bibblock">
+Mert Kilickaya, Aykut Erdem, Nazli Ikizler-Cinbis, and Erkut Erdem. 2017.
+
+</span>
+<span class="ltx_bibblock">Re-evaluating automatic metrics for image captioning.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib23.1" class="ltx_emph ltx_font_italic">EACL</em>.
+
+</span></li>
+      
+<li id="bib.bib24" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Lee et al. (2021)</span>
+<span class="ltx_bibblock">
+Hwanhee Lee, Seunghyun Yoon, Franck Dernoncourt, Trung Bui, and Kyomin Jung.
+2021.
+
+</span>
+<span class="ltx_bibblock">UMIC: an unreferenced metric for image captioning via contrastive
+learning.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib24.1" class="ltx_emph ltx_font_italic">ACL</em>.
+
+</span></li>
+      
+<li id="bib.bib25" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Lee et al. (2020)</span>
+<span class="ltx_bibblock">
+Hwanhee Lee, Seunghyun Yoon, Franck Dernoncourt, Doo Soon Kim, Trung Bui, and
+Kyomin Jung. 2020.
+
+</span>
+<span class="ltx_bibblock">Vilbertscore: Evaluating image caption using vision-and-language
+bert.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib25.1" class="ltx_emph ltx_font_italic">First Workshop on Evaluation and Comparison of NLP Systems</em>.
+
+</span></li>
+      
+<li id="bib.bib26" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Lee et al. (2018)</span>
+<span class="ltx_bibblock">
+Kuang-Huei Lee, Xi Chen, Gang Hua, Houdong Hu, and Xiaodong He. 2018.
+
+</span>
+<span class="ltx_bibblock">Stacked cross attention for image-text matching.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib26.1" class="ltx_emph ltx_font_italic">ECCV</em>.
+
+</span></li>
+      
+<li id="bib.bib27" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Lin (2004)</span>
+<span class="ltx_bibblock">
+Chin-Yew Lin. 2004.
+
+</span>
+<span class="ltx_bibblock">Rouge: A package for automatic evaluation of summaries.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib27.1" class="ltx_emph ltx_font_italic">Text Summarization Branches Out</em>.
+
+</span></li>
+      
+<li id="bib.bib28" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Lin et al. (2014)</span>
+<span class="ltx_bibblock">
+Tsung-Yi Lin, Michael Maire, Serge Belongie, James Hays, Pietro Perona, Deva
+Ramanan, Piotr Dollár, and C Lawrence Zitnick. 2014.
+
+</span>
+<span class="ltx_bibblock">Microsoft COCO: Common objects in context.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib28.1" class="ltx_emph ltx_font_italic">ECCV</em>. Springer.
+
+</span></li>
+      
+<li id="bib.bib29" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Liu et al. (2018)</span>
+<span class="ltx_bibblock">
+Xihui Liu, Hongsheng Li, Jing Shao, Dapeng Chen, and Xiaogang Wang. 2018.
+
+</span>
+<span class="ltx_bibblock">Show, tell and discriminate: Image captioning by self-retrieval with
+partially labeled data.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib29.1" class="ltx_emph ltx_font_italic">ECCV</em>.
+
+</span></li>
+      
+<li id="bib.bib30" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Lo (2019)</span>
+<span class="ltx_bibblock">
+Chi-kiu Lo. 2019.
+
+</span>
+<span class="ltx_bibblock">Yisi-a unified semantic mt quality evaluation and estimation metric
+for languages with different levels of available resources.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib30.1" class="ltx_emph ltx_font_italic">Fourth Conference on Machine Translation</em>.
+
+</span></li>
+      
+<li id="bib.bib31" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Louis and Nenkova (2013)</span>
+<span class="ltx_bibblock">
+Annie Louis and Ani Nenkova. 2013.
+
+</span>
+<span class="ltx_bibblock">Automatically assessing machine summary content without a gold
+standard.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib31.1" class="ltx_emph ltx_font_italic">Computational Linguistics</em>, 39(2):267–300.
+
+</span></li>
+      
+<li id="bib.bib32" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Lu et al. (2019)</span>
+<span class="ltx_bibblock">
+Jiasen Lu, Dhruv Batra, Devi Parikh, and Stefan Lee. 2019.
+
+</span>
+<span class="ltx_bibblock">ViLBERT: Pretraining task-agnostic visiolinguistic representations
+for vision-and-language tasks.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib32.1" class="ltx_emph ltx_font_italic">NeurIPS</em>.
+
+</span></li>
+      
+<li id="bib.bib33" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Lu et al. (2020)</span>
+<span class="ltx_bibblock">
+Jiasen Lu, Vedanuj Goswami, Marcus Rohrbach, Devi Parikh, and Stefan Lee. 2020.
+
+</span>
+<span class="ltx_bibblock">12-in-1: Multi-task vision and language representation learning.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib33.1" class="ltx_emph ltx_font_italic">CVPR</em>.
+
+</span></li>
+      
+<li id="bib.bib34" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Luo et al. (2021)</span>
+<span class="ltx_bibblock">
+Grace Luo, Trevor Darrell, and Anna Rohrbach. 2021.
+
+</span>
+<span class="ltx_bibblock">NewsCLIPpings: automatic generation of out-of-context multimodal
+media.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib34.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2104.05893</em>.
+
+</span></li>
+      
+<li id="bib.bib35" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Luo et al. (2018)</span>
+<span class="ltx_bibblock">
+Ruotian Luo, Brian Price, Scott Cohen, and Gregory Shakhnarovich. 2018.
+
+</span>
+<span class="ltx_bibblock">Discriminability objective for training descriptive captions.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib35.1" class="ltx_emph ltx_font_italic">CVPR</em>.
+
+</span></li>
+      
+<li id="bib.bib36" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">MacLeod et al. (2017)</span>
+<span class="ltx_bibblock">
+Haley MacLeod, Cynthia L Bennett, Meredith Ringel Morris, and Edward Cutrell.
+2017.
+
+</span>
+<span class="ltx_bibblock">Understanding blind people’s experiences with computer-generated
+captions of social media images.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib36.1" class="ltx_emph ltx_font_italic">CHI</em>.
+
+</span></li>
+      
+<li id="bib.bib37" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Madhyastha et al. (2019)</span>
+<span class="ltx_bibblock">
+Pranava Madhyastha, Josiah Wang, and Lucia Specia. 2019.
+
+</span>
+<span class="ltx_bibblock">VIFIDEL: Evaluating the visual fidelity of image descriptions.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib37.1" class="ltx_emph ltx_font_italic">ACL</em>.
+
+</span></li>
+      
+<li id="bib.bib38" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Mehdad et al. (2012)</span>
+<span class="ltx_bibblock">
+Yashar Mehdad, Matteo Negri, and Marcello Federico. 2012.
+
+</span>
+<span class="ltx_bibblock">Match without a referee: evaluating mt adequacy without reference
+translations.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib38.1" class="ltx_emph ltx_font_italic">Seventh Workshop on Statistical Machine Translation</em>.
+
+</span></li>
+      
+<li id="bib.bib39" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Mehri and Eskenazi (2020)</span>
+<span class="ltx_bibblock">
+Shikib Mehri and Maxine Eskenazi. 2020.
+
+</span>
+<span class="ltx_bibblock">USR: An unsupervised and reference free evaluation metric for
+dialog generation.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib39.1" class="ltx_emph ltx_font_italic">ACL</em>.
+
+</span></li>
+      
+<li id="bib.bib40" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Mitchell et al. (2019)</span>
+<span class="ltx_bibblock">
+Margaret Mitchell, Simone Wu, Andrew Zaldivar, Parker Barnes, Lucy Vasserman,
+Ben Hutchinson, Elena Spitzer, Inioluwa Deborah Raji, and Timnit Gebru. 2019.
+
+</span>
+<span class="ltx_bibblock">Model cards for model reporting.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib40.1" class="ltx_emph ltx_font_italic">FAccT</em>.
+
+</span></li>
+      
+<li id="bib.bib41" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Oord et al. (2018)</span>
+<span class="ltx_bibblock">
+Aaron van den Oord, Yazhe Li, and Oriol Vinyals. 2018.
+
+</span>
+<span class="ltx_bibblock">Representation learning with contrastive predictive coding.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib41.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:1807.03748</em>.
+
+</span></li>
+      
+<li id="bib.bib42" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Papineni et al. (2002)</span>
+<span class="ltx_bibblock">
+Kishore Papineni, Salim Roukos, Todd Ward, and Wei-Jing Zhu. 2002.
+
+</span>
+<span class="ltx_bibblock">Bleu: a method for automatic evaluation of machine translation.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib42.1" class="ltx_emph ltx_font_italic">ACL</em>.
+
+</span></li>
+      
+<li id="bib.bib43" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Pedregosa et al. (2011)</span>
+<span class="ltx_bibblock">
+F. Pedregosa, G. Varoquaux, A. Gramfort, V. Michel, B. Thirion, O. Grisel,
+M. Blondel, P. Prettenhofer, R. Weiss, V. Dubourg, J. Vanderplas, A. Passos,
+D. Cournapeau, M. Brucher, M. Perrot, and E. Duchesnay. 2011.
+
+</span>
+<span class="ltx_bibblock">Scikit-learn: Machine learning in Python.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib43.1" class="ltx_emph ltx_font_italic">JMLR</em>, 12.
+
+</span></li>
+      
+<li id="bib.bib44" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Peyrard and Gurevych (2018)</span>
+<span class="ltx_bibblock">
+Maxime Peyrard and Iryna Gurevych. 2018.
+
+</span>
+<span class="ltx_bibblock">Objective function learning to match human judgements for
+optimization-based summarization.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib44.1" class="ltx_emph ltx_font_italic">NAACL</em>.
+
+</span></li>
+      
+<li id="bib.bib45" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Pires et al. (2019)</span>
+<span class="ltx_bibblock">
+Telmo Pires, Eva Schlinger, and Dan Garrette. 2019.
+
+</span>
+<span class="ltx_bibblock">How multilingual is multilingual BERT?
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib45.1" class="ltx_emph ltx_font_italic">ACL</em>.
+
+</span></li>
+      
+<li id="bib.bib46" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Radford et al. (2021)</span>
+<span class="ltx_bibblock">
+Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh,
+Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark,
+Gretchen Krueger, and Ilya Sutskever. 2021.
+
+</span>
+<span class="ltx_bibblock">Learning transferable visual models from natural language
+supervision.
+
+</span></li>
+      
+<li id="bib.bib47" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Radford et al. (2019)</span>
+<span class="ltx_bibblock">
+Alec Radford, Jeffrey Wu, Rewon Child, David Luan, Dario Amodei, and Ilya
+Sutskever. 2019.
+
+</span>
+<span class="ltx_bibblock">Language models are unsupervised multitask learners.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib47.1" class="ltx_emph ltx_font_italic">OpenAI blog</em>, 1(8):9.
+
+</span></li>
+      
+<li id="bib.bib48" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Rohrbach et al. (2018)</span>
+<span class="ltx_bibblock">
+Anna Rohrbach, Lisa Anne Hendricks, Kaylee Burns, Trevor Darrell, and Kate
+Saenko. 2018.
+
+</span>
+<span class="ltx_bibblock">Object hallucination in image captioning.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib48.1" class="ltx_emph ltx_font_italic">EMNLP</em>.
+
+</span></li>
+      
+<li id="bib.bib49" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Rohrbach et al. (2017)</span>
+<span class="ltx_bibblock">
+Anna Rohrbach, Atousa Torabi, Marcus Rohrbach, Niket Tandon, Christopher Pal,
+Hugo Larochelle, Aaron Courville, and Bernt Schiele. 2017.
+
+</span>
+<span class="ltx_bibblock">Movie description.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib49.1" class="ltx_emph ltx_font_italic">IJCV</em>.
+
+</span></li>
+      
+<li id="bib.bib50" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Sennrich et al. (2016)</span>
+<span class="ltx_bibblock">
+Rico Sennrich, Barry Haddow, and Alexandra Birch. 2016.
+
+</span>
+<span class="ltx_bibblock">Neural machine translation of rare words with subword units.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib50.1" class="ltx_emph ltx_font_italic">ACL</em>.
+
+</span></li>
+      
+<li id="bib.bib51" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Shekhar et al. (2017)</span>
+<span class="ltx_bibblock">
+Ravi Shekhar, Sandro Pezzelle, Yauhen Klimovich, Aurélie Herbelot, Moin
+Nabi, Enver Sangineto, and Raffaella Bernardi. 2017.
+
+</span>
+<span class="ltx_bibblock">FOIL it! find one mismatch between image and language caption.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib51.1" class="ltx_emph ltx_font_italic">ACL</em>.
+
+</span></li>
+      
+<li id="bib.bib52" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Shuster et al. (2019)</span>
+<span class="ltx_bibblock">
+Kurt Shuster, Samuel Humeau, Hexiang Hu, Antoine Bordes, and Jason Weston.
+2019.
+
+</span>
+<span class="ltx_bibblock">Engaging image captioning via personality.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib52.1" class="ltx_emph ltx_font_italic">CVPR</em>.
+
+</span></li>
+      
+<li id="bib.bib53" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Sohn (2016)</span>
+<span class="ltx_bibblock">
+Kihyuk Sohn. 2016.
+
+</span>
+<span class="ltx_bibblock">Improved deep metric learning with multi-class n-pair loss objective.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib53.1" class="ltx_emph ltx_font_italic">NeurIPS</em>.
+
+</span></li>
+      
+<li id="bib.bib54" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Specia et al. (2010)</span>
+<span class="ltx_bibblock">
+Lucia Specia, Dhwaj Raj, and Marco Turchi. 2010.
+
+</span>
+<span class="ltx_bibblock">Machine translation evaluation versus quality estimation.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib54.1" class="ltx_emph ltx_font_italic">Machine translation</em>, 24(1):39–50.
+
+</span></li>
+      
+<li id="bib.bib55" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Specia and Shah (2018)</span>
+<span class="ltx_bibblock">
+Lucia Specia and Kashif Shah. 2018.
+
+</span>
+<span class="ltx_bibblock">Machine translation quality estimation: Applications and future
+perspectives.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib55.1" class="ltx_emph ltx_font_italic">Translation Quality Assessment</em>, pages 201–235. Springer.
+
+</span></li>
+      
+<li id="bib.bib56" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Stangl et al. (2020)</span>
+<span class="ltx_bibblock">
+Abigale Stangl, Meredith Ringel Morris, and Danna Gurari. 2020.
+
+</span>
+<span class="ltx_bibblock">“person, shoes, tree. is the person naked?" what people with vision
+impairments want in image descriptions.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib56.1" class="ltx_emph ltx_font_italic">CHI</em>.
+
+</span></li>
+      
+<li id="bib.bib57" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Sun and Nenkova (2019)</span>
+<span class="ltx_bibblock">
+Simeng Sun and Ani Nenkova. 2019.
+
+</span>
+<span class="ltx_bibblock">The feasibility of embedding based automatic evaluation for single
+document summarization.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib57.1" class="ltx_emph ltx_font_italic">EMNLP</em>.
+
+</span></li>
+      
+<li id="bib.bib58" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Tao et al. (2018)</span>
+<span class="ltx_bibblock">
+Chongyang Tao, Lili Mou, Dongyan Zhao, and Rui Yan. 2018.
+
+</span>
+<span class="ltx_bibblock">Ruber: An unsupervised method for automatic evaluation of open-domain
+dialog systems.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib58.1" class="ltx_emph ltx_font_italic">AAAI</em>.
+
+</span></li>
+      
+<li id="bib.bib59" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Vaswani et al. (2017)</span>
+<span class="ltx_bibblock">
+Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones,
+Aidan N Gomez, Lukasz Kaiser, and Illia Polosukhin. 2017.
+
+</span>
+<span class="ltx_bibblock">Attention is all you need.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib59.1" class="ltx_emph ltx_font_italic">NeurIPS</em>.
+
+</span></li>
+      
+<li id="bib.bib60" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Vedantam et al. (2015)</span>
+<span class="ltx_bibblock">
+Ramakrishna Vedantam, C Lawrence Zitnick, and Devi Parikh. 2015.
+
+</span>
+<span class="ltx_bibblock">Cider: Consensus-based image description evaluation.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib60.1" class="ltx_emph ltx_font_italic">CVPR</em>.
+
+</span></li>
+      
+<li id="bib.bib61" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Vinyals et al. (2016)</span>
+<span class="ltx_bibblock">
+Oriol Vinyals, Alexander Toshev, Samy Bengio, and Dumitru Erhan. 2016.
+
+</span>
+<span class="ltx_bibblock">Show and tell: Lessons learned from the 2015 mscoco image captioning
+challenge.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib61.1" class="ltx_emph ltx_font_italic">TPAMI</em>, 39(4):652–663.
+
+</span></li>
+      
+<li id="bib.bib62" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Wang et al. (2021)</span>
+<span class="ltx_bibblock">
+Sijin Wang, Ziwei Yao, Ruiping Wang, Zhongqin Wu, and Xilin Chen. 2021.
+
+</span>
+<span class="ltx_bibblock">FAIEr: Fidelity and adequacy ensured image caption evaluation.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib62.1" class="ltx_emph ltx_font_italic">CVPR</em>.
+
+</span></li>
+      
+<li id="bib.bib63" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Wu and Dredze (2019)</span>
+<span class="ltx_bibblock">
+Shijie Wu and Mark Dredze. 2019.
+
+</span>
+<span class="ltx_bibblock">Beto, bentz, becas: The surprising cross-lingual effectiveness of
+BERT.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib63.1" class="ltx_emph ltx_font_italic">EMNLP</em>.
+
+</span></li>
+      
+<li id="bib.bib64" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Yankovskaya et al. (2019)</span>
+<span class="ltx_bibblock">
+Elizaveta Yankovskaya, Andre Tättar, and Mark Fishel. 2019.
+
+</span>
+<span class="ltx_bibblock">Quality estimation and translation metrics via pre-trained word and
+sentence embeddings.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib64.1" class="ltx_emph ltx_font_italic">Fourth Conference on Machine Translation</em>.
+
+</span></li>
+      
+<li id="bib.bib65" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Yi et al. (2020)</span>
+<span class="ltx_bibblock">
+Yanzhi Yi, Hangyu Deng, and Jinglu Hu. 2020.
+
+</span>
+<span class="ltx_bibblock">Improving image captioning evaluation by considering inter references
+variance.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib65.1" class="ltx_emph ltx_font_italic">ACL</em>.
+
+</span></li>
+      
+<li id="bib.bib66" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Young et al. (2014)</span>
+<span class="ltx_bibblock">
+Peter Young, Alice Lai, Micah Hodosh, and Julia Hockenmaier. 2014.
+
+</span>
+<span class="ltx_bibblock">From image descriptions to visual denotations: New similarity metrics
+for semantic inference over event descriptions.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib66.1" class="ltx_emph ltx_font_italic">TACL</em>, 2:67–78.
+
+</span></li>
+      
+<li id="bib.bib67" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zhang et al. (2020)</span>
+<span class="ltx_bibblock">
+Tianyi Zhang, Varsha Kishore, Felix Wu, Kilian Q Weinberger, and Yoav Artzi.
+2020.
+
+</span>
+<span class="ltx_bibblock">BERTScore: Evaluating text generation with BERT.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib67.1" class="ltx_emph ltx_font_italic">ICLR</em>.
+
+</span></li>
+      
+<li id="bib.bib68" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zhao et al. (2020)</span>
+<span class="ltx_bibblock">
+Wei Zhao, Goran Glavaš, Maxime Peyrard, Yang Gao, Robert West, and
+Steffen Eger. 2020.
+
+</span>
+<span class="ltx_bibblock">On the limitations of cross-lingual encoders as exposed by
+reference-free machine translation evaluation.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib68.1" class="ltx_emph ltx_font_italic">ACL</em>.
+
+</span></li>
+      
+<li id="bib.bib69" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zitnick and Parikh (2013)</span>
+<span class="ltx_bibblock">
+C Lawrence Zitnick and Devi Parikh. 2013.
+
+</span>
+<span class="ltx_bibblock">Bringing semantics into focus using visual abstraction.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib69.1" class="ltx_emph ltx_font_italic">CVPR</em>.
+
+</span></li>
+    
+</ul>
+</section>
+<div class="ltx_pagination ltx_role_newpage"></div>
+<section id="A1" class="ltx_appendix">
+<h2 class="ltx_title ltx_title_appendix"><span class="ltx_tag ltx_tag_appendix">Appendix A </span>Evaluation and Replication Details</h2>
+
+<div id="A1.p1" class="ltx_para">
+<p id="A1.p1.1" class="ltx_p"><cite class="ltx_cite ltx_citemacro_citet"><a href="#biba.bib1" title="" class="ltx_ref">Anderson et al. (2016)</a></cite> introduced a set of corpora, metrics, and experimental settings for comparing image caption generation evaluation metrics. Perhaps unwittingly, their introduced protocols have become the accepted standard for evaluation of new caption generation metrics. However, seemingly innocuous preprocessing+reporting choices can significantly impact correlations with human judgment on these corpora. In what follows, we detail our replication efforts. Our goal was to make the experimental comparisons involving <span id="A1.p1.1.1" class="ltx_text ltx_font_typewriter">CLIPScore</span> reported in the main paper as fair as possible. We hope it can be useful for researchers reporting metrics on this setup going forward.</p>
+</div>
+<section id="A1.SSx1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Flickr8K details</h3>
+
+<div id="A1.SSx1.p1" class="ltx_para">
+<p id="A1.SSx1.p1.1" class="ltx_p">We contacted the authors of some prior work, and did our best to re-create their evaluation settings. We uncovered two types of discrepancies when reporting on this corpus. The first discrepancy is that prior work has mixed evaluating rank correlations with kendall-C and kendall-B. These metrics handle ties differently, and ties are frequent because human Likert judgements are discretized.
+The second discrepancy is the method of aggregation of human ratings. Three human ratings were gathered for 5664 (image, candidate) pairs. The majority of prior works flatten all human judgments to a single list, and report rank correlation over 5664 * 3 = 16992 instances (method A). However, another (possibly more defensible) evaluation choice is to average human ratings for each pair, and report rank correlation instead over 5664 instances (method B). The choice of aggregation method has a significant impact on correlations. For example, when we used aggregation method A and <math id="A1.SSx1.p1.m1" class="ltx_Math" alttext="\tau_{c}" display="inline" intent=":literal"><semantics><msub><mi>τ</mi><mi>c</mi></msub><annotation encoding="application/x-tex">\tau_{c}</annotation></semantics></math> for SPICE, we can exactly replicate the correlation, 44.9, originally reported in <cite class="ltx_cite ltx_citemacro_cite"><a href="#biba.bib1" title="" class="ltx_ref">Anderson et al. (2016)</a></cite>. But, if we use <math id="A1.SSx1.p1.m2" class="ltx_Math" alttext="\tau_{c}" display="inline" intent=":literal"><semantics><msub><mi>τ</mi><mi>c</mi></msub><annotation encoding="application/x-tex">\tau_{c}</annotation></semantics></math> and instead use aggregation method B, the correlation increases to 52.9: this inflation occurs with other metrics, too.</p>
+</div>
+<div id="A1.SSx1.p2" class="ltx_para">
+<p id="A1.SSx1.p2.1" class="ltx_p">For our results, we do our best to report all results for the most common setting: using <math id="A1.SSx1.p2.m1" class="ltx_Math" alttext="\tau_{c}" display="inline" intent=":literal"><semantics><msub><mi>τ</mi><mi>c</mi></msub><annotation encoding="application/x-tex">\tau_{c}</annotation></semantics></math> correlation, and using aggregation method A. Thus, the results we report may differ slightly than the results reported in prior work.</p>
+</div>
+</section>
+<section id="A1.SSx2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Composite details</h3>
+
+<div id="A1.SSx2.p1" class="ltx_para">
+<p id="A1.SSx2.p1.1" class="ltx_p">For this corpus too, prior work has mixed evaluating with kendall-C and kendall-B correlations, which can have an impact, e.g., for CIDEr in our setting, switching from <math id="A1.SSx2.p1.m1" class="ltx_Math" alttext="\tau_{b}" display="inline" intent=":literal"><semantics><msub><mi>τ</mi><mi>b</mi></msub><annotation encoding="application/x-tex">\tau_{b}</annotation></semantics></math> to <math id="A1.SSx2.p1.m2" class="ltx_Math" alttext="\tau_{c}" display="inline" intent=":literal"><semantics><msub><mi>τ</mi><mi>c</mi></msub><annotation encoding="application/x-tex">\tau_{c}</annotation></semantics></math> results in an increase from 35 to 38 rank correlation. But perhaps the most impactful decision for this corpus relates to the references: each image originally has (roughly) five references. But when gathering human judgments, one of the candidate captions that was rated by humans was sampled from the references. For Flickr8k, <cite class="ltx_cite ltx_citemacro_citet"><a href="#biba.bib1" title="" class="ltx_ref">Anderson et al. (2016)</a></cite> “exclude 158 correct image-caption pairs where the candidate caption appears in the reference set;" this curation choice has become standard for Flickr8k. But for Composite, it’s not clear if they repeated this curation choice, or not. And because of this ambiguity, it’s not obvious which standard each prior work followed, either. For fair comparison, in an effort to reconstruct <cite class="ltx_cite ltx_citemacro_citet"><a href="#biba.bib1" title="" class="ltx_ref">Anderson et al. (2016)</a></cite>, we tried both ways: removing the ground truth candidate reference, and not.</p>
+</div>
+<figure id="A1.T6" class="ltx_table">
+<div id="A1.T6.2" class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:345.0pt;height:89.9pt;vertical-align:-42.3pt;"><span class="ltx_transformed_inner" style="transform:translate(9.0pt,-2.3pt) scale(1.05499920209862,1.05499920209862) ;">
+<table id="A1.T6.2.1" class="ltx_tabular ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="A1.T6.2.1.1" class="ltx_tr">
+<th id="A1.T6.2.1.1.1" class="ltx_td ltx_th ltx_th_row ltx_border_tt"></th>
+<th id="A1.T6.2.1.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt">Original</th>
+<th id="A1.T6.2.1.1.3" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><math id="A1.T6.m1" class="ltx_Math" alttext="\tau_{b}" display="inline" intent=":literal"><semantics><msub><mi>τ</mi><mi>b</mi></msub><annotation encoding="application/x-tex">\tau_{b}</annotation></semantics></math> no GT</th>
+<th id="A1.T6.2.1.1.4" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><math id="A1.T6.m2" class="ltx_Math" alttext="\tau_{b}" display="inline" intent=":literal"><semantics><msub><mi>τ</mi><mi>b</mi></msub><annotation encoding="application/x-tex">\tau_{b}</annotation></semantics></math> w/ GT</th>
+<th id="A1.T6.2.1.1.5" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><math id="A1.T6.m3" class="ltx_Math" alttext="\tau_{c}" display="inline" intent=":literal"><semantics><msub><mi>τ</mi><mi>c</mi></msub><annotation encoding="application/x-tex">\tau_{c}</annotation></semantics></math> no GT</th>
+<th id="A1.T6.2.1.1.6" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><math id="A1.T6.m4" class="ltx_Math" alttext="\tau_{c}" display="inline" intent=":literal"><semantics><msub><mi>τ</mi><mi>c</mi></msub><annotation encoding="application/x-tex">\tau_{c}</annotation></semantics></math> w/ GT</th></tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="A1.T6.2.1.2" class="ltx_tr">
+<th id="A1.T6.2.1.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">BLEU-1</th>
+<td id="A1.T6.2.1.2.2" class="ltx_td ltx_align_center ltx_border_t">26</td>
+<td id="A1.T6.2.1.2.3" class="ltx_td ltx_align_center ltx_border_t">29</td>
+<td id="A1.T6.2.1.2.4" class="ltx_td ltx_align_center ltx_border_t">45</td>
+<td id="A1.T6.2.1.2.5" class="ltx_td ltx_align_center ltx_border_t">31</td>
+<td id="A1.T6.2.1.2.6" class="ltx_td ltx_align_center ltx_border_t">49</td></tr>
+<tr id="A1.T6.2.1.3" class="ltx_tr">
+<th id="A1.T6.2.1.3.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">BLEU-4</th>
+<td id="A1.T6.2.1.3.2" class="ltx_td ltx_align_center">18</td>
+<td id="A1.T6.2.1.3.3" class="ltx_td ltx_align_center">31</td>
+<td id="A1.T6.2.1.3.4" class="ltx_td ltx_align_center">46</td>
+<td id="A1.T6.2.1.3.5" class="ltx_td ltx_align_center">31</td>
+<td id="A1.T6.2.1.3.6" class="ltx_td ltx_align_center">50</td></tr>
+<tr id="A1.T6.2.1.4" class="ltx_tr">
+<th id="A1.T6.2.1.4.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">ROUGE-L</th>
+<td id="A1.T6.2.1.4.2" class="ltx_td ltx_align_center">28</td>
+<td id="A1.T6.2.1.4.3" class="ltx_td ltx_align_center">30</td>
+<td id="A1.T6.2.1.4.4" class="ltx_td ltx_align_center">48</td>
+<td id="A1.T6.2.1.4.5" class="ltx_td ltx_align_center">32</td>
+<td id="A1.T6.2.1.4.6" class="ltx_td ltx_align_center">49</td></tr>
+<tr id="A1.T6.2.1.5" class="ltx_tr">
+<th id="A1.T6.2.1.5.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">METEOR</th>
+<td id="A1.T6.2.1.5.2" class="ltx_td ltx_align_center">35</td>
+<td id="A1.T6.2.1.5.3" class="ltx_td ltx_align_center">36</td>
+<td id="A1.T6.2.1.5.4" class="ltx_td ltx_align_center">49</td>
+<td id="A1.T6.2.1.5.5" class="ltx_td ltx_align_center">39</td>
+<td id="A1.T6.2.1.5.6" class="ltx_td ltx_align_center">50</td></tr>
+<tr id="A1.T6.2.1.6" class="ltx_tr">
+<th id="A1.T6.2.1.6.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">CIDEr</th>
+<td id="A1.T6.2.1.6.2" class="ltx_td ltx_align_center">36</td>
+<td id="A1.T6.2.1.6.3" class="ltx_td ltx_align_center">35</td>
+<td id="A1.T6.2.1.6.4" class="ltx_td ltx_align_center">48</td>
+<td id="A1.T6.2.1.6.5" class="ltx_td ltx_align_center">38</td>
+<td id="A1.T6.2.1.6.6" class="ltx_td ltx_align_center">52</td></tr>
+<tr id="A1.T6.2.1.7" class="ltx_tr">
+<th id="A1.T6.2.1.7.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb">SPICE</th>
+<td id="A1.T6.2.1.7.2" class="ltx_td ltx_align_center ltx_border_bb">39</td>
+<td id="A1.T6.2.1.7.3" class="ltx_td ltx_align_center ltx_border_bb">39</td>
+<td id="A1.T6.2.1.7.4" class="ltx_td ltx_align_center ltx_border_bb">51</td>
+<td id="A1.T6.2.1.7.5" class="ltx_td ltx_align_center ltx_border_bb">40</td>
+<td id="A1.T6.2.1.7.6" class="ltx_td ltx_align_center ltx_border_bb">53</td></tr>
+</tbody>
+</table>
+</span></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 6: </span>Attempts at replicating <cite class="ltx_cite ltx_citemacro_citet"><a href="#biba.bib1" title="" class="ltx_ref">Anderson et al. (2016)</a></cite>’s results on the composite corpus.</figcaption>
+</figure>
+<div id="A1.SSx2.p2" class="ltx_para">
+<p id="A1.SSx2.p2.1" class="ltx_p">Our efforts to replicate the exact values of <cite class="ltx_cite ltx_citemacro_citet"><a href="#biba.bib1" title="" class="ltx_ref">Anderson et al. (2016)</a></cite> are in Table <a href="#A1.T6" title="Table 6 ‣ Composite details ‣ Appendix A Evaluation and Replication Details ‣ CLIPScore:A Reference-free Evaluation Metric for Image Captioning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a>. We suspect the discrepancy in BLEU-4 likely results from a smoothing issue related to the application of BLEU-4 to individual captions vs. the whole corpus (as mentioned in <cite class="ltx_cite ltx_citemacro_citet"><a href="#biba.bib4" title="" class="ltx_ref">Kane et al. (2020)</a></cite>). Based on these replication efforts, it’s likely that the original evaluations for this corpus were computed using <math id="A1.SSx2.p2.m1" class="ltx_Math" alttext="\tau_{c}" display="inline" intent=":literal"><semantics><msub><mi>τ</mi><mi>c</mi></msub><annotation encoding="application/x-tex">\tau_{c}</annotation></semantics></math> with GT references removed. We agree that the fairest analysis on this corpus should not include a reference that is also a candidate. And while we didn’t go through all prior works and recompute their metrics with this change, we did compute ViLBERTScore-F in this setting, because it was, before <span id="A1.SSx2.p2.1.1" class="ltx_text ltx_font_typewriter">CLIPScore</span>, the state-of-the-art for this corpus. If it’s helpful for future reporting: in the setting where all references (including the GT reference) are used, RefCLIP-S gets <math id="A1.SSx2.p2.m2" class="ltx_Math" alttext="\tau_{c}=60.0" display="inline" intent=":literal"><semantics><mrow><msub><mi>τ</mi><mi>c</mi></msub><mo>=</mo><mn>60.0</mn></mrow><annotation encoding="application/x-tex">\tau_{c}=60.0</annotation></semantics></math>.</p>
+</div>
+</section>
+<section id="A1.SSx3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">MSCOCO system-level details</h3>
+
+<div id="A1.SSx3.p1" class="ltx_para">
+<p id="A1.SSx3.p1.1" class="ltx_p">The MSCOCO 2015 image captioning challenge is a standard corpus for evaluation the system-level correlation between new evaluation metrics and human judgments on the MSCOCO test set. To our knowledge, this evaluation was first conducted by <cite class="ltx_cite ltx_citemacro_citet"><a href="#biba.bib1" title="" class="ltx_ref">Anderson et al. (2016)</a></cite> using a random sample of 1K test set submissions from 15 teams. But because the test set predictions are not public, more recent work (e.g., <cite class="ltx_cite ltx_citemacro_citet"><a href="#biba.bib3" title="" class="ltx_ref">Cui et al. (2018)</a>; <a href="#biba.bib5" title="" class="ltx_ref">Zhang et al. (2020)</a></cite>) has evaluated using dev set predictions from systems, and assuming dev set results correlate with test set results (12 teams submitted dev predictions). However, there are some potential problems with this setup:</p>
+</div>
+<div id="A1.SSx3.p2" class="ltx_para">
+<ol id="A1.I1" class="ltx_enumerate ltx_leftmargin_flush">
+<li id="A1.I1.i1" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">1.</span> 
+<div id="A1.I1.i1.p1" class="ltx_para">
+<p id="A1.I1.i1.p1.1" class="ltx_p">There’s reason to believe that some teams give dev set predictions with different models vs. test set predictions. For example, the dev set predictions are identical between the two submissions: <span id="A1.I1.i1.p1.1.1" class="ltx_text ltx_font_typewriter">m-RNN</span> and <span id="A1.I1.i1.p1.1.2" class="ltx_text ltx_font_typewriter">m-RNN (Baidu/ UCLA)</span>, but the test set predictions differ (and achieve significantly different scores).</p>
+</div></li>
+<li id="A1.I1.i2" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">2.</span> 
+<div id="A1.I1.i2.p1" class="ltx_para">
+<p id="A1.I1.i2.p1.1" class="ltx_p">Correlations are reported over 12 (or possibly only 11, given the duplicate predictions) systems. But spearman/pearson correlation over only 12 observations is unfortunately simple to (accidentally) “game" due to the low statistical power of the comparison (see <cite class="ltx_cite ltx_citemacro_citet"><a href="#biba.bib2" title="" class="ltx_ref">Card et al. (2020)</a></cite> for an overview of statistical power in NLP). Consider a (nonsense) evaluation metric that assigns a random uniform <math id="A1.I1.i2.p1.m1" class="ltx_Math" alttext="[0,1)" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">[0,1)</annotation></semantics></math> “score" to systems without examining outputs, and consider applying this metric, e.g., <math id="A1.I1.i2.p1.m2" class="ltx_Math" alttext="N=10" display="inline" intent=":literal"><semantics><mrow><mi>N</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">N=10</annotation></semantics></math> times to the 12 systems and taking the best performing run as the final metric (simulating either a single researcher developing a new evaluation metric and/or the community’s collective trials). We ran a simulation of this process 1000 times: the average spearman/pearson correlation between human judgments and our bogus metric were <math id="A1.I1.i2.p1.m3" class="ltx_Math" alttext="r/\rho=.91" display="inline" intent=":literal"><semantics><mrow><mrow><mi>r</mi><mo>/</mo><mi>ρ</mi></mrow><mo>=</mo><mn>.91</mn></mrow><annotation encoding="application/x-tex">r/\rho=.91</annotation></semantics></math>, due to repeated evaluation and low sample size.</p>
+</div></li>
+</ol>
+</div>
+<div id="A1.SSx3.p3" class="ltx_para ltx_noindent">
+<p id="A1.SSx3.p3.1" class="ltx_p">Thus, while the intent of this evaluation is understandable, and it may be possible to garner some insight if relatively few evaluations are conducted, this specific setup as a fine-grained comparison between new evaluation metrics for caption generation has likely outlived its utility.</p>
+</div>
+</section>
+<section id="A1.SSx4" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Pascal-50S Setup Erratum</h3>
+
+<figure id="A1.T7" class="ltx_table">
+<div id="A1.T7.2" class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:345.0pt;height:148.3pt;vertical-align:-71.1pt;"><span class="ltx_transformed_inner" style="transform:translate(31.0pt,-13.3pt) scale(1.21932156406128,1.21932156406128) ;">
+<table id="A1.T7.2.1" class="ltx_tabular ltx_guessed_headers ltx_align_middle">
+<tbody class="ltx_tbody">
+<tr id="A1.T7.2.1.1" class="ltx_tr">
+<th id="A1.T7.2.1.1.1" class="ltx_td ltx_th ltx_th_row ltx_border_tt"></th>
+<td id="A1.T7.2.1.1.2" class="ltx_td ltx_align_center ltx_border_tt">HC</td>
+<td id="A1.T7.2.1.1.3" class="ltx_td ltx_align_center ltx_border_tt">HI</td>
+<td id="A1.T7.2.1.1.4" class="ltx_td ltx_align_center ltx_border_tt">HM</td>
+<td id="A1.T7.2.1.1.5" class="ltx_td ltx_align_center ltx_border_r ltx_border_tt">MM</td>
+<td id="A1.T7.2.1.1.6" class="ltx_td ltx_align_center ltx_border_tt">Mean</td></tr>
+<tr id="A1.T7.2.1.2" class="ltx_tr">
+<th id="A1.T7.2.1.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">length</th>
+<td id="A1.T7.2.1.2.2" class="ltx_td ltx_align_center ltx_border_t"><span id="A1.T7.2.1.2.2.1" class="ltx_text ltx_font_bold">65.4</span></td>
+<td id="A1.T7.2.1.2.3" class="ltx_td ltx_align_center ltx_border_t">52.4</td>
+<td id="A1.T7.2.1.2.4" class="ltx_td ltx_align_center ltx_border_t">63.0</td>
+<td id="A1.T7.2.1.2.5" class="ltx_td ltx_align_center ltx_border_r ltx_border_t">42.3</td>
+<td id="A1.T7.2.1.2.6" class="ltx_td ltx_align_center ltx_border_t">55.8</td></tr>
+<tr id="A1.T7.2.1.3" class="ltx_tr">
+<th id="A1.T7.2.1.3.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">BLEU-4</th>
+<td id="A1.T7.2.1.3.2" class="ltx_td ltx_align_center">52.5</td>
+<td id="A1.T7.2.1.3.3" class="ltx_td ltx_align_center">90.4</td>
+<td id="A1.T7.2.1.3.4" class="ltx_td ltx_align_center">84.9</td>
+<td id="A1.T7.2.1.3.5" class="ltx_td ltx_align_center ltx_border_r">55.3</td>
+<td id="A1.T7.2.1.3.6" class="ltx_td ltx_align_center">70.8</td></tr>
+<tr id="A1.T7.2.1.4" class="ltx_tr">
+<th id="A1.T7.2.1.4.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">SPICE</th>
+<td id="A1.T7.2.1.4.2" class="ltx_td ltx_align_center">56.9</td>
+<td id="A1.T7.2.1.4.3" class="ltx_td ltx_align_center">96.3</td>
+<td id="A1.T7.2.1.4.4" class="ltx_td ltx_align_center">87.1</td>
+<td id="A1.T7.2.1.4.5" class="ltx_td ltx_align_center ltx_border_r">66.4</td>
+<td id="A1.T7.2.1.4.6" class="ltx_td ltx_align_center">76.7</td></tr>
+<tr id="A1.T7.2.1.5" class="ltx_tr">
+<th id="A1.T7.2.1.5.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">METEOR</th>
+<td id="A1.T7.2.1.5.2" class="ltx_td ltx_align_center">59.0</td>
+<td id="A1.T7.2.1.5.3" class="ltx_td ltx_align_center">97.7</td>
+<td id="A1.T7.2.1.5.4" class="ltx_td ltx_align_center">93.9</td>
+<td id="A1.T7.2.1.5.5" class="ltx_td ltx_align_center ltx_border_r">62.0</td>
+<td id="A1.T7.2.1.5.6" class="ltx_td ltx_align_center">78.2</td></tr>
+<tr id="A1.T7.2.1.6" class="ltx_tr">
+<th id="A1.T7.2.1.6.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">ROUGE-L</th>
+<td id="A1.T7.2.1.6.2" class="ltx_td ltx_align_center">55.0</td>
+<td id="A1.T7.2.1.6.3" class="ltx_td ltx_align_center">95.3</td>
+<td id="A1.T7.2.1.6.4" class="ltx_td ltx_align_center">93.1</td>
+<td id="A1.T7.2.1.6.5" class="ltx_td ltx_align_center ltx_border_r">58.7</td>
+<td id="A1.T7.2.1.6.6" class="ltx_td ltx_align_center">75.5</td></tr>
+<tr id="A1.T7.2.1.7" class="ltx_tr">
+<th id="A1.T7.2.1.7.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">CIDEr</th>
+<td id="A1.T7.2.1.7.2" class="ltx_td ltx_align_center">53.7</td>
+<td id="A1.T7.2.1.7.3" class="ltx_td ltx_align_center">98.1</td>
+<td id="A1.T7.2.1.7.4" class="ltx_td ltx_align_center">90.8</td>
+<td id="A1.T7.2.1.7.5" class="ltx_td ltx_align_center ltx_border_r">63.7</td>
+<td id="A1.T7.2.1.7.6" class="ltx_td ltx_align_center">76.6</td></tr>
+<tr id="A1.T7.2.1.8" class="ltx_tr">
+<th id="A1.T7.2.1.8.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">BERT-S (RoBERTa-F)</th>
+<td id="A1.T7.2.1.8.2" class="ltx_td ltx_align_center">54.4</td>
+<td id="A1.T7.2.1.8.3" class="ltx_td ltx_align_center">96.1</td>
+<td id="A1.T7.2.1.8.4" class="ltx_td ltx_align_center">94.3</td>
+<td id="A1.T7.2.1.8.5" class="ltx_td ltx_align_center ltx_border_r">56.4</td>
+<td id="A1.T7.2.1.8.6" class="ltx_td ltx_align_center">75.3</td></tr>
+<tr id="A1.T7.2.1.9" class="ltx_tr">
+<th id="A1.T7.2.1.9.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">CLIP-S (no refs)</th>
+<td id="A1.T7.2.1.9.2" class="ltx_td ltx_align_center ltx_border_t">60.3</td>
+<td id="A1.T7.2.1.9.3" class="ltx_td ltx_align_center ltx_border_t">99.4</td>
+<td id="A1.T7.2.1.9.4" class="ltx_td ltx_align_center ltx_border_t"><span id="A1.T7.2.1.9.4.1" class="ltx_text ltx_font_bold">97.9</span></td>
+<td id="A1.T7.2.1.9.5" class="ltx_td ltx_align_center ltx_border_r ltx_border_t">77.3</td>
+<td id="A1.T7.2.1.9.6" class="ltx_td ltx_align_center ltx_border_t"><span id="A1.T7.2.1.9.6.1" class="ltx_text ltx_font_bold">83.7</span></td></tr>
+<tr id="A1.T7.2.1.10" class="ltx_tr">
+<th id="A1.T7.2.1.10.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb">RefCLIP-S</th>
+<td id="A1.T7.2.1.10.2" class="ltx_td ltx_align_center ltx_border_bb">57.9</td>
+<td id="A1.T7.2.1.10.3" class="ltx_td ltx_align_center ltx_border_bb"><span id="A1.T7.2.1.10.3.1" class="ltx_text ltx_font_bold">99.5</span></td>
+<td id="A1.T7.2.1.10.4" class="ltx_td ltx_align_center ltx_border_bb">96.1</td>
+<td id="A1.T7.2.1.10.5" class="ltx_td ltx_align_center ltx_border_bb ltx_border_r"><span id="A1.T7.2.1.10.5.1" class="ltx_text ltx_font_bold">80.8</span></td>
+<td id="A1.T7.2.1.10.6" class="ltx_td ltx_align_center ltx_border_bb">83.6</td></tr>
+</tbody>
+</table>
+</span></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 7: </span>Pascal50S-11-judgment accuracy results (5 references, non-standard 11 human judgment version). HC = two human correct captions; HI = both captions are human written, but one is wrong; HM = both captions are for the image, but one is written by a human, one by an algorithm; MM = both captions are for the image, and both are written by an algorithm. We average our results over 5 random samples (but CLIP-S doesn’t change because it doesn’t use references).</figcaption>
+</figure>
+<div id="A1.SSx4.p1" class="ltx_para">
+<p id="A1.SSx4.p1.1" class="ltx_p">In March 2022, Jin-Hwa Kim reported some <a href="https://github.com/jmhessel/clipscore/issues/4" title="" class="ltx_ref ltx_href">small discrepancies</a> in a replication effort for the Pascal-50S corpus. Upon further investigation, it was discovered that the original version of this work was using a different set of human judgments than the usual setup. In particular, the <a href="http://vrama91.github.io/cider/" title="" class="ltx_ref ltx_href">Pascal-50S corpus</a> contains two types of human judgments: 11 human judgments per pair (located in a file named <span id="A1.SSx4.p1.1.1" class="ltx_text ltx_font_typewriter">pair_pascal.mat</span>); and 48 human judgments per pair (located in a file named <span id="A1.SSx4.p1.1.2" class="ltx_text ltx_font_typewriter">consensus_pascal.mat</span>). The 48 judgments are intended to be used, and the results in the main paper have been updated accordingly. For reproducability sake, in case future work utilizes the 11 judgments, we have included those results in Table <a href="#A1.T7" title="Table 7 ‣ Pascal-50S Setup Erratum ‣ Appendix A Evaluation and Replication Details ‣ CLIPScore:A Reference-free Evaluation Metric for Image Captioning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">7</span></a>.</p>
+</div>
+</section>
+</section>
+<section id="A2" class="ltx_appendix">
+<h2 class="ltx_title ltx_title_appendix"><span class="ltx_tag ltx_tag_appendix">Appendix B </span>Rescaling <span id="A2.2" class="ltx_text ltx_font_typewriter">CLIPScore</span></h2>
+
+<figure id="A2.F4" class="ltx_figure">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_2">
+<figure id="A2.F4.sf1" class="ltx_figure ltx_figure_panel"><object type="image/svg+xml" data="2104.08718v3/flickr8k_with_metrics_cosdist.svg" id="A2.F4.sf1.g1" class="ltx_graphics ltx_centering ltx_img_square" style="aspect-ratio:429/429;" width="429" height="429"></object>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">(a) </span>Flickr8K</figcaption>
+</figure></div><div class="ltx_flex_cell ltx_flex_size_2">
+<figure id="A2.F4.sf2" class="ltx_figure ltx_figure_panel"><object type="image/svg+xml" data="2104.08718v3/composite_correctness_withoutGT_with_metrics_cosdist.svg" id="A2.F4.sf2.g1" class="ltx_graphics ltx_centering ltx_img_square" style="aspect-ratio:429/429;" width="429" height="429"></object>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">(b) </span>Composite</figcaption>
+</figure></div><div class="ltx_flex_break"></div><div class="ltx_flex_cell ltx_flex_size_2">
+<figure id="A2.F4.sf3" class="ltx_figure ltx_figure_panel ltx_align_center"><object type="image/svg+xml" data="2104.08718v3/pascal50s_0_with_metrics_cosdist.svg" id="A2.F4.sf3.g1" class="ltx_graphics ltx_centering ltx_img_square" style="aspect-ratio:429/429;" width="429" height="429"></object>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">(c) </span>Pascal50S</figcaption>
+</figure></div><div class="ltx_flex_cell ltx_flex_size_2">
+<figure id="A2.F4.sf4" class="ltx_figure ltx_figure_panel ltx_align_center"><object type="image/svg+xml" data="2104.08718v3/alttext_with_metrics_cosdist.svg" id="A2.F4.sf4.g1" class="ltx_graphics ltx_centering ltx_img_square" style="aspect-ratio:429/429;" width="429" height="429"></object>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">(d) </span>Twitter AltText</figcaption>
+</figure></div></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 4: </span>Distributions of raw cosine similarities between <span id="A2.F4.6" class="ltx_text" style="--ltx-fg-color:#E66101;"> <span id="A2.F4.6.1" class="ltx_text ltx_underline ltx_font_bold">c</span>andidate and <span id="A2.F4.6.2" class="ltx_text ltx_underline ltx_font_bold">r</span>eferences</span> and <span id="A2.F4.7" class="ltx_text ltx_underline ltx_font_bold" style="--ltx-fg-color:#5E3C99;">c</span><span id="A2.F4.8" class="ltx_text" style="--ltx-fg-color:#5E3C99;">andidate and <span id="A2.F4.8.1" class="ltx_text ltx_underline ltx_font_bold">v</span>isual content</span> from CLIP <span id="A2.F4.9" class="ltx_text ltx_font_typewriter">ViT-B/32</span>.</figcaption>
+</figure>
+<div id="A2.p1" class="ltx_para">
+<p id="A2.p1.1" class="ltx_p">For readability purposes, as in <cite class="ltx_cite ltx_citemacro_citet"><a href="#biba.bib5" title="" class="ltx_ref">Zhang et al. (2020)</a></cite>, we sought to re-scale the raw cosine similarities computed by CLIP <span id="A2.p1.1.1" class="ltx_text ltx_font_typewriter">ViT-B/32</span>. While such a monotonic rescaling operation doesn’t affect ranking results, for reporting purposes, it can be easier to compare raw values if they are on a scale more closely-aligned with other evaluation metrics (e.g., from roughly zero to roughly one). Figure <a href="#A2.F4" title="Figure 4 ‣ Appendix B Rescaling CLIPScore ‣ CLIPScore:A Reference-free Evaluation Metric for Image Captioning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a> shows the raw candidate-reference and candidate-image cosine similarities for four corpora. (Many “reference"-candidate similarities for the Twitter corpus are 1.0 because users frequently use the text of their tweet as the AltText.) Across all of these cases, we never observed a negative negative cosine similarity. But, to be safe, we take a maximum between the cosine similarity and zero because the harmonic mean used to compute <span id="A2.p1.1.2" class="ltx_text ltx_font_typewriter">RefCLIPScore</span> would be undefined for negative values. Multiplying by 2.5 has the effect of “stretching" the <span id="A2.p1.1.3" class="ltx_text ltx_font_typewriter">CLIPScore</span> distribution to more uniformly span between zero and one, though, <span id="A2.p1.1.4" class="ltx_text ltx_font_typewriter">CLIPScore</span> can be greater than 1. Furthermore, when computing <span id="A2.p1.1.5" class="ltx_text ltx_font_typewriter">RefCLIPScore</span>, we maintain this weighting, because it has the effect of mapping the visual-textual cosine similarity distribution to more closely match the reference-candidate distribution: this provides a roughly equal importance weighting between the image-candidate and reference-candidate similarity factors.</p>
+</div>
+<div id="A2.p2" class="ltx_para">
+<p id="A2.p2.1" class="ltx_p">We note that the exact parameters of our rescaling method only apply to CLIP <span id="A2.p2.1.1" class="ltx_text ltx_font_typewriter">ViT-B/32</span>. If future, bigger models are released, e.g., the presently unreleased <span id="A2.p2.1.2" class="ltx_text ltx_font_typewriter">ViT-L/14</span> CLIP variant, they could exhibit a different cosine similarity distribution.</p>
+</div>
+</section>
+<section id="biba" class="ltx_bibliography">
+<h2 class="ltx_title ltx_title_bibliography">References</h2>
+
+<ul class="ltx_biblist">
+      
+<li id="biba.bib1" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Anderson et al. (2016)</span>
+<span class="ltx_bibblock">
+Peter Anderson, Basura Fernando, Mark Johnson, and Stephen Gould. 2016.
+
+</span>
+<span class="ltx_bibblock">Spice: Semantic propositional image caption evaluation.
+
+</span>
+<span class="ltx_bibblock">In <em id="biba.bib1.1" class="ltx_emph ltx_font_italic">ECCV</em>. Springer.
+
+</span></li>
+      
+<li id="biba.bib2" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Card et al. (2020)</span>
+<span class="ltx_bibblock">
+Dallas Card, Peter Henderson, Urvashi Khandelwal, Robin Jia, Kyle Mahowald, and
+Dan Jurafsky. 2020.
+
+</span>
+<span class="ltx_bibblock">With little power comes great responsibility.
+
+</span>
+<span class="ltx_bibblock">In <em id="biba.bib2.1" class="ltx_emph ltx_font_italic">EMNLP</em>.
+
+</span></li>
+      
+<li id="biba.bib3" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Cui et al. (2018)</span>
+<span class="ltx_bibblock">
+Yin Cui, Guandao Yang, Andreas Veit, Xun Huang, and Serge Belongie. 2018.
+
+</span>
+<span class="ltx_bibblock">Learning to evaluate image captioning.
+
+</span>
+<span class="ltx_bibblock">In <em id="biba.bib3.1" class="ltx_emph ltx_font_italic">CVPR</em>.
+
+</span></li>
+      
+<li id="biba.bib4" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Kane et al. (2020)</span>
+<span class="ltx_bibblock">
+Hassan Kane, Muhammed Yusuf Kocyigit, Ali Abdalla, Pelkins Ajanoh, and Mohamed
+Coulibali. 2020.
+
+</span>
+<span class="ltx_bibblock">NUBIA: NeUral based interchangeability assessor for text
+generation.
+
+</span>
+<span class="ltx_bibblock">In <em id="biba.bib4.1" class="ltx_emph ltx_font_italic">1st Workshop on Evaluating NLG Evaluation</em>.
+
+</span></li>
+      
+<li id="biba.bib5" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zhang et al. (2020)</span>
+<span class="ltx_bibblock">
+Tianyi Zhang, Varsha Kishore, Felix Wu, Kilian Q Weinberger, and Yoav Artzi.
+2020.
+
+</span>
+<span class="ltx_bibblock">BERTScore: Evaluating text generation with BERT.
+
+</span>
+<span class="ltx_bibblock">In <em id="biba.bib5.1" class="ltx_emph ltx_font_italic">ICLR</em>.
+
+</span></li>
+    
+</ul>
+</section>
+</article>
+    </div>
+  </section>
+  <section class="pane pane-zh">
+    <div class="pane-head">中文精读翻译</div>
+    <div class="pane-body" id="zhBody"><div class="md" id="mdRoot"></div></div>
+  </section>
+</main>
+<script type="text/markdown" id="zhSrc"># 《CLIPScore: A Reference-free Evaluation Metric for Image Captioning》中文精读翻译
+
+## 论文信息
+
+- **英文标题**：CLIPScore: A Reference-free Evaluation Metric for Image Captioning
+- **中文标题**：CLIPScore：免参考的图像描述评估指标
+- **作者**：Jack Hessel、Ari Holtzman、Maxwell Forbes、Ronan Le Bras、Yejin Choi
+- **机构**：University of Washington（华盛顿大学保罗·艾伦计算机科学与工程学院）/ Allen Institute for AI（艾伦人工智能研究所）
+- **arXiv 链接**：<https://arxiv.org/abs/2104.08718>（EMNLP 2021）
+- **提出的框架**：CLIPScore（免参考版 CLIP-S，及参考增强版 RefCLIPScore）
+
+## 一句话核心总结
+
+直接用现成的 CLIP（ViT-B/32）计算候选描述与图像嵌入的余弦相似度并乘以 2.5 做重缩放，就得到免参考指标 CLIPScore——它在多个标准图像描述基准上与人类判断的相关性超过 CIDEr、SPICE 等所有基于参考的指标；其参考增强版 RefCLIPScore（与参考相似度的调和平均）相关性更高，信息增益分析进一步表明 CLIP-S 与文本-文本类参考指标互补，应搭配报告。
+
+---
+
+## 摘要
+
+图像描述（image captioning）任务历来依赖**基于参考**（reference-based）的自动评估：把机器生成的描述与人工撰写的描述进行比对。这与人类评估描述质量时的**免参考**（reference-free）方式形成鲜明对比。
+
+本文报告了一个令人惊讶的实证发现：CLIP（Radford et al., 2021）——一个在来自互联网的 4 亿图像+描述对上预训练的跨模态模型——可以用于稳健的图像描述自动评估，而无需任何参考。跨越多个语料库的实验表明，我们提出的免参考指标 CLIPScore 取得了与人类判断的最高相关性，超过了 CIDEr、SPICE 等现有基于参考的指标。信息增益（information gain）实验表明：CLIPScore 紧密聚焦于**图文兼容性**（image–text compatibility），与强调**文本-文本相似性**的现有基于参考的指标形成互补。因此，我们还提出了参考增强版本 RefCLIPScore，其相关性更高。在字面描述任务之外，若干案例研究既揭示了 CLIPScore 表现良好的领域（剪贴画图像、alt-text 评分），也揭示了它相对基于参考指标较弱的领域，例如需要更丰富上下文知识的新闻描述。
+
+---
+
+## 1 引言
+
+对于大多数文本生成任务，基于参考的 n-gram 重叠（n-gram overlap）方法仍是自动评估的主流手段。在图像描述生成领域，近期的基于参考指标试图超越简单重叠，考虑更丰富的参考-候选相似性模型：例如近似场景图（scene graph）（Anderson et al., 2016），以及允许基于参考的方法纳入图像本身（Jiang et al., 2019; Lee et al., 2020）。但是，参考描述的收集成本高昂，而且即便为每张图像比对**多条**人工描述，往往仍不充分（见图 1）。其结果是：在许多语料库上，基于参考的打分与人类质量判断之间仍存在显著鸿沟（关于图像描述生成指标的全面比较，见 Elliott and Keller, 2014 及 Kilickaya et al., 2017）。
+
+评估图像描述，我们真的需要参考吗？毕竟，人类在判断一条图像描述是否恰当时，只需看着图像、读一遍候选文本即可完成。
+
+机器翻译领域的近期趋势提供了灵感：在那里，免参考评估（有时被称为**质量估计**，quality estimation）的关键障碍一直是估计源文+候选句之间的跨语言相似性（Blatz et al., 2004; Specia et al., 2010; Mehdad et al., 2012; Specia and Shah, 2018）。但近期工作（Lo, 2019; Yankovskaya et al., 2019; Zhao et al., 2020）提升与人类判断相关性的方式，并非收集更多的单语参考，而是利用大规模预训练多语言模型学得的跨语言表示，例如 LASER（Artetxe and Schwenk, 2019）或 M-BERT（Devlin et al., 2019）。
+
+我们假设，预训练视觉+语言模型（如 ALIGN（Jia et al., 2021）和 CLIP（Radford et al., 2021））所学到的关系，同样能够支撑图像描述场景下的免参考评估。事实确实如此：我们证明，把 CLIP 相当直接地应用于（图像，生成描述）对，即可在一组标准图像描述基准（如 MSCOCO（Lin et al., 2014））上取得与人类判断高得惊人的相关性。我们称这一流程为 CLIPScore（缩写为 CLIP-S）。除了与人类判断的直接相关性之外，一项信息增益分析揭示：CLIP-S 既与常报告的指标（如 BLEU-4、SPICE、CIDEr）互补，也与新提出的基于参考指标（如 ViLBERTScore-F（Lee et al., 2020））互补。
+
+此外，我们（1）提出 CLIPScore 的参考增强版本 RefCLIPScore，取得更高的与人类的相关性；（2）验证 CLIP-S 对对抗构造的图像描述敏感——这类描述中有一个名词短语被替换为一个貌似合理（但错误）的干扰项；（3）构建了一个从未在互联网上公开过的图像语料库，以验证 CLIP-S 能够在从未见过的图像上重建人类判断。
+
+最后，我们在四个偏离"无上下文字面照片描述"的案例研究情境中评估 CLIP-S。其中两个案例 CLIP-S 表现良好：它与 Twitter 上 alt-text 质量评分高度相关，并展现出对剪贴画图像+描述进行推理的惊人能力。对于新闻图像描述生成，基于参考的方法与人类判断的相关性最好。而对于受社交媒体语言风格启发的情绪化描述（emotive captions），连基于参考的指标也无能为力。
+
+> **图 1**：上：CLIPScore 像人类一样，仅用 CLIP 评估图像-描述兼容性，**不使用**任何参考。下：这使 CLIPScore 摆脱了 n-gram 匹配指标众所周知的缺陷——这类指标歧视含新词的好描述（上），却偏爱任何包含常见词的描述（下）。图标来源：Noun Project，作者 Hasanudin、Adiyogi。
+
+## 2 相关工作
+
+**仅基于参考的图像描述评估**。总体而言，图像描述生成模型由一套共 5 个基于参考的指标评估：BLEU-4（Papineni et al., 2002，衡量候选与参考之间某种精确率）、ROUGE-L（Lin, 2004，衡量某种召回率）、METEOR（Banerjee and Lavie, 2005，计算词级对齐）、CIDEr（Vedantam et al., 2015，结合 n-gram TF-IDF 加权与词干化）以及 SPICE（Anderson et al., 2016，对参考集合应用语义解析器，并用预测的场景图计算相似度）。（与这些指标对比时，我们使用标准 COCO 评估工具 https://github.com/tylin/coco-caption。Yi et al., 2020 提出了一种专为图像描述生成领域调优的 BERTScore（Zhang et al., 2020）重加权方法，我们称之为 BERT-S++。）
+
+**参考+图像的描述评估**。近期指标在参考之外纳入了图文 grounding 特征：TIGEr（Jiang et al., 2019）使用预训练 SCAN 模型（Lee et al., 2018），ViLBERTScore-F（Lee et al., 2020）使用在 12 个下游视觉-语言任务上微调过的预训练 ViLBERT 模型（Lu et al., 2019; Lu et al., 2020）。我们的工作则审视下一个合乎逻辑的延伸：与其在参考之外再加入视觉-文本交互，我们能否彻底抛弃参考？
+
+**图像描述的自检索**。先前工作提出在描述生成中引入**自检索**（self-retrieval）损失，其直觉是：好的描述应当能够以高准确率唯一地识别出它的图像（Dai and Lin, 2017; Luo et al., 2018; Liu et al., 2018）；监控这类损失可以揭示描述在模型自身看来有多高的辨识度。CLIP-S 精神上与之相似，但其独特之处在于可以像 BLEU-4 或 CIDEr 那样作为外在（extrinsic）评估指标使用。
+
+**免参考评估**。除引言中强调的机器翻译案例外，免参考评估还被提出用于其他生成任务，包括摘要（Louis and Nenkova, 2013; Peyrard and Gurevych, 2018; Sun and Nenkova, 2019）与对话（Tao et al., 2018; Mehri and Eskenazi, 2020）。这些指标可以是有监督的（依赖人类质量判断），也可以是低监督的（依赖预训练模型表示）。在图像描述方面，VIFIDEL（Madhyastha et al., 2019）的一个版本被用于免参考评估；但 VIFIDEL 基于固定物体词表从图像中检测到的物体列表来计算，其与人类评分的相关性通常低于基于参考的指标。
+
+## 3 CLIPScore 指标定义
+
+**模型细节**。CLIP（Radford et al., 2021）是一个在从互联网收集的 4 亿（图像，描述）对上训练的跨模态检索模型。构建数据时，先在搜索引擎上执行 50 万个搜索查询（由常见一元/二元词组、命名实体等构成），每个查询最多收集 2 万个（图像，描述）对。
+
+本文使用的是 **ViT-B/32** 版本（作者预计日后发布的更大更强的版本可能表现更好）。它用 Vision Transformer（Vaswani et al., 2017; Dosovitskiy et al., 2021）表示图像：摒弃卷积滤波器，改用在一个 7×7 图像块网格上计算的自注意力图，该网格均匀划分 224×224 像素的输入图像。图像网络有 12 层 Transformer、86M 参数。文本同样由一个 12 层 Transformer 表示，在 49K 的 BPE 词表上训练（Sennrich et al., 2016；更完整的描述见 Radford et al., 2019）。文本与图像两个网络各输出一个向量，分别旨在表示输入描述或图像的内容；ViT-B/32 的输出向量为 512 维。模型权重以 InfoNCE（Sohn, 2016; Oord et al., 2018）损失训练：最大化真正对应的图像/描述对的缩放余弦相似度，同时最小化错配对的相似度。我们的实验中这组权重保持冻结。
+
+**用 CLIP 评估描述生成**。为评估一条候选生成的质量，我们把图像与候选描述分别送入各自的特征提取器，然后计算所得嵌入的余弦相似度。（更复杂的 CLIP 配置，如区域级/token 级对应模型，并未取得更好效果。我们发现在候选前加提示词 "A photo depicts" 可小幅提升相关性，这也是我们推荐的标准配置；Radford et al., 2021 推荐的 "A photo of" 也表现不错。）参照 BERTScore（Zhang et al., 2020）的做法，我们进行一次重缩放（rescaling）：理论上余弦相似度取值范围为 $[-1,1]$，但（1）我们从未观察到负的余弦相似度；（2）观测值大致分布在 0 到 0.4 之间。我们倡导的 $w$ 取值为 $w=2.5$，目的是把分数分布拉伸到 $[0,1]$（更多细节与跨语料库的普适性验证见附录 B）。对于视觉 CLIP 嵌入为 $\mathbf{v}$ 的图像、文本 CLIP 嵌入为 $\mathbf{c}$ 的候选描述，我们取 $w=2.5$ 并计算：
+
+$$
+\texttt{CLIP-S}(\mathbf{c},\mathbf{v})=w\cdot\max\big(\cos(\mathbf{c},\mathbf{v}),\,0\big) \tag{1}
+$$
+
+计算语料库级 CLIP-S 时，只需对所有（候选，图像）对取平均。注意，这一评估**不依赖任何参考**。以 ViT-B/32 为主干的 CLIP-S 运行速度很快：在单张消费级 GPU 和硬盘上，每分钟约可处理 4 千个图像-候选对。
+
+**RefCLIPScore**。如果有参考可用，CLIP-S 还可扩展为纳入参考的版本。我们把每条可用参考送入 CLIP 的文本 Transformer 提取向量表示，得到所有参考的向量表示集合 $\mathbf{R}$。RefCLIPScore 计算为 CLIP-S 与最大参考余弦相似度的调和平均（harmonic mean），即：
+
+$$
+\texttt{RefCLIP-S}(\mathbf{c},\mathbf{R},\mathbf{v})=
+\text{H-Mean}\Big(\texttt{CLIP-S}(\mathbf{c},\mathbf{v}),\;\max\big(\max_{\mathbf{r}\in\mathbf{R}}\cos(\mathbf{c},\mathbf{r}),\,0\big)\Big) \tag{2}
+$$
+
+## 4 基准描述评估
+
+我们首先在一组字面描述（literal description）语料库上评估。总体而言，这些语料库中的描述旨在识别并突出照片图像中字面的、显著的物体/动作，且不带额外上下文（这类语料中显著性的统计探讨见 Berg et al., 2012）。
+
+### 4.1 句子级 Likert 判断
+
+我们首先探索三个由（图像/描述）对级别的人类 Likert 量表判断构成的语料库。
+
+**Flickr8K-Expert**（Hodosh et al., 2013）包含 5664 张图像上 1.7 万条"专家"人类判断：人类按 1 到 4 的量表为描述打分（4 = "描述无任何错误地刻画了图像"；1 = "描述与图像无关"）。
+
+**Flickr8K-CF** 是在 CrowdFlower 众包平台上对 4.8 万个（图像，描述）对（1000 张唯一图像）收集的 14.5 万条二元质量判断。每对至少有 3 条二元判断，我们取"是"标注的平均比例作为每对的分数来计算相关性。
+
+**Composite**（Aditya et al., 2015）包含 1.2 万条人类判断，图像来自 MSCOCO（2007 张）、Flickr8k（997 张）与 Flickr30k（Young et al., 2014，991 张）。每张图像原本有五条参考，但其中一条被选中接受人类评分（因此在计算指标时我们把它从参考集中移除；这与部分先前工作不同，为何我们认为这是更难也更合理的设定，见附录 A）。对 Composite 与 Flickr8K 判断，我们用 Kendall τ 计算各指标与人类评分的相关性。
+
+| 指标 | $\tau_c$ |
+| --- | --- |
+| BLEU-1 | 32.3 |
+| BLEU-4 | 30.8 |
+| ROUGE-L | 32.3 |
+| BERT-S (RoBERTa-F) | 39.2 |
+| METEOR | 41.8 |
+| CIDEr | 43.9 |
+| SPICE | 44.9 |
+| LEIC（$\tau_b$）*（Cui et al., 2018） | 46.6 |
+| BERT-S++（Yi et al., 2020） | 46.7 |
+| TIGEr（Jiang et al., 2019） | 49.3 |
+| NUBIA*（Kane et al., 2020） | 49.5 |
+| ViLBERTScore-F（Lee et al., 2020） | 50.1 |
+| **CLIP-S（无参考）** | **51.2** |
+| **RefCLIP-S** | **53.0** |
+
+> **表 1**：Flickr8K-Expert 与人类判断的相关性。所有指标使用 4–5 条真值参考，唯独 CLIP-S 不使用任何参考。* 表示引自先前工作的结果。
+
+**结果**。Flickr8K-Expert 的结果见表 1，Flickr8K-CF 的结果见表 2（按 Cui et al., 2018 的惯例采用 $\tau_b$），Composite 的结果见表 3。在我们考察的句子级语料库上，无参考的 CLIP-S 与人类判断的相关性高于以往所有依赖参考的指标；且在所有情形下，RefCLIP-S 都能进一步提升相关性。这提供了强有力的证据：在与这些字面照片图像描述任务的句子级人类判断的相关性上，对 CLIP 的一次相当直接的应用就足以充当强力的自动评估指标。
+
+| 指标 | $\tau_b$ |
+| --- | --- |
+| BLEU-4 | 16.9 |
+| ROUGE-L | 19.9 |
+| BERT-S (RoBERTa-F) | 22.8 |
+| METEOR | 22.2 |
+| SPICE | 24.4 |
+| CIDEr | 24.6 |
+| LEIC* | 29.5 |
+| **CLIP-S（无参考）** | **34.4** |
+| **RefCLIP-S** | **36.4** |
+
+> **表 2**：Flickr8K-CF 与人类判断的相关性。* 表示引自先前工作的结果。
+
+### 4.2 Pascal-50S 上的成对排序
+
+在 Pascal-50S（Vedantam et al., 2015）中，标注者对句子对做出成对偏好判断。共有 4 千个句子对，均匀分布于四种类别（如两条人类描述、两条机器描述等）。每个句子对收集了 48 条人类成对判断（与展示图像不同，标注者只看到一条参考以及待排序的两条候选）。沿用先前工作，我们不计算相关系数，而是计算准确率：把多数标注者偏好的描述视为正确，衡量评估指标给该成员打出更高分数的频率；平局随机打破。由于基于参考的指标需要从 48 条候选中随机抽取 5 条作为真值参考，结果可能与先前工作略有出入（我们对 5 次随机抽取取平均）。
+
+结果见表 4，评估按四类描述对分别给出（类别定义见表注）。CLIP-S 与 RefCLIP-S 在所有类别中总体都取得高性能。
+
+| 指标 | HC | HI | HM | MM | 平均 |
+| --- | --- | --- | --- | --- | --- |
+| length | 51.7 | 52.3 | 63.6 | 49.6 | 54.3 |
+| BLEU-4 | 60.4 | 90.6 | 84.9 | 54.7 | 72.6 |
+| ROUGE-L | 63.7 | 95.3 | 92.3 | 61.2 | 78.1 |
+| METEOR | 63.8 | 97.7 | 93.7 | 65.4 | 80.1 |
+| CIDEr | 65.1 | 98.1 | 90.5 | 64.8 | 79.6 |
+| BERT-S (RoBERTa-F) | 65.4 | 96.2 | 93.3 | 61.4 | 79.1 |
+| SPICE | 63.6 | 96.3 | 86.7 | 68.3 | 78.7 |
+| TIGEr* | 56.0 | 99.8 | 92.8 | 74.2 | 80.7 |
+| ViLBERTScore-F* | 49.9 | 99.6 | 93.1 | 75.8 | 79.6 |
+| BERT-S++* | 65.4 | 98.1 | 96.4 | 60.3 | 80.1 |
+| **CLIP-S（无参考）** | 56.5 | 99.3 | 96.4 | 70.4 | 80.7 |
+| **RefCLIP-S** | 64.5 | 99.6 | 95.4 | 72.8 | **83.1** |
+
+> **表 4**：Pascal50S 准确率结果（5 条参考）。HC = 两条人类正确描述；HI = 两条均为人工撰写但一条错误；HM = 两条都对应图像，一条由人撰写、一条由算法生成；MM = 两条都对应图像且均由算法生成。* 表示引自先前工作的结果：我们与 * 行的可比性受（任意抽取的）参考样本影响。我们对 5 次随机抽样取平均（但 CLIP-S 不用参考，故结果不变）。
+
+（译注：原文表格顺序为表 1、2、3、4、5，其中表 3 为 Composite 结果，因页面排版原因在原文中出现于 4.3 节位置，此处按原编号保持：表 3 见下文。）
+
+### 4.3 MSCOCO 系统级相关性
+
+CLIP-S 在系统级别上同样与人类判断高度相关：我们评估提交到 2015 年 MSCOCO 图像描述挑战赛（Vinyals et al., 2016）的系统输出。我们对这一语料上的标准评估设定有所顾虑，主要因为它只包含 12 个数据点（更多讨论见附录）。尽管如此，按标准流程，我们将 CLIP-S 和 RefCLIP-S 与两个指标相关联："被评估为优于或等于人类描述的描述占比（M1）"与通过"图灵测试"的描述占比（M2）。CLIP-S 取得 Spearman $\rho_{M1}/\rho_{M2}=.59/.63$，RefCLIP-S 取得 $\rho_{M1}/\rho_{M2}=.69/.74$（均 $p<.05$）。
+
+| 指标 | $\tau_c$ |
+| --- | --- |
+| BLEU-1 | 31.3 |
+| BLEU-4 | 30.6 |
+| ROUGE-L | 32.4 |
+| BERT-S (RoBERTa-F) | 30.1 |
+| METEOR | 38.9 |
+| CIDEr | 37.7 |
+| SPICE | 40.3 |
+| BERT-S++* | 44.9 |
+| TIGEr | 45.4 |
+| ViLBERTScore-F | 52.4 |
+| **CLIP-S（无参考）** | **53.8** |
+| **RefCLIP-S** | **55.4** |
+
+> **表 3**：Composite 与人类判断的相关性。所有指标使用 4–5 条真值参考，唯独 CLIP-S 不使用任何参考。与部分先前工作不同，我们考虑更难的设定，把候选本身从参考集中移除（细节见附录 A；作为对照，RefCLIP-S 在更容易的设定下取得 $\tau_c=60.0$）。* 表示引自先前工作的结果。
+
+### 4.4 CLIP-S 对幻觉的敏感性
+
+先前工作表明，在许多字面描述任务中，人类在描述中往往更看重**正确性**而非具体性（Rohrbach et al., 2018; Rohrbach et al., 2017）（这并非绝对：MacLeod et al., 2017 显示低视力与盲人社交媒体用户群体内部观点不一）。因此，理解评估指标能否以及如何处理包含错误"幻觉"（hallucination）的描述——例如提及图中并不存在的物体——十分重要。我们使用 FOIL 数据集（Shekhar et al., 2017 构建）的描述样本来检验 CLIP-S 对描述中潜在细微错误细节的敏感度。该语料由 MSCOCO 参考描述修改而成：单个名词短语被对抗性地替换，使 FOIL 描述变错，例如把 "motorcycle"（摩托车）换成 "bicycle"（自行车）。
+
+为把该语料适配到我们的设定，对 3.2 万张测试图像的每张，我们采样一个（FOIL，真值）对，计算各评估指标给真值候选打出高于 FOIL 分数的准确率。计算基于参考的指标时，我们提供该图像的 MSCOCO 参考描述（但不包括与 FOIL 对比的那条真值候选）。虽然我们的成对设定与原设定不完全相同，但 Shekhar et al., 2017 估计在非成对版本的任务上人类一致性约为 92%（相对 50/50 随机猜测基线）。
+
+结果见表 5。在这一设定下，更多标注对基于参考的指标相当有帮助，例如参考从一条增加到四条时，SPICE 与 BLEU-4 的准确率提升超过十个百分点。但在参考受限的设定中，**无任何参考**的 CLIP-S 超过除 BERT-S（RoBERTa-F）之外的所有指标；而 RefCLIP-S 在所有情形中效果最佳。
+
+| 指标 | 1 条参考 | 4 条参考 |
+| --- | --- | --- |
+| length | 50.2 | 50.2 |
+| BLEU-4 | 66.5 | 82.6 |
+| ROUGE-L | 71.7 | 79.3 |
+| METEOR | 78.8 | 85.4 |
+| SPICE | 75.5 | 86.1 |
+| CIDEr | 82.5 | 90.6 |
+| CLIP-S（无参考） | 87.2 | 87.2 |
+| BERT-S (RoBERTa-F) | 88.6 | 92.1 |
+| **RefCLIP-S** | **91.0** | **92.6** |
+
+> **表 5**：成对 FOIL 幻觉检测设定下各评估指标的准确率。所有基于参考的指标可使用一条或四条参考。
+
+总体而言，我们使用基于 Shekhar et al., 2017 的语料佐证了 Rohrbach et al., 2018 的发现——"物体幻觉并不总能被传统句子指标预测"，尤其在参考稀少时。而 CLIP-S 与 RefCLIP-S 在成对设定中带来了性能提升。
+
+### 4.5 CLIP-S 对记忆化（memorization）的敏感性
+
+基于模型的打分方法的一个顾虑是**记忆化**：如果模型权重用大规模语料预训练，评估时使用的数据可能已在预训练时见过。虽然 Radford et al., 2021 做过训练-测试重叠分析并认为 CLIP 不太可能因记忆化而成功，我们仍用 CLIP 从未见过的图像做了一项实验。
+
+本文作者汇集个人照片，构造了 250 张从未发布到互联网的图像。集合包含各种 Flickr 式场景：自然风光、动物、城市街道、物体等。对每张图像，我们收集两条自动生成的描述：一条来自商业 API Microsoft Azure Cognitive Services（v3.1），另一条来自 Luo et al., 2018 的预训练模型（以自批判基线训练以最大化 CIDEr 分数；我们使用 ResNet101 预训练版本，在 COCO 验证集上取得 1.05 CIDEr 与 0.19 SPICE）。然后对每张图像，本文三位作者独立选出更准确描述图像内容的描述。相对 50% 的随机基线（以及选择**较短**描述的 72% 长度基线），CLIP-S 在 86% 的情况下正确重建了多数人类偏好；该语料上的人类一致性为 93%（标注者 81% 的情况下更偏好 Microsoft 的描述）。
+
+虽然这一设定无法彻底驳斥"CLIP 之所以有效是因为记住了图像"的观点，我们希望这些结果能为网络级预训练模型泛化性质的持续讨论做出贡献。
+
+### 4.6 我该报告哪些指标？
+
+> **图 2**：两个语料库上指标对人类 Likert 评分的前向选择回归的 $R^2$。前向选择往往很早便选中 CLIP-S 与 RefCLIP-S；其他信息量大且互补的指标包括 ViLBERTScore-F 与 SPICE。
+
+多数描述生成工作会报告多个指标，它们（想必）与人类判断的相关程度各异。但单个指标究竟捕捉的是人类判断中不同还是冗余的维度，并不总是清楚。例如，CLIP-S 与 ViLBERTScore-F 都产生高相关性，它们是冗余还是互补？
+
+我们寻找一个（最小的）能解释人类判断最多方差的指标集合。为此，我们在十个候选指标上做前向选择（forward selection）：六个广泛报告的指标（BLEU-1、BLEU-4、METEOR、CIDEr、ROUGE-L、SPICE）加上四个较新指标（BERT-S (RoBERTa-F)、TIGEr、ViLBERTScore-F、CLIP-S；也做了以 RefCLIP-S 替代 CLIP-S 起步的实验）。从空集开始，迭代式贪心地挑选信息量最大的新增指标（判据是线性回归下该指标带来的 $R^2$ 增量；使用 sklearn（Pedregosa et al., 2011）的前向选择，每步做 5 折交叉验证；为估计方差，用 bootstrap 重采样的语料版本重复前向选择过程 10 次）。
+
+图 2 展示了在 Composite 与 Flickr8K-Expert 上运行该实验的信息增益，以及每轮迭代最常被选中的指标（越早选中 = 信息增益越大）。对 Composite，CLIP-S（或 RefCLIP-S）总是第一入选，其次是 ViLBERTScore-F，然后（最常见地）是 BERT-S（RoBERTa-F）。对 Flickr8k-Expert，前三个选择总是 CLIP-S（或 RefCLIP-S）、ViLBERTScore-F 与 SPICE。虽然 CLIP-S 与 ViLBERTScore-F 倾向于成为信息量最大的指标，但（1）它们虽有相关却不纯然冗余；（2）图像无关的基于参考指标（如 SPICE）仍然有用。
+
+总结：这些结果表明，纳入视觉内容的评估指标（如 CLIP-S）确实捕捉到了纯文本基于参考指标目前未覆盖的人类判断维度。**对我们考察的字面图像描述评估设定，报告指标的合理组合是：至少一个图像感知指标（如 CLIP-S）加一个强的仅参考指标（如 SPICE）。**
+
+## 5 使用 CLIPScore 的案例研究
+
+到目前为止的结果表明 CLIP 编码了对评估字面图像描述任务有用的信息。但基于参考的指标**先验地**看似乎比 CLIP-S 更具适应性。CLIP-S 在 MSCOCO、Flickr8K 之外还能与人类判断相关吗？
+
+为回答这个问题，我们考察四个案例研究，探索 CLIP-S 与人类判断在"发散性"（divergent）图像描述数据集上的相关性。这些语料在性质上不同于 §4 探索的更流行领域：或者图像不是 Flickr 式的"日常"照片，或者描述并非字面描述（见图 3）。
+
+> **图 3**：四个案例研究语料库的实例。
+
+### 5.1 Twitter 上的 Alt-Text 评分
+
+在推特配图时，用户可以选择提供替代文本（alternative text, alt-text）：虽然很少有人使用该功能（Gleason et al., 2019 发现少于 .1% 的图像推文有 alt-text），但其更广泛的采纳或将使社交媒体对低视力与盲人用户更无障碍。我们测量 CLIP-S 重建一组 2.8 千条 alt-text 质量人类判断的能力。该语料由 Gleason et al., 2019; Gleason et al., 2020 的作者收集并评分，每条 alt-text 按 0 到 3 的量表就其作为 alt-text 的可能效用评分。人类评分者本身具备视觉，无法直接评估某条 alt-text 对低视力/盲人用户的效用，但他们是设计与评估 alt-text 系统的专家。推文采样自 Twitter FireHose API 与站内低视力及盲人用户的时间线混合。图像在性质上是比 Flickr 式领域更广的网络内容混合，如截图、表情包等。Alt-text 候选混合了用户上传与机器生成。语料不含参考，但为与基于参考的指标比较，我们（以程序化方式）把推文的任何文本上下文当作参考。
+
+CLIP-S 与人类判断取得 48.4 的 $\tau_c$ 相关性。与之相反，可能由于推文文本作为 alt-text 的不可靠性，基于参考的方法举步维艰：表现最好的纯参考指标 BERT-S（RoBERTa-F）只取得 15 的 $\tau_c$，甚至低于长度基线的 25。虽然收集高质量的上下文参考 alt-text 是有前景的未来方向（见 Stangl et al., 2020，他们在六个领域做了用户研究），CLIP-S 在该领域仍是一个有前景的评估指标候选。
+
+### 5.2 Abstract-50S
+
+我们用 Abstract-50S（Vedantam et al., 2015）评估 CLIP-S 向抽象、非照片类剪贴画图像泛化的能力。该数据集把剪贴画图像（最初由 Zitnick and Parikh, 2013 构建）与 48 条人工参考描述配对。图像描绘两个卡通角色 Mike 与 Jenny 在各种户外情境中的活动，如运动、野餐等。对 400 个人工撰写的候选描述对（200 对来自同一图像，200 对来自不同图像），收集了人类判断：标注者被要求选出成对描述中与每条参考描述更相似者，因此每个候选对收集到 48 条判断（共 19200 条）。
+
+我们在给定 5 条随机抽样参考描述的条件下，将 CLIP-S 与若干基于参考的指标比较。沿用 Pascal-50S 的流程，随机重抽样 5 次并报告平均成对准确率。两个基线（BL）均取得 53：仅长度（即认为更长的描述更好）；以及把图像随机打乱后输入 CLIP-S（使其无法依赖有意义的视觉-文本交互）。
+
+| BL | BLEU-4 | CIDEr | METEOR | BERT-S | CLIP-S（无参考） |
+| --- | --- | --- | --- | --- | --- |
+| 53 | 71 | 79 | 79 | 73 | 68 |
+
+总体而言，CLIP-S 虽不敌基于参考的指标，却以大幅优势超过基线。这一结果表明 CLIP-S 即便面对非照片图像也有能力推理视觉-文本交互。
+
+### 5.3 Personality Captions（人格化描述）
+
+受社交媒体语言使用启发，Shuster et al., 2019 以"人格"（如 dramatic、sympathetic、sad 等）提示标注者，请他们就给定人格特质"写一条别人会觉得有吸引力的、关于图像的评论"来收集图像描述。为评估模型，作者收集了成对人类判断，评估者被要求"选出最有吸引力的评论"。我们从两方面评估 CLIP-S：（1）它偏好字面描述，还是不那么字面、更有吸引力的人格化描述？（2）给定两条人格化描述，它能否预测人类认为哪条更有吸引力？
+
+对（1）：在 2.4 千条"传统"描述与人格化描述的成对评分上，人类 65% 的情况下认为人格化描述更有吸引力，而 CLIP-S 80% 的情况下偏好传统描述（初步的提示词工程实验，如 "when I look at this photo, I feel [PERSONALITY] and think [CAPTION]"，也未能扭转这一点）。我们的结论：给定一条直接描述与一条更有吸引力的非字面描述时，CLIP-S 一般会偏好字面那条。
+
+对（2）：CLIP-S 略好于随机，例如在比较两个神经生成器模型 TransResNet（ResNeXt-IG-3.5B）与 TransResNet（ResNet-152）的 2.5 千条人类成对判断上取得 57%（见 Shuster et al., 2019 表 7 第 5 行），但不比仅长度基线（同样 57%）更好。值得注意的是，基于参考的指标在该语料上同样无法与吸引力的成对人类判断相关：例如在提供一条人格化引导参考时，BLEU-4、CIDEr 与 SPICE 与人类判断的一致率分别为 52%/53%/51%。我们的结论：给定两条有吸引力的非字面描述时，CLIP-S 与传统基于参考指标都无法预测人类将判定哪条更有吸引力。
+
+### 5.4 新闻图像描述
+
+Biten et al., 2019 考虑为《纽约时报》文章图像生成描述；其任务与 MSCOCO 的不同在于：1) 95% 的描述含至少一个命名实体（如政治人物、名人或地点）；2) 描述通常"不描述场景物体，而是对场景给出语境化解读"。他们对 106 张图像收集了 2.1 千条成对人类判断，比较两个新闻图像描述模型的表现。每张图像由 20 名标注者选出两条模型生成中更接近真值描述的一条（他们也能看到图像本身）。我们以指标匹配两名候选间人类判断的准确率来比较各指标。
+
+基于参考的指标占优：METEOR 与 BLEU-4 分别取得 93 与 91 的最高准确率，而 CLIP-S 仅略高于随机，为 65。定性来看，当存在可视觉验证的内容时 CLIP-S 会成功，例如把黑白照片匹配到更早的年代（某一例中在 1933 与 1977 之间正确选择前者），以及匹配特别标志性的人物（它能自信地认出穆罕默德·阿里在打拳；Luo et al., 2021 的近期实验定量表明 CLIP 有能力推理新闻图像中的真实世界实体）。但它最常见的失败案例是那些仅凭图像内容可能根本无法验证的描述。例如：对一个房间的图像，CLIP-S 选择了 "The dining room at Elle Decor"，但标注者更偏好提及"纽约青少年联盟（the Junior League of New York）"的描述；真值描述揭示了图像入选的缘由："A Manhattan home on a May 7 tour by the Junior League of New York."
+
+总体而言，在这种情形下我们不提倡免参考评估，尤其因为我们的结果表明（至少对这批特定标注而言）基于参考的 n-gram 重叠指标与人类判断高度相关。
+
+## 6 结论
+
+对字面图像描述任务，CLIPScore 以开箱即用（off-the-shelf）的方式、**不使用参考**即取得与描述质量人类判断的高度相关性。发散领域中的额外实验表明：CLIP 还能对非照片剪贴画进行推理，并在 alt-text 场景中充当合理的免参考评估选项。有前景的未来方向包括：1) 把 CLIP-S 作为字面描述生成器的强化学习奖励；2) 探究少量标注的人类评分数据能否帮助 CLIP-S 适配其薄弱领域，如吸引力（engagingness）预测。我们希望这项工作能为预训练模型在生成评估中所扮演角色的持续讨论添砖加瓦。
+
+免参考评估也存在风险。与 BERTScore 一样，基于模型的指标（如 CLIP-S）会反映预训练数据的偏见。虽然我们相信把 CLIP-S 用作字面描述质量的离线评估指标符合 CLIP 模型卡（model card，Mitchell et al., 2019）的建议，但 Agarwal et al., 2021 的研究表明 CLIP 可能对人群做出不成比例的错误分类，例如"男性图像被错误分类到与犯罪相关的类别"。若系统将被部署，对候选描述潜在社会偏见的探究（如 Hendricks et al., 2018）仍至关重要。
+
+**同期工作**。本文投稿期间，另有两个图像描述的免参考评估指标问世：FAIEr（Wang et al., 2021，基于预训练物体检测器并在 MSCOCO 上微调）与 UMIC（Lee et al., 2021，基于 UNITER（Chen et al., 2020））。其中 UMIC 在字面图像描述任务（§4）上取得与 CLIP-S 相当的与人类判断的相关性，但采用在合成负样本描述上微调的互补路径。未来工作很适合探究 Lee et al., 2021 提出的文本数据增强（1）所产生的指标与非微调 CLIP-S（§4.6）是互补还是重叠；以及（2）能否扩展到字面描述之外的场景（§5）。
+
+---
+
+## 附录要点（压缩概括）
+
+1. **复现细节（附录 A）**：Anderson et al., 2016 引入的评估协议已成为新描述指标的公认标准，但看似无害的预处理与报告选择会显著影响与人类判断的相关性。作者联系先前工作的作者并尽力复现其设定，发现两类不一致： Kendall-C 与 Kendall-B 的混用——二者对并列（tie）处理不同，而 Likert 判断离散化导致并列频繁； 人类评分的聚合方式——多数先前工作把 5664×3=16992 条判断拉平成单列表计算秩相关（方法 A），另一种（或许更合理）做法是对每对取平均后对 5664 个实例计算（方法 B）。选择影响巨大：SPICE 用方法 A + $\tau_c$ 可精确复现 Anderson et al., 2016 报告的 44.9，而改用方法 B 则膨胀至 52.9（其他指标同样膨胀）。本文统一采用最常见设定：$\tau_c$ + 方法 A。
+2. **Composite 复现**：该语料每图约有五条参考，但接受人类评分的候选正是从参考中抽出的。对 Flickr8k，Anderson et al., 2016 "剔除了 158 个候选描述出现在参考集中的正确图文对"，该清洗已成标准；但 Composite 上是否沿用并不明确，各后续工作遵循的标准也因此不明。作者两种方式都试了（表 6：原文 Original 列与 $\tau_b/\tau_c$ × 保留/移除真值参考四种组合），并推断原评估很可能用的是 $\tau_c$ + 移除真值参考。作者认同最公平的分析不应把同时是候选的参考计入；在该更难设定下重算了此前最优的 ViLBERTScore-F，并给出更易设定（含真值参考）下 RefCLIP-S $\tau_c=60.0$ 供未来报告对照。
+3. **MSCOCO 系统级设定的统计功效问题**：因测试集预测不公开，近期工作用 12 支队伍的开发集预测做系统级相关。两大隐患： 其一，有的队伍开发集与测试集提交用的可能是不同模型（如 m-RNN 与 m-RNN (Baidu/UCLA) 开发集预测完全相同而测试集不同且得分差异显著）；其二，仅 12 个观测上的 Spearman/Pearson 相关因统计功效低而极易被（无意地）"刷高"——模拟显示：给 12 个系统随机打分、重复 $N=10$ 次并取最好一次作为最终指标，1000 次模拟中该无意义指标与人类判断的平均相关达 $r/\rho=.91$。作者认为该设定作为新指标的细粒度比较基准已基本失效。
+4. **Pascal-50S 勘误**：2022 年 3 月，Jin-Hwa Kim 在复现中报告了 Pascal-50S 结果的细微出入。进一步调查发现本文原版误用了非标准的人类判断集：语料含每对 11 条判断（pair_pascal.mat）与每对 48 条判断（consensus_pascal.mat）两种，标准应使用 48 条版本，正文表格已相应更新；为可复现性，11 条判断版本的结果保留于表 7（该设定下 CLIP-S 平均 83.7、RefCLIP-S 83.6，CLIP-S 的 MM 类达 77.3）。
+5. **重缩放的依据（附录 B）**：为可读性，参照 BERTScore 对 CLIP ViT-B/32 的原始余弦相似度做单调重缩放（不影响排序）。四个语料库上均未观察到负相似度，但为安全起见与 0 取最大值（RefCLIPScore 的调和平均对负值无定义）。乘以 2.5 把分布更均匀地拉伸到 0–1 之间（CLIPScore 可以大于 1）；计算 RefCLIPScore 时保留该加权，因为它把视觉-文本相似度分布映射得更接近参考-候选分布，使图像-候选与参考-候选两个因子的重要性大致均衡。该重缩放参数仅适用于 ViT-B/32；更大的模型（如当时未发布的 ViT-L/14）可能呈现不同的余弦相似度分布。
+6. **速度**：ViT-B/32 主干下单张消费级 GPU 上每分钟可处理约 4 千个图像-候选对。
+7. **提示词**：推荐在候选描述前加 "A photo depicts"（比 CLIP 原论文推荐的 "A photo of" 略好）；更复杂的区域级/token 级对应配置未见更好效果。
+8. **致谢**：研究部分由 DARPA MCS 项目（经 NIWC Pacific，N66001-19-2-4031）、DARPA SemaFor 项目及 Allen Institute for AI 资助。
+
+---
+
+## 创新点提炼
+
+1. **提出 CLIPScore：首个直接复用大规模预训练图文模型的高质量免参考描述评估指标**。把（图像，候选描述）分别编码后取余弦相似度、截断并乘 $w=2.5$（式 1），完全不依赖人工参考，即在与人类判断的相关性上全面超越 CIDEr、SPICE、ViLBERTScore-F 等所有基于参考的指标（Flickr8K-Expert 51.2 vs. 50.1；Composite 53.8 vs. 52.4）。
+
+2. **参考增强版 RefCLIPScore（式 2）**。当参考可用时，取 CLIP-S 与最大参考余弦相似度的调和平均，在所有语料库上进一步提升相关性（如 Flickr8K-Expert 达 53.0、Composite 达 55.4、FOIL 幻觉检测达 92.6），实现了"免参考指标"与"参考指标"生态的平滑统一。
+
+3. **信息增益与前向选择分析揭示指标互补性**。通过 bootstrap + 5 折交叉验证的前向选择回归证明：CLIP-S（图文兼容性）与 ViLBERTScore-F、SPICE（文本-文本相似性）虽相关但不冗余，据此给出可操作的报告建议——"至少一个图像感知指标（CLIP-S）+ 一个强仅参考指标（SPICE）"。
+
+4. **对幻觉与记忆化的敏感度检验**。在 FOIL 对抗语料上验证 CLIP-S 能察觉名词短语级细微错误（无参考 87.2，超过几乎所有有参考指标）；并自建 250 张从未上网的私人照片语料，86% 重建多数人类偏好（人类一致性 93%），回应了"CLIP 靠记忆化取胜"的质疑。
+
+5. **系统性边界测绘：四个发散领域的案例研究**。Twitter alt-text 评分上 CLIP-S（48.4 $\tau_c$）远超所有参考指标与长度基线；剪贴画 Abstract-50S 上虽逊于参考指标（68 vs. 79）却大幅超过打乱图像与长度基线（53）；而在新闻描述（65 vs. METEOR 93）与吸引力判断（57，仅等于长度基线）上失效——诚实刻画了免参考评估的能力边界，指明其适用于字面描述、不适用于需要外部上下文或主观吸引力的场景。
+
+6. **评估方法学的复现纪律**。系统梳理 Anderson et al., 2016 协议中的自由度（Kendall 变体、评分聚合方式、真值参考是否剔除、Pascal-50S 判断集误用）并逐项复现修正，指出 MSCOCO 系统级 12 点相关因低统计功效可被随机指标"刷"到 $r/\rho=.91$——这些披露对后续指标论文的实验规范具有独立于 CLIPScore 本身的方法论价值。
+
+---
+
+*注：本翻译基于 ar5iv（LaTeXML）转换的 Markdown 版本，已忽略站点导航残留与 LaTeX 转义符；参考文献列表从略，正文引用保留 (作者 et al., 年份) 格式。原文式 (1)(2) 在 ar5iv 中被渲染为表格乱码，已按语义还原为标准公式；原文表 1–5 的表格编号与出现顺序不完全一致（表 3 出现于 4.3 节位置），本翻译保持原编号并以译注标明。*
+</script>
+<script src="../assets/app.js?v=5"></script>
+</body>
+</html>
