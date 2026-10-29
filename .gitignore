@@ -1,0 +1,9 @@
+# 论文 PDF 原文库（468MB，仅本地留存，不随仓库发布）
+papers/
+# 英文全文 Markdown 工作稿（翻译源材料，不随仓库发布）
+fulltext/
+# 系统与临时文件
+Thumbs.db
+.DS_Store
+~$*
+*.tmp

@@ -1,0 +1,307 @@
+/* ===== 中英对照论文阅读器 ===== */
+:root {
+  --bg: #f5f3ee;
+  --card: #ffffff;
+  --ink: #1f2328;
+  --ink-soft: #57606a;
+  --line: #e3ded4;
+  --accent: #8a5cf6;
+  --accent-soft: #f0eaff;
+  --en-head: #eef4fb;
+  --zh-head: #f3f0fb;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+body {
+  font-family: -apple-system, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+/* ---------- 顶栏 ---------- */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  height: 52px; display: flex; align-items: center; gap: 14px;
+  padding: 0 16px;
+  background: rgba(255,255,255,.92); backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+}
+.topbar .back {
+  color: var(--ink-soft); text-decoration: none; font-size: 14px;
+  padding: 6px 10px; border-radius: 8px; white-space: nowrap;
+}
+.topbar .back:hover { background: var(--bg); color: var(--ink); }
+.tb-title {
+  flex: 1; min-width: 0; font-size: 15px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tb-title .num {
+  display: inline-block; background: var(--accent); color: #fff;
+  font-size: 12px; border-radius: 6px; padding: 1px 7px; margin-right: 8px;
+  vertical-align: 1px;
+}
+.tb-controls { display: flex; align-items: center; gap: 12px; white-space: nowrap; }
+.tb-link {
+  font-size: 13px; color: var(--ink-soft); text-decoration: none;
+  padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px;
+}
+.tb-link:hover { color: var(--accent); border-color: var(--accent); }
+.sync { font-size: 13px; color: var(--ink-soft); user-select: none; cursor: pointer; }
+.sync input { vertical-align: -2px; margin-right: 4px; accent-color: var(--accent); }
+
+/* ---------- 双栏 ---------- */
+.reader {
+  position: fixed; top: 52px; bottom: 0; left: 0; right: 0;
+  display: flex;
+}
+.pane { flex: 1 1 50%; display: flex; flex-direction: column; min-width: 0; }
+.pane + .pane { border-left: 1px solid var(--line); }
+.pane-head {
+  flex: 0 0 auto; padding: 7px 16px; font-size: 12.5px; font-weight: 600;
+  color: var(--ink-soft); letter-spacing: .5px;
+  border-bottom: 1px solid var(--line);
+}
+.pane-en .pane-head { background: var(--en-head); }
+.pane-zh .pane-head { background: var(--zh-head); }
+.pane-body {
+  flex: 1 1 auto; overflow-y: auto; overflow-x: hidden;
+  padding: 22px 28px 120px; scroll-behavior: auto;
+}
+.pane-body::-webkit-scrollbar { width: 9px; }
+.pane-body::-webkit-scrollbar-thumb { background: #d6d0c4; border-radius: 5px; }
+.pane-body::-webkit-scrollbar-thumb:hover { background: #c0b8a8; }
+
+@media (max-width: 1000px) {
+  .reader { position: static; display: block; margin-top: 52px; }
+  .pane { display: block; }
+  .pane + .pane { border-left: none; border-top: 2px solid var(--line); }
+  .pane-body { overflow: visible; padding-bottom: 60px; }
+}
+
+/* ---------- 通用正文排版 ---------- */
+.pane-body { line-height: 1.75; font-size: 15px; }
+.pane-body p, .pane-body .ltx_p { margin: 0 0 14px; }
+.pane-body a { color: #6b4fd8; }
+h1, h2, h3, h4 { line-height: 1.4; }
+
+/* ---------- 英文侧：LaTeXML 结构 ---------- */
+#enBody .ltx_title, #enBody h2, #enBody h3, #enBody h4 { font-family: inherit; }
+#enBody h2.ltx_title, #enBody h3.ltx_title, #enBody h4.ltx_title {
+  margin: 30px 0 12px; font-weight: 700; color: #16325c;
+}
+#enBody h2.ltx_title { font-size: 21px; border-bottom: 2px solid var(--line); padding-bottom: 6px; }
+#enBody h3.ltx_title { font-size: 17.5px; }
+#enBody h4.ltx_title { font-size: 15.5px; }
+#enBody h6.ltx_title { font-size: 16px; margin: 24px 0 10px; }
+#enBody .ltx_tag { color: var(--accent); margin-right: 8px; }
+#enBody .ltx_authors { font-size: 14px; }
+#enBody .ltx_date, #enBody .ltx_note { color: var(--ink-soft); font-size: 13px; }
+#enBody .ltx_bibliography { font-size: 13px; }
+#enBody .ltx_p { text-align: inherit; }
+#enBody .ltx_figure {
+  margin: 18px 0; padding: 10px; background: #fafaf7;
+  border: 1px solid var(--line); border-radius: 10px;
+}
+#enBody .ltx_figure img, #enBody img { max-width: 100%; height: auto; }
+#enBody .ltx_caption { font-size: 13px; color: var(--ink-soft); margin-top: 6px; line-height: 1.55; }
+/* LaTeXML 行间公式表：不加框、透明、居中（公式在 LaTeXML 中也用 table 排版） */
+#enBody table.ltx_equation, #enBody table.ltx_equationgroup {
+  border-collapse: collapse; margin: 10px auto; background: transparent; min-width: 0;
+}
+#enBody table.ltx_equation td, #enBody table.ltx_equation th,
+#enBody table.ltx_equationgroup td, #enBody table.ltx_equationgroup th {
+  border: none; padding: 2px 8px; background: none; vertical-align: middle;
+}
+#enBody .ltx_Math { font-size: 1.02em; }
+#enBody .ltx_listing { font-size: 13px; overflow-x: auto; }
+#enBody math { font-size: 1.05em; }
+.img-miss {
+  display: inline-block; padding: 10px 14px; font-size: 12px; color: #9a9484;
+  background: #f4f1ea; border: 1px dashed #d6d0c4; border-radius: 8px;
+}
+
+/* ---------- 表格（英文侧数据表 + 中文侧统一风格） ---------- */
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+/* 英文侧数据表：仅作用于 figure.ltx_table 内的表格，避免波及公式表与行内对齐表 */
+#enBody figure.ltx_table table, .md table {
+  border-collapse: collapse; font-size: 13px; line-height: 1.5;
+  margin: 0 auto; max-width: 100%;
+  background: #fff;
+}
+#enBody figure.ltx_table table { min-width: 60%; }
+#enBody figure.ltx_table th, .md th {
+  background: #f0ecdf; color: #3c3428; font-weight: 600;
+  border: 1px solid #d8d2c2; padding: 6px 10px; text-align: center;
+}
+#enBody figure.ltx_table td, .md td {
+  border: 1px solid #ddd6c8; padding: 6px 10px; vertical-align: top;
+}
+#enBody figure.ltx_table tr:nth-child(even) td, .md tr:nth-child(even) td { background: #fbfaf6; }
+
+/* 英文侧表格卡片：与图同款隔离框 + 横向滚动兜底 */
+#enBody figure.ltx_table {
+  margin: 18px 0; padding: 10px 12px; background: #fafaf7;
+  border: 1px solid var(--line); border-radius: 10px;
+  overflow-x: auto;
+}
+
+/* LaTeXML 超宽表的内联缩放机制按其自带紧凑内边距估算预留盒，
+   与本站表格边框/内边距叠加后会导致表格溢出并与正文重叠；
+   此处解除内联缩放，由 app.js 按窗格实际宽度重新适配 */
+#enBody .ltx_transformed_inner { transform: none !important; }
+#enBody .ltx_transformed_outer { width: auto !important; height: auto !important; vertical-align: top !important; }
+
+/* 段落中的裸小表格（行内对齐结构）：紧凑无框，不拉伸 */
+#enBody table.ltx_tabular { min-width: 0; }
+#enBody .ltx_para > table.ltx_tabular td, #enBody .ltx_para > table.ltx_tabular th {
+  border: none; padding: 1px 6px; background: transparent;
+}
+
+/* ---------- 中文侧：markdown 渲染 ---------- */
+.md > h1, .md > h2, .md > h3, .md > h4 { color: #4a35a8; margin-top: 30px; }
+.md > h1 { font-size: 22px; margin-top: 8px; }
+.md > h2 { font-size: 19px; border-bottom: 2px solid var(--zh-head); padding-bottom: 5px; }
+.md > h3 { font-size: 16.5px; }
+.md > h4 { font-size: 15px; color: #5b4ec2; }
+.md > p { margin: 0 0 13px; }
+.md ul, .md ol { padding-left: 24px; margin: 0 0 13px; }
+.md li { margin: 4px 0; }
+.md blockquote {
+  margin: 14px 0; padding: 10px 16px; color: #4c4a57;
+  background: var(--zh-head); border-left: 4px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+}
+.md blockquote p { margin: 4px 0; }
+.md code {
+  background: #f0ecdf; padding: 1px 6px; border-radius: 5px;
+  font-size: 13px; font-family: Consolas, "Courier New", monospace;
+}
+.md hr { border: none; border-top: 1px solid var(--line); margin: 22px 0; }
+.md h2.anchorable, .md h3.anchorable, .md h4.anchorable { cursor: pointer; }
+#enBody h2.ltx_title, #enBody h3.ltx_title { cursor: pointer; }
+
+/* 数学块：KaTeX 加载前的降级样式（加载后由 KaTeX 接管） */
+.math-display {
+  margin: 16px 0; padding: 4px 8px; text-align: center;
+  font-family: "Times New Roman", serif; font-size: 15.5px;
+  overflow-x: auto; color: #24333f;
+}
+.math-miss { color: #b06a00; font-size: 13px; text-align: center; }
+.katex-display { margin: 0 !important; }
+
+/* ---------- PDF 内嵌（08 号等无 HTML 的论文） ---------- */
+.pdf-embed-wrap { height: calc(100vh - 160px); }
+.pdf-embed-wrap object, .pdf-embed-wrap embed {
+  width: 100%; height: 100%; border-radius: 8px;
+}
+.pane-notice {
+  margin: 30px auto; padding: 18px 22px; max-width: 640px;
+  background: #fff; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 14px; color: var(--ink-soft); line-height: 1.8;
+}
+.pane-notice b { color: var(--ink); }
+
+/* ---------- 图片灯箱（点击放大） ---------- */
+#enBody img, #zhBody img { cursor: zoom-in; }
+.lightbox {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(18, 16, 24, .90);
+  display: none; align-items: center; justify-content: center; flex-direction: column;
+  animation: lb-fade .16s ease-out;
+}
+.lightbox.open { display: flex; }
+@keyframes lb-fade { from { opacity: 0; } to { opacity: 1; } }
+.lb-img {
+  max-width: 92vw; max-height: 82vh;
+  border-radius: 6px; background: #fff;
+  box-shadow: 0 12px 60px rgba(0,0,0,.55);
+  cursor: grab; user-select: none; -webkit-user-drag: none;
+  transform-origin: center center;
+}
+.lb-img:active { cursor: grabbing; }
+.lb-cap {
+  max-width: 82vw; margin-top: 14px; padding: 0 20px;
+  color: #d9d4e8; font-size: 13px; line-height: 1.7; text-align: center;
+}
+.lb-hint {
+  position: absolute; left: 16px; bottom: 12px;
+  color: #9a93b8; font-size: 12px; letter-spacing: .5px;
+  background: rgba(30,26,44,.6); padding: 5px 12px; border-radius: 20px;
+}
+.lb-close {
+  position: absolute; top: 14px; right: 20px;
+  width: 40px; height: 40px; line-height: 38px; text-align: center;
+  color: #ece9f8; font-size: 26px; cursor: pointer; user-select: none;
+  background: rgba(30,26,44,.55); border-radius: 50%;
+}
+.lb-close:hover { background: rgba(70,60,110,.8); }
+.lb-zoom {
+  position: absolute; top: 14px; left: 20px;
+  color: #d9d4e8; font-size: 13px;
+  background: rgba(30,26,44,.55); padding: 5px 12px; border-radius: 20px;
+}
+
+/* ---------- 首页 ---------- */
+.home {
+  max-width: 1060px; margin: 0 auto; padding: 40px 24px 80px;
+}
+.home-hero { text-align: center; margin-bottom: 34px; }
+.home-hero h1 { font-size: 26px; margin: 0 0 10px; }
+.home-hero p { color: var(--ink-soft); font-size: 14px; margin: 0; line-height: 1.9; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.card {
+  display: block; text-decoration: none; color: var(--ink);
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+  padding: 18px 20px 16px; position: relative;
+  transition: box-shadow .18s, transform .18s, border-color .18s;
+}
+.card:hover {
+  transform: translateY(-2px); border-color: #cbb9f4;
+  box-shadow: 0 8px 24px rgba(100, 60, 200, .10);
+}
+.card .c-num {
+  position: absolute; top: 16px; right: 16px; font-size: 20px; font-weight: 800;
+  color: #e5defa; font-family: Georgia, serif;
+}
+.card .c-tag {
+  display: inline-block; font-size: 11.5px; font-weight: 600; color: var(--accent);
+  background: var(--accent-soft); border-radius: 20px; padding: 2px 10px; margin-bottom: 10px;
+}
+.card .c-tag.t2 { color: #0b7285; background: #e3f5f8; }
+.card .c-tag.t3 { color: #9a6b00; background: #fdf3d7; }
+.card .c-tag.t4 { color: #c2255c; background: #ffe3ec; }
+.card h3 { font-size: 16px; margin: 0 0 4px; line-height: 1.45; }
+.card .c-date { font-size: 12px; color: #98928a; margin: 0 0 8px; letter-spacing: 0.02em; }
+.card .c-en { font-size: 12.5px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 10px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card .c-meta { display: flex; gap: 10px; align-items: center; font-size: 12px; color: #98928a; }
+.card .c-status {
+  font-size: 11.5px; font-weight: 600; border-radius: 20px; padding: 1px 9px;
+  background: #e6f4ea; color: #1a7f37;
+}
+.card .c-status.pending { background: #fdf3d7; color: #9a6b00; }
+.home-foot { margin-top: 34px; font-size: 13px; color: var(--ink-soft); line-height: 2; }
+
+/* ---------- 移动端 / 窄屏适配 ---------- */
+/* 长公式与代码块允许横向滚动，避免撑破布局 */
+.katex-display { overflow-x: auto; overflow-y: hidden; }
+.md pre, .pane-body pre { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+@media (max-width: 640px) {
+  .topbar { height: 46px; padding: 0 10px; gap: 8px; }
+  .reader { margin-top: 46px; }
+  .topbar .back { padding: 6px; font-size: 13px; }
+  .tb-title { font-size: 14px; }
+  .tb-link { padding: 4px 6px; font-size: 12px; }
+  /* 窄屏为上下布局，双栏滚动同步不适用，隐藏开关以免挤压标题 */
+  .sync { display: none; }
+  .pane-head { padding: 6px 12px; font-size: 12px; }
+  .pane-body { padding: 14px 14px 80px; }
+  .home { padding: 24px 14px 56px; }
+  .home-hero h1 { font-size: 21px; }
+  .home-hero p { font-size: 13px; }
+  .cards { grid-template-columns: 1fr; gap: 12px; }
+  .card { padding: 15px 16px 14px; }
+  .home-foot { font-size: 12.5px; }
+  #enBody figure.ltx_table { padding: 8px 8px; }
+}
