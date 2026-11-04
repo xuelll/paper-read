@@ -186,7 +186,7 @@ if (Test-Path $sumSrc) {
     $sumTpl = Read-Utf8 (Join-Path $web "template_summary.html")
     $sumMd = Read-Utf8 $sumSrc
     $sumMd = $sumMd.Replace('</script', '<\/script')
-    $sumPage = $sumTpl.Replace('@@ZH@@', $sumMd)
+    $sumPage = $sumTpl.Replace('@@SUM_TITLE@@', [string]$meta.summaryTitle).Replace('@@SUM_HEAD@@', [string]$meta.summaryHead).Replace('@@ZH@@', $sumMd)
     Write-Utf8 (Join-Path $web "summary.html") $sumPage
     Write-Output "built summary.html"
 }
