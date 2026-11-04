@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>74 · FPEM 直播人脸吸引力预测 — 中英对照精读</title>
+<link rel="stylesheet" href="../assets/style.css?v=6">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="back" href="../index.html">← 首页</a>
+  <div class="tb-title"><span class="num">74</span>FPEM 直播人脸吸引力预测</div>
+  <div class="tb-controls">
+    <a class="tb-link" href="https://openaccess.thecvf.com/content/ICCV2025/papers/Li_FPEM_Face_Prior_Enhanced_Facial_Attractiveness_Prediction_for_Live_Videos_ICCV_2025_paper.pdf" target="_blank" rel="noopener">ICCV 2025</a>
+    <label class="sync"><input type="checkbox" id="syncToggle"> 滚动同步</label>
+  </div>
+</header>
+<main class="reader">
+  <section class="pane pane-en">
+    <div class="pane-head">ENGLISH 原文 (ICCV 2025 link)</div>
+    <div class="pane-body" id="enBody">
+<div class="pane-notice"><b>本篇论文暂无 arXiv HTML 版本</b>（无 arXiv 版或未生成 HTML）。英文原文请前往官方渠道阅读——点击下方链接或顶栏按钮。右侧中文精读翻译完整可用。</div>
+<p style="margin:16px 0 0"><a href="https://openaccess.thecvf.com/content/ICCV2025/papers/Li_FPEM_Face_Prior_Enhanced_Facial_Attractiveness_Prediction_for_Live_Videos_ICCV_2025_paper.pdf" target="_blank" rel="noopener">Read paper (official source) &rarr;</a></p>
+    </div>
+  </section>
+  <section class="pane pane-zh">
+    <div class="pane-head">中文精读翻译</div>
+    <div class="pane-body" id="zhBody"><div class="md" id="mdRoot"></div></div>
+  </section>
+</main>
+<script type="text/markdown" id="zhSrc"># 《FPEM: Face Prior Enhanced Facial Attractiveness Prediction for Live Videos with Face Retouching》中文精读翻译
+
+## 论文信息
+
+- **英文标题**：FPEM: Face Prior Enhanced Facial Attractiveness Prediction for Live Videos with Face Retouching
+- **中文标题**：FPEM：面向带人脸美颜的直播视频的人脸先验增强面部吸引力预测
+- **作者**：Hui Li†、Xiaoyu Ren†（† 共同一作）、Hongjiu Yu、Ying Chen*（* 通讯作者）、Kai Li、L Wang、Xiongkuo Min、Huiyu Duan、Guangtao Zhai、Xu Liu
+- **机构**：1 阿里巴巴集团（Alibaba Group）；2 上海交通大学（Shanghai Jiao Tong University）
+- **发表**：ICCV 2025（Highlight 论文），pp. 11458–11468；经 CVF Open Access 官方渠道获取（无 arXiv 正式版。注：arXiv 2501.02509 为同名工作的早期预印本，且已被撤稿，与本文内容并不一致，请勿引用）
+- **代码与数据**：<https://github.com/Estella-LH/FPEM>
+- **提出的数据集与模型**：LiveBeauty——首个面向直播场景的大规模开放获取人脸吸引力预测（FAP）数据集；FPEM（Facial Prior Enhanced Multi-modal model）——人脸先验增强的多模态人脸吸引力预测模型
+
+## 一句话核心总结
+
+本文面向"带实时人脸美颜的直播视频"这一既有 FAP 数据集、又缺专用模型的双重空白场景，一方面构建了首个大规模开放获取的直播人脸吸引力数据集 LiveBeauty（10,000 张真实直播人脸图像 × 20 名标注者 = 200,000 条吸引力标注，为当前最大的开放 FAP 数据集），另一方面提出两阶段训练的人脸先验增强多模态模型 FPEM——第一阶段并行训练"以冻结 FaceNet 人脸先验经交叉注意力增强 Swin 多尺度特征"的个性化吸引力先验模块（PAPM）与"以五级文本锚点 + 相似度回归 + 排序损失适配 CLIP"的多模态吸引力编码模块（MAEM），第二阶段由选择性融合模块（SFM）以通道级自适应软权重整合两路特征，在 LiveBeauty、MEBeauty、SCUT-FBP5500 三个基准及跨数据集设置下均取得 SOTA 性能。
+
+---
+
+## 摘要
+
+人脸吸引力预测（Facial Attractiveness Prediction, FAP）长期以来一直是重要的计算机视觉任务，可广泛应用于带人脸美颜（face retouching）的直播视频。然而，既有的 FAP 数据集要么规模较小、要么闭源不公开；此外，相应的 FAP 模型也表现出有限的泛化与适配能力。为克服这些局限，本文引入了首个专门面向直播视频场景的大规模 FAP 数据集 **LiveBeauty**——在该场景中，人脸图像可能出于美观目的被实时处理。10,000 张人脸图像直接采集自某直播平台，并通过精心设计的主观实验获得 200,000 条对应的吸引力标注，使 LiveBeauty 成为最大的开放获取（open-access）FAP 数据集。在所构建数据集的基础上，本文提出了一种名为**人脸先验增强多模态模型（Facial Prior Enhanced Multi-modal model, FPEM）**的新型 FAP 方法来度量人脸图像的吸引力。在 LiveBeauty 与其他开源 FAP 数据集上开展的大量实验表明，所提方法取得了最先进（state-of-the-art）的性能。数据集将在 <https://github.com/Estella-LH/FPEM> 发布。
+
+---
+
+## 1 引言
+
+随着直播、短视频以及此类应用中先进人脸美颜技术的迅速发展，人脸的感知质量成为影响用户整体视觉体验的重要因素。这对视频平台尤为关键，因为它会显著影响观众的平均观看时长，甚至影响 GMV（Gross Merchandise Volume，商品交易总额）。一套用于评估人脸清晰度与美学的稳健指标体系，对于监控平台整体服务质量以及各个直播频道视觉吸引力的变化或改进而言必不可少。
+
+与清晰度相关的人脸质量评估任务可分为生物特征人脸图像质量评估（Biometric Face Image Quality Assessment, BFIQA）与通用人脸图像质量评估（Generic Face Image Quality Assessment, GFIQA）两类。BFIQA 关注面向人脸识别等下游任务的人脸身份信息 (Best-Rowden & Jain, 2018; Ou et al., 2021; Phillips et al., 2013)，而 GFIQA 强调人脸的视觉感知质量 (Chahine et al., 2023; Su et al., 2023; Tian et al., 2022)。与美学相关的人脸质量评估通常被称为人脸吸引力预测（Facial Attractiveness Prediction, FAP）(Eisenthal et al., 2006; Liang et al., 2018; Lin et al., 2019)。FAP 的目标是量化人脸图像的吸引力，这对评估人脸美颜参数设置的有效性至关重要，并能为算法研发提供有价值的洞察。
+
+> **图 1**：在 LiveBeauty 与 SCUT-FBP5500 (Liang et al., 2018) 上的 SROCC–PLCC 对比。以红色三角形表示的 FPEM 在两个数据集上均优于其他方法（CNN-ER (Bougourzi et al., 2022)、2D-FAP (Liu et al., 2022)、REX-INCEP (Bougourzi et al., 2022)、Inception-V3 (Szegedy et al., 2016)、ResNeXt-50 (Xie et al., 2017)）。
+
+如表 1 所示，近年来已有众多 FAP 数据集被提出，其中许多在年龄、性别、表情与姿态上具备丰富的多样性 (De Vries & Yosinski, 2015; Gray et al., 2010; Lebedeva et al., 2022; Liang et al., 2018; Tong et al., 2021; Yan, 2014; Zhai et al., 2016; Zhai et al., 2020)。然而，出于隐私与伦理顾虑，这些数据集中的大多数要么规模较小，要么不可获取。在视频流（尤其是直播）中，使用人脸美颜算法来提升呈现给观众内容的面部美感是普遍做法。这些算法之间的差异会带来独特的数据分布，与从互联网上获取的未经处理或精心编辑的人脸图像的分布大相径庭。与此同时，人脸美颜的效果在很大程度上取决于可用的计算资源，这反过来又会影响这些数据特征。由于训练数据会影响数据驱动深度学习方法的泛化能力，缺乏专门从带真实人脸美颜过程的直播视频中采集的 FAP 数据集，可能导致模型在实际视频场景中性能受限。
+
+**表 1**：常见人脸吸引力预测数据集概览（Public 列：✓ 表示公开发布/可获取，— 表示未公开；依据原文表格符号转写）。
+
+| 数据集 | 年份 | 评分量表 | 图像数 | 性别 | 族群 | 标注者数 | 公开 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Gray et al. (2010) | 2010 | [−3, 3] | 2,056 | 女/男 | 高加索 | 30 | ✓ |
+| MBW+FBW (Yan, 2014) | 2014 | [1, 5] | 10,400 | 女/男 | 多族群 | 30 | — |
+| De Vries et al. (2015) | 2015 | 二值 | 9,364 | 女/男 | 亚洲 | 20 | — |
+| LSFBD (Zhai et al., 2016) | 2016 | [1, 5] | 20,000 | 女/男 | — | — | — |
+| SCUT-FBP5500 (Liang et al., 2018) | 2018 | [1, 5] | 5,500 | 女/男 | 多族群 | 60 | ✓ |
+| Tong et al. (2021) | 2020 | 二值 | 4,512 | 女/男 | — | 20 | — |
+| LSAFBD (Zhai et al., 2020) | 2020 | [1, 5] | 20,000 | 女 | 亚洲 | 20 | — |
+| MEBeauty (Lebedeva et al., 2022) | 2022 | [1, 10] | 2,550 | 女/男 | 多族群 | 300 | ✓ |
+| **LiveBeauty（本文）** | 2024 | [1, 5] | 10,000 | 女/男 | 亚洲 | 20 | ✓ |
+
+与此同时，目前尚无被广泛认可的、专门为直播视频设计的 FAP 模型。依赖手工设计美貌描述子（beauty descriptor）的早期方法 (Iyer et al., 2021; Liu et al., 2017) 因特征表示能力不足而性能有限。基于深度学习的方法（如卷积神经网络 CNN (Bougourzi et al., 2022; Liu et al., 2022; Xu & Xiang, 2020) 与 Transformer (Liu et al., 2023; Peng et al., 2024)）的成功推动了 FAP 任务的进展。具体而言，(Peng et al., 2024) 首次将视觉 Transformer 引入 FAP 任务，并提出了利用人脸关键点的几何先验引导网络。尽管该方法性能可观，但其直接的特征拼接与过于简单的先验难以自适应地建模个体化人脸特征，因而限制了其在真实应用中的适用性与有效性。
+
+为解决缺乏考虑人脸美颜影响的 FAP 数据集这一问题，我们首先构建了大规模人脸吸引力数据集 **LiveBeauty**，其中包括从某热门视频直播平台采集的 10,000 张人脸图像，以及由 20 名标注者给出的对应人脸吸引力标注。
+
+进一步地，在所构建数据集的基础上，我们提出了一种无参考（no-reference）FAP 模型——**人脸先验增强多模态模型（Facial Prior Enhanced Multi-modal model, FPEM）**，通过提取并整合整体人脸先验知识与多模态美学语义特征来预测人脸吸引力。具体而言，我们首先设计了**个性化吸引力先验模块（Personalized Attractiveness Prior Module, PAPM）**来整合丰富的人脸先验知识：由 Swin Transformer (Liu et al., 2021) 提取的多尺度视觉特征与由预训练 FaceNet (Schroff et al., 2015) 提取的人脸先验特征，通过一个交叉注意力（Cross-Attention）模块加以整合。为获取人脸美貌属性，我们还引入了基于 CLIP (Radford et al., 2021) 的**多模态吸引力编码模块（Multi-modal Attractiveness Encoder Module, MAEM）**来提取多模态美学语义特征。此外，这些提取出的特征通过一个融合模块进行自适应整合。如图 1 所示，大量实验结果证实，所提方法在我们的 LiveBeauty 数据集与其他 FAP 数据集上均取得了优于其他最先进（SOTA）方法的最佳性能。
+
+总结而言，本文的贡献如下：
+
+- 我们构建了 LiveBeauty 数据集——首个源自真实直播视频平台、以美观为目的增强过人脸的大规模开源人脸吸引力预测数据集，使其适用于人脸美学至关重要、因而需要被良好建模与监控的应用场景；
+- 我们提出了一种专为 FAP 设计的多模态方法，为人脸图像预测吸引力分数；通过整合视觉与文本模态，该方法能够提供更可靠的人脸吸引力预测；
+- 我们通过利用人脸先验知识增强了模型的表示能力，并进一步采用选择性融合模块来整合与精炼所提取的视觉特征。
+
+---
+
+## 2 相关工作
+
+### 2.1 通用图像的美学评估
+
+图像美学评估（Image Aesthetic Assessment, IAA）任务旨在从美学角度评估图像质量。相应的 IAA 方法已经从采用手工特征——即对感知图像中摄影规则 (Datta et al., 2006)、全局图像布局 (Murray et al., 2012) 或典型物体 (Li et al., 2010) 的建模 (Deng et al., 2017)——演进为基于深度学习技术、性能更优的数据驱动方法 (He et al., 2022, 2023a, 2023b; Hosu et al., 2019)。值得注意的是，这些 IAA 方法主要针对通用图像，并未专门面向人脸区域。
+
+### 2.2 人脸图像的质量评估
+
+与清晰度相关的人脸评估包括 BFIQA 与 GFIQA 两类。BFIQA 源于生物特征识别研究，关注评估人脸图像是否适合识别，最初依赖手工特征 (Dutta et al., 2014; Terhorst et al., 2020)，近期则发展为采用回归与基于嵌入方案的深度学习方法 (Boutros et al., 2023; Ou et al., 2024)。尽管如此，(Chen et al., 2024) 指出，由于对人脸生物特征信息的侧重，这些方法在其他人脸质量与美学任务上可能无法很好地泛化。相比之下，GFIQA 旨在评估人脸图像的常规感知质量。GFIQA 方法已通过基于 Transformer 的 (Chen et al., 2024; Liu et al., 2024) 与多模态 (Sun et al., 2024) 的方法取得进展。显然，GFIQA 关注的是人脸区域的退化建模（如与模糊、噪声相关的问题），因此与人脸吸引力是相互正交的。
+
+### 2.3 人脸图像的吸引力评估
+
+在本文语境下，人脸美学主要指吸引力。为度量人脸图像的吸引力，早期基于手工特征的 FAP 方法主要依赖人工设计的特征，例如几何特征 (Eisenthal et al., 2006; Iyer et al., 2021; Liu et al., 2017)、传统图像描述子 (Eisenthal et al., 2006; Iyer et al., 2021; Liang et al., 2018)、整体描述子 (Eisenthal et al., 2006) 等。然而，这些方法因难以全面刻画人脸吸引力特性而性能受限。
+
+随着深度学习的发展，基于 CNN 的 FAP 方案展现出更佳性能。受心理学研究启发，一些特定的 CNN 架构被专门设计 (Cao et al., 2020; Xu et al., 2017)。标签分布学习（Label Distribution Learning, LDL）的应用 (Fan et al., 2017; Liu et al., 2017; Liu et al., 2022) 取得了更好的性能。一些方法 (Gao et al., 2018; Shi et al., 2019; Xiao et al., 2021) 结合了包含关键点、解析图（parsing map）等的几何先验知识，另一些方法 (Lin et al., 2019; Xu et al., 2019) 则整合了性别、种族等与吸引力相关的属性。此外，不同损失函数（如回归损失与分类损失）的集成 (Xu & Xiang, 2020) 以及不同模型（包括 ResNeXt50 与 Inception-V3）的 ensemble (Bougourzi et al., 2022) 也被进一步探索。然而，这些基于 CNN 的方法主要关注局部特征，限制了其长程建模能力。为解决该问题，基于 Transformer 的方案 (Boukhari et al., 2023; Gan et al., 2023a) 被相继提出，而 (Liu et al., 2023) 与 (Gan et al., 2023b) 将 Transformer 与 CNN 相结合，以同时利用与人脸吸引力相关的全局与局部特征。尽管如此，由于训练数据向特定人群倾斜所导致的预测偏差，以及依赖视觉特征简单拼接的单模态建模技术，这些方法在更具挑战性的场景中泛化与适配能力仍然有限。
+
+---
+
+## 3 LiveBeauty 数据集构建
+
+### 3.1 图像采集
+
+为准确反映所采集视频中人脸吸引力的真实分布，我们首先从最受欢迎的直播平台之一采集大规模原始人脸图像。具体而言，我们检索了 2024 年 3 月期间该平台上所有主播开播的、页面浏览量（Page Views, PVs）相对较高的直播频道回放。鉴于每个频道持续约 2 到 10 小时，我们在每个频道的前三个小时内每小时采样一张图像，从而从每个频道采样到三张图像。然后，采用一个 SOTA 人脸检测模型 (Zhang et al., 2017) 生成人脸区域的边界框（bounding box, bbox）。
+
+进一步开展数据清洗，以剔除包含动漫角色、虚拟头像的样本以及来自同一个人的重复样本，确保数据集的质量与多样性。最终采集了 10,000 张图像，确保这些图像是来自超过 9,500 个直播频道的 10,000 张不同人脸。图 2 展示了 LiveBeauty 数据集中人脸图像的一些示例。
+
+> **图 2**：LiveBeauty 数据集中人脸图像示例（从左到右依次为评级 1 到 5 的示例）。第一行为男性，第二行为女性。
+
+### 3.2 主观实验
+
+我们在实验中招募了 20 名受试者，其中 14 名女性、6 名男性。这一比例由该直播平台的真实用户画像决定。人脸刺激（stimulus）显示在一部 iPhone 14 Pro Max 上，其配备 6.7 英寸有机发光二极管（OLED）屏幕，支持最高 2,796 × 1,290 的分辨率。主观实验在受控良好的实验室环境中进行，光照、观看距离、观看角度等设置均保持固定 (ITU-R BT.500-13, 2012)。
+
+我们将实验划分为 200 个场次（session），每场 50 张图像。每张人脸图像显示 10 秒，随后是 1 秒的灰屏掩蔽。实验开始前，我们提供简要说明以及 50 张额外的训练样本，使受试者熟悉任务。实验过程中，要求受试者将刺激的人脸吸引力评为 1 到 5 分，五个等级分别定义为："无吸引力"（unappealing）、"不太讨喜"（less favorable）、"普通"（ordinary）、"网红级"（online influencer）与"明星级"（celebrity），并配有关于妆容与肤质的详细描述。每场结束后，要求受试者休息至少 5 分钟。所有受试者均参与全部场次，且每名受试者每天参与的场次不超过 5 场。最终，全部 10,000 张图像均由 20 名受试者完成评估，共收集到 200,000（10,000 × 20）个评分。
+
+### 3.3 数据分析
+
+按照 (ITU-R BT.500-13, 2012)，我们采用离群值比率与 Spearman 秩序相关系数（SROCC）对受试者进行事后筛选（post-screening）。与全部标注众数相差超过两个等级的标注被视为潜在离群值，将由专家细致剔除。所评分数 SROCC < 0.75 或离群值比率 > 2% 的受试者将被标记为不可靠并予以剔除。最终，20 名受试者全部保留。我们计算平均意见分数（Mean Opinion Score, MOS）作为每张人脸图像的吸引力标签：
+
+$$\mathrm{MOS}_j = \frac{1}{N}\sum_{i=1}^{N} r_{ij}, \tag{1}$$
+
+其中 $\mathrm{MOS}_j$ 表示第 $j$ 张人脸图像的 MOS，$N$ 为受试者给出的有效标注分数的数量，$r_{ij}$ 为第 $i$ 名受试者对第 $j$ 张人脸图像的评分。
+
+> **图 3**：LiveBeauty MOS 分布示意图。偏度（Skewness）= −0.470，峰度（Kurtosis）= 1.498。
+
+LiveBeauty 的 MOS 分布如图 3 所示。可以观察到，MOS 分布呈现类高斯形状。图 3 中还给出了若干 MOS 分布的偏度与峰度值，表明该分布具有薄尾特征，MOS 集中在 3 附近。这与真实世界的人脸吸引力分布相符，即大多数个体拥有平均水平的面部吸引力。
+
+每张人脸样本各吸引力等级上的标注分布如图 4 所示。尽管吸引力高度主观并受个人偏好影响，仍可以观察到每张人脸的标注分数都集中在最接近 MOS 的三个等级上（例如，MOS 3.85 来自五个 3 分、十三个 4 分与两个 5 分）。
+
+> **图 4**：各吸引力等级上的标注分数分布。
+
+---
+
+## 4 所提方法（FPEM）
+
+如图 5 所示，我们的人脸先验增强多模态（Facial Prior Enhanced Multi-modal, FPEM）方法采用**两阶段训练策略**，由三个主要模块组成。
+
+第一阶段，即**预训练阶段（Preliminary Training Phase）**，包括个性化吸引力先验模块（PAPM，见 4.1.1 节）与多模态吸引力编码模块（MAEM，见 4.1.2 节）。PAPM 接收图像 $I$：Swin Transformer $E_{\mathrm{MS}}$ 从中提取多尺度特征 $f_m$，冻结的 FaceNet $E_{\mathrm{FP}}$ 提取人脸感知特征 $f_s$。随后，一个交叉注意力模块将 $f_m$ 与 $f_s$ 融合，构成个性化吸引力特征 $f_p$，再将其投影为初步吸引力分数 $\hat{Q}_1$。MAEM 包含 CLIP (Radford et al., 2021) 式的图像编码器 $E_I$ 与文本编码器 $E_T$，接收图像 $I$ 与渐进式文本（即五个等级递进的候选描述），利用视觉嵌入 $f_i$ 与文本嵌入 $f_t$，并通过相似度回归（Similarity Regression, SR）操作得到另一个初步分数 $\hat{Q}_2$。
+
+第二阶段，即**选择性融合阶段（Selective Fusion Phase）**，选择性融合模块（SFM，见 4.2 节）基于个性化吸引力特征 $f_p$ 对提取的视觉嵌入 $f_i$ 进行动态精炼，得到 $f_i'$。随后使用 SR 策略预测最终分数 $\hat{Q}$。
+
+> **图 5**：FPEM 的整体架构，包括个性化吸引力先验模块（PAPM）、多模态吸引力编码模块（MAEM）与选择性融合模块（SFM）。（依原图转写图例：雪花符号为冻结参数；F 为展平 Flatten；⊕ 为逐元素相加；拼接符号为 Concatenate；E 为扩展 Expand；S 为 Softmax；⊙ 为逐元素相乘；文本提示模板为 "a photo of a person with {a} attractiveness"；MAEM 内含余弦相似度与"加权汇总（Weighted Summary）"的相似度回归，SFM 内含 Squeeze Layer 与两个 FC 投影。）
+
+### 4.1 预训练阶段
+
+在此阶段，PAPM 与 MAEM 在不考虑 SFM 的情况下独立训练，且 MAEM 在训练期间采用 SR 策略进行回归。
+
+#### 4.1.1 个性化吸引力先验模块
+
+**Swin 主干（Stem Swin）**。考虑到视觉感知过程是从低层到高层逐级进行的，来自连续各 Transformer 阶段的层次化特征得到了充分利用。具体而言，从第 $i$ 个阶段提取的特征 $f_i^r \in \mathbb{R}^{H_i \times W_i \times C_i}$ 被重整形为相同尺寸，然后拼接为 $f_\oplus \in \mathbb{R}^{\frac{H}{4} \times \frac{W}{4} \times C_\oplus}$。同时，$f_\oplus$ 从通道角度由一个通道注意力模块（Channel Attention）精炼（如图 6 所示），随后展平为 $f_m \in \mathbb{R}^{N_4 \times C_\oplus}$。
+
+**交叉注意力（Cross-Attention）**。人脸先验知识——即由 FaceNet 提取的人脸感知特征 $f_s$——在该模块中被用来引导人脸吸引力的学习。具体而言，Swin 主干提取并精炼的特征 $f_m$ 与人脸感知特征 $f_s$ 通过交叉注意力进行融合。如图 6 所示，$f_s$ 经一个线性层（Linear）与一个层归一化（Layer Normalization, LN）层编码为查询（query）$Q$，而 $f_m$ 经一个 LN 层编码为键（key）$K$ 与值（value）$V$。进一步地，应用多头交叉注意力（Multi-Head Cross-Attention, MHCA）机制，其计算方式为：
+
+$$
+\begin{cases}
+\mathrm{head}_i = \sigma\!\left(\dfrac{Q \cdot K^T}{\sqrt{d}}\right) \cdot V \cdot W_i, & i \in \{1, \ldots, h\}\\[6pt]
+\mathrm{MHCA}(Q, K, V) = \mathrm{Concat}(\mathrm{head}_i)\, W_o,
+\end{cases} \tag{2}
+$$
+
+其中 $\sigma(\cdot)$ 表示 softmax 函数，$W_o$ 表示投影参数矩阵，$d$ 表示查询维度。令 FFN 表示前馈网络（Feed-Forward Network），AP 表示平均池化（Average Pooling），输出特征 $f_p \in \mathbb{R}^{1 \times C}$ 的计算方式为：
+
+$$
+\begin{cases}
+f_c = f_m + \mathrm{MHCA}(Q, K, V)\\
+f_p = \mathrm{AP}\big(f_c + \mathrm{FFN}(\mathrm{LN}(f_c))\big),
+\end{cases} \tag{3}
+$$
+
+（译注：FaceNet 特征 $f_s$ 为单 token 查询，交叉注意力输出需依图 5 图例中的 "E: Expand" 扩展后才能与 $f_m$ 逐元素相加，构成式 (3) 的残差结构。）
+
+令 MLP 表示多层感知机（Multi-Layer Perceptron），则吸引力分数 $\hat{Q}_1$ 可由下式预测：
+
+$$\hat{Q}_1 = \mathrm{MLP}(f_p). \tag{4}$$
+
+#### 4.1.2 多模态吸引力编码模块
+
+受 (Zhang et al., 2023) 启发，MAEM 被设计为利用多模态美学语义特征。我们采用五个吸引力等级 $a \in \mathcal{A} = \{1, 2, 3, 4, 5\}$ = {"bad"（差）、"poor"（较差）、"fair"（一般）、"good"（好）、"perfect"（完美）}。于是文本模板可形如 "a photo of a person with {a} attractiveness"，从而得到五个候选文本描述 $T$。
+
+MAEM 包含一个冻结的文本编码器 $E_T$（GPT-2）与一个可训练的图像编码器 $E_I$（ViT-B/16），其中 $E_T$ 接收五个候选文本描述 $T$ 以形成文本嵌入 $f_t' \in \mathbb{R}^{5 \times C}$，而 $E_I$ 接收图像 $I$ 以形成视觉嵌入 $f_i \in \mathbb{R}^{1 \times C}$。
+
+随后，文本嵌入 $f_t'$ 与视觉嵌入 $f_i$ 被送入相似度回归（SR）。具体而言，计算 $f_t$ 与 $f_i$ 之间的余弦相似度，以获得吸引力等级概率分布 $\hat{p}$：
+
+$$\hat{p} = \sigma\!\left(\frac{f_i \cdot f_t}{\lVert f_i \rVert \times \lVert f_t \rVert}\right), \tag{5}$$
+
+其中 $\sigma(\cdot)$ 表示 softmax 函数。然后吸引力分数 $\hat{Q}_2$ 可由下式预测：
+
+$$\hat{Q}_2 = \sum_{a=1}^{5} \hat{p}(a \mid I) \cdot a, \tag{6}$$
+
+其中 $a$ 表示从 1 到 5 的吸引力等级，$\hat{p}(a \mid \cdot)$ 为等级 $a$ 被估计的概率。
+
+> **图 6**：通道注意力与交叉注意力模块的结构。（通道注意力：对输入分别做平均池化与最大池化，经共享 MLP 后由 Sigmoid 激活，再与输入逐元素相乘；交叉注意力：$f_s$ 经 Linear + LN 作为查询、$f_m$ 经 LN 作为键与值，经多头交叉注意力与残差相加，再经 LN + 前馈网络得到输出。）
+
+### 4.2 选择性融合阶段
+
+在此阶段，我们冻结在先前预训练阶段中训练好的 MAEM 与 PAPM 的参数。然后训练选择性融合模块（Selective Fusion Module, SFM），以动态整合整体人脸先验知识与多模态美学语义特征。为实现该目标，我们首先通过逐元素相加来融合视觉嵌入 $f_i$ 与个性化吸引力特征 $f_p$。受 (Li et al., 2019) 启发，进一步生成一个紧凑特征 $f_z \in \mathbb{R}^{1 \times d}$，以便为这些人脸特征提供自适应的选择引导；该特征由一个压缩层（Squeeze Layer）产生，后者利用一个全连接层（Fully Connected layer, FC）与 ReLU 激活函数实现：
+
+$$f_z = \mathrm{ReLU}\big(\mathrm{FC}(f_i + f_p)\big), \tag{7}$$
+
+随后，$f_z$ 经两个 FC 层投影为分别作用于 $f_i$ 与 $f_p$ 的两个自适应权重 $a \in \mathbb{R}^{1 \times C}$ 与 $b \in \mathbb{R}^{1 \times C}$。在 $a$ 与 $b$ 的各通道维度上施加 Softmax 函数以确保 $a + b = 1$。之后，通过以 $a$、$b$ 进行通道级加权相加，可获得优化后的视觉嵌入 $f_i'$：
+
+$$f_i' = f_i \cdot a + f_p \cdot b. \tag{8}$$
+
+随后，精炼后的 $f_i'$ 与文本嵌入 $f_t$ 被输入相似度回归以计算最终预测 $\hat{Q}$，这一做法与 MAEM 保持一致。
+
+### 4.3 训练目标
+
+**PAPM 损失**。计算 $\hat{Q}_1$ 与真值标签 $Q$ 之间的 L1 损失作为吸引力预测损失函数 $\mathcal{L}_1$，其公式为：
+
+$$\mathcal{L}_1 = \frac{1}{n}\sum_{i=1}^{n} \big| \hat{Q}_1^i - Q^i \big|, \tag{9}$$
+
+其中 $n$ 表示训练样本数。
+
+**MAEM 损失**。为联合优化排序与回归，我们在 L1 评分损失 $\mathcal{L}_S$ 之外引入了一个合并的排序损失 $\mathcal{L}_R$。具体而言，$\mathcal{L}_R$ 由一个保真损失（fidelity loss）$\mathcal{L}_{R1}$ 与一个双向排序损失（two-direction ranking loss）$\mathcal{L}_{R2}$ 组成。对于保真损失 $\mathcal{L}_{R1}$，给定图像对 $(I_i, I_j)$，依据其真值 $(Q_i, Q_j)$ 定义的二值标签为：
+
+$$R(I_i, I_j) = \begin{cases} 1, & \text{若 } Q_i \geq Q_j\\ 0, & \text{其他}, \end{cases} \tag{10}$$
+
+按照 Thurstone 比较判断模型 (Thurstone, 2017)，$I_i$ 被感知为比 $I_j$ 更具吸引力的概率估计为：
+
+$$\hat{R}(I_i, I_j) = \Phi\!\left(\frac{\hat{Q}_2^i - \hat{Q}_2^j}{\sqrt{2}}\right), \tag{11}$$
+
+其中 $\Phi(\cdot)$ 表示标准正态累积分布函数，其方差设为 1。于是保真损失 (Tsai et al., 2007) 可计算为：
+
+$$\mathcal{L}_{R1} = 1 - \sqrt{R(I_i, I_j)\, \hat{R}(I_i, I_j)} - \sqrt{\big(1 - R(I_i, I_j)\big)\big(1 - \hat{R}(I_i, I_j)\big)}. \tag{12}$$
+
+对于双向排序损失 $\mathcal{L}_{R2}$，给定图像 $I_i$，$\hat{S}_{i,j}$ 表示第 $j$ 个吸引力等级的余弦相似度分数，且 $\hat{S}_{i,o} = \max\{\hat{S}_{i,j} \mid j \in \{1, 2, 3, 4, 5\}\}$。由于人类对人脸吸引力的感知是渐进的、极少呈现多峰 (Yu et al., 2024)，我们通过确保吸引力等级概率分布仅呈现一个峰值、并向左右两个方向递减，来进一步获取排序信息。于是双向成对排序损失可表述为：
+
+$$
+\begin{cases}
+\mathcal{L}_{\mathrm{left}} = -\displaystyle\sum_{j=2}^{o} \log \dfrac{\exp(\hat{S}_{i,j})}{\exp(\hat{S}_{i,j}) + \exp(\hat{S}_{i,j-1})}\\[10pt]
+\mathcal{L}_{\mathrm{right}} = -\displaystyle\sum_{j=o}^{A-1} \log \dfrac{\exp(\hat{S}_{i,j})}{\exp(\hat{S}_{i,j}) + \exp(\hat{S}_{i,j+1})}\\[10pt]
+\mathcal{L}_{R2} = \lambda \big(\mathcal{L}_{\mathrm{left}} + \mathcal{L}_{\mathrm{right}}\big),
+\end{cases} \tag{13}
+$$
+
+其中 $A$ 表示吸引力等级数，$\hat{S}_{i,j-1}$、$\hat{S}_{i,j}$ 与 $\hat{S}_{i,j+1}$ 相对应的标签分别为 0、1、0。（译注：式 (13) 中 $\mathcal{L}_{R2}$ 的系数符号在 PDF 文本提取中丢失，依上下文推断为平衡系数，此处记作 $\lambda$。）最终，MAEM 的总损失可定义为 $\mathcal{L}_2 = \mathcal{L}_S + \lambda_1 \mathcal{L}_{R1} + \lambda_2 \mathcal{L}_{R2}$，其中 $\lambda_1$ 与 $\lambda_2$ 经验性地设为 1。
+
+**SFM 损失**。第二阶段中真值标签 $Q$ 与最终吸引力分数 $\hat{Q}$ 之间使用的损失为 L1 损失：
+
+$$\mathcal{L}_3 = \frac{1}{n}\sum_{i=1}^{n} \big| \hat{Q}^i - Q^i \big|. \tag{14}$$
+
+---
+
+## 5 实验
+
+### 5.1 基准数据集
+
+选用所提 LiveBeauty 数据集与两个开源 FAP 数据集——SCUT-FBP5500 (Liang et al., 2018) 与 MEBeauty (Lebedeva et al., 2022)——作为基准数据集。三者的 MOS 分布如图 7 所示。SCUT-FBP5500 与 MEBeauty 分别按 60%-40% 与 80%-20% 的训练-测试比例划分（与其各自协议保持一致），LiveBeauty 采用 90%-10% 协议划分。
+
+> **图 7**：三个基准数据集的 MOS 分布。(a) LiveBeauty；(b) MEBeauty；(c) SCUT-FBP5500。
+
+### 5.2 实现细节
+
+**模型初始化**。在 MAEM 中，分别采用 ViT-B/16 与 GPT-2 作为图像编码器与文本编码器，二者由 (Radford et al., 2021) 初始化。在 PAPM 中，采用 Swin-T 作为可训练的图像编码器，仅保留其四个阶段，并以在多个人脸相关任务上预训练得到的参数进行初始化 (Qin et al., 2023)。
+
+**超参数**。在整个训练过程中，选择 AdamW 作为优化器，学习率调度器采用线性预热（linear warm-up）与余弦退火（cosine annealing）方案。基础学习率随训练阶段不同而变化。每个训练阶段持续 50 个 epoch，批大小（batch size）设为 32。更多细节见补充材料。
+
+### 5.3 对比方法与评价指标
+
+为确认所提 FPEM 方法的有效性，我们选取了基线模型与若干 SOTA 的 FAP 与 IAA 方法，包括 ComboNet (Xu & Xiang, 2020)、2D-FAP (Liu et al., 2022)、REX-INCEP (Bougourzi et al., 2022)、CNN-ER (Bougourzi et al., 2022)、MEBeauty (Lebedeva et al., 2022)、AVA-MLSP (Hosu et al., 2019)、TANet (He et al., 2022)、Dele-Trans (He et al., 2023a) 与 EAT (He et al., 2023b)。所有模型均由我们按其论文中定义的默认参数自行重新训练。采用三项准则评估这些方法的性能，即 Spearman 秩序相关系数（SROCC）、Pearson 线性相关系数（PLCC）与 Kendall 秩序相关系数（KROCC）。
+
+### 5.4 性能
+
+三个 FAP 数据集上的实验结果如表 2 所示，由此可得出以下结论：(i) 所提方法取得第一名，在 LiveBeauty、MEBeauty 与 SCUT-FBP5500 上的 SROCC 值分别超出次优方法约 0.011、0.077、0.020，彰显其优越性；(ii) IAA 方法劣于 FAP 方法，这表明通用美学评估方法忽视了人脸吸引力主观性所涉及的人脸特征，导致其在 FAP 任务上性能受限；(iii) 所有方法在 MEBeauty 上性能均出现下降，原因是其训练样本数量受限且人脸族群多样，表明人脸吸引力存在很大的多样性；(iv) 相对其他数据集，本文方法在 MEBeauty 上的显著提升在很大程度上可归因于人脸先验带来的增强，这在训练数据不足的场景中尤为有效。
+
+**表 2**：在 LiveBeauty、MEBeauty (Lebedeva et al., 2022) 与 SCUT-FBP5500 (Liang et al., 2018) 上的性能比较。**加粗为最优**（原文红色）、*斜体为次优*（原文蓝色）；"提升"行为最优相对次优方法的绝对差值。
+
+| 类别 | 方法 | LiveBeauty SROCC↑ | LiveBeauty PLCC↑ | LiveBeauty KROCC↑ | MEBeauty SROCC↑ | MEBeauty PLCC↑ | MEBeauty KROCC↑ | SCUT-FBP5500 SROCC↑ | SCUT-FBP5500 PLCC↑ | SCUT-FBP5500 KROCC↑ |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 基线 | ViT-B (Kolesnikov et al., 2021) | 0.897 | 0.847 | 0.733 | 0.620 | 0.659 | 0.443 | 0.869 | 0.880 | 0.686 |
+| 基线 | ResNeXt-50 (Xie et al., 2017) | 0.907 | 0.879 | 0.746 | 0.700 | 0.743 | 0.516 | 0.899 | 0.911 | 0.727 |
+| 基线 | Inception-V3 (Szegedy et al., 2016) | 0.906 | 0.880 | 0.745 | 0.676 | 0.727 | 0.492 | 0.905 | 0.918 | 0.736 |
+| IAA | AVA-MLSP (Hosu et al., 2019) | 0.833 | 0.815 | 0.650 | 0.602 | 0.643 | 0.431 | 0.764 | 0.794 | 0.566 |
+| IAA | TANet (He et al., 2022) | 0.891 | 0.858 | 0.728 | 0.651 | 0.690 | 0.467 | 0.870 | 0.882 | 0.686 |
+| IAA | Dele-Trans (He et al., 2023a) | 0.888 | 0.841 | 0.721 | 0.611 | 0.651 | 0.440 | 0.870 | 0.860 | 0.682 |
+| IAA | EAT (He et al., 2023b) | 0.893 | 0.867 | 0.728 | 0.640 | 0.697 | 0.462 | 0.853 | 0.872 | 0.665 |
+| FAP | ComboNet (Xu & Xiang, 2020) | 0.902 | 0.871 | 0.741 | 0.651 | 0.692 | 0.472 | 0.897 | 0.907 | 0.725 |
+| FAP | 2D-FAP (Liu et al., 2022) | 0.896 | 0.854 | 0.733 | 0.690 | 0.719 | 0.506 | 0.903 | 0.915 | 0.734 |
+| FAP | REX-INCEP (Bougourzi et al., 2022) | 0.908 | 0.884 | 0.750 | 0.702 | 0.739 | 0.514 | 0.907 | 0.917 | 0.739 |
+| FAP | CNN-ER (Bougourzi et al., 2022) | *0.913* | *0.888* | *0.757* | *0.706* | *0.748* | *0.519* | *0.910* | *0.922* | *0.745* |
+| FAP | MEBeauty (Lebedeva et al., 2022) | 0.826 | 0.796 | 0.643 | 0.649 | 0.677 | 0.467 | 0.799 | 0.802 | 0.599 |
+| FAP | **FPEM（本文）** | **0.924** | **0.896** | **0.773** | **0.783** | **0.795** | **0.593** | **0.930** | **0.932** | **0.774** |
+| | 提升 | +1.1% | +0.8% | +1.6% | +7.7% | +4.7% | +7.4% | +2.0% | +1.0% | +2.9% |
+
+图 8 展示了三个数据集测试集上 FPEM 预测吸引力分数（纵轴）与 MOS（横轴）关系的散点图。MEBeauty 的 MOS 除以 2，以使其分数范围与其他数据集对齐。散点颜色从蓝到红表示点的密度由低到高。每个子图中均叠加了一条二阶多项式非线性拟合曲线。可以观察到，拟合曲线接近对角线，证明了 FPEM 的有效性。
+
+> **图 8**：FPEM 在三个基准数据集上的预测分数与 MOS 的散点图。(a) LiveBeauty；(b) MEBeauty；(c) SCUT-FBP5500。
+
+### 5.5 消融实验
+
+我们开展了细致的消融实验，以研究所提方法中不同模块的贡献，结果如表 3 所示。可以得出以下结论：(i) 在 PAPM 的消融中，可以观察到利用人脸先验与多尺度特征均有帮助；(ii) MAEM 的消融结果表明，零样本（zero-shot）CLIP 在 FAP 任务中泛化能力有限，这印证了其在美学评估方面的短板 (Sheng et al., 2023)。具体而言，对于 MAEM w/o SR，我们改为将视觉特征与相似度最高的文本特征拼接，并利用 MLP 进行回归。可以看到，去掉 SR 后性能显著下降，这表明专门设计的回归策略对于 CLIP 适配回归任务至关重要；同时，排序与回归的联合优化也带来了 SROCC 的提升；(iii) 在全部模块的消融中，可以看到采用全部模块可获得最佳性能，证实了使用 SFM 自适应整合多模态美学特征与整体人脸先验知识的有效性。
+
+**表 3**：在 LiveBeauty 测试集上的消融实验。$E_{\mathrm{FP}}$ 表示与 $f_p$ 相关的交叉注意力（即 FaceNet 人脸先验注入），MS 表示多尺度融合操作，SR 表示相似度回归策略，$\mathcal{L}_S$ 表示 L1 评分损失，$\mathcal{L}_R$ 表示总排序损失（$\mathcal{L}_R = \mathcal{L}_{R1} + \mathcal{L}_{R2}$）。
+
+| 模块 | 配置 | SROCC↑ | PLCC↑ | KROCC↑ |
+| --- | --- | --- | --- | --- |
+| PAPM | 仅 $E_{\mathrm{MS}}$（Swin 主干） | 0.9045 | 0.8710 | 0.7454 |
+| PAPM | w/o $E_{\mathrm{FP}}$（去人脸先验交叉注意力） | 0.9078 | 0.8714 | 0.7475 |
+| PAPM | w/o MS（去多尺度融合） | 0.9089 | 0.8808 | 0.7487 |
+| PAPM | PAPM 完整 | **0.9096** | **0.8810** | **0.7497** |
+| MAEM | zero-shot CLIP | 0.3838 | 0.3582 | 0.2692 |
+| MAEM | w/o SR | 0.8825 | 0.8226 | 0.7123 |
+| MAEM | w/o $\mathcal{L}_S$ | 0.9161 | 0.8433 | 0.7607 |
+| MAEM | w/o $\mathcal{L}_R$ | 0.9186 | *0.8911* | 0.7653 |
+| MAEM | MAEM 完整 | **0.9198** | 0.8631 | **0.7653** |
+| 全部 | w/o 两阶段 | 0.9189 | 0.8889 | 0.7652 |
+| 全部 | w/o SFM | 0.9197 | 0.8961 | 0.7641 |
+| 全部 | 全模块组合（FPEM） | **0.9243** | **0.8962** | **0.7732** |
+
+### 5.6 跨数据集研究
+
+考虑到人脸吸引力感知的多样性，我们开展了跨数据集验证，以检验这些方法的泛化能力。具体而言，前文提到的所有模型均在所提 LiveBeauty 数据集上训练，随后在完整的 SCUT-FBP5500 数据集与完整的 MEBeauty 数据集上测试。
+
+如表 4 所示，所提方法在两个数据集上均优于所有其他方法，展示了其强大的泛化能力。此外，表 5 给出了在 MEBeauty 上泛化能力的消融结果。可以观察到，MAEM 通过利用多模态信息超越了 PAPM；通过 SFM 融合二者的特征后，泛化能力进一步提升。这表明整合包含丰富上下文与个体信息的人脸先验，不仅有助于提升性能，也有助于增强泛化能力。
+
+**表 4**：跨数据集研究——在 LiveBeauty 上训练、在完整 MEBeauty 数据集与完整 SCUT-FBP5500 数据集上测试。**加粗为最优**（原文红色）、*斜体为次优*（原文蓝色）。
+
+| 方法 | MEBeauty SROCC↑ | MEBeauty PLCC↑ | MEBeauty KROCC↑ | SCUT-FBP5500 SROCC↑ | SCUT-FBP5500 PLCC↑ | SCUT-FBP5500 KROCC↑ |
+| --- | --- | --- | --- | --- | --- | --- |
+| ViT-B (Kolesnikov et al., 2021) | 0.573 | 0.583 | 0.402 | *0.553* | *0.548* | *0.394* |
+| ResNeXt-50 (Xie et al., 2017) | 0.535 | 0.546 | 0.372 | 0.478 | 0.467 | 0.335 |
+| Inception-V3 (Szegedy et al., 2016) | 0.575 | 0.581 | 0.404 | 0.484 | 0.480 | 0.339 |
+| AVA-MLSP (Hosu et al., 2019) | 0.587 | 0.597 | 0.414 | 0.400 | 0.412 | 0.275 |
+| TANet (He et al., 2022) | 0.551 | 0.529 | 0.384 | 0.401 | 0.411 | 0.277 |
+| Dele-Trans (He et al., 2023a) | 0.576 | 0.572 | 0.402 | 0.480 | 0.476 | 0.335 |
+| EAT (He et al., 2023b) | *0.603* | *0.624* | *0.427* | 0.484 | 0.466 | 0.338 |
+| ComboNet (Xu & Xiang, 2020) | 0.540 | 0.548 | 0.375 | 0.384 | 0.375 | 0.264 |
+| 2D-FAP (Liu et al., 2022) | 0.556 | 0.489 | 0.390 | 0.444 | 0.445 | 0.306 |
+| REX-INCEP (Bougourzi et al., 2022) | 0.588 | 0.592 | 0.413 | 0.473 | 0.471 | 0.332 |
+| CNN-ER (Bougourzi et al., 2022) | 0.589 | 0.596 | 0.414 | 0.502 | 0.499 | 0.352 |
+| MEBeauty (Lebedeva et al., 2022) | 0.520 | 0.516 | 0.361 | 0.366 | 0.339 | 0.251 |
+| **FPEM（本文）** | **0.630** | **0.629** | **0.447** | **0.599** | **0.577** | **0.434** |
+| 提升 | +2.7% | +0.5% | +2.0% | +4.6% | +2.9% | +4.0% |
+
+**表 5**：各模块的跨数据集消融实验。所有模型均在 LiveBeauty 上训练、在完整 MEBeauty 上测试。
+
+| PAPM | MAEM | SFM | SROCC↑ | PLCC↑ | KROCC↑ |
+| --- | --- | --- | --- | --- | --- |
+| ✓ | | | 0.6134 | 0.6141 | 0.4349 |
+| | ✓ | | 0.6229 | 0.6268 | 0.4244 |
+| ✓ | ✓ | ✓ | **0.6299** | **0.6291** | **0.4472** |
+
+---
+
+## 6 结论
+
+本文研究的是经过人脸美颜处理的直播视频中的人脸吸引力预测问题。为弥补数据集方面的既有空白，我们引入了 LiveBeauty——首个以美观为目的、包含美颜人脸图像的大规模 FAP 数据集。该数据集采集自真实环境，高质量且真实可信，是目前最大的开放获取人脸吸引力数据集。我们进一步提出了 FPEM——一个选择性融合整体人脸先验与美学语义特征的多模态 FAP 框架。大量实验证明了 FPEM 相对于最先进方法的优势。同时，LiveBeauty 与 FPEM 也可被有效地应用于其他视频场景中的人脸吸引力预测。
+
+---
+
+## 精读小结
+
+- **问题定位具有鲜明的工业落地属性**：与通用 FAP 研究不同，本文的出发点是直播平台的人脸感知质量直接影响观看时长与 GMV；且直播场景中人脸普遍经过实时美颜处理，其数据分布（美颜算法差异、算力约束下的处理强度差异）与互联网抓取的"原图"或"精修图"分布明显不同——这正是既有 FAP 数据集与模型在直播场景失效的根因，也是 LiveBeauty 的立身之本。
+- **数据集构建方法论扎实**：采集端（按 PV 筛选频道 → 每频道前三小时逐小时采样 → SOTA 人脸检测 → 剔除动漫/虚拟形象/同人重复 → 9,500+ 频道 10,000 张不同人脸）保证了真实性与多样性；标注端严格遵循 ITU-R BT.500 规范（固定实验室环境、10 秒刺激 + 1 秒灰屏、每天 ≤5 场、场次间 ≥5 分钟休息），受试者男女比例按平台真实用户画像设定（14 女 6 男），并以 SROCC < 0.75 或离群率 > 2% 剔除不可靠标注者；MOS 分布近高斯、集中于 3（偏度 −0.470、峰度 1.498），与"大多数人相貌平平"的真实分布一致，佐证了标注质量。
+- **方法设计的三条主线**：(1) 用冻结 FaceNet 的"人脸识别级"语义作为先验，经交叉注意力（先验为 Query、Swin 多尺度特征为 K/V）注入可训练的 Swin 主干——本质是"以身份/结构感知引导美学特征学习"，弥补美学任务缺乏人脸专用归纳偏置的短板；(2) 把 CLIP 改造为 FAP 回归器：五个等级词文本锚点 + 余弦相似度 softmax + 期望值回归（SR），避免 CLIP 直接做标量回归的失配；(3) 感知先验驱动的损失设计——Thurstone 成对保真损失（Frank 损失）+ 利用"吸引力感知渐进、单峰、罕现多峰"心理学特性的双向排序损失，把等级间的偏序结构显式编码进训练。
+- **实验结论的要点**：MEBeauty 上的增益最大（SROCC +7.7% 绝对值 0.077），作者归因于人脸先验在训练数据匮乏、族群多样的场景下尤为有效——这实际上是"先验注入 + 多模态语义"对低数据量任务价值的直接证据；跨数据集（LiveBeauty → MEBeauty/SCUT-FBP5500）测试中 FPEM 全面第一（SROCC 0.630/0.599），说明其泛化能力并非过拟合于直播分布；消融中零样本 CLIP 仅 0.3838 SROCC，而适配后的 MAEM 达 0.9198，凸显"CLIP 用于 FAP 必须专门适配回归"这一结论。
+- **局限与可思考之处**（自评）：(1) LiveBeauty 族群为亚洲面孔，跨族群泛化仅能靠 MEBeauty 测试间接体现，标注规模（20 人）也小于 SCUT-FBP5500（60 人）与 MEBeauty（300 人）；(2) 文本锚点为五个固定英文等级词，吸引力语义对语言/文化的敏感性未予探讨；(3) 评分量表引入"网红级/明星级"等直播业务语义，向通用 FAP 迁移时需注意量表差异；(4) SFM 的软选择权重仅在通道粒度，空间粒度的自适应选择或可进一步挖掘；(5) 两阶段训练（先并行、再冻结融合）增加了流程复杂度，端到端联合训练（w/o 两阶段）的消融结果显示其差距虽小但确实存在（0.9243 vs 0.9189）。
+
+---
+
+## 创新点提炼
+
+1. **首个面向"带实时美颜的直播视频"的开放获取大规模 FAP 数据集 LiveBeauty**：从真实直播平台按 PV 检索回放、每频道前三小时逐小时采样、人脸检测后清洗动漫角色/虚拟头像/同人重复样本，最终得到来自 9,500+ 频道的 10,000 张不同人脸；20 名受试者（男女比例按平台真实用户画像设定）依 ITU-R BT.500 规范产出 200,000 条标注，使其成为最大的开放 FAP 数据集，并首次覆盖"美颜处理后"的人脸吸引力分布——此前所有 FAP 数据集要么规模小、要么闭源，且均不反映直播美颜的真实数据特征。
+
+2. **以人脸识别先验补齐美学模型短板的 PAPM 设计**：用冻结 FaceNet 提取人脸感知特征作为先验，以"先验为 Query、Swin 多尺度特征为 K/V"的多头交叉注意力注入可训练 Swin 主干，并以通道注意力（平均池化 + 最大池化 + 共享 MLP）精炼拼接后的多尺度特征。消融证明人脸先验与多尺度融合各自带来稳定增益（完整 PAPM SROCC 0.9096 vs 仅主干 0.9045）；且在训练数据匮乏的 MEBeauty 上增益最大（SROCC 绝对提升 0.077），跨数据集消融进一步显示先验注入同时改善性能与泛化。
+
+3. **把 CLIP 改造成"分级文本锚点 + 相似度回归"的 FAP 回归器（MAEM）**：以 bad/poor/fair/good/perfect 五个等级词构造 "a photo of a person with {a} attractiveness" 的文本嵌入，将吸引力回归转化为图像嵌入与五个等级文本嵌入的余弦相似度 softmax 期望（$\hat{Q}_2 = \sum_a \hat{p}(a|I)\cdot a$）。消融显示零样本 CLIP 仅 0.3838 SROCC、去掉 SR 改用"拼接 + MLP 回归"则降至 0.8825（完整 MAEM 0.9198），证明该适配是 CLIP 用于 FAP 的关键，而非 CLIP 原生能力。
+
+4. **编码"感知渐进且单峰"心理学特性的联合排序-回归损失**：在 L1 评分损失外，引入基于 Thurstone 比较判断模型的成对保真损失（Frank 损失，式 10–12）与双向排序损失（式 13）——后者强制等级概率分布自峰值等级 $o$ 向左右两侧单调递减，把"人类对吸引力的感知罕现多峰"这一先验转化为结构化监督信号。消融显示排序与回归的联合优化带来 SROCC 提升（完整 MAEM 0.9198 vs 单用排序 0.9161）。
+
+5. **两阶段"先分后合"的选择性融合架构（SFM）**：第一阶段 PAPM 与 MAEM 独立训练，第二阶段冻结两者、仅训练 SFM——以压缩层（FC + ReLU）从两路特征之和生成紧凑引导向量 $f_z$，经两个 FC 层与通道级 Softmax 生成满足 $a + b = 1$ 的自适应权重，对视觉嵌入与人脸先验特征做通道级软选择加权（式 7–8），再走相似度回归输出最终分数。这种受 SKNet 启发的软选择融合既提升精度（0.9243 vs 去 SFM 0.9197），也带来全部配置中最强的跨数据集泛化（MEBeauty SROCC 0.6299 vs 单模块 0.6134/0.6229）。
+
+---
+
+*注：本翻译基于 CVF Open Access 官方 PDF 的清洗文本（`fulltext/74_FPEM_clean.md`）。原 PDF 提取文本存在行序错乱、公式乱码与图注错位，已按语义重组，乱码公式依上下文以 LaTeX 重写（个别丢失符号的处理见文中译注）；参考文献列表从略，正文引用转换为 (作者, 年份) 格式（同作者同年多篇以 a/b 区分）；原文页眉的 ICCV Open Access 水印声明（"本文为 CVF 提供的开放获取版本，除水印外与录用版一致，最终版见 IEEE Xplore"）未予翻译。表 2、表 4 中"提升"行的百分比按原文转录，实为最优相对次优的绝对差值。*
+</script>
+<script src="../assets/app.js?v=5"></script>
+</body>
+</html>

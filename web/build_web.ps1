@@ -24,6 +24,18 @@ foreach ($p in $meta.papers) {
     $num = $p.n.Substring(0, 2)
     $pageFile = Join-Path $pagesDir ($p.n + ".html")
     $arxivUrl = "https://arxiv.org/abs/" + $p.id
+    $linkText = "arXiv"
+    $datePrefix = "arXiv"
+    $srcMeta = "arXiv " + $p.id
+    $readLabel = "Read on arXiv (" + $p.id + ") &rarr;"
+    if ($p.link) {
+        # non-arXiv paper: official source link overrides arXiv defaults
+        $arxivUrl = [string]$p.link
+        $linkText = [string]$p.venue
+        $datePrefix = [string]$p.venue
+        $srcMeta = [string]$p.srcMeta
+        $readLabel = "Read paper (official source) &rarr;"
+    }
 
     # ---------- English side ----------
     $enFile = Join-Path $web ("en_src\" + $p.n + ".html")
@@ -119,8 +131,8 @@ foreach ($p in $meta.papers) {
     if ($enHtml -eq "") {
         # no HTML available: notice card + arXiv link (local PDFs are not published with the site)
         $enHtml = [string]$meta.noHtmlPdfNote + "`n" +
-            '<p style="margin:16px 0 0"><a href="' + $arxivUrl + '" target="_blank" rel="noopener">Read on arXiv (' + $p.id + ') &rarr;</a></p>'
-        $enSrcNote = "(arXiv link)"
+            '<p style="margin:16px 0 0"><a href="' + $arxivUrl + '" target="_blank" rel="noopener">' + $readLabel + '</a></p>'
+        $enSrcNote = "(" + $linkText + " link)"
     }
 
     # ---------- Chinese side ----------
@@ -140,6 +152,7 @@ foreach ($p in $meta.papers) {
     $page = $page.Replace('@@NUM@@', $num)
     $page = $page.Replace('@@TITLE@@', [string]$p.zh)
     $page = $page.Replace('@@ARXIVURL@@', $arxivUrl)
+    $page = $page.Replace('@@LINKTEXT@@', $linkText)
     $page = $page.Replace('@@ENSRC@@', $enSrcNote)
     $page = $page.Replace('@@EN@@', $enHtml)
     $page = $page.Replace('@@ZH@@', $zhMd)
@@ -151,15 +164,16 @@ foreach ($p in $meta.papers) {
     $tcClass = ""
     if ($p.tc -ne 1) { $tcClass = " t" + $p.tc }
     if ($enTitle.Length -gt 110) { $enTitle = $enTitle.Substring(0, 110) + "..." }
-    # derive publication year-month from the arXiv id (YYMM.NNNNN)
+    # derive publication year-month from the arXiv id (YYMM.NNNNN); non-arXiv papers carry an explicit "pub"
     $pubDate = "20" + $p.id.Substring(0, 2) + "-" + $p.id.Substring(2, 2)
+    if ($p.pub) { $pubDate = [string]$p.pub }
     $card = '<a class="card" href="papers/' + $p.n + '.html">' +
         '<span class="c-num">' + $num + '</span>' +
         '<span class="c-tag' + $tcClass + '">' + $p.tag + '</span>' +
         '<h3>' + $num + ' · ' + $p.zh + '</h3>' +
-        '<div class="c-date">arXiv ' + $pubDate + '</div>' +
+        '<div class="c-date">' + $datePrefix + ' ' + $pubDate + '</div>' +
         '<div class="c-en">' + $enTitle + '</div>' +
-        '<div class="c-meta"><span>arXiv ' + $p.id + '</span>' + $statusHtml + '</div></a>'
+        '<div class="c-meta"><span>' + $srcMeta + '</span>' + $statusHtml + '</div></a>'
     $indexCards.Add($card)
     $zhState = "pending"
     if ($zhDone) { $zhState = "ok" }

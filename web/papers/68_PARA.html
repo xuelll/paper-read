@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>68 · PARA 丰富属性个性化美学评估 — 中英对照精读</title>
+<link rel="stylesheet" href="../assets/style.css?v=6">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="back" href="../index.html">← 首页</a>
+  <div class="tb-title"><span class="num">68</span>PARA 丰富属性个性化美学评估</div>
+  <div class="tb-controls">
+    <a class="tb-link" href="https://arxiv.org/abs/2203.16754" target="_blank" rel="noopener">arXiv</a>
+    <label class="sync"><input type="checkbox" id="syncToggle"> 滚动同步</label>
+  </div>
+</header>
+<main class="reader">
+  <section class="pane pane-en">
+    <div class="pane-head">ENGLISH 原文 (arXiv HTML)</div>
+    <div class="pane-body" id="enBody">
+<article class="ltx_document ltx_authors_1line">
+<h1 class="ltx_title ltx_title_document">Personalized Image Aesthetics Assessment with Rich Attributes</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Yuzhe Yang<span id="footnotex1" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">1</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">1</sup>
+          <span class="ltx_tag ltx_tag_note">1</span>
+          
+          
+          
+          
+          
+          
+          
+        Equal contribution</span></span></span>
+</span><span class="ltx_author_notes"><span class="ltx_author_notes_content">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_contact_name">Affiliation: </span>OPPO Research Institute
+</span>
+<span class="ltx_contact ltx_role_email"><span class="ltx_contact_name">Email: </span><a href="mailto:ldli@xidian.edu.cn">ldli@xidian.edu.cn</a>
+</span></span></span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Liwu Xu<span id="footnotex2" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">1</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">1</sup>
+          <span class="ltx_tag ltx_tag_note">1</span>
+          
+          
+          
+          
+          
+          
+          
+        Equal contribution</span></span></span>
+</span><span class="ltx_author_notes"><span class="ltx_author_notes_content">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_contact_name">Affiliation: </span>OPPO Research Institute
+</span>
+<span class="ltx_contact ltx_role_email"><span class="ltx_contact_name">Email: </span><a href="mailto:yandong.guo@live.com">yandong.guo@live.com</a>
+</span></span></span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Leida Li
+</span><span class="ltx_author_notes"><span class="ltx_author_notes_content">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_contact_name">Affiliation: </span>Xidian University<span id="id1" class="ltx_text ltx_font_typewriter" style="font-size:90%;">ippllewis@gmail.com, {xuliwu, qienan, liyaqian, zhangpeng6}@oppo.com</span>
+</span></span></span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Nan Qie
+</span><span class="ltx_author_notes"><span class="ltx_author_notes_content">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_contact_name">Affiliation: </span>OPPO Research Institute
+</span></span></span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Yaqian Li
+</span><span class="ltx_author_notes"><span class="ltx_author_notes_content">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_contact_name">Affiliation: </span>OPPO Research Institute
+</span></span></span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Peng Zhang
+</span><span class="ltx_author_notes"><span class="ltx_author_notes_content">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_contact_name">Affiliation: </span>OPPO Research Institute
+</span></span></span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Yandong Guo<span id="footnotex3" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">2</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">2</sup>
+          <span class="ltx_tag ltx_tag_note">2</span>
+          
+          
+          
+          
+          
+          
+          
+        Corresponding author</span></span></span>
+</span><span class="ltx_author_notes"><span class="ltx_author_notes_content">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_contact_name">Affiliation: </span>OPPO Research Institute
+</span></span></span></span></div>
+
+<div id="abstract1" class="ltx_abstract"><h6 class="ltx_title ltx_title_abstract">Abstract</h6>
+    
+<p id="abstract1.1" class="ltx_p">Personalized image aesthetics assessment (PIAA) is challenging due to its highly subjective nature. People’s aesthetic tastes depend on diversified factors, including image characteristics and subject characters. The existing PIAA databases are limited in terms of annotation diversity, especially the subject aspect, which can no longer meet the increasing demands of PIAA research. To solve the dilemma, we conduct so far, the most comprehensive subjective study of personalized image aesthetics and introduce a new Personalized image Aesthetics database with Rich Attributes (PARA), which consists of 31,220 images with annotations by 438 subjects. PARA features wealthy annotations, including 9 image-oriented objective attributes and 4 human-oriented subjective attributes. In addition, desensitized subject information, such as personality traits, is also provided to support study of PIAA and user portraits. A comprehensive analysis of the annotation data is provided and statistic study indicates that the aesthetic preferences can be mirrored by proposed subjective attributes. We also propose a conditional PIAA model by utilizing subject information as conditional prior. Experimental results indicate that the conditional PIAA model can outperform the control group, which is also the first attempt to demonstrate how image aesthetics and subject characters interact to produce the intricate personalized tastes on image aesthetics. We believe the database and the associated analysis would be useful for conducting next-generation PIAA study. The project page of PARA can be found at: <a href="https://cv-datasets.institutecv.com/#/data-sets" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://cv-datasets.institutecv.com/#/data-sets</a> .</p>
+  
+</div>
+<div class="ltx_pagination ltx_role_newpage"></div>
+<div id="p1" class="ltx_para">
+<p id="p1.1" class="ltx_p"><span id="p1.1.1" class="ltx_text"></span></p>
+</div>
+<section id="S1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">1 </span>Introduction</h2>
+
+<figure id="S1.F1" class="ltx_figure"><img src="https://arxiv.org/html/2203.16754v1/figeg.png" id="S1.F1.g1" class="ltx_graphics ltx_centering ltx_img_portrait" style="aspect-ratio:316/421;" width="316" height="421" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span id="S1.F1.3" class="ltx_text" style="font-size:90%;">Figure 1</span>: </span><span id="S1.F1.4" class="ltx_text" style="font-size:90%;">Sample images in PARA.</span></figcaption>
+</figure>
+<div id="S1.p1" class="ltx_para">
+<p id="S1.p1.1" class="ltx_p">Image aesthetics assessment (IAA) aims at evaluating photo aesthetics computationally. Due to the highly differentiated aesthetic preference, image aesthetics assessment can be divided into two categories: generic and personalized image aesthetics assessment (a.k.a GIAA and PIAA) <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib13" title="" class="ltx_ref">13</a>]</cite>. For GIAA, an image is annotated by different voters and mean opinion score (MOS) is used as the aesthetics “ground truth”. However, GIAA merely reflects an “average opinion”, which neglects the highly subjective nature of aesthetic tastes. To mitigate this issue, PIAA was proposed to capture unique aesthetic preferences <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib13" title="" class="ltx_ref">13</a>]</cite>.
+In the past decade, PIAA has achieved encouraging advances. Initially, Ren et al. <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib13" title="" class="ltx_ref">13</a>]</cite> proposed the first PIAA database named FLICKR-AES and they addressed this problem by leveraging GIAA knowledge on user-related data, so that model can capture aesthetic “offset”. Later, research work attempted to learn PIAA from various perspectives, such as multi-modal collaborative learning <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib17" title="" class="ltx_ref">17</a>]</cite>, meta-learning <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib21" title="" class="ltx_ref">21</a>]</cite>, multi-task learning <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib7" title="" class="ltx_ref">7</a>]</cite>, deep reinforcement learning <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib10" title="" class="ltx_ref">10</a>]</cite> etc. High quality databases are essential for building data-driven PIAA models. However, current databases, such as FLICKR-AES <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib13" title="" class="ltx_ref">13</a>]</cite> and AADB <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib6" title="" class="ltx_ref">6</a>]</cite>, are limited in annotation diversity. For comparison, we summarize the annotation information of three related databases in Table <a href="#S1.T1" title="Table 1 ‣ 1 Introduction ‣ Personalized Image Aesthetics Assessment with Rich Attributes" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a> and it is easy to observe that most databases are limited in annotation diversity.</p>
+</div>
+<figure id="S1.T1" class="ltx_table">
+<div id="S1.T1.3" class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:233.5pt;height:22.8pt;vertical-align:-10.6pt;"><span class="ltx_transformed_inner" style="transform:translate(-259.7pt,25.4pt) scale(0.310168826563232,0.310168826563232) ;">
+<table id="S1.T1.3.1" class="ltx_tabular ltx_align_middle">
+<tr id="S1.T1.3.1.1" class="ltx_tr">
+<td id="S1.T1.3.1.1.1" class="ltx_td ltx_align_left ltx_border_r ltx_border_tttt">Database</td>
+<td id="S1.T1.3.1.1.2" class="ltx_td ltx_align_center ltx_border_tttt"><span id="S1.T1.3.1.1.2.1" class="ltx_text"></span> <span id="S1.T1.3.1.1.2.2" class="ltx_text">
+<span id="S1.T1.3.1.1.2.2.1" class="ltx_tabular ltx_align_middle">
+<span id="S1.T1.3.1.1.2.2.1.1" class="ltx_tr">
+<span id="S1.T1.3.1.1.2.2.1.1.1" class="ltx_td ltx_nopad_r ltx_align_center">Subjective</span></span>
+<span id="S1.T1.3.1.1.2.2.1.2" class="ltx_tr">
+<span id="S1.T1.3.1.1.2.2.1.2.1" class="ltx_td ltx_nopad_r ltx_align_center">label</span></span>
+</span></span><span id="S1.T1.3.1.1.2.3" class="ltx_text"></span></td>
+<td id="S1.T1.3.1.1.3" class="ltx_td ltx_align_center ltx_border_r ltx_border_tttt"><span id="S1.T1.3.1.1.3.1" class="ltx_text"></span> <span id="S1.T1.3.1.1.3.2" class="ltx_text">
+<span id="S1.T1.3.1.1.3.2.1" class="ltx_tabular ltx_align_middle">
+<span id="S1.T1.3.1.1.3.2.1.1" class="ltx_tr">
+<span id="S1.T1.3.1.1.3.2.1.1.1" class="ltx_td ltx_nopad_r ltx_align_center">Objective</span></span>
+<span id="S1.T1.3.1.1.3.2.1.2" class="ltx_tr">
+<span id="S1.T1.3.1.1.3.2.1.2.1" class="ltx_td ltx_nopad_r ltx_align_center">label</span></span>
+</span></span><span id="S1.T1.3.1.1.3.3" class="ltx_text"></span></td>
+<td id="S1.T1.3.1.1.4" class="ltx_td ltx_align_center ltx_border_tttt"><span id="S1.T1.3.1.1.4.1" class="ltx_text"></span> <span id="S1.T1.3.1.1.4.2" class="ltx_text">
+<span id="S1.T1.3.1.1.4.2.1" class="ltx_tabular ltx_align_middle">
+<span id="S1.T1.3.1.1.4.2.1.1" class="ltx_tr">
+<span id="S1.T1.3.1.1.4.2.1.1.1" class="ltx_td ltx_nopad_r ltx_align_center">Annotation</span></span>
+<span id="S1.T1.3.1.1.4.2.1.2" class="ltx_tr">
+<span id="S1.T1.3.1.1.4.2.1.2.1" class="ltx_td ltx_nopad_r ltx_align_center">count</span></span>
+</span></span><span id="S1.T1.3.1.1.4.3" class="ltx_text"></span></td>
+<td id="S1.T1.3.1.1.5" class="ltx_td ltx_align_center ltx_border_tttt"><span id="S1.T1.3.1.1.5.1" class="ltx_text"></span> <span id="S1.T1.3.1.1.5.2" class="ltx_text">
+<span id="S1.T1.3.1.1.5.2.1" class="ltx_tabular ltx_align_middle">
+<span id="S1.T1.3.1.1.5.2.1.1" class="ltx_tr">
+<span id="S1.T1.3.1.1.5.2.1.1.1" class="ltx_td ltx_nopad_r ltx_align_center">Avg. annotation</span></span>
+<span id="S1.T1.3.1.1.5.2.1.2" class="ltx_tr">
+<span id="S1.T1.3.1.1.5.2.1.2.1" class="ltx_td ltx_nopad_r ltx_align_center">times per image</span></span>
+</span></span><span id="S1.T1.3.1.1.5.3" class="ltx_text"></span></td>
+<td id="S1.T1.3.1.1.6" class="ltx_td ltx_align_center ltx_border_tttt"><span id="S1.T1.3.1.1.6.1" class="ltx_text"></span> <span id="S1.T1.3.1.1.6.2" class="ltx_text">
+<span id="S1.T1.3.1.1.6.2.1" class="ltx_tabular ltx_align_middle">
+<span id="S1.T1.3.1.1.6.2.1.1" class="ltx_tr">
+<span id="S1.T1.3.1.1.6.2.1.1.1" class="ltx_td ltx_nopad_r ltx_align_center">Num. of</span></span>
+<span id="S1.T1.3.1.1.6.2.1.2" class="ltx_tr">
+<span id="S1.T1.3.1.1.6.2.1.2.1" class="ltx_td ltx_nopad_r ltx_align_center">images</span></span>
+</span></span><span id="S1.T1.3.1.1.6.3" class="ltx_text"></span></td>
+<td id="S1.T1.3.1.1.7" class="ltx_td ltx_align_center ltx_border_tttt"><span id="S1.T1.3.1.1.7.1" class="ltx_text"></span> <span id="S1.T1.3.1.1.7.2" class="ltx_text">
+<span id="S1.T1.3.1.1.7.2.1" class="ltx_tabular ltx_align_middle">
+<span id="S1.T1.3.1.1.7.2.1.1" class="ltx_tr">
+<span id="S1.T1.3.1.1.7.2.1.1.1" class="ltx_td ltx_nopad_r ltx_align_center">Num. of annotation</span></span>
+<span id="S1.T1.3.1.1.7.2.1.2" class="ltx_tr">
+<span id="S1.T1.3.1.1.7.2.1.2.1" class="ltx_td ltx_nopad_r ltx_align_center">dimension</span></span>
+</span></span><span id="S1.T1.3.1.1.7.3" class="ltx_text"></span></td>
+<td id="S1.T1.3.1.1.8" class="ltx_td ltx_align_center ltx_border_tttt"><span id="S1.T1.3.1.1.8.1" class="ltx_text"></span> <span id="S1.T1.3.1.1.8.2" class="ltx_text">
+<span id="S1.T1.3.1.1.8.2.1" class="ltx_tabular ltx_align_middle">
+<span id="S1.T1.3.1.1.8.2.1.1" class="ltx_tr">
+<span id="S1.T1.3.1.1.8.2.1.1.1" class="ltx_td ltx_nopad_r ltx_align_center">Num. of</span></span>
+<span id="S1.T1.3.1.1.8.2.1.2" class="ltx_tr">
+<span id="S1.T1.3.1.1.8.2.1.2.1" class="ltx_td ltx_nopad_r ltx_align_center">subject</span></span>
+</span></span><span id="S1.T1.3.1.1.8.3" class="ltx_text"></span></td></tr>
+<tr id="S1.T1.3.1.2" class="ltx_tr">
+<td id="S1.T1.3.1.2.1" class="ltx_td ltx_align_left ltx_border_r ltx_border_t">AADB <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib6" title="" class="ltx_ref">6</a>]</cite></td>
+<td id="S1.T1.3.1.2.2" class="ltx_td ltx_border_t"></td>
+<td id="S1.T1.3.1.2.3" class="ltx_td ltx_align_center ltx_border_r ltx_border_t">✓</td>
+<td id="S1.T1.3.1.2.4" class="ltx_td ltx_align_center ltx_border_t">600 k</td>
+<td id="S1.T1.3.1.2.5" class="ltx_td ltx_align_center ltx_border_t">5</td>
+<td id="S1.T1.3.1.2.6" class="ltx_td ltx_align_center ltx_border_t">10,000</td>
+<td id="S1.T1.3.1.2.7" class="ltx_td ltx_align_center ltx_border_t">12</td>
+<td id="S1.T1.3.1.2.8" class="ltx_td ltx_align_center ltx_border_t">190</td></tr>
+<tr id="S1.T1.3.1.3" class="ltx_tr">
+<td id="S1.T1.3.1.3.1" class="ltx_td ltx_align_left ltx_border_r">REAL CUR <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib13" title="" class="ltx_ref">13</a>]</cite></td>
+<td id="S1.T1.3.1.3.2" class="ltx_td"></td>
+<td id="S1.T1.3.1.3.3" class="ltx_td ltx_align_center ltx_border_r">✓</td>
+<td id="S1.T1.3.1.3.4" class="ltx_td ltx_align_center">2.87 k</td>
+<td id="S1.T1.3.1.3.5" class="ltx_td ltx_align_center">1</td>
+<td id="S1.T1.3.1.3.6" class="ltx_td ltx_align_center">2,870</td>
+<td id="S1.T1.3.1.3.7" class="ltx_td ltx_align_center">1</td>
+<td id="S1.T1.3.1.3.8" class="ltx_td ltx_align_center">14</td></tr>
+<tr id="S1.T1.3.1.4" class="ltx_tr">
+<td id="S1.T1.3.1.4.1" class="ltx_td ltx_align_left ltx_border_r">FLICKR-AES <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib13" title="" class="ltx_ref">13</a>]</cite></td>
+<td id="S1.T1.3.1.4.2" class="ltx_td"></td>
+<td id="S1.T1.3.1.4.3" class="ltx_td ltx_align_center ltx_border_r">✓</td>
+<td id="S1.T1.3.1.4.4" class="ltx_td ltx_align_center">200 k</td>
+<td id="S1.T1.3.1.4.5" class="ltx_td ltx_align_center">5</td>
+<td id="S1.T1.3.1.4.6" class="ltx_td ltx_align_center"><span id="S1.T1.3.1.4.6.1" class="ltx_text ltx_font_bold">40,000</span></td>
+<td id="S1.T1.3.1.4.7" class="ltx_td ltx_align_center">1</td>
+<td id="S1.T1.3.1.4.8" class="ltx_td ltx_align_center">210</td></tr>
+<tr id="S1.T1.3.1.5" class="ltx_tr">
+<td id="S1.T1.3.1.5.1" class="ltx_td ltx_align_left ltx_border_bbbb ltx_border_r ltx_border_t"><span id="S1.T1.3.1.5.1.1" class="ltx_text ltx_font_bold">Ours (PARA)</span></td>
+<td id="S1.T1.3.1.5.2" class="ltx_td ltx_align_center ltx_border_bbbb ltx_border_t">✓</td>
+<td id="S1.T1.3.1.5.3" class="ltx_td ltx_align_center ltx_border_bbbb ltx_border_r ltx_border_t">✓</td>
+<td id="S1.T1.3.1.5.4" class="ltx_td ltx_align_center ltx_border_bbbb ltx_border_t"><math id="S1.T1.m1" class="ltx_Math" alttext="\sim" display="inline" intent=":literal"><semantics><mo>∼</mo><annotation encoding="application/x-tex">\sim</annotation></semantics></math><span id="S1.T1.3.1.5.4.1" class="ltx_text ltx_font_bold"> 9723 k</span></td>
+<td id="S1.T1.3.1.5.5" class="ltx_td ltx_align_center ltx_border_bbbb ltx_border_t"><span id="S1.T1.3.1.5.5.1" class="ltx_text ltx_font_bold">25.87</span></td>
+<td id="S1.T1.3.1.5.6" class="ltx_td ltx_align_center ltx_border_bbbb ltx_border_t">31,220</td>
+<td id="S1.T1.3.1.5.7" class="ltx_td ltx_align_center ltx_border_bbbb ltx_border_t"><span id="S1.T1.3.1.5.7.1" class="ltx_text ltx_font_bold">13</span></td>
+<td id="S1.T1.3.1.5.8" class="ltx_td ltx_align_center ltx_border_bbbb ltx_border_t"><span id="S1.T1.3.1.5.8.1" class="ltx_text ltx_font_bold">438</span></td></tr>
+</table>
+</span></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table"><span id="S1.T1.4" class="ltx_text" style="font-size:90%;">Table 1</span>: </span><span id="S1.T1.5" class="ltx_text" style="font-size:90%;">Comparison among PIAA databases. Note that the “annotation count” is calculated by multiply Num. of images, average annotation times per image and Num. of annotation dimension. Since scene label is assigned to each image before annotation begins, we add the number of scene label separately.</span></figcaption>
+</figure>
+<figure id="S1.T2" class="ltx_table">
+<div id="S1.T2.3" class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:233.5pt;height:131.2pt;vertical-align:-63.9pt;"><span class="ltx_transformed_inner" style="transform:translate(-55.4pt,31.2pt) scale(0.678023676344142,0.678023676344142) ;">
+<table id="S1.T2.3.1" class="ltx_tabular ltx_align_middle">
+<tr id="S1.T2.3.1.1" class="ltx_tr">
+<td id="S1.T2.3.1.1.1" class="ltx_td ltx_align_center ltx_border_tttt" colspan="2"><span id="S1.T2.3.1.1.1.1" class="ltx_text ltx_font_bold">Objective label</span></td>
+<td id="S1.T2.3.1.1.2" class="ltx_td ltx_align_center ltx_border_tttt" colspan="2"><span id="S1.T2.3.1.1.2.1" class="ltx_text ltx_font_bold"># Subjective label</span></td></tr>
+<tr id="S1.T2.3.1.2" class="ltx_tr">
+<td id="S1.T2.3.1.2.1" class="ltx_td ltx_align_left ltx_border_t">Session ID</td>
+<td id="S1.T2.3.1.2.2" class="ltx_td ltx_align_left ltx_border_t">session1</td>
+<td id="S1.T2.3.1.2.3" class="ltx_td ltx_align_left ltx_border_t"><span id="S1.T2.3.1.2.3.1" class="ltx_text ltx_font_bold">User ID</span></td>
+<td id="S1.T2.3.1.2.4" class="ltx_td ltx_align_left ltx_border_t">A3c6418</td></tr>
+<tr id="S1.T2.3.1.3" class="ltx_tr">
+<td id="S1.T2.3.1.3.1" class="ltx_td ltx_align_left">Image name</td>
+<td id="S1.T2.3.1.3.2" class="ltx_td ltx_align_left">iaa_pub1_.jpg</td>
+<td id="S1.T2.3.1.3.3" class="ltx_td ltx_align_left">Age</td>
+<td id="S1.T2.3.1.3.4" class="ltx_td ltx_align_left">30</td></tr>
+<tr id="S1.T2.3.1.4" class="ltx_tr">
+<td id="S1.T2.3.1.4.1" class="ltx_td ltx_align_left"><span id="S1.T2.3.1.4.1.1" class="ltx_text ltx_font_bold">User ID</span></td>
+<td id="S1.T2.3.1.4.2" class="ltx_td ltx_align_left">A3c6418</td>
+<td id="S1.T2.3.1.4.3" class="ltx_td ltx_align_left">Gender</td>
+<td id="S1.T2.3.1.4.4" class="ltx_td ltx_align_left">male</td></tr>
+<tr id="S1.T2.3.1.5" class="ltx_tr">
+<td id="S1.T2.3.1.5.1" class="ltx_td ltx_align_left">Aesthetics</td>
+<td id="S1.T2.3.1.5.2" class="ltx_td ltx_align_left">3.0</td>
+<td id="S1.T2.3.1.5.3" class="ltx_td ltx_align_left">Education experience</td>
+<td id="S1.T2.3.1.5.4" class="ltx_td ltx_align_left">University</td></tr>
+<tr id="S1.T2.3.1.6" class="ltx_tr">
+<td id="S1.T2.3.1.6.1" class="ltx_td ltx_align_left">Quality</td>
+<td id="S1.T2.3.1.6.2" class="ltx_td ltx_align_left">3.1</td>
+<td id="S1.T2.3.1.6.3" class="ltx_td ltx_align_left">Artistic experience</td>
+<td id="S1.T2.3.1.6.4" class="ltx_td ltx_align_left">proficient</td></tr>
+<tr id="S1.T2.3.1.7" class="ltx_tr">
+<td id="S1.T2.3.1.7.1" class="ltx_td ltx_align_left">Composition</td>
+<td id="S1.T2.3.1.7.2" class="ltx_td ltx_align_left">3</td>
+<td id="S1.T2.3.1.7.3" class="ltx_td ltx_align_left">Photographic experience</td>
+<td id="S1.T2.3.1.7.4" class="ltx_td ltx_align_left">proficient</td></tr>
+<tr id="S1.T2.3.1.8" class="ltx_tr">
+<td id="S1.T2.3.1.8.1" class="ltx_td ltx_align_left">Color</td>
+<td id="S1.T2.3.1.8.2" class="ltx_td ltx_align_left">4</td>
+<td id="S1.T2.3.1.8.3" class="ltx_td ltx_align_left">E</td>
+<td id="S1.T2.3.1.8.4" class="ltx_td ltx_align_left">5</td></tr>
+<tr id="S1.T2.3.1.9" class="ltx_tr">
+<td id="S1.T2.3.1.9.1" class="ltx_td ltx_align_left">Depth of Field</td>
+<td id="S1.T2.3.1.9.2" class="ltx_td ltx_align_left">3</td>
+<td id="S1.T2.3.1.9.3" class="ltx_td ltx_align_left">A</td>
+<td id="S1.T2.3.1.9.4" class="ltx_td ltx_align_left">9</td></tr>
+<tr id="S1.T2.3.1.10" class="ltx_tr">
+<td id="S1.T2.3.1.10.1" class="ltx_td ltx_align_left">Content</td>
+<td id="S1.T2.3.1.10.2" class="ltx_td ltx_align_left">3</td>
+<td id="S1.T2.3.1.10.3" class="ltx_td ltx_align_left">N</td>
+<td id="S1.T2.3.1.10.4" class="ltx_td ltx_align_left">4</td></tr>
+<tr id="S1.T2.3.1.11" class="ltx_tr">
+<td id="S1.T2.3.1.11.1" class="ltx_td ltx_align_left">Light</td>
+<td id="S1.T2.3.1.11.2" class="ltx_td ltx_align_left">4</td>
+<td id="S1.T2.3.1.11.3" class="ltx_td ltx_align_left">O</td>
+<td id="S1.T2.3.1.11.4" class="ltx_td ltx_align_left">7</td></tr>
+<tr id="S1.T2.3.1.12" class="ltx_tr">
+<td id="S1.T2.3.1.12.1" class="ltx_td ltx_align_left">object emphasis</td>
+<td id="S1.T2.3.1.12.2" class="ltx_td ltx_align_left">0 (False)</td>
+<td id="S1.T2.3.1.12.3" class="ltx_td ltx_align_left">C</td>
+<td id="S1.T2.3.1.12.4" class="ltx_td ltx_align_left">9</td></tr>
+<tr id="S1.T2.3.1.13" class="ltx_tr">
+<td id="S1.T2.3.1.13.1" class="ltx_td ltx_align_left">Scene categories</td>
+<td id="S1.T2.3.1.13.2" class="ltx_td ltx_align_left">animal</td>
+<td id="S1.T2.3.1.13.3" class="ltx_td ltx_align_left ltx_border_t">Emotion</td>
+<td id="S1.T2.3.1.13.4" class="ltx_td ltx_align_left ltx_border_t">Neutral</td></tr>
+<tr id="S1.T2.3.1.14" class="ltx_tr">
+<td id="S1.T2.3.1.14.1" class="ltx_td"></td>
+<td id="S1.T2.3.1.14.2" class="ltx_td"></td>
+<td id="S1.T2.3.1.14.3" class="ltx_td ltx_align_left">Difficulty of judgement</td>
+<td id="S1.T2.3.1.14.4" class="ltx_td ltx_align_left">-1 (Easy)</td></tr>
+<tr id="S1.T2.3.1.15" class="ltx_tr">
+<td id="S1.T2.3.1.15.1" class="ltx_td"></td>
+<td id="S1.T2.3.1.15.2" class="ltx_td"></td>
+<td id="S1.T2.3.1.15.3" class="ltx_td ltx_align_left">Content preference</td>
+<td id="S1.T2.3.1.15.4" class="ltx_td ltx_align_left">3 (Neutral)</td></tr>
+<tr id="S1.T2.3.1.16" class="ltx_tr">
+<td id="S1.T2.3.1.16.1" class="ltx_td ltx_border_bbbb"></td>
+<td id="S1.T2.3.1.16.2" class="ltx_td ltx_border_bbbb"></td>
+<td id="S1.T2.3.1.16.3" class="ltx_td ltx_align_left ltx_border_bbbb">Willingness to share</td>
+<td id="S1.T2.3.1.16.4" class="ltx_td ltx_align_left ltx_border_bbbb">3 (Neutral)</td></tr>
+</table>
+</span></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table"><span id="S1.T2.4" class="ltx_text" style="font-size:90%;">Table 2</span>: </span><span id="S1.T2.5" class="ltx_text" style="font-size:90%;">Annotation information of single image. The annotations are divided into two groups, including objective and subjective information. The subjective and objective annotation can be associated by user ID.</span></figcaption>
+</figure>
+<div id="S1.p2" class="ltx_para">
+<p id="S1.p2.1" class="ltx_p">To mitigate this issue, we notice that attributes usually provide a richer description to explicitly characterize differentiation <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib6" title="" class="ltx_ref">6</a>]</cite>. Therefore, beyond aesthetics score, we provide quantitative personalized aesthetics attributes annotations to facilitate more accurate aesthetic preference modeling. Here, considering the highly subjective nature of PIAA task, different from the existing databases FLICKR-AES <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib13" title="" class="ltx_ref">13</a>]</cite> and AADB <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib6" title="" class="ltx_ref">6</a>]</cite>, we design the label system of PARA from two perspectives, which are human-oriented and image-oriented annotations. Specifically, apart from image aesthetics attributes, we also collect subjective annotations, including 1) content preference, 2) difficulty of judgment, 3) emotion, 4) willingness to share. We believe the aforementioned dimensions can bring further research opportunities in understanding correlation between PIAA and psychological feelings. In addition, we also provide desensitized subject information (user ID, age, gender, education, personality trait, photographic experience, art experience) for more in-depth analysis in the future. Annotation dimensions of single image are demonstrated in Table <a href="#S1.T2" title="Table 2 ‣ 1 Introduction ‣ Personalized Image Aesthetics Assessment with Rich Attributes" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a>.</p>
+</div>
+<div id="S1.p3" class="ltx_para">
+<p id="S1.p3.1" class="ltx_p">In this paper, we build so far, the richest annotated personalized image aesthetic assessment database named “PARA”. In addition, we also conduct an in-depth analysis of annotation information and propose a benchmark for this database. Contributions of this work can be summarized as follows:</p>
+<ul id="S1.I1" class="ltx_itemize">
+<li id="S1.I1.i1" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I1.i1.p1" class="ltx_para">
+<p id="S1.I1.i1.p1.1" class="ltx_p">We conduct so far, the most comprehensive subjective study of personalized image aesthetics, and build a PIAA database with rich annotations. Specifically, we collected 31,220 images and each image is annotated by 25 subjects in average and 438 subjects in total. Each image is annotated with 4 human-oriented subjective attributes and 9 image-oriented objective attributes. To support in-depth analysis, we also provide desensitized subject information.</p>
+</div></li>
+<li id="S1.I1.i2" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I1.i2.p1" class="ltx_para">
+<p id="S1.I1.i2.p1.1" class="ltx_p">We provide an in-depth analysis to discover characteristics of annotations dimensions. Statistical results indicate that the personalized aesthetic preference can be mirrored by the proposed human-oriented subjective attributes, including personality traits, difficulty of judgement and image emotion, which in turn enlightens novel research angles, such as modeling personalized aesthetic by utilizing subject information.</p>
+</div></li>
+<li id="S1.I1.i3" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I1.i3.p1" class="ltx_para">
+<p id="S1.I1.i3.p1.1" class="ltx_p">We conduct a benchmark study based on the proposed PARA database. The benchmark contains two models, including unconditional and conditional PIAA. By utilizing subject information as a condition when modeling aesthetic preference, we prove that training with human-oriented annotations can further improve the PIAA model performance.</p>
+</div></li>
+</ul>
+</div>
+<figure id="S1.F2" class="ltx_figure"><object type="image/svg+xml" data="2203.16754v1/figStatistics.svg" id="S1.F2.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:624/241;" width="624" height="241"></object>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span id="S1.F2.3" class="ltx_text" style="font-size:90%;">Figure 2</span>: </span><span id="S1.F2.4" class="ltx_text" style="font-size:90%;">Statistical pie charts of user portraits and attributes in PARA: (a) age, (b) gender, (c) education experience, (d) artistic experience, (e) photographic experience, (f) Big-Five personality traits, (g) difficulty of judgement, (h) emotion distribution, (i) object emphasis, (j) scene categories.</span></figcaption>
+</figure>
+</section>
+<section id="S2" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">2 </span>Related Works</h2>
+
+<section id="S2.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">2.1 </span>Databases for PIAA</h3>
+
+<div id="S2.SS1.p1" class="ltx_para">
+<p id="S2.SS1.p1.1" class="ltx_p">For most data-driven machine learning systems, data with rich annotation plays a critical role. In PIAA research, three databases are frequently used, including FLICKR-AES <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib13" title="" class="ltx_ref">13</a>]</cite>, REAL-CUR <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib13" title="" class="ltx_ref">13</a>]</cite> and AADB <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib6" title="" class="ltx_ref">6</a>]</cite>.
+FLICKR-AES <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib13" title="" class="ltx_ref">13</a>]</cite> is actually the first database specially designed for PIAA research. FLICKR-AES contains 40,000 images with a creative commons license from Flickr <span id="footnote1" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">*</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">*</sup>
+              <span class="ltx_tag ltx_tag_note">*</span>
+              
+              
+              
+              
+              
+              
+              
+            https://www.flickr.com</span></span></span>. It is annotated by 210 AMT <span id="footnote2" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">†</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">†</sup>
+              <span class="ltx_tag ltx_tag_note">†</span>
+              
+              
+              
+              
+              
+              
+              
+            Amazon Mechanical Turk, https://www.mturk.com/</span></span></span> workers and the aesthetics score ranges from 1 to 5. Higher score indicates better visual aesthetics perception. However, rating scores in FLICKR-AES is provided by AMT workers, instead of the owner of image. To test PIAA algorithms in real-scene, REAL-CUR <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib13" title="" class="ltx_ref">13</a>]</cite> was proposed and it is a small-scale database consists of 14 real personal albums. Each album contains different number of photos, ranging from 197 to 222, while the average is 205. In PIAA research, this database is usually served as a test set for algorithm verification only <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib13" title="" class="ltx_ref">13</a>]</cite>. In addition to FLICKR-AES and REAL-CUR, another database that usually used in PIAA research is AADB <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib6" title="" class="ltx_ref">6</a>]</cite>. It is initially designed to jointly learn image aesthetics and related attributes. Since subject ID is also provided, AADB can also be utilized to learn personalized aesthetic preferences. AADB contains 10,000 images rated by 190 workers in total and 5 workers in average. AADB provides 11 aesthetics attributes annotation (interesting content, object emphasis, good lighting, color harmony, vivid color, shallow depth of field, motion blur, rule of thirds, balancing element, repetition, and symmetry) and 1 aesthetics score that ranges from 1 to 5, indicating the overall aesthetics judgement.</p>
+</div>
+</section>
+<section id="S2.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">2.2 </span>PIAA Models</h3>
+
+<div id="S2.SS2.p1" class="ltx_para">
+<p id="S2.SS2.p1.1" class="ltx_p">Different types of computational PIAA models have been derived by various deep learning techniques in the past decade. Ren et al. <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib13" title="" class="ltx_ref">13</a>]</cite> proposed the first PIAA databases and they addressed the PIAA task by leveraging GIAA prior knowledge to personalized data to capture individual aesthetic preferences. Specifically, they first trained a GIAA model to provide fundamental task prior. Then, they finetune the GIAA knowledge with attributes and content features to learn a personalized aesthetic “offset” through residual learning. Wang et al. <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib17" title="" class="ltx_ref">17</a>]</cite> pointed out that the current PIAA models contain insufficient user-specific information. Therefore, they enrich the current PIAA database by attaching textual reviews and conducting a user/image relation embedding for collaborative learning. Besides, they introduce an attentive mechanism to dig out image semantic and Region-of-Interest (ROI) via fusing multi-modal annotation information. Zhu et al. <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib7" title="" class="ltx_ref">7</a>]</cite> proves that through multitask learning and cross-data training with personality information, performance of both GIAA and PIAA can outperform the other IAA algorithms. More recently, deep meta-learning <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib16" title="" class="ltx_ref">16</a>]</cite> has been proved its effectiveness in capturing aesthetic preferences <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib18" title="" class="ltx_ref">18</a>, <a href="#bib.bib21" title="" class="ltx_ref">21</a>]</cite>. In these works, each user’s annotation is regarded as a meta-task. Through the unique episodic training mechanism, the trained model can quickly adapt into new subject data. It is noteworthy that most algorithms mentioned above reflects the necessity and effectiveness of introducing extra information in the learning procedure, which in turn, indicates that extra data are required to design better PIAA models. These promote us to conduct this work and bring the next-generation PIAA.</p>
+</div>
+</section>
+</section>
+<section id="S3" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">3 </span>PARA Database</h2>
+
+<div id="S3.p1" class="ltx_para">
+<p id="S3.p1.1" class="ltx_p">The construction of PARA database contains four stages, including data collection, label system design, subject selection and subjective experiments.</p>
+</div>
+<section id="S3.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">3.1 </span>Data Collection</h3>
+
+<div id="S3.SS1.p1" class="ltx_para">
+<p id="S3.SS1.p1.1" class="ltx_p">We collect images from CC search <span id="footnote3" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">‡</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">‡</sup>
+              <span class="ltx_tag ltx_tag_note">‡</span>
+              
+              
+              
+              
+              
+              
+              
+            <a href="https://search.creativecommons.org/" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://search.creativecommons.org/</a></span></span></span> and filter images with ‘‘creative commons” license and ‘‘Flickr source” conditions. Then, we use a well-trained scene classification model to automatically predict scene labels on each image. Next, we double-checked the labels and revise the scene annotation manually to maintain annotation quality. Then, we sampled around 28,000 images based on scene label to maintain content diversity. We then add around 3,000 images with clear aesthetics ground truth from a website named Unsplash <span id="footnote4" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">§</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">§</sup>
+              <span class="ltx_tag ltx_tag_note">§</span>
+              
+              
+              
+              
+              
+              
+              
+            Unsplash, https://unsplash.com/</span></span></span> and image quality assessment databases, including SPAQ <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib1" title="" class="ltx_ref">1</a>]</cite> and KonIQ-10K <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib5" title="" class="ltx_ref">5</a>]</cite>, to balance aesthetics score distribution.</p>
+</div>
+</section>
+<section id="S3.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">3.2 </span>Label system design</h3>
+
+<div id="S3.SS2.p1" class="ltx_para">
+<p id="S3.SS2.p1.1" class="ltx_p">When designing the labeling system of PARA, we refer to both GIAA and PIAA databases jointly <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib11" title="" class="ltx_ref">11</a>, <a href="#bib.bib6" title="" class="ltx_ref">6</a>, <a href="#bib.bib13" title="" class="ltx_ref">13</a>]</cite>. The dimensions of PARA label system are shown in Table <a href="#S1.T2" title="Table 2 ‣ 1 Introduction ‣ Personalized Image Aesthetics Assessment with Rich Attributes" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a>. Each image is annotated with 13 labels together with subject information. Each dimension is explained below.</p>
+<ul id="S3.I1" class="ltx_itemize">
+<li id="S3.I1.i1" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i1.p1" class="ltx_para">
+<p id="S3.I1.i1.p1.1" class="ltx_p">Image-oriented attributes scores (composition, light, color, depth of field, object emphasis, content), are mostly discretely annotated from 1 to 5. Specially, the “object emphasis” is a binary label, which indicates whether there exists a salient object in this image.</p>
+</div></li>
+<li id="S3.I1.i2" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i2.p1" class="ltx_para">
+<p id="S3.I1.i2.p1.1" class="ltx_p">Emotion, (including amusement, excitement, contentment, awe, disgust, sadness, fear, neutral), refers to the image emotion <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib20" title="" class="ltx_ref">20</a>]</cite>. Subjects are allowed to select only one dominant emotion for each image.</p>
+</div></li>
+<li id="S3.I1.i3" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i3.p1" class="ltx_para">
+<p id="S3.I1.i3.p1.1" class="ltx_p">Difficulty of judgement, is a discrete label in [-1, 0, +1] and it describes the difficulty pf making judgement on photo aesthetics. “+1” means difficult, “0” means normal and “-1” refers to easy.</p>
+</div></li>
+<li id="S3.I1.i4" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i4.p1" class="ltx_para">
+<p id="S3.I1.i4.p1.1" class="ltx_p">Content preference, is a discrete annotation in [1, 5] and it represents the extent of semantic preference. For clear statements and reduce question bias, instead of using the exact expression “content preference”, we choose to use “I like the content of this photo”. The meaning from 1 to 5 refers to “strongly disagree”, “disagree”, “Neutral”, “agree” and “strongly agree”.</p>
+</div></li>
+<li id="S3.I1.i5" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i5.p1" class="ltx_para">
+<p id="S3.I1.i5.p1.1" class="ltx_p">Willingness to share, is a discrete label for social computing and image intent estimation. The original question is “The willingness of sharing this photo to social media”. The meaning from 1 to 5 still refers to “strongly disagree”, “disagree”, “Neutral”, “agree” and “strongly agree”.</p>
+</div></li>
+<li id="S3.I1.i6" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i6.p1" class="ltx_para">
+<p id="S3.I1.i6.p1.1" class="ltx_p">User ID, is designed as a unique common key for associating individual subject information and their annotation records together. Notice that to maintain annotation richness and diversity, there are two sources of subjects participated in this annotation task. For convenience, we distinguish annotation from two sources via alphabet A and B at the beginning of each ID.</p>
+</div></li>
+<li id="S3.I1.i7" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i7.p1" class="ltx_para">
+<p id="S3.I1.i7.p1.1" class="ltx_p">Aesthetics score, is a discrete class label ranging from 1 to 5 and it mirrors the comprehensive judgement. To cope with ambiguity, we add a middle choice between each integer scale. A higher score indicates better visual aesthetics perception.</p>
+</div></li>
+<li id="S3.I1.i8" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i8.p1" class="ltx_para">
+<p id="S3.I1.i8.p1.1" class="ltx_p">Quality score, represents overall judgement of image quality and it ranges from 1 to 5. Higher score represents better perceptual quality. Worth to mention that in PARA, photo with low perceptual quality contains multiple degradation, including motion blur, JPEG compression and etc.</p>
+</div></li>
+<li id="S3.I1.i9" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i9.p1" class="ltx_para">
+<p id="S3.I1.i9.p1.1" class="ltx_p">Scene category, represents the content of this image. We carefully select 9 frequently appeared scenes (including portrait, animal, plant, scene, building, still life, night scene, food and indoor) and 1 “others” class specially refers to photos without obvious meaning. Note that this label is pre-annotated before the subject experiment begin for keeping content diversity.</p>
+</div></li>
+</ul>
+</div>
+<div id="S3.SS2.p2" class="ltx_para">
+<p id="S3.SS2.p2.1" class="ltx_p">Beyond the aforementioned annotation information, we also collect desensitized subject information for providing more in-depth research opportunities. Related information includes age, gender, education experience (junior high school, senior high school, Technical secondary school, junior college, and university), personality traits (Here we use the Big-Five personality traits, including Openness (O), Conscientiousness (C), Extroversion (E), Agreeableness (A) and Neuroticism (N)), artistic experience and photographic experience. Here, to help users quickly confirm his / her personality, we use the questionnaire of BFI-10 <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib12" title="" class="ltx_ref">12</a>]</cite> and each subject is asked to finish the questionnaire. We then calculate the score of each personality traits and add it to the annotation data.</p>
+</div>
+</section>
+<section id="S3.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">3.3 </span>Subject Selection</h3>
+
+<div id="S3.SS3.p1" class="ltx_para">
+<p id="S3.SS3.p1.1" class="ltx_p">As for the principle of hiring subjects, to maintain quality and diversity of annotation, we hire and select subjects mainly based on four perspectives, health state, working experience, personality traits, and subject portrait. First, we make sure that every subject is in a good health state and no forced work is permitted. To maintain the quality of annotation, all subjects are required to work around data annotation over half-years (full-time or part-time) and their works are qualified in other annotation tasks. Second, we make sure that the subjects’ portraits are diverse enough, in terms of age, gender, education, photographic experience and personality traits. According to the previous research conclusions proposed by Zhu et al. <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib7" title="" class="ltx_ref">7</a>]</cite>, we believe that personality traits include important information to capture aesthetic preference. Hence, we specially care the distribution of personality traits. Finally, all subjects should pass the Ishihara color blindness test <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib3" title="" class="ltx_ref">3</a>]</cite>. The user portrait distribution of subjects is shown in Figure <a href="#S1.F2" title="Figure 2 ‣ 1 Introduction ‣ Personalized Image Aesthetics Assessment with Rich Attributes" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> from (a) to (f). All subjects are aware of the usage of PARA. Subjects disagree with the data usage can require us to delete their annotations and quit the experiment freely.</p>
+</div>
+</section>
+<section id="S3.SS4" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">3.4 </span>Subjective Experiments</h3>
+
+<div id="S3.SS4.p1" class="ltx_para">
+<p id="S3.SS4.p1.1" class="ltx_p">We conduct subject experiments to collect voting results by following the generic psychological experiment protocol <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib15" title="" class="ltx_ref">15</a>]</cite>. First, we split the whole database into 446 sessions for conducting subject experiments. Each session contains 70 unlabeled images, 5 standard images (a small group of pre-annotated data) and 5 repeated images (images require to be annotated two times to test annotation consistency), to control the annotation quality and consistency. Then, we develop a web-based annotation tool and assign personal accounts and passwords to subjects. Finally, relying on a carefully designed annotation quality control strategy <span id="footnote5" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">¶</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">¶</sup>
+              <span class="ltx_tag ltx_tag_note">¶</span>
+              
+              
+              
+              
+              
+              
+              
+            Details are provided in the supplementary material.</span></span></span>, all qualified annotations are automatically stored without manual acceptance. Note that not all labels mentioned above are annotated in the subject experiment, such as scene label. It is obtained before the subject experiment begin to keep rich content diversity and balance the scene distribution.</p>
+</div>
+<figure id="S3.F3" class="ltx_figure"><img src="https://arxiv.org/html/2203.16754v1/figannot.png" id="S3.F3.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:274/174;" width="274" height="174" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span id="S3.F3.3" class="ltx_text" style="font-size:90%;">Figure 3</span>: </span><span id="S3.F3.4" class="ltx_text" style="font-size:90%;">Graphical interface of annotation platform.</span></figcaption>
+</figure>
+<div id="S3.SS4.p2" class="ltx_para">
+<p id="S3.SS4.p2.1" class="ltx_p">Figure <a href="#S3.F3" title="Figure 3 ‣ 3.4 Subjective Experiments ‣ 3 PARA Database ‣ Personalized Image Aesthetics Assessment with Rich Attributes" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a> is the graphical interface of annotation platform and subjects are required to fill in all blanks before submitting. To maintain understanding of each dimension, we give unguided explanations below. Subjects can revise annotations by clicking “return” button.</p>
+</div>
+</section>
+</section>
+<section id="S4" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">4 </span>Data Analysis</h2>
+
+<div id="S4.p1" class="ltx_para">
+<p id="S4.p1.1" class="ltx_p">In this section, we first give a summary of the proposed PARA database. Then, we study the aesthetics attributes to discover characteristics of subjective and objective annotations from statistical and correlation perspectives.</p>
+</div>
+<section id="S4.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.1 </span>Data Summary</h3>
+
+<div id="S4.SS1.p1" class="ltx_para">
+<p id="S4.SS1.p1.1" class="ltx_p">The pre-processed PARA contains 31,220 images, with votes from 438 subjects in total. For intuitive observation, we give a group of pie charts in Figure <a href="#S1.F2" title="Figure 2 ‣ 1 Introduction ‣ Personalized Image Aesthetics Assessment with Rich Attributes" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> to demonstrate the proportion of each dimension. In the first row, pie charts from (a) to (e) demonstrate subject portraits of (a) age, (b) gender, (c) education experience, (d) artistic experience and (e) photographic experience. The second row includes f) Big-Five personality traits, g) difficulty of judgement, (h) emotion, (i) object emphasis (refers to whether there exists a salient object in image), (j) scene categories. Note that in scene categories, we pre-define 9 generic scenes and assign nearly <math id="S4.SS1.p1.m1" class="ltx_Math" alttext="10\%" display="inline" intent=":literal"><semantics><mrow><mn>10</mn><mo>%</mo></mrow><annotation encoding="application/x-tex">10\%</annotation></semantics></math> amount of data for each scene to pre-balance the feature diversity of PARA. As for unclear and meaningless images, we assign those with the label “others” and label them with the rest together.</p>
+</div>
+<figure id="S4.F4" class="ltx_figure"><object type="image/svg+xml" data="2203.16754v1/figAttr.svg" id="S4.F4.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:309/224;" width="309" height="224"></object>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span id="S4.F4.3" class="ltx_text" style="font-size:90%;">Figure 4</span>: </span><span id="S4.F4.4" class="ltx_text" style="font-size:90%;">Annotation score distribution. Note that the x axis reflects score of different dimensions, while y axis means the frequency on each score scale.</span></figcaption>
+</figure>
+</section>
+<section id="S4.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.2 </span>Statistical Analysis</h3>
+
+<section id="S4.SS2.SSS0.Px1" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Annotation distribution</h4>
+
+<div id="S4.SS2.SSS0.Px1.p1" class="ltx_para">
+<p id="S4.SS2.SSS0.Px1.p1.1" class="ltx_p">PARA contains rich annotation information. Here, annotation distribution and variance of each dimension are visualized in Figure <a href="#S4.F4" title="Figure 4 ‣ 4.1 Data Summary ‣ 4 Data Analysis ‣ Personalized Image Aesthetics Assessment with Rich Attributes" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a> and Figure <a href="#S4.F5" title="Figure 5 ‣ Annotation distribution ‣ 4.2 Statistical Analysis ‣ 4 Data Analysis ‣ Personalized Image Aesthetics Assessment with Rich Attributes" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a>. From Figure <a href="#S4.F4" title="Figure 4 ‣ 4.1 Data Summary ‣ 4 Data Analysis ‣ Personalized Image Aesthetics Assessment with Rich Attributes" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>, it can be observed that the distribution of each attribute is similar. However, they are still slightly different from each other, which indicate that aesthetics attributes are correlated with each other, but still provide unique valuable information. From the box plot of aesthetics score shown in Figure <a href="#S4.F5" title="Figure 5 ‣ Annotation distribution ‣ 4.2 Statistical Analysis ‣ 4 Data Analysis ‣ Personalized Image Aesthetics Assessment with Rich Attributes" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a>, it is easy to observe that in high score interval (4, 5], the aesthetics score does have a lower variance compared with other score intervals. It proves that we do have common cognition on “what is beautiful”. Meanwhile, we do have different aesthetic opinions in other score intervals, such as [1, 2], (2, 3] and (3, 4], which proves the necessity of conducting PIAA research.</p>
+</div>
+<figure id="S4.F5" class="ltx_figure"><object type="image/svg+xml" data="2203.16754v1/figBoxplot.svg" id="S4.F5.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:274/206;" width="274" height="206"></object>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span id="S4.F5.3" class="ltx_text" style="font-size:90%;">Figure 5</span>: </span><span id="S4.F5.4" class="ltx_text" style="font-size:90%;">Box plot of different aesthetics score intervals.</span></figcaption>
+</figure>
+<figure id="S4.F6" class="ltx_figure"><img src="https://arxiv.org/html/2203.16754v1/figcorrStatistics.png" id="S4.F6.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:309/247;" width="309" height="247" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span id="S4.F6.3" class="ltx_text" style="font-size:90%;">Figure 6</span>: </span><span id="S4.F6.4" class="ltx_text" style="font-size:90%;">Pearson Linear Correlation Coefficient (PLCC) map among attributes dimensions.</span></figcaption>
+</figure>
+</section>
+<section id="S4.SS2.SSS0.Px2" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Attributes correlation analysis</h4>
+
+<div id="S4.SS2.SSS0.Px2.p1" class="ltx_para">
+<p id="S4.SS2.SSS0.Px2.p1.1" class="ltx_p">To understand PARA from the correlation perspective, we visualize the Pearson Linear Correlation Coefficient (PLCC) among each dimension in Figure <a href="#S4.F6" title="Figure 6 ‣ Annotation distribution ‣ 4.2 Statistical Analysis ‣ 4 Data Analysis ‣ Personalized Image Aesthetics Assessment with Rich Attributes" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a>. It can be observed that the correlation between aesthetics and quality is extremely high, which indicates that photo quality can largely affect image aesthetics perception. Meanwhile, correlations among attributes are mostly around 0.5, indicating “moderately related”. It means the annotation information for each dimension contains both commonality and differences. Finally, we notice that the “content preference” and “willingness to share” dimensions are also highly correlated, which proves that people are more easily to share a photo when they are enjoying the image content.</p>
+</div>
+</section>
+</section>
+<section id="S4.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.3 </span>Subject preference</h3>
+
+<div id="S4.SS3.p1" class="ltx_para">
+<p id="S4.SS3.p1.1" class="ltx_p">Beyond traditional aesthetics judgement dimensions, PARA provides subject portraits as well. Current PIAA algorithms are mostly limited due to the annotation diversity. We believe that subject portrait information can bring more in-depth research opportunities, such as utilizing portrait information by transductive learning <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib8" title="" class="ltx_ref">8</a>]</cite> etc. Therefore, we also collect user portrait information in PARA, such as personality traits and photographic experience. We further study the correlation among personality traits, emotion, annotation difficulty and aesthetics attribute preference to discover characteristics inside. For intuitive observation, we show the personality traits of different subjects together with their aesthetics judgements on sample image in Figure <a href="#S4.F7" title="Figure 7 ‣ 4.3 Subject preference ‣ 4 Data Analysis ‣ Personalized Image Aesthetics Assessment with Rich Attributes" class="ltx_ref"><span class="ltx_text ltx_ref_tag">7</span></a>. It is easy to observe that subjects with different personality traits have different aesthetic tastes and the given score from three subjects are 4, 2.5 and 3.5.</p>
+</div>
+<figure id="S4.F7" class="ltx_figure"><img src="https://arxiv.org/html/2203.16754v1/figSampleResults.png" id="S4.F7.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:322/108;" width="322" height="108" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span id="S4.F7.3" class="ltx_text" style="font-size:90%;">Figure 7</span>: </span><span id="S4.F7.4" class="ltx_text" style="font-size:90%;">Sample image is rated by three subjects. The related aesthetics scores are 4, 2.5 and 3.5, which is highly differentiated with each other. It is noteworthy that their personality traits are different from each other as well.</span></figcaption>
+</figure>
+<section id="S4.SS3.SSS0.Px1" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Personality traits &amp; attributes preference</h4>
+
+<div id="S4.SS3.SSS0.Px1.p1" class="ltx_para">
+<p id="S4.SS3.SSS0.Px1.p1.1" class="ltx_p">We discover correlations between personality, aesthetics score and aesthetics attributes and the result is shown in Figure <a href="#S4.F8" title="Figure 8 ‣ Personality traits &amp; attributes preference ‣ 4.3 Subject preference ‣ 4 Data Analysis ‣ Personalized Image Aesthetics Assessment with Rich Attributes" class="ltx_ref"><span class="ltx_text ltx_ref_tag">8</span></a>. To obtain the results, we first get the max value among 5 traits and use the associated traits as an accordance to group the data into “O”, “C”, “E”, “A”, “N”. Then, we compute the PLCC between each aesthetics attributes and aesthetics score respectively. Here, it is easy to discover that subjects with high “N” traits are dissimilar with others. Interestingly, we find that the “N” traits refer to “Neuroticism”, which means subjects with high “N” traits tend to over-react to outer stimulation and have stronger emotion reaction compared with others. Similar phenomenon can be found in this work <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib22" title="" class="ltx_ref">22</a>]</cite>. In addition, subjects with high “E” traits cares more about the content of image when giving the aesthetics judgement, since the PLCC in this dimension has reached over 0.8, indicating “strongly correlated”.</p>
+</div>
+<figure id="S4.F8" class="ltx_figure"><object type="image/svg+xml" data="2203.16754v1/figPA.svg" id="S4.F8.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:261/188;" width="261" height="188"></object>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span id="S4.F8.3" class="ltx_text" style="font-size:90%;">Figure 8</span>: </span><span id="S4.F8.4" class="ltx_text" style="font-size:90%;">Attributes-aesthetics PLCC with personality traits.</span></figcaption>
+</figure>
+</section>
+<section id="S4.SS3.SSS0.Px2" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Aesthetics &amp; difficulty of judgement</h4>
+
+<div id="S4.SS3.SSS0.Px2.p1" class="ltx_para">
+<p id="S4.SS3.SSS0.Px2.p1.1" class="ltx_p">We also conduct correlation analysis on “Difficulty of judgement” and aesthetics score. We calculate the probability of choosing “difficult”, “normal”, and “easy” at each score and visualize its distribution in Figure <a href="#S4.F9" title="Figure 9 ‣ Aesthetics &amp; difficulty of judgement ‣ 4.3 Subject preference ‣ 4 Data Analysis ‣ Personalized Image Aesthetics Assessment with Rich Attributes" class="ltx_ref"><span class="ltx_text ltx_ref_tag">9</span></a>. It can be observed that subjects feel difficult when evaluating photos with low aesthetics score. To discover reasons behind, we then collect feedback from 10 subjects to discover reasons behind. Interestingly, we notice that subjects say they suffer from dizziness and hard to recognize the scene clearly, so it is hard to give a judgement. This especially happens when annotating aesthetics attributes. In addition, they are more likely to be confused when making a decision between “worse” and “much worse”, while not when selecting between “better” and “much better”.</p>
+</div>
+<figure id="S4.F9" class="ltx_figure"><object type="image/svg+xml" data="2203.16754v1/figdifficult.svg" id="S4.F9.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:261/175;" width="261" height="175"></object>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span id="S4.F9.3" class="ltx_text" style="font-size:90%;">Figure 9</span>: </span><span id="S4.F9.4" class="ltx_text" style="font-size:90%;">Difficulty of judgement distribution in each aesthetics scores. It can be observed that photo with lower aesthetics score tend to be difficult for subjects to make a judgement.</span></figcaption>
+</figure>
+</section>
+<section id="S4.SS3.SSS0.Px3" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Aesthetics &amp; emotion</h4>
+
+<div id="S4.SS3.SSS0.Px3.p1" class="ltx_para">
+<p id="S4.SS3.SSS0.Px3.p1.1" class="ltx_p">For image emotion dimension, we first group the eight types of emotion into three groups, including “positive” (amusement, excitement, contentment), “negative” (disgust, sadness, fear) and “neutral” (including awe and neutral). Then, we calculate the annotation distribution of grouped emotion categories over aesthetics scores and the related results are shown in Figure <a href="#S4.F10" title="Figure 10 ‣ Aesthetics &amp; emotion ‣ 4.3 Subject preference ‣ 4 Data Analysis ‣ Personalized Image Aesthetics Assessment with Rich Attributes" class="ltx_ref"><span class="ltx_text ltx_ref_tag">10</span></a>. Clear conclusion is that images with aesthetics score lower than 2.0 (on the left of l1), are more likely to convey negative emotion. Meanwhile, images with high aesthetics score (over 4.0, on the right of l2), tend to convey positive emotion to subjects. Similar conclusions are also claimed by Cui et al. <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib19" title="" class="ltx_ref">19</a>]</cite>. In their work, they release a conclusion say that if image can arouse positive emotions, they tend to have a higher score; otherwise, they are more likely with low aesthetics score <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib19" title="" class="ltx_ref">19</a>]</cite>.</p>
+</div>
+<figure id="S4.F10" class="ltx_figure"><object type="image/svg+xml" data="2203.16754v1/figEmoAes.svg" id="S4.F10.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:261/185;" width="261" height="185"></object>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span id="S4.F10.3" class="ltx_text" style="font-size:90%;">Figure 10</span>: </span><span id="S4.F10.4" class="ltx_text" style="font-size:90%;">Probabilistic distribution between emotion and aesthetics score.</span></figcaption>
+</figure>
+<figure id="S4.F11" class="ltx_figure"><img src="https://arxiv.org/html/2203.16754v1/pipeline.png" id="S4.F11.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:261/154;" width="261" height="154" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span id="S4.F11.3" class="ltx_text" style="font-size:90%;">Figure 11</span>: </span><span id="S4.F11.4" class="ltx_text" style="font-size:90%;">Pipeline of proposed PIAA models. We propose two types of model, including conditional and unconditional PIAA.</span></figcaption>
+</figure>
+</section>
+</section>
+</section>
+<section id="S5" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">5 </span>Benchmark</h2>
+
+<section id="S5.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">5.1 </span>Conditional and Unconditional PIAA</h3>
+
+<div id="S5.SS1.p1" class="ltx_para">
+<p id="S5.SS1.p1.1" class="ltx_p">To prove the usability and fair comparisons, we conduct a benchmark study on PARA. The proposed benchmark contains two modeling methods, referring to the conditional and unconditional PIAA. The training pipeline of unconditional and conditional PIAA are shown in Figure <a href="#S4.F11" title="Figure 11 ‣ Aesthetics &amp; emotion ‣ 4.3 Subject preference ‣ 4 Data Analysis ‣ Personalized Image Aesthetics Assessment with Rich Attributes" class="ltx_ref"><span class="ltx_text ltx_ref_tag">11</span></a> (a) and (b). To implement unconditional PIAA, we first train a GIAA model in phase 1. Then, we directly finetune the GIAA model with personal data to learn personalized preference. As for the conditional PIAA modeling, we add three types of conditional information when modeling, including personality traits, artistic experience and photographic experience in both phase 1 and 2. By multiplying the condition to the last-layer outputs, we learn a “conditional” GIAA and PIAA model respectively. Finally, we conduct comparison experiment for evaluation. Since PIAA is a typical small sample problem <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib21" title="" class="ltx_ref">21</a>]</cite>, we adopt similar experimental settings and evaluation criteria by referring Few-Shot Learning <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib2" title="" class="ltx_ref">2</a>]</cite> and previous PIAA research work <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib13" title="" class="ltx_ref">13</a>, <a href="#bib.bib21" title="" class="ltx_ref">21</a>]</cite>. In this work, the experimental settings include 1) without finetune group (“control group”), 2) 10-shot group and 3) 100-shot group. Results are shown in Table <a href="#S5.T3" title="Table 3 ‣ 5.1 Conditional and Unconditional PIAA ‣ 5 Benchmark ‣ Personalized Image Aesthetics Assessment with Rich Attributes" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a>.</p>
+</div>
+<figure id="S5.T3" class="ltx_table">
+<div id="S5.T3.3" class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:482.0pt;height:81.8pt;vertical-align:-39.6pt;"><span class="ltx_transformed_inner" style="transform:translate(-224.9pt,38.1pt) scale(0.517284084346202,0.517284084346202) ;">
+<table id="S5.T3.3.1" class="ltx_tabular ltx_align_middle">
+<tr id="S5.T3.3.1.1" class="ltx_tr">
+<td id="S5.T3.3.1.1.1" class="ltx_td ltx_align_left ltx_border_tttt" rowspan="3"><span id="S5.T3.3.1.1.1.1" class="ltx_text ltx_font_bold">Methods</span></td>
+<td id="S5.T3.3.1.1.2" class="ltx_td ltx_border_tttt"></td>
+<td id="S5.T3.3.1.1.3" class="ltx_td ltx_align_left ltx_border_tttt" rowspan="2"><span id="S5.T3.3.1.1.3.1" class="ltx_text ltx_font_bold">Backbone</span></td>
+<td id="S5.T3.3.1.1.4" class="ltx_td ltx_align_center ltx_border_tttt" rowspan="2"><span id="S5.T3.3.1.1.4.1" class="ltx_text"><span id="S5.T3.3.1.1.4.1.1" class="ltx_text"></span><span id="S5.T3.3.1.1.4.1.2" class="ltx_text ltx_font_bold"> <span id="S5.T3.3.1.1.4.1.2.1" class="ltx_text">
+<span id="S5.T3.3.1.1.4.1.2.1.1" class="ltx_tabular ltx_align_middle">
+<span id="S5.T3.3.1.1.4.1.2.1.1.1" class="ltx_tr">
+<span id="S5.T3.3.1.1.4.1.2.1.1.1.1" class="ltx_td ltx_nopad_r ltx_align_center">Conditional</span></span>
+<span id="S5.T3.3.1.1.4.1.2.1.1.2" class="ltx_tr">
+<span id="S5.T3.3.1.1.4.1.2.1.1.2.1" class="ltx_td ltx_nopad_r ltx_align_center">information</span></span>
+</span></span><span id="S5.T3.3.1.1.4.1.2.2" class="ltx_text"></span></span></span></td>
+<td id="S5.T3.3.1.1.5" class="ltx_td ltx_align_center ltx_border_tttt" colspan="3"><em id="S5.T3.3.1.1.5.1" class="ltx_emph ltx_font_bold ltx_font_italic">SROCC</em></td>
+<td id="S5.T3.3.1.1.6" class="ltx_td ltx_border_tttt"></td>
+<td id="S5.T3.3.1.1.7" class="ltx_td ltx_align_center ltx_border_tttt" colspan="3"><em id="S5.T3.3.1.1.7.1" class="ltx_emph ltx_font_bold ltx_font_italic">PLCC</em></td></tr>
+<tr id="S5.T3.3.1.2" class="ltx_tr">
+<td id="S5.T3.3.1.2.1" class="ltx_td"></td>
+<td id="S5.T3.3.1.2.2" class="ltx_td ltx_align_center ltx_border_t"><em id="S5.T3.3.1.2.2.1" class="ltx_emph ltx_font_bold ltx_font_italic"><span id="S5.T3.3.1.2.2.1.1" class="ltx_text"></span> <span id="S5.T3.3.1.2.2.1.2" class="ltx_text">
+<span id="S5.T3.3.1.2.2.1.2.1" class="ltx_tabular ltx_align_middle">
+<span id="S5.T3.3.1.2.2.1.2.1.1" class="ltx_tr">
+<span id="S5.T3.3.1.2.2.1.2.1.1.1" class="ltx_td ltx_nopad_r ltx_align_center">without</span></span>
+<span id="S5.T3.3.1.2.2.1.2.1.2" class="ltx_tr">
+<span id="S5.T3.3.1.2.2.1.2.1.2.1" class="ltx_td ltx_nopad_r ltx_align_center">finetune</span></span>
+</span></span><span id="S5.T3.3.1.2.2.1.3" class="ltx_text"></span></em></td>
+<td id="S5.T3.3.1.2.3" class="ltx_td ltx_align_center ltx_border_t"><em id="S5.T3.3.1.2.3.1" class="ltx_emph ltx_font_bold ltx_font_italic">10 shot</em></td>
+<td id="S5.T3.3.1.2.4" class="ltx_td ltx_align_center ltx_border_t"><em id="S5.T3.3.1.2.4.1" class="ltx_emph ltx_font_bold ltx_font_italic">100 shot</em></td>
+<td id="S5.T3.3.1.2.5" class="ltx_td"></td>
+<td id="S5.T3.3.1.2.6" class="ltx_td ltx_align_center ltx_border_t"><em id="S5.T3.3.1.2.6.1" class="ltx_emph ltx_font_bold ltx_font_italic"><span id="S5.T3.3.1.2.6.1.1" class="ltx_text"></span> <span id="S5.T3.3.1.2.6.1.2" class="ltx_text">
+<span id="S5.T3.3.1.2.6.1.2.1" class="ltx_tabular ltx_align_middle">
+<span id="S5.T3.3.1.2.6.1.2.1.1" class="ltx_tr">
+<span id="S5.T3.3.1.2.6.1.2.1.1.1" class="ltx_td ltx_nopad_r ltx_align_center">without</span></span>
+<span id="S5.T3.3.1.2.6.1.2.1.2" class="ltx_tr">
+<span id="S5.T3.3.1.2.6.1.2.1.2.1" class="ltx_td ltx_nopad_r ltx_align_center">finetune</span></span>
+</span></span><span id="S5.T3.3.1.2.6.1.3" class="ltx_text"></span></em></td>
+<td id="S5.T3.3.1.2.7" class="ltx_td ltx_align_center ltx_border_t"><em id="S5.T3.3.1.2.7.1" class="ltx_emph ltx_font_bold ltx_font_italic">10 shot</em></td>
+<td id="S5.T3.3.1.2.8" class="ltx_td ltx_align_center ltx_border_t"><em id="S5.T3.3.1.2.8.1" class="ltx_emph ltx_font_bold ltx_font_italic">100 shot</em></td></tr>
+<tr id="S5.T3.3.1.3" class="ltx_tr">
+<td id="S5.T3.3.1.3.1" class="ltx_td ltx_border_t"></td>
+<td id="S5.T3.3.1.3.2" class="ltx_td ltx_align_left ltx_border_t">ResNet-18 <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib4" title="" class="ltx_ref">4</a>]</cite></td>
+<td id="S5.T3.3.1.3.3" class="ltx_td ltx_align_center ltx_border_t">/</td>
+<td id="S5.T3.3.1.3.4" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T3.m1" class="ltx_Math" alttext="0.6521\pm 0.0038" display="inline" intent=":literal"><semantics><mrow><mn>0.6521</mn><mo>±</mo><mn>0.0038</mn></mrow><annotation encoding="application/x-tex">0.6521\pm 0.0038</annotation></semantics></math></td>
+<td id="S5.T3.3.1.3.5" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T3.m2" class="ltx_Math" alttext="0.6534\pm 0.0044" display="inline" intent=":literal"><semantics><mrow><mn>0.6534</mn><mo>±</mo><mn>0.0044</mn></mrow><annotation encoding="application/x-tex">0.6534\pm 0.0044</annotation></semantics></math></td>
+<td id="S5.T3.3.1.3.6" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T3.m3" class="ltx_Math" alttext="0.6616\pm 0.0040" display="inline" intent=":literal"><semantics><mrow><mn>0.6616</mn><mo>±</mo><mn>0.0040</mn></mrow><annotation encoding="application/x-tex">0.6616\pm 0.0040</annotation></semantics></math></td>
+<td id="S5.T3.3.1.3.7" class="ltx_td ltx_border_t"></td>
+<td id="S5.T3.3.1.3.8" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T3.m4" class="ltx_Math" alttext="0.7069\pm 0.0034" display="inline" intent=":literal"><semantics><mrow><mn>0.7069</mn><mo>±</mo><mn>0.0034</mn></mrow><annotation encoding="application/x-tex">0.7069\pm 0.0034</annotation></semantics></math></td>
+<td id="S5.T3.3.1.3.9" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T3.m5" class="ltx_Math" alttext="0.7093\pm 0.0044" display="inline" intent=":literal"><semantics><mrow><mn>0.7093</mn><mo>±</mo><mn>0.0044</mn></mrow><annotation encoding="application/x-tex">0.7093\pm 0.0044</annotation></semantics></math></td>
+<td id="S5.T3.3.1.3.10" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T3.m6" class="ltx_Math" alttext="0.7147\pm 0.0031" display="inline" intent=":literal"><semantics><mrow><mn>0.7147</mn><mo>±</mo><mn>0.0031</mn></mrow><annotation encoding="application/x-tex">0.7147\pm 0.0031</annotation></semantics></math></td></tr>
+<tr id="S5.T3.3.1.4" class="ltx_tr">
+<td id="S5.T3.3.1.4.1" class="ltx_td"></td>
+<td id="S5.T3.3.1.4.2" class="ltx_td"></td>
+<td id="S5.T3.3.1.4.3" class="ltx_td ltx_align_left">MobileNet-V2 <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib14" title="" class="ltx_ref">14</a>]</cite></td>
+<td id="S5.T3.3.1.4.4" class="ltx_td ltx_align_center">/</td>
+<td id="S5.T3.3.1.4.5" class="ltx_td ltx_align_center"><math id="S5.T3.m7" class="ltx_Math" alttext="0.6696\pm 0.0032" display="inline" intent=":literal"><semantics><mrow><mn>0.6696</mn><mo>±</mo><mn>0.0032</mn></mrow><annotation encoding="application/x-tex">0.6696\pm 0.0032</annotation></semantics></math></td>
+<td id="S5.T3.3.1.4.6" class="ltx_td ltx_align_center"><math id="S5.T3.m8" class="ltx_Math" alttext="0.6697\pm 0.0031" display="inline" intent=":literal"><semantics><mrow><mn>0.6697</mn><mo>±</mo><mn>0.0031</mn></mrow><annotation encoding="application/x-tex">0.6697\pm 0.0031</annotation></semantics></math></td>
+<td id="S5.T3.3.1.4.7" class="ltx_td ltx_align_center"><math id="S5.T3.m9" class="ltx_Math" alttext="0.6814\pm 0.0041" display="inline" intent=":literal"><semantics><mrow><mn>0.6814</mn><mo>±</mo><mn>0.0041</mn></mrow><annotation encoding="application/x-tex">0.6814\pm 0.0041</annotation></semantics></math></td>
+<td id="S5.T3.3.1.4.8" class="ltx_td"></td>
+<td id="S5.T3.3.1.4.9" class="ltx_td ltx_align_center"><math id="S5.T3.m10" class="ltx_Math" alttext="0.7211\pm 0.0035" display="inline" intent=":literal"><semantics><mrow><mn>0.7211</mn><mo>±</mo><mn>0.0035</mn></mrow><annotation encoding="application/x-tex">0.7211\pm 0.0035</annotation></semantics></math></td>
+<td id="S5.T3.3.1.4.10" class="ltx_td ltx_align_center"><math id="S5.T3.m11" class="ltx_Math" alttext="0.7214\pm 0.0035" display="inline" intent=":literal"><semantics><mrow><mn>0.7214</mn><mo>±</mo><mn>0.0035</mn></mrow><annotation encoding="application/x-tex">0.7214\pm 0.0035</annotation></semantics></math></td>
+<td id="S5.T3.3.1.4.11" class="ltx_td ltx_align_center"><math id="S5.T3.m12" class="ltx_Math" alttext="0.7302\pm 0.0026" display="inline" intent=":literal"><semantics><mrow><mn>0.7302</mn><mo>±</mo><mn>0.0026</mn></mrow><annotation encoding="application/x-tex">0.7302\pm 0.0026</annotation></semantics></math></td></tr>
+<tr id="S5.T3.3.1.5" class="ltx_tr">
+<td id="S5.T3.3.1.5.1" class="ltx_td ltx_align_left"><span id="S5.T3.3.1.5.1.1" class="ltx_text"></span> <span id="S5.T3.3.1.5.1.2" class="ltx_text">
+<span id="S5.T3.3.1.5.1.2.1" class="ltx_tabular ltx_align_middle">
+<span id="S5.T3.3.1.5.1.2.1.1" class="ltx_tr">
+<span id="S5.T3.3.1.5.1.2.1.1.1" class="ltx_td ltx_nopad_r ltx_align_center">Unconditional</span></span>
+<span id="S5.T3.3.1.5.1.2.1.2" class="ltx_tr">
+<span id="S5.T3.3.1.5.1.2.1.2.1" class="ltx_td ltx_nopad_r ltx_align_center">PIAA group</span></span>
+</span></span><span id="S5.T3.3.1.5.1.3" class="ltx_text"></span></td>
+<td id="S5.T3.3.1.5.2" class="ltx_td"></td>
+<td id="S5.T3.3.1.5.3" class="ltx_td ltx_align_left"><span id="S5.T3.3.1.5.3.1" class="ltx_text ltx_font_bold">ResNet-50*</span> <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib4" title="" class="ltx_ref">4</a>]</cite></td>
+<td id="S5.T3.3.1.5.4" class="ltx_td ltx_align_center">/</td>
+<td id="S5.T3.3.1.5.5" class="ltx_td ltx_align_center"><math id="S5.T3.m13" class="ltx_Math" alttext="0.6808\pm 0.0015" display="inline" intent=":literal"><semantics><mrow><mn>0.6808</mn><mo>±</mo><mn>0.0015</mn></mrow><annotation encoding="application/x-tex">0.6808\pm 0.0015</annotation></semantics></math></td>
+<td id="S5.T3.3.1.5.6" class="ltx_td ltx_align_center"><math id="S5.T3.m14" class="ltx_Math" alttext="0.6811\pm 0.0015" display="inline" intent=":literal"><semantics><mrow><mn>0.6811</mn><mo>±</mo><mn>0.0015</mn></mrow><annotation encoding="application/x-tex">0.6811\pm 0.0015</annotation></semantics></math></td>
+<td id="S5.T3.3.1.5.7" class="ltx_td ltx_align_center"><math id="S5.T3.m15" class="ltx_Math" alttext="0.6952\pm 0.0014" display="inline" intent=":literal"><semantics><mrow><mn>0.6952</mn><mo>±</mo><mn>0.0014</mn></mrow><annotation encoding="application/x-tex">0.6952\pm 0.0014</annotation></semantics></math></td>
+<td id="S5.T3.3.1.5.8" class="ltx_td"></td>
+<td id="S5.T3.3.1.5.9" class="ltx_td ltx_align_center"><math id="S5.T3.m16" class="ltx_Math" alttext="0.7295\pm 0.0014" display="inline" intent=":literal"><semantics><mrow><mn>0.7295</mn><mo>±</mo><mn>0.0014</mn></mrow><annotation encoding="application/x-tex">0.7295\pm 0.0014</annotation></semantics></math></td>
+<td id="S5.T3.3.1.5.10" class="ltx_td ltx_align_center"><math id="S5.T3.m17" class="ltx_Math" alttext="0.7298\pm 0.0013" display="inline" intent=":literal"><semantics><mrow><mn>0.7298</mn><mo>±</mo><mn>0.0013</mn></mrow><annotation encoding="application/x-tex">0.7298\pm 0.0013</annotation></semantics></math></td>
+<td id="S5.T3.3.1.5.11" class="ltx_td ltx_align_center"><math id="S5.T3.m18" class="ltx_Math" alttext="0.7429\pm 0.0012" display="inline" intent=":literal"><semantics><mrow><mn>0.7429</mn><mo>±</mo><mn>0.0012</mn></mrow><annotation encoding="application/x-tex">0.7429\pm 0.0012</annotation></semantics></math></td></tr>
+<tr id="S5.T3.3.1.6" class="ltx_tr">
+<td id="S5.T3.3.1.6.1" class="ltx_td"></td>
+<td id="S5.T3.3.1.6.2" class="ltx_td"></td>
+<td id="S5.T3.3.1.6.3" class="ltx_td ltx_align_left">Swin-TF Tiny <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib9" title="" class="ltx_ref">9</a>]</cite></td>
+<td id="S5.T3.3.1.6.4" class="ltx_td ltx_align_center">/</td>
+<td id="S5.T3.3.1.6.5" class="ltx_td ltx_align_center"><math id="S5.T3.m19" class="ltx_Math" alttext="0.6855\pm 0.0010" display="inline" intent=":literal"><semantics><mrow><mn>0.6855</mn><mo>±</mo><mn>0.0010</mn></mrow><annotation encoding="application/x-tex">0.6855\pm 0.0010</annotation></semantics></math></td>
+<td id="S5.T3.3.1.6.6" class="ltx_td ltx_align_center"><math id="S5.T3.m20" class="ltx_Math" alttext="0.6859\pm 0.0010" display="inline" intent=":literal"><semantics><mrow><mn>0.6859</mn><mo>±</mo><mn>0.0010</mn></mrow><annotation encoding="application/x-tex">0.6859\pm 0.0010</annotation></semantics></math></td>
+<td id="S5.T3.3.1.6.7" class="ltx_td ltx_align_center"><math id="S5.T3.m21" class="ltx_Math" alttext="0.6988\pm 0.0023" display="inline" intent=":literal"><semantics><mrow><mn>0.6988</mn><mo>±</mo><mn>0.0023</mn></mrow><annotation encoding="application/x-tex">0.6988\pm 0.0023</annotation></semantics></math></td>
+<td id="S5.T3.3.1.6.8" class="ltx_td"></td>
+<td id="S5.T3.3.1.6.9" class="ltx_td ltx_align_center"><math id="S5.T3.m22" class="ltx_Math" alttext="0.7321\pm 0.0012" display="inline" intent=":literal"><semantics><mrow><mn>0.7321</mn><mo>±</mo><mn>0.0012</mn></mrow><annotation encoding="application/x-tex">0.7321\pm 0.0012</annotation></semantics></math></td>
+<td id="S5.T3.3.1.6.10" class="ltx_td ltx_align_center"><math id="S5.T3.m23" class="ltx_Math" alttext="0.7311\pm 0.0013" display="inline" intent=":literal"><semantics><mrow><mn>0.7311</mn><mo>±</mo><mn>0.0013</mn></mrow><annotation encoding="application/x-tex">0.7311\pm 0.0013</annotation></semantics></math></td>
+<td id="S5.T3.3.1.6.11" class="ltx_td ltx_align_center"><math id="S5.T3.m24" class="ltx_Math" alttext="0.7441\pm 0.0012" display="inline" intent=":literal"><semantics><mrow><mn>0.7441</mn><mo>±</mo><mn>0.0012</mn></mrow><annotation encoding="application/x-tex">0.7441\pm 0.0012</annotation></semantics></math></td></tr>
+<tr id="S5.T3.3.1.7" class="ltx_tr">
+<td id="S5.T3.3.1.7.1" class="ltx_td"></td>
+<td id="S5.T3.3.1.7.2" class="ltx_td"></td>
+<td id="S5.T3.3.1.7.3" class="ltx_td ltx_align_left">Swin-TF Small <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib9" title="" class="ltx_ref">9</a>]</cite></td>
+<td id="S5.T3.3.1.7.4" class="ltx_td ltx_align_center">/</td>
+<td id="S5.T3.3.1.7.5" class="ltx_td ltx_align_center"><math id="S5.T3.m25" class="ltx_Math" alttext="0.6897\pm 0.0013" display="inline" intent=":literal"><semantics><mrow><mn>0.6897</mn><mo>±</mo><mn>0.0013</mn></mrow><annotation encoding="application/x-tex">0.6897\pm 0.0013</annotation></semantics></math></td>
+<td id="S5.T3.3.1.7.6" class="ltx_td ltx_align_center"><math id="S5.T3.m26" class="ltx_Math" alttext="0.6900\pm 0.0013" display="inline" intent=":literal"><semantics><mrow><mn>0.6900</mn><mo>±</mo><mn>0.0013</mn></mrow><annotation encoding="application/x-tex">0.6900\pm 0.0013</annotation></semantics></math></td>
+<td id="S5.T3.3.1.7.7" class="ltx_td ltx_align_center"><math id="S5.T3.m27" class="ltx_Math" alttext="0.7040\pm 0.0010" display="inline" intent=":literal"><semantics><mrow><mn>0.7040</mn><mo>±</mo><mn>0.0010</mn></mrow><annotation encoding="application/x-tex">0.7040\pm 0.0010</annotation></semantics></math></td>
+<td id="S5.T3.3.1.7.8" class="ltx_td"></td>
+<td id="S5.T3.3.1.7.9" class="ltx_td ltx_align_center"><math id="S5.T3.m28" class="ltx_Math" alttext="0.7354\pm 0.0015" display="inline" intent=":literal"><semantics><mrow><mn>0.7354</mn><mo>±</mo><mn>0.0015</mn></mrow><annotation encoding="application/x-tex">0.7354\pm 0.0015</annotation></semantics></math></td>
+<td id="S5.T3.3.1.7.10" class="ltx_td ltx_align_center"><math id="S5.T3.m29" class="ltx_Math" alttext="0.7358\pm 0.0015" display="inline" intent=":literal"><semantics><mrow><mn>0.7358</mn><mo>±</mo><mn>0.0015</mn></mrow><annotation encoding="application/x-tex">0.7358\pm 0.0015</annotation></semantics></math></td>
+<td id="S5.T3.3.1.7.11" class="ltx_td ltx_align_center"><math id="S5.T3.m30" class="ltx_Math" alttext="0.7485\pm 0.0011" display="inline" intent=":literal"><semantics><mrow><mn>0.7485</mn><mo>±</mo><mn>0.0011</mn></mrow><annotation encoding="application/x-tex">0.7485\pm 0.0011</annotation></semantics></math></td></tr>
+<tr id="S5.T3.3.1.8" class="ltx_tr">
+<td id="S5.T3.3.1.8.1" class="ltx_td ltx_border_t"></td>
+<td id="S5.T3.3.1.8.2" class="ltx_td ltx_border_t"></td>
+<td id="S5.T3.3.1.8.3" class="ltx_td ltx_align_left ltx_border_t">ResNet-50</td>
+<td id="S5.T3.3.1.8.4" class="ltx_td ltx_align_center ltx_border_t">Artistic Exp.</td>
+<td id="S5.T3.3.1.8.5" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T3.m31" class="ltx_Math" alttext="0.6854\pm 0.0016" display="inline" intent=":literal"><semantics><mrow><mn>0.6854</mn><mo>±</mo><mn>0.0016</mn></mrow><annotation encoding="application/x-tex">0.6854\pm 0.0016</annotation></semantics></math></td>
+<td id="S5.T3.3.1.8.6" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T3.m32" class="ltx_Math" alttext="0.6859\pm 0.0016" display="inline" intent=":literal"><semantics><mrow><mn>0.6859</mn><mo>±</mo><mn>0.0016</mn></mrow><annotation encoding="application/x-tex">0.6859\pm 0.0016</annotation></semantics></math></td>
+<td id="S5.T3.3.1.8.7" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T3.m33" class="ltx_Math" alttext="0.6976\pm 0.0012" display="inline" intent=":literal"><semantics><mrow><mn>0.6976</mn><mo>±</mo><mn>0.0012</mn></mrow><annotation encoding="application/x-tex">0.6976\pm 0.0012</annotation></semantics></math></td>
+<td id="S5.T3.3.1.8.8" class="ltx_td ltx_border_t"></td>
+<td id="S5.T3.3.1.8.9" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T3.m34" class="ltx_Math" alttext="0.7329\pm 0.0024" display="inline" intent=":literal"><semantics><mrow><mn>0.7329</mn><mo>±</mo><mn>0.0024</mn></mrow><annotation encoding="application/x-tex">0.7329\pm 0.0024</annotation></semantics></math></td>
+<td id="S5.T3.3.1.8.10" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T3.m35" class="ltx_Math" alttext="0.7332\pm 0.0022" display="inline" intent=":literal"><semantics><mrow><mn>0.7332</mn><mo>±</mo><mn>0.0022</mn></mrow><annotation encoding="application/x-tex">0.7332\pm 0.0022</annotation></semantics></math></td>
+<td id="S5.T3.3.1.8.11" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T3.m36" class="ltx_Math" alttext="0.7419\pm 0.0012" display="inline" intent=":literal"><semantics><mrow><mn>0.7419</mn><mo>±</mo><mn>0.0012</mn></mrow><annotation encoding="application/x-tex">0.7419\pm 0.0012</annotation></semantics></math></td></tr>
+<tr id="S5.T3.3.1.9" class="ltx_tr">
+<td id="S5.T3.3.1.9.1" class="ltx_td ltx_align_left"><span id="S5.T3.3.1.9.1.1" class="ltx_text"></span> <span id="S5.T3.3.1.9.1.2" class="ltx_text">
+<span id="S5.T3.3.1.9.1.2.1" class="ltx_tabular ltx_align_middle">
+<span id="S5.T3.3.1.9.1.2.1.1" class="ltx_tr">
+<span id="S5.T3.3.1.9.1.2.1.1.1" class="ltx_td ltx_nopad_r ltx_align_center">Conditional</span></span>
+<span id="S5.T3.3.1.9.1.2.1.2" class="ltx_tr">
+<span id="S5.T3.3.1.9.1.2.1.2.1" class="ltx_td ltx_nopad_r ltx_align_center">PIAA group</span></span>
+</span></span><span id="S5.T3.3.1.9.1.3" class="ltx_text"></span></td>
+<td id="S5.T3.3.1.9.2" class="ltx_td"></td>
+<td id="S5.T3.3.1.9.3" class="ltx_td ltx_align_left">ResNet-50</td>
+<td id="S5.T3.3.1.9.4" class="ltx_td ltx_align_center">Photographic Exp.</td>
+<td id="S5.T3.3.1.9.5" class="ltx_td ltx_align_center"><math id="S5.T3.m37" class="ltx_Math" alttext="0.6826\pm 0.0014" display="inline" intent=":literal"><semantics><mrow><mn>0.6826</mn><mo>±</mo><mn>0.0014</mn></mrow><annotation encoding="application/x-tex">0.6826\pm 0.0014</annotation></semantics></math></td>
+<td id="S5.T3.3.1.9.6" class="ltx_td ltx_align_center"><math id="S5.T3.m38" class="ltx_Math" alttext="0.6830\pm 0.0014" display="inline" intent=":literal"><semantics><mrow><mn>0.6830</mn><mo>±</mo><mn>0.0014</mn></mrow><annotation encoding="application/x-tex">0.6830\pm 0.0014</annotation></semantics></math></td>
+<td id="S5.T3.3.1.9.7" class="ltx_td ltx_align_center"><math id="S5.T3.m39" class="ltx_Math" alttext="0.6982\pm 0.0010" display="inline" intent=":literal"><semantics><mrow><mn>0.6982</mn><mo>±</mo><mn>0.0010</mn></mrow><annotation encoding="application/x-tex">0.6982\pm 0.0010</annotation></semantics></math></td>
+<td id="S5.T3.3.1.9.8" class="ltx_td"></td>
+<td id="S5.T3.3.1.9.9" class="ltx_td ltx_align_center"><math id="S5.T3.m40" class="ltx_Math" alttext="0.7324\pm 0.0010" display="inline" intent=":literal"><semantics><mrow><mn>0.7324</mn><mo>±</mo><mn>0.0010</mn></mrow><annotation encoding="application/x-tex">0.7324\pm 0.0010</annotation></semantics></math></td>
+<td id="S5.T3.3.1.9.10" class="ltx_td ltx_align_center"><math id="S5.T3.m41" class="ltx_Math" alttext="0.7326\pm 0.0010" display="inline" intent=":literal"><semantics><mrow><mn>0.7326</mn><mo>±</mo><mn>0.0010</mn></mrow><annotation encoding="application/x-tex">0.7326\pm 0.0010</annotation></semantics></math></td>
+<td id="S5.T3.3.1.9.11" class="ltx_td ltx_align_center"><math id="S5.T3.m42" class="ltx_Math" alttext="0.7447\pm 0.0010" display="inline" intent=":literal"><semantics><mrow><mn>0.7447</mn><mo>±</mo><mn>0.0010</mn></mrow><annotation encoding="application/x-tex">0.7447\pm 0.0010</annotation></semantics></math></td></tr>
+<tr id="S5.T3.3.1.10" class="ltx_tr">
+<td id="S5.T3.3.1.10.1" class="ltx_td ltx_border_bbbb"></td>
+<td id="S5.T3.3.1.10.2" class="ltx_td ltx_border_bbbb"></td>
+<td id="S5.T3.3.1.10.3" class="ltx_td ltx_align_left ltx_border_bbbb">ResNet-50</td>
+<td id="S5.T3.3.1.10.4" class="ltx_td ltx_align_center ltx_border_bbbb">Personality traits</td>
+<td id="S5.T3.3.1.10.5" class="ltx_td ltx_align_center ltx_border_bbbb"><math id="S5.T3.m43" class="ltx_Math" alttext="0.6908\pm 0.0010" display="inline" intent=":literal"><semantics><mrow><mn>0.6908</mn><mo>±</mo><mn>0.0010</mn></mrow><annotation encoding="application/x-tex">0.6908\pm 0.0010</annotation></semantics></math></td>
+<td id="S5.T3.3.1.10.6" class="ltx_td ltx_align_center ltx_border_bbbb"><math id="S5.T3.m44" class="ltx_Math" alttext="0.6912\pm 0.0009" display="inline" intent=":literal"><semantics><mrow><mn>0.6912</mn><mo>±</mo><mn>0.0009</mn></mrow><annotation encoding="application/x-tex">0.6912\pm 0.0009</annotation></semantics></math></td>
+<td id="S5.T3.3.1.10.7" class="ltx_td ltx_align_center ltx_border_bbbb"><math id="S5.T3.m45" class="ltx_Math" alttext="0.7046\pm 0.0015" display="inline" intent=":literal"><semantics><mrow><mn>0.7046</mn><mo>±</mo><mn>0.0015</mn></mrow><annotation encoding="application/x-tex">0.7046\pm 0.0015</annotation></semantics></math></td>
+<td id="S5.T3.3.1.10.8" class="ltx_td ltx_border_bbbb"></td>
+<td id="S5.T3.3.1.10.9" class="ltx_td ltx_align_center ltx_border_bbbb"><math id="S5.T3.m46" class="ltx_Math" alttext="0.7380\pm 0.0007" display="inline" intent=":literal"><semantics><mrow><mn>0.7380</mn><mo>±</mo><mn>0.0007</mn></mrow><annotation encoding="application/x-tex">0.7380\pm 0.0007</annotation></semantics></math></td>
+<td id="S5.T3.3.1.10.10" class="ltx_td ltx_align_center ltx_border_bbbb"><math id="S5.T3.m47" class="ltx_Math" alttext="0.7384\pm 0.0007" display="inline" intent=":literal"><semantics><mrow><mn>0.7384</mn><mo>±</mo><mn>0.0007</mn></mrow><annotation encoding="application/x-tex">0.7384\pm 0.0007</annotation></semantics></math></td>
+<td id="S5.T3.3.1.10.11" class="ltx_td ltx_align_center ltx_border_bbbb"><math id="S5.T3.m48" class="ltx_Math" alttext="0.7509\pm 0.0010" display="inline" intent=":literal"><semantics><mrow><mn>0.7509</mn><mo>±</mo><mn>0.0010</mn></mrow><annotation encoding="application/x-tex">0.7509\pm 0.0010</annotation></semantics></math></td></tr>
+</table>
+</span></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table"><span id="S5.T3.4" class="ltx_text" style="font-size:90%;">Table 3</span>: </span><span id="S5.T3.5" class="ltx_text" style="font-size:90%;">Experimental results of proposed conditional and unconditional PIAA on PARA. Results of unconditional PIAA with ResNet-50 backbone (marked with * ) are selected as the official benchmark of PARA.</span></figcaption>
+</figure>
+<section id="S5.SS1.SSS0.Px1" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Implementation details</h4>
+
+<div id="S5.SS1.SSS0.Px1.p1" class="ltx_para">
+<p id="S5.SS1.SSS0.Px1.p1.1" class="ltx_p">We randomly select 40 subjects (occupying 10% of the total subject number) as test subjects. For each subject, 10 and 100 images are randomly selected from his or her personal data as support set and 50 images are also randomly sampled from the rest data as query set. Second, we fine-tune the GIAA model on support set, to refine GIAA into a PIAA model and evaluate performance on query set. Third, to avoid randomness of data selection, data from each subject is sampled and evaluated 10 times and we compute mean value of each evaluation metric. Forth, to observe the robustness and average performance on all test subjects, we repeat the whole pipeline for 10 times and calculate the mean and standard deviation of each evaluation metric over all test subjects as the final results. As for conditional PIAA, we multiply the subjective attributes information to the last-layer output to learn both GIAA and PIAA. Note that we use the “average subject information” as condition when training GIAA and the rest settings are consistent with the “unconditional” group.</p>
+</div>
+</section>
+</section>
+<section id="S5.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">5.2 </span>Evaluation Criteria</h3>
+
+<div id="S5.SS2.p1" class="ltx_para">
+<p id="S5.SS2.p1.1" class="ltx_p">In this article, we adopt four metrics for GIAA performance evaluation, including Mean Square Error (MSE), Spearman Rank Order Correlation Coefficient (SROCC), Pearson Linear Correlation Coefficient (PLCC) and classification accuracy. While in PIAA, we utilize the SROCC and PLCC as evaluation metrics.</p>
+</div>
+</section>
+<section id="S5.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">5.3 </span>Experimental Results</h3>
+
+<div id="S5.SS3.p1" class="ltx_para">
+<p id="S5.SS3.p1.1" class="ltx_p">In this work, the evaluation procedure happens in both GIAA and PIAA. First, experimental results of proposed benchmark is shown in Table <a href="#S5.T3" title="Table 3 ‣ 5.1 Conditional and Unconditional PIAA ‣ 5 Benchmark ‣ Personalized Image Aesthetics Assessment with Rich Attributes" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a>. We test different GIAA backbones, including ResNet-18 <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib4" title="" class="ltx_ref">4</a>]</cite>, ResNet-50 <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib4" title="" class="ltx_ref">4</a>]</cite>, MobileNet-V2 <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib14" title="" class="ltx_ref">14</a>]</cite>, Swin-TF tiny <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib9" title="" class="ltx_ref">9</a>]</cite> and Swin-TF small <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib9" title="" class="ltx_ref">9</a>]</cite>. We also evaluate the GIAA performance on test set. As for the influence of backbone selection, we also conduct a backbone experiment for comparison. The backbone experimental results are reported in Table <a href="#S5.T4" title="Table 4 ‣ 5.3 Experimental Results ‣ 5 Benchmark ‣ Personalized Image Aesthetics Assessment with Rich Attributes" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>.</p>
+</div>
+<figure id="S5.T4" class="ltx_table">
+<div id="S5.T4.3" class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:223.6pt;height:52.9pt;vertical-align:-25.4pt;"><span class="ltx_transformed_inner" style="transform:translate(-145.2pt,34.4pt) scale(0.435010587301627,0.435010587301627) ;">
+<table id="S5.T4.3.1" class="ltx_tabular ltx_align_middle">
+<tr id="S5.T4.3.1.1" class="ltx_tr">
+<td id="S5.T4.3.1.1.1" class="ltx_td ltx_align_center ltx_border_tttt"><span id="S5.T4.3.1.1.1.1" class="ltx_text"></span> <span id="S5.T4.3.1.1.1.2" class="ltx_text">
+<span id="S5.T4.3.1.1.1.2.1" class="ltx_tabular ltx_align_middle">
+<span id="S5.T4.3.1.1.1.2.1.1" class="ltx_tr">
+<span id="S5.T4.3.1.1.1.2.1.1.1" class="ltx_td ltx_nopad_r ltx_align_center">Conditional</span></span>
+<span id="S5.T4.3.1.1.1.2.1.2" class="ltx_tr">
+<span id="S5.T4.3.1.1.1.2.1.2.1" class="ltx_td ltx_nopad_r ltx_align_center">information</span></span>
+</span></span><span id="S5.T4.3.1.1.1.3" class="ltx_text"></span></td>
+<td id="S5.T4.3.1.1.2" class="ltx_td ltx_align_center ltx_border_tttt">Backbone</td>
+<td id="S5.T4.3.1.1.3" class="ltx_td ltx_align_center ltx_border_tttt">MSE</td>
+<td id="S5.T4.3.1.1.4" class="ltx_td ltx_align_center ltx_border_tttt">SROCC</td>
+<td id="S5.T4.3.1.1.5" class="ltx_td ltx_align_center ltx_border_tttt">PLCC</td>
+<td id="S5.T4.3.1.1.6" class="ltx_td ltx_align_center ltx_border_tttt">Accuracy</td></tr>
+<tr id="S5.T4.3.1.2" class="ltx_tr">
+<td id="S5.T4.3.1.2.1" class="ltx_td ltx_align_center ltx_border_t">/</td>
+<td id="S5.T4.3.1.2.2" class="ltx_td ltx_align_center ltx_border_t">ResNet18 <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib4" title="" class="ltx_ref">4</a>]</cite></td>
+<td id="S5.T4.3.1.2.3" class="ltx_td ltx_align_center ltx_border_t">0.0546</td>
+<td id="S5.T4.3.1.2.4" class="ltx_td ltx_align_center ltx_border_t">0.8538</td>
+<td id="S5.T4.3.1.2.5" class="ltx_td ltx_align_center ltx_border_t">0.9005</td>
+<td id="S5.T4.3.1.2.6" class="ltx_td ltx_align_center ltx_border_t">0.8567</td></tr>
+<tr id="S5.T4.3.1.3" class="ltx_tr">
+<td id="S5.T4.3.1.3.1" class="ltx_td ltx_align_center">/</td>
+<td id="S5.T4.3.1.3.2" class="ltx_td ltx_align_center">MobileNet-V2 <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib14" title="" class="ltx_ref">14</a>]</cite></td>
+<td id="S5.T4.3.1.3.3" class="ltx_td ltx_align_center">0.0479</td>
+<td id="S5.T4.3.1.3.4" class="ltx_td ltx_align_center">0.8706</td>
+<td id="S5.T4.3.1.3.5" class="ltx_td ltx_align_center">0.9120</td>
+<td id="S5.T4.3.1.3.6" class="ltx_td ltx_align_center">0.8710</td></tr>
+<tr id="S5.T4.3.1.4" class="ltx_tr">
+<td id="S5.T4.3.1.4.1" class="ltx_td ltx_align_center">/</td>
+<td id="S5.T4.3.1.4.2" class="ltx_td ltx_align_center">ResNet50 <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib4" title="" class="ltx_ref">4</a>]</cite></td>
+<td id="S5.T4.3.1.4.3" class="ltx_td ltx_align_center">0.0433</td>
+<td id="S5.T4.3.1.4.4" class="ltx_td ltx_align_center">0.8790</td>
+<td id="S5.T4.3.1.4.5" class="ltx_td ltx_align_center">0.9208</td>
+<td id="S5.T4.3.1.4.6" class="ltx_td ltx_align_center">0.8697</td></tr>
+<tr id="S5.T4.3.1.5" class="ltx_tr">
+<td id="S5.T4.3.1.5.1" class="ltx_td ltx_align_center">/</td>
+<td id="S5.T4.3.1.5.2" class="ltx_td ltx_align_center">Swin-TF Tiny <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib9" title="" class="ltx_ref">9</a>]</cite></td>
+<td id="S5.T4.3.1.5.3" class="ltx_td ltx_align_center">0.0373</td>
+<td id="S5.T4.3.1.5.4" class="ltx_td ltx_align_center">0.8971</td>
+<td id="S5.T4.3.1.5.5" class="ltx_td ltx_align_center">0.9331</td>
+<td id="S5.T4.3.1.5.6" class="ltx_td ltx_align_center">0.8843</td></tr>
+<tr id="S5.T4.3.1.6" class="ltx_tr">
+<td id="S5.T4.3.1.6.1" class="ltx_td ltx_align_center">/</td>
+<td id="S5.T4.3.1.6.2" class="ltx_td ltx_align_center">Swin-TF Small <cite class="ltx_cite ltx_citemacro_cite">[<a href="#bib.bib9" title="" class="ltx_ref">9</a>]</cite></td>
+<td id="S5.T4.3.1.6.3" class="ltx_td ltx_align_center">0.0356</td>
+<td id="S5.T4.3.1.6.4" class="ltx_td ltx_align_center">0.9021</td>
+<td id="S5.T4.3.1.6.5" class="ltx_td ltx_align_center">0.9355</td>
+<td id="S5.T4.3.1.6.6" class="ltx_td ltx_align_center">0.8857</td></tr>
+<tr id="S5.T4.3.1.7" class="ltx_tr">
+<td id="S5.T4.3.1.7.1" class="ltx_td ltx_align_center ltx_border_t">Artistic Exp.</td>
+<td id="S5.T4.3.1.7.2" class="ltx_td ltx_align_center ltx_border_t">ResNet50</td>
+<td id="S5.T4.3.1.7.3" class="ltx_td ltx_align_center ltx_border_t">0.0434</td>
+<td id="S5.T4.3.1.7.4" class="ltx_td ltx_align_center ltx_border_t">0.8814</td>
+<td id="S5.T4.3.1.7.5" class="ltx_td ltx_align_center ltx_border_t">0.9206</td>
+<td id="S5.T4.3.1.7.6" class="ltx_td ltx_align_center ltx_border_t">0.8720</td></tr>
+<tr id="S5.T4.3.1.8" class="ltx_tr">
+<td id="S5.T4.3.1.8.1" class="ltx_td ltx_align_center">Photographic Exp.</td>
+<td id="S5.T4.3.1.8.2" class="ltx_td ltx_align_center">ResNet50</td>
+<td id="S5.T4.3.1.8.3" class="ltx_td ltx_align_center">0.0440</td>
+<td id="S5.T4.3.1.8.4" class="ltx_td ltx_align_center">0.8824</td>
+<td id="S5.T4.3.1.8.5" class="ltx_td ltx_align_center">0.9215</td>
+<td id="S5.T4.3.1.8.6" class="ltx_td ltx_align_center">0.8770</td></tr>
+<tr id="S5.T4.3.1.9" class="ltx_tr">
+<td id="S5.T4.3.1.9.1" class="ltx_td ltx_align_center ltx_border_bbbb">Personality Traits</td>
+<td id="S5.T4.3.1.9.2" class="ltx_td ltx_align_center ltx_border_bbbb">ResNet50</td>
+<td id="S5.T4.3.1.9.3" class="ltx_td ltx_align_center ltx_border_bbbb">0.0416</td>
+<td id="S5.T4.3.1.9.4" class="ltx_td ltx_align_center ltx_border_bbbb">0.8860</td>
+<td id="S5.T4.3.1.9.5" class="ltx_td ltx_align_center ltx_border_bbbb">0.9238</td>
+<td id="S5.T4.3.1.9.6" class="ltx_td ltx_align_center ltx_border_bbbb">0.8763</td></tr>
+</table>
+</span></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table"><span id="S5.T4.4" class="ltx_text" style="font-size:90%;">Table 4</span>: </span><span id="S5.T4.5" class="ltx_text" style="font-size:90%;">GIAA backbone experimental results on PARA.</span></figcaption>
+</figure>
+<div id="S5.SS3.p2" class="ltx_para">
+<p id="S5.SS3.p2.1" class="ltx_p">Experimental results can be summarized as follows. 1) First, we prove that by fine-tuning on 10 and 100 shot personalized data, PIAA can outperform the control group (“without finetune” group). 2) Second, more personalized training data can further improve the finetune performance. In addition, results in 10 shot group are close to the control group, which inspire us to rethink the rationality of 10 shot setting. 3) Third, utilizing subjective attributes information into PIAA modeling can improve model performance compared with the unconditional PIAA group.</p>
+</div>
+</section>
+</section>
+<section id="S6" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">6 </span>Conclusion</h2>
+
+<div id="S6.p1" class="ltx_para">
+<p id="S6.p1.1" class="ltx_p">In this article, we have proposed a new PIAA database named “PARA”. The PARA database contains 31,220 images and it is annotated by 438 subjects in total. Rich annotations are attached to each image from 13 dimensions, including 9 image-oriented objective attributes and 4 human-oriented subjective attributes. In addition, desensitized subject information is also provided. Statistical results indicate that the personalized aesthetic preference can be mirrored by the human-oriented subjective attributes. To further prove the value of subject attributes from a computational perspective, we propose a conditional PIAA modeling method by utilizing subject information as conditional prior. Experimental results indicate that adding subjective information can better model personal aesthetic preference, which may bring novel research opportunities for the next-generation PIAA.</p>
+</div>
+</section>
+<section id="bib" class="ltx_bibliography">
+<h2 class="ltx_title ltx_title_bibliography" style="font-size:90%;">References</h2>
+
+<ul class="ltx_biblist">
+      
+<li id="bib.bib1" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib1.2" class="ltx_text" style="font-size:90%;">[1]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib1.4" class="ltx_text" style="font-size:90%;">
+Yuming Fang, Hanwei Zhu, Yan Zeng, Kede Ma, and Zhou Wang.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib1.5" class="ltx_text" style="font-size:90%;">Perceptual quality assessment of smartphone photography.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib1.6" class="ltx_text" style="font-size:90%;">In </span><span id="bib.bib1.7" class="ltx_text ltx_font_italic" style="font-size:90%;">IEEE Conference on Computer Vision and Pattern Recognition</span><span id="bib.bib1.8" class="ltx_text" style="font-size:90%;">,
+pages 3677–3686, 2020.
+</span>
+</span></li>
+      
+<li id="bib.bib2" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib2.2" class="ltx_text" style="font-size:90%;">[2]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib2.4" class="ltx_text" style="font-size:90%;">
+Li Fe-Fei et al.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib2.5" class="ltx_text" style="font-size:90%;">A bayesian approach to unsupervised one-shot learning of object
+categories.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib2.6" class="ltx_text" style="font-size:90%;">In </span><span id="bib.bib2.7" class="ltx_text ltx_font_italic" style="font-size:90%;">Proceedings Ninth IEEE International Conference on Computer
+Vision</span><span id="bib.bib2.8" class="ltx_text" style="font-size:90%;">, pages 1134–1141. IEEE, 2003.
+</span>
+</span></li>
+      
+<li id="bib.bib3" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib3.2" class="ltx_text" style="font-size:90%;">[3]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib3.4" class="ltx_text" style="font-size:90%;">
+LeGrand H. Hardy, Gertrude Rand, and M. Catherine Rittler.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib3.5" class="ltx_text" style="font-size:90%;">Tests for the detection and analysis of color-blindness. i. the
+ishihara test: An evaluation.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib3.6" class="ltx_text ltx_font_italic" style="font-size:90%;">J. Opt. Soc. Am.</span><span id="bib.bib3.7" class="ltx_text" style="font-size:90%;">, 35(4):268–275, Apr 1945.
+</span>
+</span></li>
+      
+<li id="bib.bib4" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib4.2" class="ltx_text" style="font-size:90%;">[4]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib4.4" class="ltx_text" style="font-size:90%;">
+Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib4.5" class="ltx_text" style="font-size:90%;">Deep residual learning for image recognition.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib4.6" class="ltx_text" style="font-size:90%;">In </span><span id="bib.bib4.7" class="ltx_text ltx_font_italic" style="font-size:90%;">Proceedings of the IEEE conference on computer vision and
+pattern recognition</span><span id="bib.bib4.8" class="ltx_text" style="font-size:90%;">, pages 770–778, 2016.
+</span>
+</span></li>
+      
+<li id="bib.bib5" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib5.2" class="ltx_text" style="font-size:90%;">[5]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib5.4" class="ltx_text" style="font-size:90%;">
+V. Hosu, H. Lin, T. Sziranyi, and D. Saupe.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib5.5" class="ltx_text" style="font-size:90%;">Koniq-10k: An ecologically valid database for deep learning of blind
+image quality assessment.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib5.6" class="ltx_text ltx_font_italic" style="font-size:90%;">IEEE Transactions on Image Processing</span><span id="bib.bib5.7" class="ltx_text" style="font-size:90%;">, 29:4041–4056, 2020.
+</span>
+</span></li>
+      
+<li id="bib.bib6" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib6.2" class="ltx_text" style="font-size:90%;">[6]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib6.4" class="ltx_text" style="font-size:90%;">
+Shu Kong, Xiaohui Shen, Zhe Lin, Radomir Mech, and Charless Fowlkes.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib6.5" class="ltx_text" style="font-size:90%;">Photo aesthetics ranking network with attributes and content
+adaptation.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib6.6" class="ltx_text" style="font-size:90%;">In </span><span id="bib.bib6.7" class="ltx_text ltx_font_italic" style="font-size:90%;">ECCV</span><span id="bib.bib6.8" class="ltx_text" style="font-size:90%;">, 2016.
+</span>
+</span></li>
+      
+<li id="bib.bib7" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib7.2" class="ltx_text" style="font-size:90%;">[7]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib7.4" class="ltx_text" style="font-size:90%;">
+Leida Li, Hancheng Zhu, Sicheng Zhao, Guiguang Ding, and Weisi Lin.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib7.5" class="ltx_text" style="font-size:90%;">Personality-assisted multi-task learning for generic and personalized
+image aesthetics assessment.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib7.6" class="ltx_text ltx_font_italic" style="font-size:90%;">IEEE Transactions on Image Processing</span><span id="bib.bib7.7" class="ltx_text" style="font-size:90%;">, 29:3898–3910, 2020.
+</span>
+</span></li>
+      
+<li id="bib.bib8" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib8.2" class="ltx_text" style="font-size:90%;">[8]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib8.4" class="ltx_text" style="font-size:90%;">
+Yanbin Liu, Juho Lee, Minseop Park, Saehoon Kim, Eunho Yang, Sungju Hwang, and
+Yi Yang.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib8.5" class="ltx_text" style="font-size:90%;">Learning to propagate labels: Transductive propagation network for
+few-shot learning.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib8.6" class="ltx_text" style="font-size:90%;">In </span><span id="bib.bib8.7" class="ltx_text ltx_font_italic" style="font-size:90%;">International Conference on Learning Representations</span><span id="bib.bib8.8" class="ltx_text" style="font-size:90%;">, 2019.
+</span>
+</span></li>
+      
+<li id="bib.bib9" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib9.2" class="ltx_text" style="font-size:90%;">[9]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib9.4" class="ltx_text" style="font-size:90%;">
+Ze Liu, Yutong Lin, Yue Cao, Han Hu, Yixuan Wei, Zheng Zhang, Stephen Lin, and
+Baining Guo.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib9.5" class="ltx_text" style="font-size:90%;">Swin transformer: Hierarchical vision transformer using shifted
+windows.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib9.6" class="ltx_text ltx_font_italic" style="font-size:90%;">International Conference on Computer Vision (ICCV)</span><span id="bib.bib9.7" class="ltx_text" style="font-size:90%;">, 2021.
+</span>
+</span></li>
+      
+<li id="bib.bib10" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib10.2" class="ltx_text" style="font-size:90%;">[10]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib10.4" class="ltx_text" style="font-size:90%;">
+Pei Lv, Jianqi Fan, Xixi Nie, Weiming Dong, Xiaoheng Jiang, Bing Zhou,
+Mingliang Xu, and Changsheng Xu.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib10.5" class="ltx_text" style="font-size:90%;">User-guided personalized image aesthetic assessment based on deep
+reinforcement learning.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib10.6" class="ltx_text ltx_font_italic" style="font-size:90%;">arXiv preprint arXiv:2106.07488</span><span id="bib.bib10.7" class="ltx_text" style="font-size:90%;">, 2021.
+</span>
+</span></li>
+      
+<li id="bib.bib11" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib11.2" class="ltx_text" style="font-size:90%;">[11]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib11.4" class="ltx_text" style="font-size:90%;">
+Naila Murray, Luca Marchesotti, and Florent Perronnin.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib11.5" class="ltx_text" style="font-size:90%;">Ava: A large-scale database for aesthetic visual analysis.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib11.6" class="ltx_text" style="font-size:90%;">In </span><span id="bib.bib11.7" class="ltx_text ltx_font_italic" style="font-size:90%;">2012 IEEE Conference on Computer Vision and Pattern
+Recognition</span><span id="bib.bib11.8" class="ltx_text" style="font-size:90%;">, pages 2408–2415. IEEE, 2012.
+</span>
+</span></li>
+      
+<li id="bib.bib12" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib12.2" class="ltx_text" style="font-size:90%;">[12]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib12.4" class="ltx_text" style="font-size:90%;">
+Beatrice Rammstedt and Oliver P. John.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib12.5" class="ltx_text" style="font-size:90%;">Measuring personality in one minute or less: A 10-item short version
+of the big five inventory in english and german.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib12.6" class="ltx_text ltx_font_italic" style="font-size:90%;">Journal of Research in Personality</span><span id="bib.bib12.7" class="ltx_text" style="font-size:90%;">, 41(1):203–212, 2007.
+</span>
+</span></li>
+      
+<li id="bib.bib13" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib13.2" class="ltx_text" style="font-size:90%;">[13]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib13.4" class="ltx_text" style="font-size:90%;">
+Jian Ren, Xiaohui Shen, Zhe Lin, Radomir Mech, and David J. Foran.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib13.5" class="ltx_text" style="font-size:90%;">Personalized image aesthetics.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib13.6" class="ltx_text" style="font-size:90%;">In </span><span id="bib.bib13.7" class="ltx_text ltx_font_italic" style="font-size:90%;">Proceedings of the IEEE International Conference on Computer
+Vision (ICCV)</span><span id="bib.bib13.8" class="ltx_text" style="font-size:90%;">, Oct 2017.
+</span>
+</span></li>
+      
+<li id="bib.bib14" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib14.2" class="ltx_text" style="font-size:90%;">[14]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib14.4" class="ltx_text" style="font-size:90%;">
+Mark Sandler, Andrew Howard, Menglong Zhu, Andrey Zhmoginov, and Liang-Chieh
+Chen.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib14.5" class="ltx_text" style="font-size:90%;">Mobilenetv2: Inverted residuals and linear bottlenecks.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib14.6" class="ltx_text" style="font-size:90%;">In </span><span id="bib.bib14.7" class="ltx_text ltx_font_italic" style="font-size:90%;">Proceedings of the IEEE conference on computer vision and
+pattern recognition</span><span id="bib.bib14.8" class="ltx_text" style="font-size:90%;">, pages 4510–4520, 2018.
+</span>
+</span></li>
+      
+<li id="bib.bib15" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib15.2" class="ltx_text" style="font-size:90%;">[15]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib15.4" class="ltx_text" style="font-size:90%;">
+H.R. Sheikh, M.F. Sabir, and A.C. Bovik.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib15.5" class="ltx_text" style="font-size:90%;">A statistical evaluation of recent full reference image quality
+assessment algorithms.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib15.6" class="ltx_text ltx_font_italic" style="font-size:90%;">IEEE Transactions on Image Processing</span><span id="bib.bib15.7" class="ltx_text" style="font-size:90%;">, 15(11):3440–3451, 2006.
+</span>
+</span></li>
+      
+<li id="bib.bib16" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib16.2" class="ltx_text" style="font-size:90%;">[16]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib16.4" class="ltx_text" style="font-size:90%;">
+Oriol Vinyals, Charles Blundell, Timothy Lillicrap, Daan Wierstra, et al.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib16.5" class="ltx_text" style="font-size:90%;">Matching networks for one shot learning.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib16.6" class="ltx_text ltx_font_italic" style="font-size:90%;">Advances in neural information processing systems</span><span id="bib.bib16.7" class="ltx_text" style="font-size:90%;">,
+29:3630–3638, 2016.
+</span>
+</span></li>
+      
+<li id="bib.bib17" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib17.2" class="ltx_text" style="font-size:90%;">[17]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib17.4" class="ltx_text" style="font-size:90%;">
+Guolong Wang, Junchi Yan, and Zheng Qin.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib17.5" class="ltx_text" style="font-size:90%;">Collaborative and attentive learning for personalized image aesthetic
+assessment.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib17.6" class="ltx_text" style="font-size:90%;">In </span><span id="bib.bib17.7" class="ltx_text ltx_font_italic" style="font-size:90%;">IJCAI</span><span id="bib.bib17.8" class="ltx_text" style="font-size:90%;">, pages 957–963, 2018.
+</span>
+</span></li>
+      
+<li id="bib.bib18" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib18.2" class="ltx_text" style="font-size:90%;">[18]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib18.4" class="ltx_text" style="font-size:90%;">
+Weining Wang, Junjie Su, Lemin Li, Xiangmin Xu, and Jiebo Luo.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib18.5" class="ltx_text" style="font-size:90%;">Meta-learning perspective for personalized image aesthetics
+assessment.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib18.6" class="ltx_text" style="font-size:90%;">In </span><span id="bib.bib18.7" class="ltx_text ltx_font_italic" style="font-size:90%;">2019 IEEE International Conference on Image Processing
+(ICIP)</span><span id="bib.bib18.8" class="ltx_text" style="font-size:90%;">, pages 1875–1879. IEEE, 2019.
+</span>
+</span></li>
+      
+<li id="bib.bib19" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib19.2" class="ltx_text" style="font-size:90%;">[19]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib19.4" class="ltx_text" style="font-size:90%;">
+Jun Yu, Chaoran Cui, LeiLei Geng, Yuling Ma, and Yilong Yin.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib19.5" class="ltx_text" style="font-size:90%;">Towards unified aesthetics and emotion prediction in images.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib19.6" class="ltx_text" style="font-size:90%;">In </span><span id="bib.bib19.7" class="ltx_text ltx_font_italic" style="font-size:90%;">2019 IEEE International Conference on Image Processing
+(ICIP)</span><span id="bib.bib19.8" class="ltx_text" style="font-size:90%;">, pages 2526–2530. IEEE, 2019.
+</span>
+</span></li>
+      
+<li id="bib.bib20" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib20.2" class="ltx_text" style="font-size:90%;">[20]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib20.4" class="ltx_text" style="font-size:90%;">
+Sicheng Zhao, Guiguang Ding, Qingming Huang, Tat-Seng Chua, Björn W
+Schuller, and Kurt Keutzer.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib20.5" class="ltx_text" style="font-size:90%;">Affective image content analysis: A comprehensive survey.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib20.6" class="ltx_text" style="font-size:90%;">In </span><span id="bib.bib20.7" class="ltx_text ltx_font_italic" style="font-size:90%;">IJCAI</span><span id="bib.bib20.8" class="ltx_text" style="font-size:90%;">, pages 5534–5541, 2018.
+</span>
+</span></li>
+      
+<li id="bib.bib21" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib21.2" class="ltx_text" style="font-size:90%;">[21]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib21.4" class="ltx_text" style="font-size:90%;">
+Hancheng Zhu, Leida Li, Jinjian Wu, Sicheng Zhao, Guiguang Ding, and Guangming
+Shi.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib21.5" class="ltx_text" style="font-size:90%;">Personalized image aesthetics assessment via meta-learning with
+bilevel gradient optimization.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib21.6" class="ltx_text ltx_font_italic" style="font-size:90%;">IEEE Transactions on Cybernetics</span><span id="bib.bib21.7" class="ltx_text" style="font-size:90%;">, 2020.
+</span>
+</span></li>
+      
+<li id="bib.bib22" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem"><span id="bib.bib22.2" class="ltx_text" style="font-size:90%;">[22]</span></span>
+<span class="ltx_bibblock"><span id="bib.bib22.4" class="ltx_text" style="font-size:90%;">
+Hancheng Zhu, Yong Zhou, Leida Li, Yaqian Li, and Yandong Guo.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib22.5" class="ltx_text" style="font-size:90%;">Learning personalized image aesthetics from subjective and objective
+attributes.
+</span>
+</span>
+<span class="ltx_bibblock"><span id="bib.bib22.6" class="ltx_text ltx_font_italic" style="font-size:90%;">IEEE Transactions on Multimedia</span><span id="bib.bib22.7" class="ltx_text" style="font-size:90%;">, pages 1–1, 2021.
+</span>
+</span></li>
+    
+</ul>
+</section>
+</article>
+    </div>
+  </section>
+  <section class="pane pane-zh">
+    <div class="pane-head">中文精读翻译</div>
+    <div class="pane-body" id="zhBody"><div class="md" id="mdRoot"></div></div>
+  </section>
+</main>
+<script type="text/markdown" id="zhSrc"># 《Personalized Image Aesthetics Assessment with Rich Attributes》中文精读翻译
+
+## 论文信息
+
+- **英文标题**：Personalized Image Aesthetics Assessment with Rich Attributes
+- **中文标题**：基于丰富属性的个性化图像美学评估
+- **作者**：Yuzhe Yang\*、Liwu Xu\*（\* 共同第一作者）、Leida Li、Nan Qie、Yaqian Li、Peng Zhang、Yandong Guo（通讯作者）
+- **机构**：OPPO 研究院（OPPO Research Institute）、西安电子科技大学（Xidian University）（Leida Li 来自西安电子科技大学，其余作者来自 OPPO 研究院）
+- **发表**：CVPR 2022（Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 19861–19869）；arXiv:2203.16754（v1，2022-03）
+- **提出的资源与框架**：PARA 数据集（Personalized image Aesthetics database with Rich Attributes，带丰富属性的个性化图像美学数据库）+ 条件化 PIAA（conditional PIAA）基准模型
+- **arXiv 链接**：<https://arxiv.org/abs/2203.16754>
+- **项目主页**：<https://cv-datasets.institutecv.com/#/data-sets>
+
+## 一句话核心总结
+
+本文通过为 31,220 张图像同时标注"9 项面向图像的客观属性 + 4 项面向人的主观属性"，并首次随库发布脱敏被试画像（含 BFI-10 大五人格特质、教育、艺术/摄影经验等），构建了迄今最全面的个性化图像美学数据库 PARA（438 名被试、约 972 万条标注）；统计分析证明人格特质、判断难度与图像情绪等主观属性可以"镜像"个性化审美偏好，而将被试信息作为条件先验、以"乘到网络末层输出"方式注入的条件化 PIAA 模型在三种少样本设定下均优于无条件组——这是首次从计算角度揭示"图像美学 × 被试特征"如何交互形成复杂的个性化美学品味。
+
+---
+
+## 摘要
+
+个性化图像美学评估（Personalized Image Aesthetics Assessment, PIAA）因其高度主观的本质而极具挑战。人的审美品味取决于多样化的因素，包括图像特性与被试特征。现有 PIAA 数据库在标注多样性方面存在局限，尤其是被试（主体）一侧，已无法满足日益增长的 PIAA 研究需求。为破解这一困境，我们开展了迄今最全面的个性化图像美学主观研究，并发布了一个全新的带丰富属性的个性化图像美学数据库（Personalized image Aesthetics database with Rich Attributes, PARA），其中包含 31,220 张图像，由 438 名被试进行标注。PARA 的特色在于丰富的标注，包括 9 项面向图像的客观属性与 4 项面向人的主观属性。此外，还提供了脱敏的被试信息（如人格特质），以支持 PIAA 与用户画像研究。我们对标注数据进行了全面分析，统计研究表明：审美偏好可以被所提出的主观属性所"镜像"反映。我们还提出了一种条件化 PIAA 模型，将被试信息作为条件先验加以利用。实验结果表明，条件化 PIAA 模型可以超越对照组，这也是首次尝试证明图像美学与被试特征如何相互作用、进而产生复杂的个性化图像美学品味。我们相信，该数据库及相关分析将有助于开展下一代 PIAA 研究。PARA 的项目页面见：https://cv-datasets.institutecv.com/#/data-sets 。
+
+---
+
+## 1 引言
+
+> **图 1**：PARA 中的样例图像。
+
+图像美学评估（Image Aesthetics Assessment, IAA）旨在以计算方式评价照片美学。由于审美偏好高度分化，图像美学评估可分为两类：通用图像美学评估与个性化图像美学评估（即 GIAA 与 PIAA）(Ren et al., 2017)。对 GIAA 而言，一张图像由不同的评分者标注，并以平均意见分数（mean opinion score, MOS）作为美学"真值"。然而，GIAA 仅反映"平均意见"，忽略了审美品味的高度主观性。为缓解这一问题，PIAA 被提出以捕捉独特的审美偏好 (Ren et al., 2017)。
+
+过去十年，PIAA 取得了令人鼓舞的进展。最初，Ren et al. (2017) 提出了首个名为 FLICKR-AES 的 PIAA 数据库，并通过在用户相关数据上迁移 GIAA 知识来解决该问题，使模型能够捕捉美学"偏移（offset）"。随后，研究工作尝试从多种视角学习 PIAA，如多模态协同学习 (Wang et al., 2018)、元学习 (Zhu et al., 2020)、多任务学习 (Li et al., 2020)、深度强化学习 (Lv et al., 2021) 等。高质量数据库对构建数据驱动的 PIAA 模型至关重要。然而，当前的数据库（如 FLICKR-AES (Ren et al., 2017) 与 AADB (Kong et al., 2016)）在标注多样性上受限。作为对比，我们在表 1 中总结了三个相关数据库的标注信息，不难看出大多数数据库在标注多样性上都较为有限。
+
+**表 1**：PIAA 数据库对比。注意"标注总数"由图像数、每图平均标注次数与标注维度数相乘得到；由于场景标签在标注开始前即被分配给每张图像，场景标签的数量单独计入。
+
+| 数据库 | 主观标注 | 客观标注 | 标注总数 | 每图平均标注次数 | 图像数 | 标注维度数 | 被试数 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| AADB (Kong et al., 2016) | ✗ | ✓ | 600 k | 5 | 10,000 | 12 | 190 |
+| REAL-CUR (Ren et al., 2017) | ✗ | ✓ | 2.87 k | 1 | 2,870 | 1 | 14 |
+| FLICKR-AES (Ren et al., 2017) | ✗ | ✓ | 200 k | 5 | 40,000 | 1 | 210 |
+| 本文（PARA） | ✓ | ✓ | $\sim$9723 k | 25.87 | 31,220 | 13 | 438 |
+
+为缓解这一问题，我们注意到：属性通常能提供更丰富的描述来显式刻画差异性 (Kong et al., 2016)。因此，除美学分数之外，我们还提供量化的个性化美学属性标注，以促成更精准的审美偏好建模。考虑到 PIAA 任务的高度主观性，与现有数据库 FLICKR-AES (Ren et al., 2017) 和 AADB (Kong et al., 2016) 不同，我们从两个视角设计 PARA 的标签体系，即面向人的标注（human-oriented）与面向图像的标注（image-oriented）。具体而言，除图像美学属性外，我们还收集主观标注，包括：1) 内容偏好；2) 判断难度；3) 情绪；4) 分享意愿。我们相信上述维度能为理解 PIAA 与心理感受之间的关联带来新的研究机会。此外，我们还提供脱敏的被试信息（用户 ID、年龄、性别、学历、人格特质、摄影经验、艺术经验），供未来更深入的分析之用。单张图像的标注维度见表 2。
+
+**表 2**：单张图像的标注信息。标注分为两组，包括客观信息与主观信息。主观与客观标注可通过用户 ID 关联。
+
+| 客观标注 | 值 | 主观标注 | 值 |
+| --- | --- | --- | --- |
+| 会话 ID（Session ID） | session1 | 用户 ID | A3c6418 |
+| 图像名 | iaa_pub1_.jpg | 年龄 | 30 |
+| 用户 ID | A3c6418 | 性别 | 男（male） |
+| 美学分数 | 3.0 | 教育经历 | 大学（University） |
+| 质量分数 | 3.1 | 艺术经验 | 熟练（proficient） |
+| 构图 | 3 | 摄影经验 | 熟练（proficient） |
+| 色彩 | 4 | E（外向性） | 5 |
+| 景深 | 3 | A（宜人性） | 9 |
+| 内容 | 3 | N（神经质） | 4 |
+| 光照 | 4 | O（开放性） | 7 |
+| 主体强调（object emphasis） | 0（否） | C（尽责性） | 9 |
+| 场景类别 | 动物 | 情绪 | 中性（Neutral） |
+| | | 判断难度 | −1（容易） |
+| | | 内容偏好 | 3（中立） |
+| | | 分享意愿 | 3（中立） |
+
+在本文中，我们构建了迄今标注最丰富的个性化图像美学评估数据库"PARA"。此外，我们还对标注信息进行了深入分析，并为该数据库提出了一个基准（benchmark）。本文贡献可总结如下：
+
+- 我们开展了迄今最全面的个性化图像美学主观研究，并构建了一个带丰富标注的 PIAA 数据库。具体而言，我们收集了 31,220 张图像，每张图像平均由 25 名被试标注，共 438 名被试参与。每张图像被标注了 4 项面向人的主观属性与 9 项面向图像的客观属性。为支持深入分析，我们还提供脱敏的被试信息。
+- 我们提供了深入分析以发现标注维度的特性。统计结果表明：个性化审美偏好可由所提出的面向人的主观属性所"镜像"反映，包括人格特质、判断难度与图像情绪，这进而启发了一些新颖的研究角度，例如利用被试信息来建模个性化美学。
+- 我们基于所提出的 PARA 数据库开展了基准研究。该基准包含两个模型：非条件化与条件化 PIAA。通过在建模审美偏好时将被试信息作为条件，我们证明：利用面向人的标注进行训练可以进一步提升 PIAA 模型的性能。
+
+> **图 2**：PARA 中用户画像与属性的统计饼图：(a) 年龄、(b) 性别、(c) 教育经历、(d) 艺术经验、(e) 摄影经验、(f) 大五人格特质、(g) 判断难度、(h) 情绪分布、(i) 主体强调、(j) 场景类别。
+
+---
+
+## 2 相关工作
+
+### 2.1 PIAA 的数据库
+
+对大多数数据驱动的机器学习系统而言，带丰富标注的数据发挥着关键作用。在 PIAA 研究中，有三个数据库被频繁使用，包括 FLICKR-AES (Ren et al., 2017)、REAL-CUR (Ren et al., 2017) 与 AADB (Kong et al., 2016)。
+
+FLICKR-AES (Ren et al., 2017) 实际上是首个专为 PIAA 研究设计的数据库。FLICKR-AES 包含 40,000 张来自 Flickr（https://www.flickr.com）的带知识共享（Creative Commons）许可的图像，由 210 名 Amazon Mechanical Turk（AMT，https://www.mturk.com/）工作者标注，美学分数范围为 1 到 5，分数越高表示越好的视觉美学感知。然而，FLICKR-AES 中的评分由 AMT 工作者而非图像所有者提供。为在真实场景中测试 PIAA 算法，REAL-CUR (Ren et al., 2017) 被提出，它是一个小规模数据库，由 14 个真实个人相册组成。每个相册包含数量不等的照片，从 197 到 222 张不等，平均为 205 张。在 PIAA 研究中，该数据库通常仅作为算法验证的测试集使用 (Ren et al., 2017)。除 FLICKR-AES 与 REAL-CUR 之外，PIAA 研究中另一个常用的数据库是 AADB (Kong et al., 2016)。它最初被设计用于联合学习图像美学与相关属性。由于其也提供了被试 ID，AADB 同样可用于学习个性化审美偏好。AADB 包含 10,000 张图像，由 190 名工作者标注（平均每图 5 名工作者）。AADB 提供 11 个美学属性标注（有趣的内容、主体强调、良好光照、色彩和谐、色彩鲜艳、浅景深、运动模糊、三分法、平衡元素、重复与对称）以及 1 个范围为 1 到 5 的美学分数，表示整体美学判断。
+
+### 2.2 PIAA 模型
+
+过去十年中，各类深度学习技术衍生出了不同类型的计算化 PIAA 模型。Ren et al. (2017) 提出了首批 PIAA 数据库，并通过把 GIAA 先验知识迁移到个性化数据来解决 PIAA 任务，以捕捉个体审美偏好。具体而言，他们先训练一个 GIAA 模型以提供基础任务先验；然后利用属性与内容特征微调 GIAA 知识，通过残差学习获得个性化的美学"偏移"。Wang et al. (2018) 指出现有 PIAA 模型所含的用户特定信息不足。因此，他们通过附加文本评论来扩充当时的 PIAA 数据库，并进行用户/图像关系嵌入（relation embedding）以实现协同学习。此外，他们还引入注意力机制，通过融合多模态标注信息来挖掘图像语义与感兴趣区域（Region-of-Interest, ROI）。Li et al. (2020)（译注：原文此处写作 Zhu et al. [7]，但该文献第一作者为 Leida Li，疑系笔误）证明：通过多任务学习与带人格信息的跨数据训练，GIAA 与 PIAA 的性能均可超越其他 IAA 算法。最近，深度元学习 (Vinyals et al., 2016) 已被证明在捕捉审美偏好方面具有有效性 (Wang et al., 2019; Zhu et al., 2020)。在这些工作中，每位用户的标注被视为一个元任务（meta-task）。凭借独特的情节式训练（episodic training）机制，训练得到的模型能够快速适应新的被试数据。值得注意的是，上述大多数算法都反映了在学习过程中引入额外信息的必要性与有效性，这进而表明：设计更好的 PIAA 模型需要更多的额外数据。这促使我们开展本项工作，带来下一代 PIAA。
+
+---
+
+## 3 PARA 数据库
+
+PARA 数据库的构建包含四个阶段：数据收集、标签体系设计、被试选择与主观实验。
+
+### 3.1 数据收集
+
+我们从 CC search（https://search.creativecommons.org/）收集图像，并以"creative commons 许可"与"Flickr 来源"两个条件过滤。然后，我们使用一个训练良好的场景分类模型自动预测每张图像的场景标签。接着，我们对标签进行双重检查并人工修正场景标注，以保持标注质量。之后，我们基于场景标签采样约 28,000 张图像以保持内容多样性。随后，我们从名为 Unsplash（https://unsplash.com/）的网站以及图像质量评估数据库（包括 SPAQ (Fang et al., 2020) 与 KonIQ-10K (Hosu et al., 2020)）中补充约 3,000 张具有清晰美学真值的图像，以平衡美学分数分布。
+
+### 3.2 标签体系设计
+
+在设计 PARA 的标签体系时，我们同时参考了 GIAA 与 PIAA 数据库 (Murray et al., 2012; Kong et al., 2016; Ren et al., 2017)。PARA 标签体系的维度如表 2 所示。每张图像连同被试信息一起被标注 13 个标签。各维度解释如下：
+
+- **面向图像的属性分数**（构图、光照、色彩、景深、主体强调、内容）大多以 1 到 5 的离散刻度标注。特别地，"主体强调"是一个二值标签，指示图像中是否存在显著主体。
+- **情绪**（包括愉悦、兴奋、满足、敬畏、厌恶、悲伤、恐惧、中性）指图像情绪 (Zhao et al., 2018)。被试只需为每张图像选择一个主导情绪。
+- **判断难度**（difficulty of judgement）是取值于 $[-1, 0, +1]$ 的离散标签，描述对照片美学作出判断的难度。"+1"表示困难，"0"表示一般，"−1"表示容易。
+- **内容偏好**（content preference）是取值于 $[1, 5]$ 的离散标注，表示语义偏好程度。为表述清晰并减少问题偏差，我们没有使用"内容偏好"这一确切措辞，而是选择使用"我喜欢这张照片的内容"。1 到 5 的含义分别为"强烈不同意""不同意""中立""同意"与"强烈同意"。
+- **分享意愿**（willingness to share）是面向社会计算与图像意图估计的离散标签。原始问题为"将这张照片分享到社交媒体的意愿"。1 到 5 的含义仍为"强烈不同意""不同意""中立""同意"与"强烈同意"。
+- **用户 ID** 被设计为唯一公共键，用于将个体被试信息与其标注记录关联起来。注意，为保持标注的丰富性与多样性，参与本标注任务的被试来自两个来源。为方便起见，我们通过每个 ID 开头的字母 A 与 B 来区分两个来源的标注。
+- **美学分数**是取值 1 到 5 的离散类别标签，反映综合判断。为应对（评分）歧义性，我们在每个整数刻度之间加入一个中间选项（即允许半分）。分数越高表示越好的视觉美学感知。
+- **质量分数**表示对图像质量的整体判断，范围为 1 到 5。分数越高代表越好的感知质量。值得提及的是，在 PARA 中，感知质量低的照片包含多种退化，包括运动模糊、JPEG 压缩等。
+- **场景类别**表示图像的内容。我们精心挑选了 9 个高频场景（包括人像、动物、植物、风景、建筑、静物、夜景、食物与室内）以及 1 个"其他"类，后者特指无明显含义的照片。注意，该标签在主观实验开始前预先标注，以保持内容多样性。
+
+除上述标注信息外，我们还收集了脱敏的被试信息，以提供更深入的研究机会。相关信息包括年龄、性别、教育经历（初中、高中、中专、大专与大学）、人格特质（此处我们使用大五人格特质，包括开放性（Openness, O）、尽责性（Conscientiousness, C）、外向性（Extroversion, E）、宜人性（Agreeableness, A）与神经质（Neuroticism, N））、艺术经验与摄影经验。为帮助用户快速确认其人格，我们使用 BFI-10 问卷 (Rammstedt & John, 2007)，每位被试都被要求完成该问卷。我们随后计算每种人格特质的分数并将其加入标注数据。
+
+### 3.3 被试选择
+
+关于招募被试的原则：为保持标注的质量与多样性，我们主要从四个视角招聘和筛选被试：健康状态、工作经验、人格特质与被试画像。首先，我们确保每位被试都处于良好的健康状态，且不允许任何强迫工作。为保持标注质量，所有被试都须从事数据标注工作约半年以上（全职或兼职），且其在其他标注任务中的工作合格。其次，我们确保被试画像足够多样，涵盖年龄、性别、学历、摄影经验与人格特质。根据 Li et al. (2020) 提出的先前研究结论，我们相信人格特质包含捕捉审美偏好的重要信息，因此我们特别关注人格特质的分布。最后，所有被试都须通过石原（Ishihara）色盲测试 (Hardy et al., 1945)。被试的用户画像分布见图 2(a)–(f)。所有被试都知晓 PARA 的用途；不同意该数据使用方式的被试，可以要求我们删除其标注并自由退出实验。
+
+### 3.4 主观实验
+
+我们遵循通用心理学实验协议 (Sheikh et al., 2006) 开展主观实验以收集投票结果。首先，我们将整个数据库划分为 446 个场次（session）以进行主观实验。每个场次包含 70 张未标注图像、5 张标准图像（一小批预先标注的数据）与 5 张重复图像（需要被标注两次以检验标注一致性的图像），用以控制标注质量与一致性。然后，我们开发了一个基于网页的标注工具，并为被试分配个人账号与密码。最后，依托精心设计的标注质量控制策略（脚注：细节见补充材料），所有合格标注均自动存储，无需人工验收。注意，并非上文提到的所有标签都在主观实验中标注，例如场景标签——它在主观实验开始前即已获得，以保持丰富的内容多样性并平衡场景分布。
+
+> **图 3**：标注平台的图形界面。
+
+图 3 是标注平台的图形界面，被试在提交前须填写所有空栏。为确保被试理解每个维度，我们在（标注界面）下方给出了无引导性的说明。被试可以通过点击"返回"按钮修改标注。
+
+---
+
+## 4 数据分析
+
+本节中，我们首先给出所提出 PARA 数据库的概览。然后，我们从统计与相关性两个视角研究美学属性，以发现主观与客观标注的特性。
+
+### 4.1 数据概览
+
+预处理后的 PARA 包含 31,220 张图像，共获得 438 名被试的投票。为直观观察，我们在图 2 中给出一组饼图以展示各维度的占比。第一行的饼图 (a)–(e) 展示被试画像：(a) 年龄、(b) 性别、(c) 教育经历、(d) 艺术经验与 (e) 摄影经验。第二行包括 (f) 大五人格特质、(g) 判断难度、(h) 情绪、(i) 主体强调（指图像中是否存在显著主体）、(j) 场景类别。注意，在场景类别中，我们预定义了 9 个通用场景，并为每个场景分配约 $10\%$ 的数据量，以预先平衡 PARA 的特征多样性。至于不清晰且无意义的图像，我们将其归入"其他"标签，并与其余数据一同标注。
+
+> **图 4**：标注分数分布。注意 x 轴反映不同维度的分数，y 轴表示每个分数刻度上的频次。
+
+### 4.2 统计分析
+
+#### 标注分布
+
+PARA 包含丰富的标注信息。此处，各维度的标注分布与方差分别在图 4 与图 5 中可视化。从图 4 可以观察到，各属性的分布彼此相似。然而，它们之间仍存在细微差异，这表明美学属性彼此相关，但仍各自提供独特而有价值的信息。从图 5 所示的美学分数箱线图容易观察到：在高分区间 $(4, 5]$，美学分数的方差确实低于其他分数区间。这证明我们对"什么是美"确实拥有共同认知。与此同时，在其他分数区间，如 $[1, 2]$、$(2, 3]$ 与 $(3, 4]$，我们的确持有不同的美学观点，这证明了开展 PIAA 研究的必要性。
+
+> **图 5**：不同美学分数区间的箱线图。
+
+> **图 6**：各属性维度间的皮尔逊线性相关系数（PLCC）热力图。
+
+#### 属性相关性分析
+
+为从相关性视角理解 PARA，我们在图 6 中可视化了各维度之间的皮尔逊线性相关系数（Pearson Linear Correlation Coefficient, PLCC）。可以观察到，美学与质量之间的相关性极高，表明照片质量在很大程度上会影响图像美学感知。同时，属性之间的相关性大多在 0.5 左右，属于"中度相关"。这意味着每个维度的标注信息既包含共性也包含差异。最后，我们注意到"内容偏好"与"分享意愿"两个维度也高度相关，证明人们在享受图像内容时更倾向于分享该照片。
+
+### 4.3 被试偏好
+
+除传统美学判断维度外，PARA 还提供被试画像。当前 PIAA 算法大多受限于标注多样性。我们相信被试画像信息能带来更深入的研究机会，例如通过直推式学习（transductive learning）利用画像信息 (Liu et al., 2019) 等。因此，我们也在 PARA 中收集了用户画像信息，如人格特质与摄影经验。我们进一步研究人格特质、情绪、标注难度与美学属性偏好之间的相关性，以发现其内在特性。为直观观察，我们在图 7 中展示了不同被试的人格特质及其对样例图像的美学判断。容易观察到，具有不同人格特质的被试有不同的审美品味，三位被试给出的分数分别为 4、2.5 与 3.5。
+
+> **图 7**：样例图像由三名被试评分。相应的美学分数为 4、2.5 与 3.5，彼此高度分化。值得注意的是，他们的人格特质也互不相同。
+
+#### 人格特质与属性偏好
+
+我们发现了人格、美学分数与美学属性之间的相关性，结果见图 8。为获得该结果，我们首先取 5 种人格特质中的最大值，并以相应特质作为依据，将数据分组为"O""C""E""A""N"。然后，我们分别计算每个美学属性与美学分数之间的 PLCC。此处，容易发现高"N"特质的被试与其他组不相似。有趣的是，"N"特质指"神经质"，意味着高"N"特质的被试倾向于对外部刺激过度反应，相比他人有更强的情绪反应。在 Zhu et al. (2021) 的工作中可以找到类似现象。此外，高"E"特质的被试在给出美学判断时更关注图像的内容，因为该维度（内容偏好）的 PLCC 已超过 0.8，属于"强相关"。
+
+> **图 8**：按人格特质分组的属性-美学 PLCC。
+
+#### 美学与判断难度
+
+我们还对"判断难度"与美学分数进行了相关性分析。我们计算了每个分数下选择"困难""一般"与"容易"的概率，并在图 9 中可视化其分布。可以观察到，被试在评估低美学分数的照片时感到困难。为挖掘其背后原因，我们随后收集了 10 名被试的反馈。有趣的是，我们注意到被试表示他们会感到眩晕、难以清楚辨认场景，因此难以给出判断。这在标注美学属性时尤为明显。此外，他们在"更差"与"差得多"之间做决定时更容易困惑，而在"更好"与"好得多"之间选择时则不然。
+
+> **图 9**：各美学分数下的判断难度分布。可以观察到，美学分数较低的照片往往使被试难以作出判断。
+
+#### 美学与情绪
+
+对于图像情绪维度，我们首先将八类情绪分为三组："正面"（愉悦、兴奋、满足）、"负面"（厌恶、悲伤、恐惧）与"中性"（包括敬畏与中性）。然后，我们计算分组后的情绪类别在美学分数上的标注分布，相关结果见图 10。明确的结论是：美学分数低于 2.0 的图像（位于 l1 左侧）更可能传递负面情绪。同时，高美学分数（超过 4.0，位于 l2 右侧）的图像倾向于向被试传递正面情绪。Yu et al. (2019)（译注：原文此处写作 Cui et al. [19]，但该文献第一作者为 Jun Yu，疑系笔误）也提出了类似结论。他们在其工作中发布的结论称：如果图像能唤起正面情绪，它们往往获得更高的分数；否则，它们更可能获得较低的美学分数 (Yu et al., 2019)。
+
+> **图 10**：情绪与美学分数之间的概率分布。
+
+> **图 11**：所提出 PIAA 模型的流水线。我们提出两类模型：条件化与非条件化 PIAA。
+
+---
+
+## 5 基准
+
+### 5.1 条件化与非条件化 PIAA
+
+为证明（数据库的）可用性并进行公平比较，我们在 PARA 上开展了基准研究。所提出的基准包含两种建模方法，即条件化（conditional）与非条件化（unconditional）PIAA。非条件化与条件化 PIAA 的训练流水线分别见图 11(a) 与 (b)。为实现非条件化 PIAA，我们首先在阶段 1 训练一个 GIAA 模型；然后直接用个人数据微调该 GIAA 模型，以学习个性化偏好。至于条件化 PIAA 建模，我们在建模时加入三类条件信息，包括人格特质、艺术经验与摄影经验（阶段 1 与阶段 2 均如此）。通过将条件与网络末层输出相乘，我们分别学到"条件化"的 GIAA 与 PIAA 模型。最后，我们进行比较实验用于评估。由于 PIAA 是一个典型的小样本问题 (Zhu et al., 2020)，我们参照少样本学习 (Li Fe-Fei et al., 2003) 与先前的 PIAA 研究工作 (Ren et al., 2017; Zhu et al., 2020)，采用相似的实验设定与评价准则。本文的实验设定包括：1) 不微调组（"对照组"）；2) 10-shot 组；3) 100-shot 组。结果见表 3。
+
+**表 3**：所提出的条件化与非条件化 PIAA 在 PARA 上的实验结果。以 ResNet-50 为主干的非条件化 PIAA 结果（标 \* 者）被选为 PARA 的官方基准。
+
+| 组别 | 主干网络 | 条件信息 | SROCC（不微调） | SROCC（10-shot） | SROCC（100-shot） | PLCC（不微调） | PLCC（10-shot） | PLCC（100-shot） |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 非条件化 PIAA | ResNet-18 (He et al., 2016) | / | $0.6521\pm 0.0038$ | $0.6534\pm 0.0044$ | $0.6616\pm 0.0040$ | $0.7069\pm 0.0034$ | $0.7093\pm 0.0044$ | $0.7147\pm 0.0031$ |
+| 非条件化 PIAA | MobileNet-V2 (Sandler et al., 2018) | / | $0.6696\pm 0.0032$ | $0.6697\pm 0.0031$ | $0.6814\pm 0.0041$ | $0.7211\pm 0.0035$ | $0.7214\pm 0.0035$ | $0.7302\pm 0.0026$ |
+| 非条件化 PIAA | ResNet-50\* (He et al., 2016) | / | $0.6808\pm 0.0015$ | $0.6811\pm 0.0015$ | $0.6952\pm 0.0014$ | $0.7295\pm 0.0014$ | $0.7298\pm 0.0013$ | $0.7429\pm 0.0012$ |
+| 非条件化 PIAA | Swin-TF Tiny (Liu et al., 2021) | / | $0.6855\pm 0.0010$ | $0.6859\pm 0.0010$ | $0.6988\pm 0.0023$ | $0.7321\pm 0.0012$ | $0.7311\pm 0.0013$ | $0.7441\pm 0.0012$ |
+| 非条件化 PIAA | Swin-TF Small (Liu et al., 2021) | / | $0.6897\pm 0.0013$ | $0.6900\pm 0.0013$ | $0.7040\pm 0.0010$ | $0.7354\pm 0.0015$ | $0.7358\pm 0.0015$ | $0.7485\pm 0.0011$ |
+| 条件化 PIAA | ResNet-50 | 艺术经验 | $0.6854\pm 0.0016$ | $0.6859\pm 0.0016$ | $0.6976\pm 0.0012$ | $0.7329\pm 0.0024$ | $0.7332\pm 0.0022$ | $0.7419\pm 0.0012$ |
+| 条件化 PIAA | ResNet-50 | 摄影经验 | $0.6826\pm 0.0014$ | $0.6830\pm 0.0014$ | $0.6982\pm 0.0010$ | $0.7324\pm 0.0010$ | $0.7326\pm 0.0010$ | $0.7447\pm 0.0010$ |
+| 条件化 PIAA | ResNet-50 | 人格特质 | $0.6908\pm 0.0010$ | $0.6912\pm 0.0009$ | $0.7046\pm 0.0015$ | $0.7380\pm 0.0007$ | $0.7384\pm 0.0007$ | $0.7509\pm 0.0010$ |
+
+#### 实现细节
+
+我们随机选择 40 名被试（占总被试数的 10%）作为测试被试。对每名被试，从其个人数据中随机选择 10 张与 100 张图像作为支持集（support set），并从其余数据中随机采样 50 张图像作为查询集（query set）。其次，我们在支持集上微调 GIAA 模型，将 GIAA 精炼为 PIAA 模型，并在查询集上评估性能。第三，为避免数据选择的随机性，每名被试的数据被采样并评估 10 次，我们计算每个评估指标的平均值。第四，为观察在所有测试被试上的鲁棒性与平均性能，我们将整个流水线重复 10 次，并计算所有测试被试上每个评估指标的均值与标准差，作为最终结果。至于条件化 PIAA，我们将主观属性信息乘到网络末层输出，以同时学习 GIAA 与 PIAA。注意，训练 GIAA 时我们使用"平均被试信息"作为条件，其余设定与"非条件化"组保持一致。
+
+### 5.2 评价准则
+
+本文采用四个指标评估 GIAA 性能，包括均方误差（Mean Square Error, MSE）、斯皮尔曼秩序相关系数（Spearman Rank Order Correlation Coefficient, SROCC）、皮尔逊线性相关系数（PLCC）与分类准确率。而在 PIAA 中，我们使用 SROCC 与 PLCC 作为评估指标。
+
+### 5.3 实验结果
+
+本文中，评估在 GIAA 与 PIAA 两个层面进行。首先，所提出基准的实验结果见表 3。我们测试了不同的 GIAA 主干网络，包括 ResNet-18 (He et al., 2016)、ResNet-50 (He et al., 2016)、MobileNet-V2 (Sandler et al., 2018)、Swin-TF tiny (Liu et al., 2021) 与 Swin-TF small (Liu et al., 2021)。我们还在测试集上评估了 GIAA 性能。至于主干网络选择的影响，我们也开展了主干对比实验，结果见表 4。
+
+**表 4**：PARA 上的 GIAA 主干网络实验结果。
+
+| 条件信息 | 主干网络 | MSE | SROCC | PLCC | 准确率 |
+| --- | --- | --- | --- | --- | --- |
+| / | ResNet-18 (He et al., 2016) | 0.0546 | 0.8538 | 0.9005 | 0.8567 |
+| / | MobileNet-V2 (Sandler et al., 2018) | 0.0479 | 0.8706 | 0.9120 | 0.8710 |
+| / | ResNet-50 (He et al., 2016) | 0.0433 | 0.8790 | 0.9208 | 0.8697 |
+| / | Swin-TF Tiny (Liu et al., 2021) | 0.0373 | 0.8971 | 0.9331 | 0.8843 |
+| / | Swin-TF Small (Liu et al., 2021) | 0.0356 | 0.9021 | 0.9355 | 0.8857 |
+| 艺术经验 | ResNet-50 | 0.0434 | 0.8814 | 0.9206 | 0.8720 |
+| 摄影经验 | ResNet-50 | 0.0440 | 0.8824 | 0.9215 | 0.8770 |
+| 人格特质 | ResNet-50 | 0.0416 | 0.8860 | 0.9238 | 0.8763 |
+
+实验结果可总结如下。1) 首先，我们证明：通过在 10-shot 与 100-shot 个性化数据上微调，PIAA 可以超越对照组（"不微调"组）。2) 其次，更多的个性化训练数据可以进一步提升微调性能。此外，10-shot 组的结果与对照组接近，这促使我们重新思考 10-shot 设定的合理性。3) 第三，与非条件化 PIAA 组相比，将主观属性信息用于 PIAA 建模可以提升模型性能。
+
+---
+
+## 6 结论
+
+本文提出了一个新的 PIAA 数据库"PARA"。PARA 数据库包含 31,220 张图像，共由 438 名被试标注。每张图像附带来自 13 个维度的丰富标注，包括 9 项面向图像的客观属性与 4 项面向人的主观属性。此外，还提供了脱敏的被试信息。统计结果表明，个性化审美偏好可以被面向人的主观属性所"镜像"反映。为进一步从计算角度证明被试属性的价值，我们提出了一种条件化 PIAA 建模方法，将被试信息用作条件先验。实验结果表明，加入主观信息可以更好地建模个人审美偏好，这可能为下一代 PIAA 带来新颖的研究机会。
+
+---
+
+## 精读小结
+
+- **论文定位**：这是一篇典型的"资源 + 基准"型论文（CVPR 2022）。其价值主要由三部分构成：迄今规模最大的个性化美学主观实验数据、系统的标注统计分析，以及一个简单但具有首创性的条件化 PIAA 基准模型。
+- **核心设计哲学**：把"人"而非仅仅"图"作为一等公民纳入标注体系。此前数据库（FLICKR-AES、AADB）只有面向图像的客观属性；PARA 首次同时提供面向人的主观属性（内容偏好、判断难度、情绪、分享意愿）与脱敏被试画像（大五人格、教育、艺术/摄影经验），并通过用户 ID 将二者关联，使"以被试信息为条件"的个性化建模第一次拥有了直接的数据支撑。
+- **分析结论链条**：高分区间 $(4,5]$ 方差更低→人类对"美"存在共识，而中低分区分歧大→PIAA 研究必要；低分图像判断难度更高（被试自述眩晕、场景难辨认）；按主导人格分组后，高神经质（N）被试的"属性-美学"相关结构显著异于他人，高外向性（E）被试打分更看重内容（PLCC>0.8）；情绪与美学分数强相关（<2.0 分多为负面情绪，>4.0 分多为正面情绪）。这些发现把 PIAA 与心理学（人格、情绪、认知负荷）系统性地联系起来。
+- **基准协议**：两阶段训练（先 GIAA、再以个人数据微调为 PIAA），少样本设定（不微调/10-shot/100-shot），40 名测试被试、每人数据重采样 10 次、整条流水线重复 10 次以报告均值与标准差；条件信息以"与末层输出相乘"的方式注入，训练 GIAA 时用"平均被试信息"作条件。人格特质条件在全部三种设定下均优于非条件化组（如 ResNet-50 100-shot：SROCC 0.7046 vs 0.6952，PLCC 0.7509 vs 0.7429）。
+- **局限与商榷之处**：条件注入方式较为朴素（逐元素相乘），且条件化实验仅在 ResNet-50 上验证；作者自己也指出 10-shot 设定的合理性存疑（10-shot 与对照组差距很小）；情绪三分类中把"敬畏（awe）"归入"中性"值得商榷；主观实验中被试的标注疲劳效应未作显式建模。
+- **影响**：PARA 已成为后续个性化美学/质量评估研究的常用数据集；"被试信息作为条件先验"的思路启发了后续大量利用人格与画像信息的美学建模工作，也使 OPPO 将此类技术应用于手机相册的个性化照片推荐成为可能。
+
+---
+
+## 附录要点
+
+- **补充材料**：正文 3.4 节脚注指明"标注质量控制策略的细节见补充材料"（本 arXiv HTML 提取版本未包含补充材料正文，故从略）。
+- **官方基准**：表 3 中以 ResNet-50 为主干的非条件化 PIAA 结果（标 \* 行）被指定为 PARA 的官方基准，供后续工作公平比较。
+- **数据获取**：PARA 数据集可通过项目主页获取：<https://cv-datasets.institutecv.com/#/data-sets>。
+- **图像来源构成**：约 28,000 张来自 CC search 的 Flickr 知识共享图像（按场景标签采样以保证内容多样性），另补充约 3,000 张来自 Unsplash 及 SPAQ、KonIQ-10K 的具有清晰美学真值的图像（用于平衡美学分数分布）。
+
+---
+
+## 创新点提炼
+
+1. **"面向图像 + 面向人"的双视角标签体系**。不同于 FLICKR-AES、AADB 等仅提供面向图像的客观属性标注，PARA 首次在 PIAA 数据库中同时引入 4 项面向人的主观属性（内容偏好、判断难度、情绪、分享意愿），把"人"本身作为标注对象，为个性化美学建模提供了直接、可量化的监督信号，也把 PIAA 研究与社会计算、心理感受分析连接起来。
+
+2. **迄今规模最大的个性化美学主观实验**。31,220 张图像 × 438 名被试 × 13 维标注，总标注量约 972 万条（每图平均 25.87 人次标注），在标注总量、标注维度数与被试数上全面超越此前数据库（AADB：600 k/12 维/190 人；FLICKR-AES：200 k/1 维/210 人）；并首次随库发布脱敏被试画像——以 BFI-10 问卷量化的大五人格特质、教育经历、艺术与摄影经验等，使"用户画像驱动的美学研究"成为可能。
+
+3. **心理学量表与美学标注的系统关联分析**。通过按被试主导人格分组计算"美学属性-美学分数"的 PLCC，发现高神经质（N）被试的属性-美学相关结构显著区别于其他人格组（对应更强的情绪反应），高外向性（E）被试打分时更看重图像内容（PLCC>0.8，强相关）；结合"低分图像更难判断"（被试自述眩晕、场景难辨认，且在'更差/差得多'间更易困惑）与"情绪-美学强相关"（<2.0 分多传递负面情绪、>4.0 分多传递正面情绪）等发现，首次以大规模数据证明个性化审美偏好可被主观属性"镜像"反映。
+
+4. **带质量控制的主观实验协议**。将数据库划分为 446 个场次，每场包含 70 张待标注图像 + 5 张预先标注的标准图像 + 5 张重复标注图像，分别用于锚定标注质量与检验标注一致性；被试招募设有四道门槛（良好健康状态且无强迫工作、约半年以上标注经验且工作合格、画像多样性覆盖年龄/性别/学历/人格、通过石原色盲测试），并尊重被试的知情同意与随时退出权；配合网页标注平台实现"合格标注自动入库、无需人工验收"。
+
+5. **条件化 PIAA 基准：人格作为条件先验的首次计算验证**。将人格特质、艺术经验、摄影经验以"乘到网络末层输出"的方式注入两阶段训练（先用"平均被试信息"作条件训练条件化 GIAA，再微调为条件化 PIAA），在不微调/10-shot/100-shot 三种设定下均稳定优于非条件化组（ResNet-50 100-shot：SROCC 0.7046 vs 0.6952，PLCC 0.7509 vs 0.7429，其中人格特质条件最优；GIAA 层面同样有效，如人格条件 MSE 0.0416 vs 无条件 0.0433），首次从计算角度证明了"图像美学 × 被试特征 → 个性化品味"的交互机制；作者同时基于 10-shot 与对照组接近的现象，对少样本设定本身的合理性提出了反思。
+
+---
+
+*注：本翻译基于 arXiv（LaTeXML）转换的 Markdown 版本，已忽略站点导航残留、脚注符号与图像占位符；参考文献列表从略，正文引用保留 (作者, 年份) 格式。原文中个别疑似笔误（如文献 [7] 被写作 "Zhu et al."、文献 [19] 被写作 "Cui et al."，二者第一作者分别为 Leida Li 与 Jun Yu）已在相应位置以译注形式标明。*
+</script>
+<script src="../assets/app.js?v=5"></script>
+</body>
+</html>

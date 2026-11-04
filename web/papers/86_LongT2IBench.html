@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>86 · LongT2IBench 长提示 T2I 对齐评测 — 中英对照精读</title>
+<link rel="stylesheet" href="../assets/style.css?v=6">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="back" href="../index.html">← 首页</a>
+  <div class="tb-title"><span class="num">86</span>LongT2IBench 长提示 T2I 对齐评测</div>
+  <div class="tb-controls">
+    <a class="tb-link" href="https://arxiv.org/abs/2512.09271" target="_blank" rel="noopener">arXiv</a>
+    <label class="sync"><input type="checkbox" id="syncToggle"> 滚动同步</label>
+  </div>
+</header>
+<main class="reader">
+  <section class="pane pane-en">
+    <div class="pane-head">ENGLISH 原文 (arXiv HTML)</div>
+    <div class="pane-body" id="enBody">
+<article class="ltx_document ltx_authors_1line">
+<h1 class="ltx_title ltx_title_document">LongT2IBench: A Benchmark for Evaluating Long Text-to-Image Generation with Graph-structured Annotations</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Zhichao Yang
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Tianjiao Gu
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Jianjie Wang
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Feiyu Lin
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Xiangfei Sheng
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Pengfei Chen
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Leida Li
+</span><span id="id1" class="ltx_note ltx_note_frontmatter ltx_thanks_correspondence ltx_role_thanks"><sup class="ltx_note_mark">†</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">†</sup><span class="ltx_note_type">thanks: </span>Corresponding authors.</span></span></span></span></div>
+
+<div id="abstract1" class="ltx_abstract"><h6 class="ltx_title ltx_title_abstract">Abstract</h6>
+    
+<p id="abstract1.1" class="ltx_p">The increasing popularity of long Text-to-Image (T2I) generation has created an urgent need for automatic and interpretable models that can evaluate the image-text alignment in long prompt scenarios. However, the existing T2I alignment benchmarks predominantly focus on short prompt scenarios and only provide MOS or Likert scale annotations. This inherent limitation hinders the development of long T2I evaluators, particularly in terms of the interpretability of alignment. In this study, we contribute <span id="abstract1.1.1" class="ltx_text ltx_font_bold">LongT2IBench</span>, which comprises 14K long text-image pairs accompanied by graph-structured human annotations. Given the detail-intensive nature of long prompts, we first design a Generate-Refine-Qualify annotation protocol to convert them into textual graph structures that encompass entities, attributes, and relations. Through this transformation, fine-grained alignment annotations are achieved based on these granular elements. Finally, the graph-structed annotations are converted into alignment scores and interpretations to facilitate the design of T2I evaluation models. Based on LongT2IBench, we further propose <span id="abstract1.1.2" class="ltx_text ltx_font_bold">LongT2IExpert</span>, a LongT2I evaluator that enables multi-modal large language models (MLLMs) to provide both quantitative scores and structured interpretations through an instruction-tuning process with Hierarchical Alignment Chain-of-Thought (CoT). Extensive experiments and comparisons demonstrate the superiority of the proposed LongT2IExpert in alignment evaluation and interpretation. Data and code have been released in https://welldky.github.io/LongT2IBench-Homepage/.</p>
+  
+</div>
+<div id="id2" class="ltx_logical-block ltx_align_bottom">
+    
+<div id="p1" class="ltx_para">
+<p id="p1.1" class="ltx_p ltx_align_center"><sup id="p1.1.1" class="ltx_sup">1</sup>School of Artificial Intelligence, Xidian University,
+<sup id="p1.1.2" class="ltx_sup">2</sup>State Key Laboratory of Electromechanical Integrated Manufacturing of High-Performance Electronic Equipments, Xidian University</p>
+<p id="p1.2" class="ltx_p ltx_align_center">(yangzhichao, gutianjiao, wangjianjie, linfeiyu)@stu.xidian.edu.cn, xiangfeisheng@gmail.com,</p>
+<p id="p1.3" class="ltx_p ltx_align_center">(chenpengfei, ldli)@xidian.edu.cn</p>
+</div>
+  
+</div>
+<figure id="S0.F1" class="ltx_figure"><img src="https://arxiv.org/html/2512.09271v1/Fig1.png" id="S0.F1.g1" class="ltx_graphics ltx_centering ltx_img_square" style="aspect-ratio:677/805;" width="677" height="805" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 1: </span>Illustration of the graph-structured annotations of LongT2IBench. Compared to existing benchmarks, we focus on T2I alignment in long prompt scenarios, offering both quantitative scores and fine-grained interpretations.</figcaption>
+</figure>
+<section id="Sx1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Introduction</h2>
+
+<div id="Sx1.p1" class="ltx_para">
+<p id="Sx1.p1.1" class="ltx_p">With the extensive application of Text-to-Image (T2I) generation models in fields such as artistic creation and advertising design, user demand for long T2I generation capabilities has significantly increased <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib14" title="" class="ltx_ref">Ko et al. 2023</a>; <a href="#bib.bib37" title="" class="ltx_ref">Zhao et al. 2024</a>; <a href="#bib.bib34" title="" class="ltx_ref">Yang et al. 2024b</a>; <a href="#bib.bib25" title="" class="ltx_ref">Sheng et al. 2025b</a>; <a href="#bib.bib33" title="" class="ltx_ref">Yang et al. 2025</a>)</cite>. This broadened research efforts from short prompts to increasingly complex and lengthy inputs <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib10" title="" class="ltx_ref">Hu et al. 2024</a>; <a href="#bib.bib20" title="" class="ltx_ref">Liu et al. 2024</a>)</cite>. Long prompts inherently contain more elements and detailed descriptions, presenting significant challenges for alignment evaluation. Given the high costs and inefficiencies associated with manual evaluation, developing automatic and interpretable methods for evaluating long T2I alignment has become in urgent need. They can effectively evaluate the performance of existing T2I models and guide the optimization of future models. High-quality, fine-grained annotations of long T2I alignment serve as the essential foundation for developing such evaluation methods.</p>
+</div>
+<div id="Sx1.p2" class="ltx_para">
+<p id="Sx1.p2.1" class="ltx_p">In the past few years, a proliferation of T2I alignment benchmarks have been proposed, along with corresponding evaluation algorithms. Early benchmarks, such as Pick-a-pic <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib13" title="" class="ltx_ref">Kirstain et al. 2023</a>)</cite> and HPDv2 <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib29" title="" class="ltx_ref">Wu et al. 2023</a>)</cite> employed side-by-side comparisons to evaluate the alignment between generated image and text. Other benchmarks like ImageReward <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib31" title="" class="ltx_ref">Xu et al. 2023</a>)</cite> and EvalAlign <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib26" title="" class="ltx_ref">Tan et al. 2024</a>)</cite> utilized Likert scale annotation, with human annotators providing holistic scores based on general text-image correspondence. Recently, Benchmarks like T2I-CompBench <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib12" title="" class="ltx_ref">Huang et al. 2023</a>)</cite> and GenAI-Bench <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib16" title="" class="ltx_ref">Li et al. 2024a</a>)</cite> introduced curated prompts designed to evaluate specific capabilities of generative models, including counting, spatial relationships, etc. For fine-grained evaluation, benchmarks like TIFA <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib11" title="" class="ltx_ref">Hu et al. 2023</a>)</cite> and EvalMuse-40K <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib6" title="" class="ltx_ref">Han et al. 2024</a>)</cite> decomposed prompts into multiple concise phrases, formulating separate assessments that require human annotators to provide element-wise alignment scores.</p>
+</div>
+<div id="Sx1.p3" class="ltx_para">
+<p id="Sx1.p3.1" class="ltx_p">While existing benchmarks provide valuable insights, they predominantly focus on short prompt scenarios and only provide Mean Opinion Score (MOS) or Likert-scale human annotations (Figure <a href="#S0.F1" title="Figure 1 ‣ LongT2IBench: A Benchmark for Evaluating Long Text-to-Image Generation with Graph-structured Annotations" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>-top). This inherent limitation hinders the development of long T2I evaluators, particularly regarding alignment interpretability. The detail-intensive nature of long prompts presents two essential challenges for obtaining high-quality, fine-grained alignment annotations: (1) <span id="Sx1.p3.1.1" class="ltx_text ltx_font_bold">Detail Overload</span>: it is both challenging and unreliable for annotators to directly provide an overall alignment score. (2) <span id="Sx1.p3.1.2" class="ltx_text ltx_font_bold">Alignment Complexity</span>: element-wise annotations are inadequate in capturing the intricate alignment relationships present in long prompts, such as connections between distant elements. To address these challenges, we contribute <span id="Sx1.p3.1.3" class="ltx_text ltx_font_bold">LongT2IBench</span>, a benchmark specifically designed for long T2I alignment that provides both quantitative alignment scores and fine-grained interpretations by introducing graph-structured annotations (Figure <a href="#S0.F1" title="Figure 1 ‣ LongT2IBench: A Benchmark for Evaluating Long Text-to-Image Generation with Graph-structured Annotations" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>-bottom). LongT2IBench consists of 3K long prompts and 14K image-text pairs. To ensure the diversity, long prompts are obtained from three sources: human-generated content, AI-generated content, and long image captions. These prompts are first converted into textual graph structures that encompass entities, attributes, and relations. This conversion follows a Generate-Refine-Qualify protocol to ensure exceptional structural fidelity. Through this transformation, fine-grained alignment annotations are achieved based on these granular elements of textual graphs. We also implement a re-verification process to ensure the reliability of the alignment annotations. Finally, the above annotations are converted into alignment scores and interpretations.</p>
+</div>
+<div id="Sx1.p4" class="ltx_para">
+<p id="Sx1.p4.1" class="ltx_p">Building upon LongT2IBench, we further propose <span id="Sx1.p4.1.1" class="ltx_text ltx_font_bold">LongT2IExpert</span>, a long T2I evaluator which empowers multi-modal large language models (MLLMs) to provide both quantitative scores and structured interpretations. Inspired by the construction of LongT2IBench, we first introduce a Hierarchical Alignment Chain-of-Thought (HA-CoT) to prompt MLLMs to engage in structured alignment reasoning. HA-CoT features a three-hop reasoning process, progressively guiding models from fine-grained analysis to comprehensive evaluation. Then, human-annotated alignment scores and interpretations are utilized as supervision signals to fine-tune MLLMs in a multi-task manner. With these designs, we achieve a unified scoring and interpreting model that aligns closely with human evaluators.</p>
+</div>
+<div id="Sx1.p5" class="ltx_para">
+<p id="Sx1.p5.1" class="ltx_p">The contributions of this work are three-fold:</p>
+</div>
+<div id="Sx1.p6" class="ltx_para">
+<ul id="Sx1.I1" class="ltx_itemize">
+<li id="Sx1.I1.i1" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="Sx1.I1.i1.p1" class="ltx_para">
+<p id="Sx1.I1.i1.p1.1" class="ltx_p">We contribute LongT2IBench, a benchmark of Long Text-to-Image generation that contains 14K long text-image pairs with graph-structured annotations. It provides both quantitative scores and fine-grained interpretations, elucidating the intricate alignment relationships between textual elements and visual components.</p>
+</div></li>
+<li id="Sx1.I1.i2" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="Sx1.I1.i2.p1" class="ltx_para">
+<p id="Sx1.I1.i2.p1.1" class="ltx_p">We propose LongT2IExpert, a novel long T2I evaluator that equips multimodal large language models (MLLMs) with structured alignment reasoning capabilities, simultaneously performing alignment scoring and interpreting.</p>
+</div></li>
+<li id="Sx1.I1.i3" class="ltx_item" style="list-style-type:none;"><span class="ltx_tag ltx_tag_item">•</span> 
+<div id="Sx1.I1.i3.p1" class="ltx_para">
+<p id="Sx1.I1.i3.p1.1" class="ltx_p">We establish a systematic framework for examining long T2I alignment abilities. It comprehensively assesses both scoring accuracy and interpretation quality, while thoroughly testing performance across varying text lengths and alignment dimensions: entity, attribute, and relation.</p>
+</div></li>
+</ul>
+</div>
+</section>
+<section id="Sx2" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Related Works</h2>
+
+<div id="Sx2.p1" class="ltx_para">
+<p id="Sx2.p1.1" class="ltx_p"><span id="Sx2.p1.1.1" class="ltx_text ltx_font_bold">Text-to-Image Alignment Benchmarks.</span> Many benchmarks have been developed to evaluate the text-to-image alignment of generation models. Early benchmarks such as Pick-a-pic <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib13" title="" class="ltx_ref">Kirstain et al. 2023</a>)</cite> and HPDv2 <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib29" title="" class="ltx_ref">Wu et al. 2023</a>)</cite>, compare models side-by-side to evaluate generated image quality. Other benchmarks like ImageReward <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib31" title="" class="ltx_ref">Xu et al. 2023</a>)</cite> and EvalAlign <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib26" title="" class="ltx_ref">Tan et al. 2024</a>)</cite> utilized Likert scale annotation to collect overall alignment scores. For fine-grained evaluation, benchmarks like TIFA <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib11" title="" class="ltx_ref">Hu et al. 2023</a>)</cite> and EvalMuse-40K <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib6" title="" class="ltx_ref">Han et al. 2024</a>)</cite> extract concise phrases from prompts and collect element-wise annotations. With increasing prompt length, benchmarks specifically designed for long T2I alignment remain scarce. In this paper, we contribute LongT2IBench, providing a foundation for examining and developing long T2I alignment evaluation models.</p>
+</div>
+<div id="Sx2.p2" class="ltx_para">
+<p id="Sx2.p2.1" class="ltx_p"><span id="Sx2.p2.1.1" class="ltx_text ltx_font_bold">Text-to-Image Alignment Evaluators.</span> Early T2I evaluators directly utilized vision-language models (VLMs) for alignment evaluation, such as CLIPScore <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib7" title="" class="ltx_ref">Hessel et al. 2021</a>)</cite> and BLIP2Score <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib18" title="" class="ltx_ref">Li et al. 2023</a>)</cite>. With the extensive collection of alignment annotations, PickScore <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib13" title="" class="ltx_ref">Kirstain et al. 2023</a>)</cite> and ImageReward <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib31" title="" class="ltx_ref">Xu et al. 2023</a>)</cite> fine-tuned VLMs to align with human ratings. With MLLMs rapidly advanced, VQAScore <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib17" title="" class="ltx_ref">Li et al. 2024b</a>)</cite> and Q-Eval-Score <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib36" title="" class="ltx_ref">Zhang et al. 2025</a>)</cite> leverage their powerful vision-language capabilities for T2I alignment. While existing models have achieved remarkable progress, their evaluation performance in long-prompt contexts remains largely unexplored. In this paper, we address this gap and introduce LongT2IExpert, a model specifically designed for long T2I alignment.</p>
+</div>
+<figure id="Sx2.F2" class="ltx_figure"><img src="https://arxiv.org/html/2512.09271v1/Fig2.png" id="Sx2.F2.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:691/291;" width="691" height="291" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 2: </span>Overview of the construction pipeline for <span id="Sx2.F2.5" class="ltx_text ltx_font_bold">LongT2IBench</span>. The pipeline consists of three stages: (a) <span id="Sx2.F2.6" class="ltx_text ltx_font_bold">Data Preparation.</span> Long prompts are collected from three sources and input into various T2I models to generate images. (b) <span id="Sx2.F2.7" class="ltx_text ltx_font_bold">Data Annotation.</span> Long prompts are converted into textual graph structures, and fine-grained image-textual graph alignment annotations are achieved. (c) <span id="Sx2.F2.8" class="ltx_text ltx_font_bold">Label Generation.</span> Two categories of labels: quantitative alignment scores and alignment interpretations are produced based on graph-structured human annotations.</figcaption>
+</figure>
+<div id="Sx2.p3" class="ltx_para">
+<p id="Sx2.p3.1" class="ltx_p"><span id="Sx2.p3.1.1" class="ltx_text ltx_font_bold">Text-to-Image Models for Long Prompt.</span> Traditional CLIP-based T2I generative models face limitations of token length restrictions, hindering their ability to process long prompts <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib23" title="" class="ltx_ref">Radford et al. 2021</a>)</cite>. To address the dilemma, recent researches employed large language models (LLMs) as text encoders to improve semantic extraction, with representative models such as Stable Diffusion 3.5 <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib4" title="" class="ltx_ref">Esser et al. 2024</a>)</cite>. Alternatively, other approaches introduced architectural improvements to the CLIP to accommodate longer inputs. LongCLIP <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib35" title="" class="ltx_ref">Zhang et al. 2024</a>)</cite> offers a plug-and-play alternative to standard CLIP that supports long-text processing. LongAlign <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib20" title="" class="ltx_ref">Liu et al. 2024</a>)</cite> decomposes long prompts into individual sentences for separate encoding, enabling long T2I generation. The rapid advancement in long-prompt generation has created an urgent need for automatic, interpretable long T2I alignment evaluation models.</p>
+</div>
+</section>
+<section id="Sx3" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">LongT2IBench</h2>
+
+<div id="Sx3.p1" class="ltx_para">
+<p id="Sx3.p1.1" class="ltx_p">In this section, we detail LongT2IBench, a benchmark for evaluating long text-to-image alignment by introducing graph-structured annotations. The overview of construction pipeline for LongT2IBench is illustrated in Figure <a href="#Sx2.F2" title="Figure 2 ‣ Related Works ‣ LongT2IBench: A Benchmark for Evaluating Long Text-to-Image Generation with Graph-structured Annotations" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a>. Throughout the benchmark, we employ multiple strategies to ensure both diversity and reliability. Next, we will elaborate on the construction process from three aspects: data preparation, data annotation, and label generation, followed by a statistical analysis.</p>
+</div>
+<section id="Sx3.SSx1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Data Preparation</h3>
+
+<div id="Sx3.SSx1.p1" class="ltx_para">
+<p id="Sx3.SSx1.p1.1" class="ltx_p"><span id="Sx3.SSx1.p1.1.1" class="ltx_text ltx_font_bold">Long Prompt Collection.</span> To ensure prompt diversity and comprehensive evaluation of long T2I alignment capabilities, we collect long prompts from three sources and controlled length distribution across different word-count intervals. Specifically, the long prompts are sampled from human-generated content (Human-Gen), AI-generated content (AI-Gen), and long image captions (Img-Cap). Human-Gen prompts are sourced from DiffusionDB <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib28" title="" class="ltx_ref">Wang et al. 2023</a>)</cite>, which contains numerous prompts created by real users. AI-Gen prompts are synthesized using GPT-4 <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib1" title="" class="ltx_ref">Achiam et al. 2023</a>)</cite> following specific templates. Img-Cap prompts are derived from DOCCI <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib21" title="" class="ltx_ref">Onoe et al. 2024</a>)</cite>, where each image is accompanied by a long description with fine-grained visual details. Meanwhile, we ensured balanced sampling across five word-count intervals (30-50, 50-70, 70-90, 90-110, 110+) to systematically assess T2I evaluators’ alignment capabilities at varying text lengths.</p>
+</div>
+<div id="Sx3.SSx1.p2" class="ltx_para">
+<p id="Sx3.SSx1.p2.1" class="ltx_p"><span id="Sx3.SSx1.p2.1.1" class="ltx_text ltx_font_bold">Text-to-Image Generation.</span> To ensure the diversity of the generated images, we select six distinct types of text-to-image generative models. These models are categorized into three groups: (1) basic open-source popular T2I models, namely Stable Diffusion v3.5 <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib4" title="" class="ltx_ref">Esser et al. 2024</a>)</cite> and PixArt-<math id="Sx3.SSx1.p2.m1" class="ltx_Math" alttext="\alpha" display="inline" intent=":literal"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math> <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib3" title="" class="ltx_ref">Chen et al. 2024</a>)</cite>; (2) powerful proprietary T2I models, including DALL-E 3 <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib22" title="" class="ltx_ref">OpenAI 2023</a>)</cite> and Midjourney v6 <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib8" title="" class="ltx_ref">Holz 2023</a>)</cite>; (3) tailored long T2I models, including LongCLIP-SD <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib35" title="" class="ltx_ref">Zhang et al. 2024</a>)</cite> and LongSD <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib20" title="" class="ltx_ref">Liu et al. 2024</a>)</cite>. For each long prompt, we utilize the default settings of these models to generate images, ensuring a comprehensive dataset for annotation.</p>
+</div>
+</section>
+<section id="Sx3.SSx2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Data Annotation</h3>
+
+<div id="Sx3.SSx2.p1" class="ltx_para">
+<p id="Sx3.SSx2.p1.1" class="ltx_p"><span id="Sx3.SSx2.p1.1.1" class="ltx_text ltx_font_bold">Textual Graph Transformation.</span> Graph representation has proven a powerful paradigm for modeling complex relationships and structural information in various domains <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib5" title="" class="ltx_ref">Hamilton 2020</a>; <a href="#bib.bib32" title="" class="ltx_ref">Yang et al. 2024a</a>)</cite>. Given the detail-intensive nature of long prompts, we perform textual graph transformation on the collected prompts. This establishes the foundation for more objective and accurate text-image alignment annotations. Additionally, the graph structure enables precise localization of aligned and misaligned elements, allowing us to better evaluate long T2I alignment capabilities.</p>
+</div>
+<div id="Sx3.SSx2.p2" class="ltx_para">
+<p id="Sx3.SSx2.p2.1" class="ltx_p">To ensure exceptional graph structural fidelity, we adopt a systematic three-phase transformation protocol. First, we design specific input prompts and output formats to guide GPT-4 to <span id="Sx3.SSx2.p2.1.1" class="ltx_text ltx_font_bold">generate</span> textual graphs, converting long prompts into graph-structures comprising entities, attributes, and relations. Second, trained human annotators <span id="Sx3.SSx2.p2.1.2" class="ltx_text ltx_font_bold">refine</span> these generated graph structures to ensure accuracy. This refinement process involves removing inappropriate conversions and making detailed adjustments through additions, deletions, and modifications to coarse transformations. Third, we perform a double-check to <span id="Sx3.SSx2.p2.1.3" class="ltx_text ltx_font_bold">qualify</span> the refined transformations from the previous stage, ensuring reliability. Only conversion graphs that receive consistent agreement are retained in the final dataset. This rigorous multi-stage process ensures high-quality structural graph transformation that accurately capture the semantic relationships of long prompts. Throughout this process, 3K precise conversions were retained from an initial collection of 4.5K long prompts. A statistical analysis on the number of entities, attributes, and relations within the transformed graph structures in <span id="Sx3.SSx2.p2.1.4" class="ltx_text ltx_font_bold">LongPrompt-3K</span> are illustrated in Figure <a href="#Sx3.F3" title="Figure 3 ‣ Data Annotation ‣ LongT2IBench ‣ LongT2IBench: A Benchmark for Evaluating Long Text-to-Image Generation with Graph-structured Annotations" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a>. The instructions for graph generation using GPT-4, the operational interface for Refine and Qualify stages, along with annotations training guidelines are detailed in the Appendix.</p>
+</div>
+<figure id="Sx3.F3" class="ltx_figure"><img src="https://arxiv.org/html/2512.09271v1/Fig3.png" id="Sx3.F3.g1" class="ltx_graphics ltx_centering ltx_img_square" style="aspect-ratio:628/568;" width="628" height="568" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 3: </span>The Source Distribution Map of <span id="Sx3.F3.2" class="ltx_text ltx_font_bold">LongPrompt-3K</span>. The long prompts are sampled from three sources: Human-Gen, AI-Gen and Img-Cap. These prompts are evenly distributed across different word count ranges, with the number of entities, attributes, and relationships in each range also being statistically presented. </figcaption>
+</figure>
+<div id="Sx3.SSx2.p3" class="ltx_para">
+<p id="Sx3.SSx2.p3.1" class="ltx_p"><span id="Sx3.SSx2.p3.1.1" class="ltx_text ltx_font_bold">Image-textual graph Alignment.</span> Based on transformed textual graphs, we implement an initial annotation followed by a re-verification process to obtain reliable image-textual graph alignment annotations. Trained annotators perform initial annotations, making binary decisions on the alignment between transformed entities, attributes, and relations with the corresponding images, namely E-Align, A-Align, and R-Align respectively. To improve efficiency, we incorporate hierarchical annotation logic into our platform design, where annotators first evaluate entities, and the platform automatically filters out attributes and relationships associated with misaligned entities. Furthermore, we engage three independent annotators to review the initial annotation results, removing instances with significant disagreement while retaining alignment annotations that achieve majority consensus. After annotation, 14K image-text pairs are retained from the original 18K samples for the final dataset. Discarded data includes images containing NSFW content, as well as instances with severe generation distortions.</p>
+</div>
+<figure id="Sx3.F4" class="ltx_figure">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_2">
+<figure id="Sx3.F4.sf1" class="ltx_figure ltx_figure_panel ltx_align_center"><img src="https://arxiv.org/html/2512.09271v1/Fig4-1.png" id="Sx3.F4.sf1.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:698/491;" width="698" height="491" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">(a) </span></figcaption>
+</figure></div><div class="ltx_flex_cell ltx_flex_size_2">
+<figure id="Sx3.F4.sf2" class="ltx_figure ltx_figure_panel ltx_align_center"><img src="https://arxiv.org/html/2512.09271v1/Fig4-2.png" id="Sx3.F4.sf2.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:698/468;" width="698" height="468" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">(b) </span></figcaption>
+</figure></div><div class="ltx_flex_break"></div><div class="ltx_flex_cell ltx_flex_size_2">
+<figure id="Sx3.F4.sf3" class="ltx_figure ltx_figure_panel ltx_align_center"><img src="https://arxiv.org/html/2512.09271v1/Fig4-3.png" id="Sx3.F4.sf3.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:698/406;" width="698" height="406" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">(c) </span></figcaption>
+</figure></div><div class="ltx_flex_cell ltx_flex_size_2">
+<figure id="Sx3.F4.sf4" class="ltx_figure ltx_figure_panel ltx_align_center"><img src="https://arxiv.org/html/2512.09271v1/Fig4-4.png" id="Sx3.F4.sf4.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:698/399;" width="698" height="399" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">(d) </span></figcaption>
+</figure></div></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 4: </span>Statistical Analysis. (a) Average alignment scores across five word-count intervals. (b) Distribution of annotated alignment scores for six T2I generative models. (c) Alignment and misalignment rates across entities, attributes, and relations. (d) Alignment percentages among six relation categories (Action, Connection, Description, Possession, From/to and Spatial relation).</figcaption>
+</figure>
+</section>
+<section id="Sx3.SSx3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Label Generation</h3>
+
+<div id="Sx3.SSx3.p1" class="ltx_para">
+<p id="Sx3.SSx3.p1.1" class="ltx_p"><span id="Sx3.SSx3.p1.1.1" class="ltx_text ltx_font_bold">Alignment Score.</span> We envision future text-to-image generative models capable of aligning with all textual details. Therefore, we treat all entities, attributes, and relations in the textual graph with equal importance. The alignment score is defined as the ratio of aligned elements to the total number. We analyzed the average alignment scores across five word-count intervals, as illustrated in Figure <a href="#Sx3.F4" title="Figure 4 ‣ Data Annotation ‣ LongT2IBench ‣ LongT2IBench: A Benchmark for Evaluating Long Text-to-Image Generation with Graph-structured Annotations" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>(a). The statistical results demonstrate that alignment scores gradually decrease as prompt length increases, underscoring the importance of evaluating text-image alignment in long-prompt scenarios. Additionally, Figure <a href="#Sx3.F4" title="Figure 4 ‣ Data Annotation ‣ LongT2IBench ‣ LongT2IBench: A Benchmark for Evaluating Long Text-to-Image Generation with Graph-structured Annotations" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>(b) shows the distribution of alignment annotations across six generative models, revealing performance disparities in long-text alignment capabilities, with proprietary models (DALL-E 3 and Midjourney v6) demonstrating relative advantages.</p>
+</div>
+<div id="Sx3.SSx3.p2" class="ltx_para">
+<p id="Sx3.SSx3.p2.1" class="ltx_p"><span id="Sx3.SSx3.p2.1.1" class="ltx_text ltx_font_bold">Alignment Interpretation.</span> In long-prompt scenarios, the need for alignment interpretation is more critical, particularly in localizing misaligned elements that can guide optimization for generation models. Leveraging textual graph transformation and image-textual graph alignment annotations, we can derive structured alignment interpretations for each image-text pair, represented as aligned and misaligned entities, attributes, and relations. We analyzed the proportions of alignment and misalignment across these three categories, as illustrated in Figure <a href="#Sx3.F4" title="Figure 4 ‣ Data Annotation ‣ LongT2IBench ‣ LongT2IBench: A Benchmark for Evaluating Long Text-to-Image Generation with Graph-structured Annotations" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>(c). The results reveal that relation misalignment constitutes a particularly significant proportion. During the annotation process, we instructed annotators to classify relations into distinct categories, with Figure <a href="#Sx3.F4" title="Figure 4 ‣ Data Annotation ‣ LongT2IBench ‣ LongT2IBench: A Benchmark for Evaluating Long Text-to-Image Generation with Graph-structured Annotations" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>(d) presenting the alignment and misalignment proportions across these relation types.</p>
+</div>
+<figure id="Sx3.F5" class="ltx_figure"><img src="https://arxiv.org/html/2512.09271v1/Fig5.png" id="Sx3.F5.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:698/481;" width="698" height="481" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 5: </span>Overall pipeline of the proposed <span id="Sx3.F5.2" class="ltx_text ltx_font_bold">LongT2IExpert</span>. A Hierarchical Alignment Chain-of-Thought (CoT) is designed to instruct MLLMs for structured alignment reasoning. Numerical alignment scores and graph-structured interpretations are utilized to train MLLMs for alignment scoring and interpreting in a multi-task manner.</figcaption>
+</figure>
+</section>
+</section>
+<section id="Sx4" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">LongT2IExpert</h2>
+
+<div id="Sx4.p1" class="ltx_para">
+<p id="Sx4.p1.1" class="ltx_p">Building on the proposed LongT2IBench, we propose <span id="Sx4.p1.1.1" class="ltx_text ltx_font_bold">LongT2IExpert</span>, a long T2I evaluator that enables multi-modal large language models (MLLMs) to provide both quantitative scores and structured interpretations through an instruction-tuning process with Hierarchical Alignment Chain-of-Thought (HA-CoT). The overall pipeline is illustrated in Figure <a href="#Sx3.F5" title="Figure 5 ‣ Label Generation ‣ LongT2IBench ‣ LongT2IBench: A Benchmark for Evaluating Long Text-to-Image Generation with Graph-structured Annotations" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a>.</p>
+</div>
+<section id="Sx4.SSx1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Instructing MLLMs for Alignment Reasoning</h3>
+
+<div id="Sx4.SSx1.p1" class="ltx_para">
+<p id="Sx4.SSx1.p1.1" class="ltx_p">The evaluation of Long T2I alignment requires that models possess both the capability to analyze long texts and the ability to achieve multimodal alignment. This imposes high demands on the foundational capabilities of the model, leading us to select a multimodal large language model as our backbone, i.e. Qwen2.5-VL-7B-Instruct <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib2" title="" class="ltx_ref">Bai et al. 2023</a>)</cite>. However, even with this advanced architecture, the characteristics of Detail Overload and Alignment Complexity inherent in this task render alignment evaluation a challenging endeavor. Inspired by the construction process of LongT2IBench, we introduce a Hierarchical Alignment Chain-of-Thought (HA-CoT) to guide MLLMs in mimicking human-like structured alignment reasoning.</p>
+</div>
+<div id="Sx4.SSx1.p2" class="ltx_para">
+<p id="Sx4.SSx1.p2.1" class="ltx_p">HA-CoT features a three-hop reasoning process. In the initial stage, the MLLM acts as an Entity Aligner, analyzing all entities mentioned in the long text and determining their alignment with the image. In the second phase, acting as an Attribute and Relation Aligner, it examines the alignment of attributes and relations associated with each aligned entity. Finally, based on the previous analysis, it synthesizes the overall alignment situation and provides a comprehensive alignment score. Throughout the structured CoT reasoning process, MLLMs perform a multi-faceted alignment evaluation that mimics the deliberation of a human evaluator.</p>
+</div>
+</section>
+<section id="Sx4.SSx2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Training MLLMs for Alignment Evaluation</h3>
+
+<div id="Sx4.SSx2.p1" class="ltx_para">
+<p id="Sx4.SSx2.p1.1" class="ltx_p">Building on the structured alignment reasoning process, we utilize high-quality alignment scores and interpretations as supervision signals for training MLLMs in alignment evaluation. Inspired by LISA <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib15" title="" class="ltx_ref">Lai et al. 2024</a>; <a href="#bib.bib24" title="" class="ltx_ref">Sheng et al. 2025a</a>)</cite>, which uses special tokens to enable reasoning segmentation capabilities in MLLMs, we expand the original LLM vocabulary with a new token <math id="Sx4.SSx2.p1.m1" class="ltx_Math" alttext="&lt;" display="inline" intent=":literal"><semantics><mo>&lt;</mo><annotation encoding="application/x-tex">&lt;</annotation></semantics></math>Level<math id="Sx4.SSx2.p1.m2" class="ltx_Math" alttext="&gt;" display="inline" intent=":literal"><semantics><mo>&gt;</mo><annotation encoding="application/x-tex">&gt;</annotation></semantics></math> to signify the request for a numerical score output. Simultaneously, we convert the graph-based human annotations into JSON formats, preserving the original structured information while facilitating easier parsing by MLLMs. These approaches allow us to leverage the powerful understanding and reasoning capabilities of MLLMs for simultaneous alignment scoring and interpreting. Give a long prompt <math id="Sx4.SSx2.p1.m3" class="ltx_Math" alttext="x_{txt}" display="inline" intent=":literal"><semantics><msub><mi>x</mi><mrow><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>x</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi></mrow></msub><annotation encoding="application/x-tex">x_{txt}</annotation></semantics></math> along with the generated image <math id="Sx4.SSx2.p1.m4" class="ltx_Math" alttext="x_{img}" display="inline" intent=":literal"><semantics><msub><mi>x</mi><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>m</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow></msub><annotation encoding="application/x-tex">x_{img}</annotation></semantics></math> and pre-defined CoT, we feed them into the MLLM <math id="Sx4.SSx2.p1.m5" class="ltx_Math" alttext="\mathcal{F}" display="inline" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">ℱ</mi><annotation encoding="application/x-tex">\mathcal{F}</annotation></semantics></math>, which in turn outputs a text response <math id="Sx4.SSx2.p1.m6" class="ltx_Math" alttext="\hat{y}_{txt}" display="inline" intent=":literal"><semantics><msub><mover accent="true"><mi>y</mi><mo>^</mo></mover><mrow><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>x</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi></mrow></msub><annotation encoding="application/x-tex">\hat{y}_{txt}</annotation></semantics></math>:</p>
+<table id="Sx4.E1" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx4.E1.m1" class="ltx_Math" alttext="\hat{y}_{txt}=\mathcal{F}\left(x_{txt},x_{img},\text{CoT}\right)," display="block" intent=":literal"><semantics><mrow><mrow><msub><mover accent="true"><mi>y</mi><mo>^</mo></mover><mrow><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>x</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi></mrow></msub><mo>=</mo><mrow><mi class="ltx_font_mathcaligraphic">ℱ</mi><mo>⁡</mo><mrow><mo>(</mo><msub><mi>x</mi><mrow><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>x</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi></mrow></msub><mo>,</mo><msub><mi>x</mi><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>m</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow></msub><mo>,</mo><mtext>CoT</mtext><mo>)</mo></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">\hat{y}_{txt}=\mathcal{F}\left(x_{txt},x_{img},\text{CoT}\right),</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(1)</span></td></tr></tbody>
+</table>
+<p id="Sx4.SSx2.p1.2" class="ltx_p">where the output <math id="Sx4.SSx2.p1.m7" class="ltx_Math" alttext="\hat{y}_{txt}" display="inline" intent=":literal"><semantics><msub><mover accent="true"><mi>y</mi><mo>^</mo></mover><mrow><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>x</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi></mrow></msub><annotation encoding="application/x-tex">\hat{y}_{txt}</annotation></semantics></math> would include a <math id="Sx4.SSx2.p1.m8" class="ltx_Math" alttext="&lt;" display="inline" intent=":literal"><semantics><mo>&lt;</mo><annotation encoding="application/x-tex">&lt;</annotation></semantics></math>Json<math id="Sx4.SSx2.p1.m9" class="ltx_Math" alttext="&gt;" display="inline" intent=":literal"><semantics><mo>&gt;</mo><annotation encoding="application/x-tex">&gt;</annotation></semantics></math> token and <math id="Sx4.SSx2.p1.m10" class="ltx_Math" alttext="&lt;" display="inline" intent=":literal"><semantics><mo>&lt;</mo><annotation encoding="application/x-tex">&lt;</annotation></semantics></math>Level<math id="Sx4.SSx2.p1.m11" class="ltx_Math" alttext="&gt;" display="inline" intent=":literal"><semantics><mo>&gt;</mo><annotation encoding="application/x-tex">&gt;</annotation></semantics></math> token corresponding to the predicted alignment interpretation and alignment score, respectively.</p>
+</div>
+<div id="Sx4.SSx2.p2" class="ltx_para">
+<p id="Sx4.SSx2.p2.1" class="ltx_p">We then extract the MLLM last-layer embedding <math id="Sx4.SSx2.p2.m1" class="ltx_Math" alttext="\hat{\mathbf{h}}_{Level}" display="inline" intent=":literal"><semantics><msub><mover accent="true"><mi>𝐡</mi><mo>^</mo></mover><mrow><mi>L</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>v</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>l</mi></mrow></msub><annotation encoding="application/x-tex">\hat{\mathbf{h}}_{Level}</annotation></semantics></math> corresponding to the <math id="Sx4.SSx2.p2.m2" class="ltx_Math" alttext="&lt;" display="inline" intent=":literal"><semantics><mo>&lt;</mo><annotation encoding="application/x-tex">&lt;</annotation></semantics></math>Level<math id="Sx4.SSx2.p2.m3" class="ltx_Math" alttext="&gt;" display="inline" intent=":literal"><semantics><mo>&gt;</mo><annotation encoding="application/x-tex">&gt;</annotation></semantics></math> token and apply a score head <math id="Sx4.SSx2.p2.m4" class="ltx_Math" alttext="\mathcal{R}" display="inline" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">ℛ</mi><annotation encoding="application/x-tex">\mathcal{R}</annotation></semantics></math> to obtain the predicted alignment score <math id="Sx4.SSx2.p2.m5" class="ltx_Math" alttext="\hat{y}_{s}" display="inline" intent=":literal"><semantics><msub><mover accent="true"><mi>y</mi><mo>^</mo></mover><mi>s</mi></msub><annotation encoding="application/x-tex">\hat{y}_{s}</annotation></semantics></math>. The score loss <math id="Sx4.SSx2.p2.m6" class="ltx_Math" alttext="\mathcal{L}_{S}" display="inline" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mi>S</mi></msub><annotation encoding="application/x-tex">\mathcal{L}_{S}</annotation></semantics></math> is calculated using Mean Squared Error (MSE) between the predicted score and the human-annotated score <math id="Sx4.SSx2.p2.m7" class="ltx_Math" alttext="y_{s}" display="inline" intent=":literal"><semantics><msub><mi>y</mi><mi>s</mi></msub><annotation encoding="application/x-tex">y_{s}</annotation></semantics></math>:</p>
+<table id="Sx4.E2" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx4.E2.m1" class="ltx_Math" alttext="\hat{y}_{s}=\mathcal{R}\left(\hat{\mathbf{h}}_{Level}\right),\mathcal{L}_{S}=(\hat{y}_{s}-y_{s})^{2}." display="block" intent=":literal"><semantics><mrow><mrow><mrow><msub><mover accent="true"><mi>y</mi><mo>^</mo></mover><mi>s</mi></msub><mo>=</mo><mrow><mi class="ltx_font_mathcaligraphic">ℛ</mi><mo>⁡</mo><mrow><mo>(</mo><msub><mover accent="true"><mi>𝐡</mi><mo>^</mo></mover><mrow><mi>L</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>v</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>l</mi></mrow></msub><mo>)</mo></mrow></mrow></mrow><mo>,</mo><mrow><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mi>S</mi></msub><mo>=</mo><msup><mrow><mo stretchy="false">(</mo><mrow><msub><mover accent="true"><mi>y</mi><mo>^</mo></mover><mi>s</mi></msub><mo>−</mo><msub><mi>y</mi><mi>s</mi></msub></mrow><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow></mrow><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">\hat{y}_{s}=\mathcal{R}\left(\hat{\mathbf{h}}_{Level}\right),\mathcal{L}_{S}=(\hat{y}_{s}-y_{s})^{2}.</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(2)</span></td></tr></tbody>
+</table>
+<p id="Sx4.SSx2.p2.2" class="ltx_p">For alignment interpretation, we decode the <math id="Sx4.SSx2.p2.m8" class="ltx_Math" alttext="&lt;" display="inline" intent=":literal"><semantics><mo>&lt;</mo><annotation encoding="application/x-tex">&lt;</annotation></semantics></math>Json<math id="Sx4.SSx2.p2.m9" class="ltx_Math" alttext="&gt;" display="inline" intent=":literal"><semantics><mo>&gt;</mo><annotation encoding="application/x-tex">&gt;</annotation></semantics></math> token into the graph-structed interpretation <math id="Sx4.SSx2.p2.m10" class="ltx_Math" alttext="\hat{\mathbf{G}}\left(E,R,A\right)" display="inline" intent=":literal"><semantics><mrow><mover accent="true"><mi>𝐆</mi><mo>^</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo>(</mo><mi>E</mi><mo>,</mo><mi>R</mi><mo>,</mo><mi>A</mi><mo>)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat{\mathbf{G}}\left(E,R,A\right)</annotation></semantics></math>, where <math id="Sx4.SSx2.p2.m11" class="ltx_Math" alttext="E,R,A" display="inline" intent=":literal"><semantics><mrow><mi>E</mi><mo>,</mo><mi>R</mi><mo>,</mo><mi>A</mi></mrow><annotation encoding="application/x-tex">E,R,A</annotation></semantics></math> represent entities, relations, and attributes, respectively. The interpretation loss <math id="Sx4.SSx2.p2.m12" class="ltx_Math" alttext="\mathcal{L}_{I}" display="inline" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mi>I</mi></msub><annotation encoding="application/x-tex">\mathcal{L}_{I}</annotation></semantics></math> is calculated using cross-entropy between the predicted interpretation and the ground-truth interpretation <math id="Sx4.SSx2.p2.m13" class="ltx_Math" alttext="\mathbf{G}" display="inline" intent=":literal"><semantics><mi>𝐆</mi><annotation encoding="application/x-tex">\mathbf{G}</annotation></semantics></math>:</p>
+<table id="Sx4.E3" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx4.E3.m1" class="ltx_Math" alttext="\mathcal{L}_{I}=\mathbf{CE}\left(\hat{\mathbf{G}},\mathbf{G}\right)." display="block" intent=":literal"><semantics><mrow><mrow><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mi>I</mi></msub><mo>=</mo><mrow><mi>𝐂𝐄</mi><mo>⁡</mo><mrow><mo>(</mo><mover accent="true"><mi>𝐆</mi><mo>^</mo></mover><mo>,</mo><mi>𝐆</mi><mo>)</mo></mrow></mrow></mrow><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">\mathcal{L}_{I}=\mathbf{CE}\left(\hat{\mathbf{G}},\mathbf{G}\right).</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(3)</span></td></tr></tbody>
+</table>
+<p id="Sx4.SSx2.p2.3" class="ltx_p">We incorporate a parameter-efficient LoRA module <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib9" title="" class="ltx_ref">Hu et al. 2022</a>)</cite> for fine-tuning the MLLM. The model is trained end-to-end using the score prediction loss <math id="Sx4.SSx2.p2.m14" class="ltx_Math" alttext="\mathcal{L}_{S}" display="inline" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mi>S</mi></msub><annotation encoding="application/x-tex">\mathcal{L}_{S}</annotation></semantics></math> and the interpretations generation loss <math id="Sx4.SSx2.p2.m15" class="ltx_Math" alttext="\mathcal{L}_{I}" display="inline" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mi>I</mi></msub><annotation encoding="application/x-tex">\mathcal{L}_{I}</annotation></semantics></math>. The overall training objective <math id="Sx4.SSx2.p2.m16" class="ltx_Math" alttext="\mathcal{L}" display="inline" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">ℒ</mi><annotation encoding="application/x-tex">\mathcal{L}</annotation></semantics></math> is the weighted sum of these losses:</p>
+<table id="Sx4.E4" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx4.E4.m1" class="ltx_Math" alttext="\mathcal{L}=\mathcal{L}_{I}+\lambda\cdot\mathcal{L}_{S}," display="block" intent=":literal"><semantics><mrow><mrow><mi class="ltx_font_mathcaligraphic">ℒ</mi><mo>=</mo><mrow><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mi>I</mi></msub><mo>+</mo><mrow><mi>λ</mi><mo lspace="0.222em" rspace="0.222em">⋅</mo><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mi>S</mi></msub></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">\mathcal{L}=\mathcal{L}_{I}+\lambda\cdot\mathcal{L}_{S},</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(4)</span></td></tr></tbody>
+</table>
+<p id="Sx4.SSx2.p2.4" class="ltx_p">where the hyperparameter <math id="Sx4.SSx2.p2.m17" class="ltx_Math" alttext="\lambda" display="inline" intent=":literal"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math> balances the two losses.</p>
+</div>
+<figure id="Sx4.T1" class="ltx_table">
+<table id="Sx4.T1.1" class="ltx_tabular ltx_centering ltx_align_middle">
+<tbody class="ltx_tbody">
+<tr id="Sx4.T1.1.1" class="ltx_tr">
+<td id="Sx4.T1.1.1.1" class="ltx_td ltx_align_left ltx_border_r ltx_border_tt" style="padding-left:2.8pt;padding-right:2.8pt;" rowspan="2"><span id="Sx4.T1.1.1.1.1" class="ltx_text ltx_font_bold">Model</span></td>
+<td id="Sx4.T1.1.1.2" class="ltx_td ltx_align_center ltx_border_r ltx_border_tt" style="padding-left:2.8pt;padding-right:2.8pt;" colspan="2"><span id="Sx4.T1.1.1.2.1" class="ltx_text ltx_font_bold">30-50 words</span></td>
+<td id="Sx4.T1.1.1.3" class="ltx_td ltx_align_center ltx_border_r ltx_border_tt" style="padding-left:2.8pt;padding-right:2.8pt;" colspan="2"><span id="Sx4.T1.1.1.3.1" class="ltx_text ltx_font_bold">50-70 words</span></td>
+<td id="Sx4.T1.1.1.4" class="ltx_td ltx_align_center ltx_border_r ltx_border_tt" style="padding-left:2.8pt;padding-right:2.8pt;" colspan="2"><span id="Sx4.T1.1.1.4.1" class="ltx_text ltx_font_bold">70-90 words</span></td>
+<td id="Sx4.T1.1.1.5" class="ltx_td ltx_align_center ltx_border_r ltx_border_tt" style="padding-left:2.8pt;padding-right:2.8pt;" colspan="2"><span id="Sx4.T1.1.1.5.1" class="ltx_text ltx_font_bold">90-110 words</span></td>
+<td id="Sx4.T1.1.1.6" class="ltx_td ltx_align_center ltx_border_r ltx_border_tt" style="padding-left:2.8pt;padding-right:2.8pt;" colspan="2"><span id="Sx4.T1.1.1.6.1" class="ltx_text ltx_font_bold">110+ words</span></td>
+<td id="Sx4.T1.1.1.7" class="ltx_td ltx_align_center ltx_border_tt" style="padding-left:2.8pt;padding-right:2.8pt;" colspan="3"><span id="Sx4.T1.1.1.7.1" class="ltx_text ltx_font_bold">Overall</span></td></tr>
+<tr id="Sx4.T1.1.2" class="ltx_tr">
+<td id="Sx4.T1.1.2.1" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.2.1.1" class="ltx_text ltx_font_bold">SRCC</span></td>
+<td id="Sx4.T1.1.2.2" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.2.2.1" class="ltx_text ltx_font_bold">PLCC</span></td>
+<td id="Sx4.T1.1.2.3" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.2.3.1" class="ltx_text ltx_font_bold">SRCC</span></td>
+<td id="Sx4.T1.1.2.4" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.2.4.1" class="ltx_text ltx_font_bold">PLCC</span></td>
+<td id="Sx4.T1.1.2.5" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.2.5.1" class="ltx_text ltx_font_bold">SRCC</span></td>
+<td id="Sx4.T1.1.2.6" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.2.6.1" class="ltx_text ltx_font_bold">PLCC</span></td>
+<td id="Sx4.T1.1.2.7" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.2.7.1" class="ltx_text ltx_font_bold">SRCC</span></td>
+<td id="Sx4.T1.1.2.8" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.2.8.1" class="ltx_text ltx_font_bold">PLCC</span></td>
+<td id="Sx4.T1.1.2.9" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.2.9.1" class="ltx_text ltx_font_bold">SRCC</span></td>
+<td id="Sx4.T1.1.2.10" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.2.10.1" class="ltx_text ltx_font_bold">PLCC</span></td>
+<td id="Sx4.T1.1.2.11" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.2.11.1" class="ltx_text ltx_font_bold">SRCC</span></td>
+<td id="Sx4.T1.1.2.12" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.2.12.1" class="ltx_text ltx_font_bold">PLCC</span></td>
+<td id="Sx4.T1.1.2.13" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.2.13.1" class="ltx_text ltx_font_bold">Avg.</span></td></tr>
+<tr id="Sx4.T1.1.3" class="ltx_tr">
+<td id="Sx4.T1.1.3.1" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">CLIPScore</td>
+<td id="Sx4.T1.1.3.2" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.224</td>
+<td id="Sx4.T1.1.3.3" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.235</td>
+<td id="Sx4.T1.1.3.4" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.349</td>
+<td id="Sx4.T1.1.3.5" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.370</td>
+<td id="Sx4.T1.1.3.6" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.271</td>
+<td id="Sx4.T1.1.3.7" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.240</td>
+<td id="Sx4.T1.1.3.8" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.208</td>
+<td id="Sx4.T1.1.3.9" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.202</td>
+<td id="Sx4.T1.1.3.10" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.209</td>
+<td id="Sx4.T1.1.3.11" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.184</td>
+<td id="Sx4.T1.1.3.12" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.269</td>
+<td id="Sx4.T1.1.3.13" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.264</td>
+<td id="Sx4.T1.1.3.14" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.267</td></tr>
+<tr id="Sx4.T1.1.4" class="ltx_tr">
+<td id="Sx4.T1.1.4.1" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">BLIP2Score</td>
+<td id="Sx4.T1.1.4.2" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.384</td>
+<td id="Sx4.T1.1.4.3" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.231</td>
+<td id="Sx4.T1.1.4.4" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.342</td>
+<td id="Sx4.T1.1.4.5" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.358</td>
+<td id="Sx4.T1.1.4.6" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.190</td>
+<td id="Sx4.T1.1.4.7" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.155</td>
+<td id="Sx4.T1.1.4.8" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.215</td>
+<td id="Sx4.T1.1.4.9" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.191</td>
+<td id="Sx4.T1.1.4.10" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.149</td>
+<td id="Sx4.T1.1.4.11" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.061</td>
+<td id="Sx4.T1.1.4.12" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.266</td>
+<td id="Sx4.T1.1.4.13" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.223</td>
+<td id="Sx4.T1.1.4.14" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.245</td></tr>
+<tr id="Sx4.T1.1.5" class="ltx_tr">
+<td id="Sx4.T1.1.5.1" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">PickScore</td>
+<td id="Sx4.T1.1.5.2" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.437</td>
+<td id="Sx4.T1.1.5.3" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.550</td>
+<td id="Sx4.T1.1.5.4" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.368</td>
+<td id="Sx4.T1.1.5.5" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.359</td>
+<td id="Sx4.T1.1.5.6" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.313</td>
+<td id="Sx4.T1.1.5.7" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.328</td>
+<td id="Sx4.T1.1.5.8" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.352</td>
+<td id="Sx4.T1.1.5.9" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.373</td>
+<td id="Sx4.T1.1.5.10" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.153</td>
+<td id="Sx4.T1.1.5.11" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.165</td>
+<td id="Sx4.T1.1.5.12" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.327</td>
+<td id="Sx4.T1.1.5.13" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.344</td>
+<td id="Sx4.T1.1.5.14" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.336</td></tr>
+<tr id="Sx4.T1.1.6" class="ltx_tr">
+<td id="Sx4.T1.1.6.1" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">ImageReward</td>
+<td id="Sx4.T1.1.6.2" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.283</td>
+<td id="Sx4.T1.1.6.3" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.339</td>
+<td id="Sx4.T1.1.6.4" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.270</td>
+<td id="Sx4.T1.1.6.5" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.319</td>
+<td id="Sx4.T1.1.6.6" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.181</td>
+<td id="Sx4.T1.1.6.7" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.226</td>
+<td id="Sx4.T1.1.6.8" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.187</td>
+<td id="Sx4.T1.1.6.9" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.188</td>
+<td id="Sx4.T1.1.6.10" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">-0.023</td>
+<td id="Sx4.T1.1.6.11" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.072</td>
+<td id="Sx4.T1.1.6.12" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.210</td>
+<td id="Sx4.T1.1.6.13" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.244</td>
+<td id="Sx4.T1.1.6.14" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.227</td></tr>
+<tr id="Sx4.T1.1.7" class="ltx_tr">
+<td id="Sx4.T1.1.7.1" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">HPSv2</td>
+<td id="Sx4.T1.1.7.2" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.540</td>
+<td id="Sx4.T1.1.7.3" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.534</td>
+<td id="Sx4.T1.1.7.4" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.479</td>
+<td id="Sx4.T1.1.7.5" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.473</td>
+<td id="Sx4.T1.1.7.6" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.7.6.1" class="ltx_text ltx_underline">0.394</span></td>
+<td id="Sx4.T1.1.7.7" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.417</td>
+<td id="Sx4.T1.1.7.8" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.395</td>
+<td id="Sx4.T1.1.7.9" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.7.9.1" class="ltx_text ltx_underline">0.408</span></td>
+<td id="Sx4.T1.1.7.10" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.148</td>
+<td id="Sx4.T1.1.7.11" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.151</td>
+<td id="Sx4.T1.1.7.12" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.381</td>
+<td id="Sx4.T1.1.7.13" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.392</td>
+<td id="Sx4.T1.1.7.14" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.387</td></tr>
+<tr id="Sx4.T1.1.8" class="ltx_tr">
+<td id="Sx4.T1.1.8.1" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">VQAScore</td>
+<td id="Sx4.T1.1.8.2" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.504</td>
+<td id="Sx4.T1.1.8.3" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.385</td>
+<td id="Sx4.T1.1.8.4" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.333</td>
+<td id="Sx4.T1.1.8.5" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.360</td>
+<td id="Sx4.T1.1.8.6" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.270</td>
+<td id="Sx4.T1.1.8.7" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.389</td>
+<td id="Sx4.T1.1.8.8" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.195</td>
+<td id="Sx4.T1.1.8.9" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.200</td>
+<td id="Sx4.T1.1.8.10" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.242</td>
+<td id="Sx4.T1.1.8.11" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.225</td>
+<td id="Sx4.T1.1.8.12" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.298</td>
+<td id="Sx4.T1.1.8.13" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.291</td>
+<td id="Sx4.T1.1.8.14" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.295</td></tr>
+<tr id="Sx4.T1.1.9" class="ltx_tr">
+<td id="Sx4.T1.1.9.1" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">FGA-BLIP2</td>
+<td id="Sx4.T1.1.9.2" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.414</td>
+<td id="Sx4.T1.1.9.3" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.399</td>
+<td id="Sx4.T1.1.9.4" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.308</td>
+<td id="Sx4.T1.1.9.5" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.330</td>
+<td id="Sx4.T1.1.9.6" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.193</td>
+<td id="Sx4.T1.1.9.7" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.299</td>
+<td id="Sx4.T1.1.9.8" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.160</td>
+<td id="Sx4.T1.1.9.9" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.171</td>
+<td id="Sx4.T1.1.9.10" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.130</td>
+<td id="Sx4.T1.1.9.11" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.155</td>
+<td id="Sx4.T1.1.9.12" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.230</td>
+<td id="Sx4.T1.1.9.13" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.262</td>
+<td id="Sx4.T1.1.9.14" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.246</td></tr>
+<tr id="Sx4.T1.1.10" class="ltx_tr">
+<td id="Sx4.T1.1.10.1" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">Q-Eval-Score</td>
+<td id="Sx4.T1.1.10.2" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.470</td>
+<td id="Sx4.T1.1.10.3" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.416</td>
+<td id="Sx4.T1.1.10.4" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.460</td>
+<td id="Sx4.T1.1.10.5" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.459</td>
+<td id="Sx4.T1.1.10.6" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.339</td>
+<td id="Sx4.T1.1.10.7" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.382</td>
+<td id="Sx4.T1.1.10.8" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.320</td>
+<td id="Sx4.T1.1.10.9" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.301</td>
+<td id="Sx4.T1.1.10.10" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.10.10.1" class="ltx_text ltx_underline">0.422</span></td>
+<td id="Sx4.T1.1.10.11" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.10.11.1" class="ltx_text ltx_underline">0.365</span></td>
+<td id="Sx4.T1.1.10.12" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.361</td>
+<td id="Sx4.T1.1.10.13" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.355</td>
+<td id="Sx4.T1.1.10.14" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.358</td></tr>
+<tr id="Sx4.T1.1.11" class="ltx_tr">
+<td id="Sx4.T1.1.11.1" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">PickScore*</td>
+<td id="Sx4.T1.1.11.2" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.387</td>
+<td id="Sx4.T1.1.11.3" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.510</td>
+<td id="Sx4.T1.1.11.4" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.530</td>
+<td id="Sx4.T1.1.11.5" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.521</td>
+<td id="Sx4.T1.1.11.6" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.393</td>
+<td id="Sx4.T1.1.11.7" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.432</td>
+<td id="Sx4.T1.1.11.8" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.419</td>
+<td id="Sx4.T1.1.11.9" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.372</td>
+<td id="Sx4.T1.1.11.10" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.250</td>
+<td id="Sx4.T1.1.11.11" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.264</td>
+<td id="Sx4.T1.1.11.12" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.11.12.1" class="ltx_text ltx_underline">0.438</span></td>
+<td id="Sx4.T1.1.11.13" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.439</td>
+<td id="Sx4.T1.1.11.14" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">0.438</td></tr>
+<tr id="Sx4.T1.1.12" class="ltx_tr">
+<td id="Sx4.T1.1.12.1" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">ImageReward*</td>
+<td id="Sx4.T1.1.12.2" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.538</td>
+<td id="Sx4.T1.1.12.3" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.12.3.1" class="ltx_text ltx_underline">0.584</span></td>
+<td id="Sx4.T1.1.12.4" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.12.4.1" class="ltx_text ltx_underline">0.546</span></td>
+<td id="Sx4.T1.1.12.5" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.12.5.1" class="ltx_text ltx_underline">0.574</span></td>
+<td id="Sx4.T1.1.12.6" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.384</td>
+<td id="Sx4.T1.1.12.7" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.398</td>
+<td id="Sx4.T1.1.12.8" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.12.8.1" class="ltx_text ltx_underline">0.399</span></td>
+<td id="Sx4.T1.1.12.9" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.396</td>
+<td id="Sx4.T1.1.12.10" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.167</td>
+<td id="Sx4.T1.1.12.11" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.195</td>
+<td id="Sx4.T1.1.12.12" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.12.12.1" class="ltx_text ltx_underline">0.438</span></td>
+<td id="Sx4.T1.1.12.13" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.439</td>
+<td id="Sx4.T1.1.12.14" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.12.14.1" class="ltx_text ltx_underline">0.439</span></td></tr>
+<tr id="Sx4.T1.1.13" class="ltx_tr">
+<td id="Sx4.T1.1.13.1" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">FGA-BLIP2*</td>
+<td id="Sx4.T1.1.13.2" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.13.2.1" class="ltx_text ltx_underline">0.570</span></td>
+<td id="Sx4.T1.1.13.3" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.568</td>
+<td id="Sx4.T1.1.13.4" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.514</td>
+<td id="Sx4.T1.1.13.5" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.527</td>
+<td id="Sx4.T1.1.13.6" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.371</td>
+<td id="Sx4.T1.1.13.7" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.13.7.1" class="ltx_text ltx_underline">0.475</span></td>
+<td id="Sx4.T1.1.13.8" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.327</td>
+<td id="Sx4.T1.1.13.9" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.355</td>
+<td id="Sx4.T1.1.13.10" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.126</td>
+<td id="Sx4.T1.1.13.11" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">0.144</td>
+<td id="Sx4.T1.1.13.12" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.406</td>
+<td id="Sx4.T1.1.13.13" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.13.13.1" class="ltx_text ltx_underline">0.444</span></td>
+<td id="Sx4.T1.1.13.14" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.425</td></tr>
+<tr id="Sx4.T1.1.14" class="ltx_tr">
+<td id="Sx4.T1.1.14.1" class="ltx_td ltx_align_left ltx_border_bb ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.14.1.1" class="ltx_text ltx_font_bold">LongT2IExpert</span></td>
+<td id="Sx4.T1.1.14.2" class="ltx_td ltx_align_left ltx_border_bb ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.14.2.1" class="ltx_text ltx_font_bold">0.781</span></td>
+<td id="Sx4.T1.1.14.3" class="ltx_td ltx_align_left ltx_border_bb ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.14.3.1" class="ltx_text ltx_font_bold">0.789</span></td>
+<td id="Sx4.T1.1.14.4" class="ltx_td ltx_align_left ltx_border_bb ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.14.4.1" class="ltx_text ltx_font_bold">0.605</span></td>
+<td id="Sx4.T1.1.14.5" class="ltx_td ltx_align_left ltx_border_bb ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.14.5.1" class="ltx_text ltx_font_bold">0.626</span></td>
+<td id="Sx4.T1.1.14.6" class="ltx_td ltx_align_left ltx_border_bb ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.14.6.1" class="ltx_text ltx_font_bold">0.548</span></td>
+<td id="Sx4.T1.1.14.7" class="ltx_td ltx_align_left ltx_border_bb ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.14.7.1" class="ltx_text ltx_font_bold">0.558</span></td>
+<td id="Sx4.T1.1.14.8" class="ltx_td ltx_align_left ltx_border_bb ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.14.8.1" class="ltx_text ltx_font_bold">0.435</span></td>
+<td id="Sx4.T1.1.14.9" class="ltx_td ltx_align_left ltx_border_bb ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.14.9.1" class="ltx_text ltx_font_bold">0.443</span></td>
+<td id="Sx4.T1.1.14.10" class="ltx_td ltx_align_left ltx_border_bb ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.14.10.1" class="ltx_text ltx_font_bold">0.431</span></td>
+<td id="Sx4.T1.1.14.11" class="ltx_td ltx_align_left ltx_border_bb ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.14.11.1" class="ltx_text ltx_font_bold">0.375</span></td>
+<td id="Sx4.T1.1.14.12" class="ltx_td ltx_align_left ltx_border_bb ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.14.12.1" class="ltx_text ltx_font_bold">0.558</span></td>
+<td id="Sx4.T1.1.14.13" class="ltx_td ltx_align_left ltx_border_bb ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.14.13.1" class="ltx_text ltx_font_bold">0.557</span></td>
+<td id="Sx4.T1.1.14.14" class="ltx_td ltx_align_left ltx_border_bb ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T1.1.14.14.1" class="ltx_text ltx_font_bold">0.557</span></td></tr>
+</tbody>
+</table>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 1: </span>Performance comparison between the proposed LongT2IExpert and the state-of-art methods for <span id="Sx4.T1.5" class="ltx_text ltx_font_bold">Long T2I Alignment Scoring</span>. Here, ‘*’ denotes the fine-tuned versions of corresponding methods using the training data from LongT2IBench. The SRCC and PLCC across five word-count intervals are reported. Best in <span id="Sx4.T1.6" class="ltx_text ltx_font_bold">bold</span>, second <span id="Sx4.T1.7" class="ltx_text ltx_underline">underlined</span>.</figcaption>
+</figure>
+<figure id="Sx4.T2" class="ltx_table">
+<table id="Sx4.T2.1" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<tbody class="ltx_tbody">
+<tr id="Sx4.T2.1.1" class="ltx_tr">
+<th id="Sx4.T2.1.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_r ltx_border_tt" style="padding-left:2.8pt;padding-right:2.8pt;" rowspan="2"><span id="Sx4.T2.1.1.1.1" class="ltx_text ltx_font_bold">Model</span></th>
+<td id="Sx4.T2.1.1.2" class="ltx_td ltx_align_center ltx_border_r ltx_border_tt" style="padding-left:2.8pt;padding-right:2.8pt;" colspan="3"><span id="Sx4.T2.1.1.2.1" class="ltx_text ltx_font_bold">Entity</span></td>
+<td id="Sx4.T2.1.1.3" class="ltx_td ltx_align_center ltx_border_r ltx_border_tt" style="padding-left:2.8pt;padding-right:2.8pt;" colspan="3"><span id="Sx4.T2.1.1.3.1" class="ltx_text ltx_font_bold">Attribute</span></td>
+<td id="Sx4.T2.1.1.4" class="ltx_td ltx_align_center ltx_border_r ltx_border_tt" style="padding-left:2.8pt;padding-right:2.8pt;" colspan="3"><span id="Sx4.T2.1.1.4.1" class="ltx_text ltx_font_bold">Relation</span></td>
+<td id="Sx4.T2.1.1.5" class="ltx_td ltx_align_center ltx_border_tt" style="padding-left:2.8pt;padding-right:2.8pt;" colspan="3"><span id="Sx4.T2.1.1.5.1" class="ltx_text ltx_font_bold">All</span></td></tr>
+<tr id="Sx4.T2.1.2" class="ltx_tr">
+<td id="Sx4.T2.1.2.1" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.2.1.1" class="ltx_text ltx_font_bold">Align</span></td>
+<td id="Sx4.T2.1.2.2" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.2.2.1" class="ltx_text ltx_font_bold">Mis.</span></td>
+<td id="Sx4.T2.1.2.3" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.2.3.1" class="ltx_text ltx_font_bold">Overall</span></td>
+<td id="Sx4.T2.1.2.4" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.2.4.1" class="ltx_text ltx_font_bold">Align</span></td>
+<td id="Sx4.T2.1.2.5" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.2.5.1" class="ltx_text ltx_font_bold">Mis.</span></td>
+<td id="Sx4.T2.1.2.6" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.2.6.1" class="ltx_text ltx_font_bold">Overall</span></td>
+<td id="Sx4.T2.1.2.7" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.2.7.1" class="ltx_text ltx_font_bold">Align</span></td>
+<td id="Sx4.T2.1.2.8" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.2.8.1" class="ltx_text ltx_font_bold">Mis.</span></td>
+<td id="Sx4.T2.1.2.9" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.2.9.1" class="ltx_text ltx_font_bold">Overall</span></td>
+<td id="Sx4.T2.1.2.10" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.2.10.1" class="ltx_text ltx_font_bold">Align</span></td>
+<td id="Sx4.T2.1.2.11" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.2.11.1" class="ltx_text ltx_font_bold">Mis.</span></td>
+<td id="Sx4.T2.1.2.12" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.2.12.1" class="ltx_text ltx_font_bold">Overall</span></td></tr>
+<tr id="Sx4.T2.1.3" class="ltx_tr">
+<th id="Sx4.T2.1.3.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">Gemini-1.5-flash</th>
+<td id="Sx4.T2.1.3.2" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">48.4%</td>
+<td id="Sx4.T2.1.3.3" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">23.2%</td>
+<td id="Sx4.T2.1.3.4" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">43.6%</td>
+<td id="Sx4.T2.1.3.5" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">26.4%</td>
+<td id="Sx4.T2.1.3.6" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">9.2%</td>
+<td id="Sx4.T2.1.3.7" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">23.2%</td>
+<td id="Sx4.T2.1.3.8" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">6.4%</td>
+<td id="Sx4.T2.1.3.9" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">3.2%</td>
+<td id="Sx4.T2.1.3.10" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">5.6%</td>
+<td id="Sx4.T2.1.3.11" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">29.7%</td>
+<td id="Sx4.T2.1.3.12" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">11.8%</td>
+<td id="Sx4.T2.1.3.13" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">25.9%</td></tr>
+<tr id="Sx4.T2.1.4" class="ltx_tr">
+<th id="Sx4.T2.1.4.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">Gemini-1.5-pro</th>
+<td id="Sx4.T2.1.4.2" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">49.2%</td>
+<td id="Sx4.T2.1.4.3" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">36.1%</td>
+<td id="Sx4.T2.1.4.4" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.4.4.1" class="ltx_text ltx_underline">46.7%</span></td>
+<td id="Sx4.T2.1.4.5" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.4.5.1" class="ltx_text ltx_underline">31.6%</span></td>
+<td id="Sx4.T2.1.4.6" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.4.6.1" class="ltx_text ltx_underline">16.6%</span></td>
+<td id="Sx4.T2.1.4.7" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.4.7.1" class="ltx_text ltx_underline">28.8%</span></td>
+<td id="Sx4.T2.1.4.8" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.4.8.1" class="ltx_text ltx_underline">13.6%</span></td>
+<td id="Sx4.T2.1.4.9" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.4.9.1" class="ltx_text ltx_underline">12.8%</span></td>
+<td id="Sx4.T2.1.4.10" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.4.10.1" class="ltx_text ltx_underline">13.4%</span></td>
+<td id="Sx4.T2.1.4.11" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.4.11.1" class="ltx_text ltx_underline">33.6%</span></td>
+<td id="Sx4.T2.1.4.12" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">21.9%</td>
+<td id="Sx4.T2.1.4.13" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.4.13.1" class="ltx_text ltx_underline">31.1%</span></td></tr>
+<tr id="Sx4.T2.1.5" class="ltx_tr">
+<th id="Sx4.T2.1.5.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">GPT-4o</th>
+<td id="Sx4.T2.1.5.2" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">44.2%</td>
+<td id="Sx4.T2.1.5.3" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">30.7%</td>
+<td id="Sx4.T2.1.5.4" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">41.6%</td>
+<td id="Sx4.T2.1.5.5" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">27.6%</td>
+<td id="Sx4.T2.1.5.6" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">13.9%</td>
+<td id="Sx4.T2.1.5.7" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">25.0%</td>
+<td id="Sx4.T2.1.5.8" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">10.0%</td>
+<td id="Sx4.T2.1.5.9" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">11.0%</td>
+<td id="Sx4.T2.1.5.10" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">10.2%</td>
+<td id="Sx4.T2.1.5.11" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">29.3%</td>
+<td id="Sx4.T2.1.5.12" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">18.6%</td>
+<td id="Sx4.T2.1.5.13" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">27.0%</td></tr>
+<tr id="Sx4.T2.1.6" class="ltx_tr">
+<th id="Sx4.T2.1.6.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">GPT-4-Turbo</th>
+<td id="Sx4.T2.1.6.2" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">43.1%</td>
+<td id="Sx4.T2.1.6.3" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">27.1%</td>
+<td id="Sx4.T2.1.6.4" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">40.1%</td>
+<td id="Sx4.T2.1.6.5" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">24.9%</td>
+<td id="Sx4.T2.1.6.6" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">11.9%</td>
+<td id="Sx4.T2.1.6.7" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">22.5%</td>
+<td id="Sx4.T2.1.6.8" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">5.6%</td>
+<td id="Sx4.T2.1.6.9" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">5.0%</td>
+<td id="Sx4.T2.1.6.10" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">5.4%</td>
+<td id="Sx4.T2.1.6.11" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">26.8%</td>
+<td id="Sx4.T2.1.6.12" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">14.6%</td>
+<td id="Sx4.T2.1.6.13" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">24.2%</td></tr>
+<tr id="Sx4.T2.1.7" class="ltx_tr">
+<th id="Sx4.T2.1.7.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">Grok-3</th>
+<td id="Sx4.T2.1.7.2" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">42.9%</td>
+<td id="Sx4.T2.1.7.3" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.7.3.1" class="ltx_text ltx_font_bold">44.0%</span></td>
+<td id="Sx4.T2.1.7.4" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">43.1%</td>
+<td id="Sx4.T2.1.7.5" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">23.0%</td>
+<td id="Sx4.T2.1.7.6" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">16.4%</td>
+<td id="Sx4.T2.1.7.7" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">21.7%</td>
+<td id="Sx4.T2.1.7.8" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">6.2%</td>
+<td id="Sx4.T2.1.7.9" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">10.7%</td>
+<td id="Sx4.T2.1.7.10" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">7.4%</td>
+<td id="Sx4.T2.1.7.11" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">26.3%</td>
+<td id="Sx4.T2.1.7.12" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.7.12.1" class="ltx_text ltx_underline">23.8%</span></td>
+<td id="Sx4.T2.1.7.13" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">25.7%</td></tr>
+<tr id="Sx4.T2.1.8" class="ltx_tr">
+<th id="Sx4.T2.1.8.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">Qwen2.5-v1-max</th>
+<td id="Sx4.T2.1.8.2" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.8.2.1" class="ltx_text ltx_underline">49.9%</span></td>
+<td id="Sx4.T2.1.8.3" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">22.8%</td>
+<td id="Sx4.T2.1.8.4" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">44.8%</td>
+<td id="Sx4.T2.1.8.5" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">28.2%</td>
+<td id="Sx4.T2.1.8.6" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">10.8%</td>
+<td id="Sx4.T2.1.8.7" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">24.9%</td>
+<td id="Sx4.T2.1.8.8" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">9.8%</td>
+<td id="Sx4.T2.1.8.9" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">4.7%</td>
+<td id="Sx4.T2.1.8.10" class="ltx_td ltx_align_left ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">8.4%</td>
+<td id="Sx4.T2.1.8.11" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">31.7%</td>
+<td id="Sx4.T2.1.8.12" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">12.6%</td>
+<td id="Sx4.T2.1.8.13" class="ltx_td ltx_align_left ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;">27.7%</td></tr>
+<tr id="Sx4.T2.1.9" class="ltx_tr">
+<th id="Sx4.T2.1.9.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">LLava-v1.6</th>
+<td id="Sx4.T2.1.9.2" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">33.6%</td>
+<td id="Sx4.T2.1.9.3" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">6.5%</td>
+<td id="Sx4.T2.1.9.4" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">28.4%</td>
+<td id="Sx4.T2.1.9.5" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">11.4%</td>
+<td id="Sx4.T2.1.9.6" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">1.9%</td>
+<td id="Sx4.T2.1.9.7" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">9.6%</td>
+<td id="Sx4.T2.1.9.8" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">1.9%</td>
+<td id="Sx4.T2.1.9.9" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">0.3%</td>
+<td id="Sx4.T2.1.9.10" class="ltx_td ltx_align_left ltx_border_r" style="padding-left:2.8pt;padding-right:2.8pt;">1.5%</td>
+<td id="Sx4.T2.1.9.11" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">17.6%</td>
+<td id="Sx4.T2.1.9.12" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">2.9%</td>
+<td id="Sx4.T2.1.9.13" class="ltx_td ltx_align_left" style="padding-left:2.8pt;padding-right:2.8pt;">14.5%</td></tr>
+<tr id="Sx4.T2.1.10" class="ltx_tr">
+<th id="Sx4.T2.1.10.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.10.1.1" class="ltx_text ltx_font_bold">LongT2IExpert</span></th>
+<td id="Sx4.T2.1.10.2" class="ltx_td ltx_align_left ltx_border_bb ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.10.2.1" class="ltx_text ltx_font_bold">80.2%</span></td>
+<td id="Sx4.T2.1.10.3" class="ltx_td ltx_align_left ltx_border_bb ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.10.3.1" class="ltx_text ltx_underline">36.5%</span></td>
+<td id="Sx4.T2.1.10.4" class="ltx_td ltx_align_left ltx_border_bb ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.10.4.1" class="ltx_text ltx_font_bold">71.9%</span></td>
+<td id="Sx4.T2.1.10.5" class="ltx_td ltx_align_left ltx_border_bb ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.10.5.1" class="ltx_text ltx_font_bold">53.8%</span></td>
+<td id="Sx4.T2.1.10.6" class="ltx_td ltx_align_left ltx_border_bb ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.10.6.1" class="ltx_text ltx_font_bold">18.9%</span></td>
+<td id="Sx4.T2.1.10.7" class="ltx_td ltx_align_left ltx_border_bb ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.10.7.1" class="ltx_text ltx_font_bold">47.3%</span></td>
+<td id="Sx4.T2.1.10.8" class="ltx_td ltx_align_left ltx_border_bb ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.10.8.1" class="ltx_text ltx_font_bold">40.6%</span></td>
+<td id="Sx4.T2.1.10.9" class="ltx_td ltx_align_left ltx_border_bb ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.10.9.1" class="ltx_text ltx_font_bold">20.8%</span></td>
+<td id="Sx4.T2.1.10.10" class="ltx_td ltx_align_left ltx_border_bb ltx_border_r ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.10.10.1" class="ltx_text ltx_font_bold">35.2%</span></td>
+<td id="Sx4.T2.1.10.11" class="ltx_td ltx_align_left ltx_border_bb ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.10.11.1" class="ltx_text ltx_font_bold">60.7%</span></td>
+<td id="Sx4.T2.1.10.12" class="ltx_td ltx_align_left ltx_border_bb ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.10.12.1" class="ltx_text ltx_font_bold">25.8%</span></td>
+<td id="Sx4.T2.1.10.13" class="ltx_td ltx_align_left ltx_border_bb ltx_border_t" style="padding-left:2.8pt;padding-right:2.8pt;"><span id="Sx4.T2.1.10.13.1" class="ltx_text ltx_font_bold">53.2%</span></td></tr>
+</tbody>
+</table>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 2: </span>Comparison between the proposed LongT2IExpert and the advanced multimodal large language models (MLLMs) for <span id="Sx4.T2.3" class="ltx_text ltx_font_bold">Long T2I Alignment Interpreting</span>. Aligned and Misaligned accuracy across entity, attribute and relation are reported.</figcaption>
+</figure>
+</section>
+</section>
+<section id="Sx5" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Experiments</h2>
+
+<section id="Sx5.SSx1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Experimental Settings</h3>
+
+<div id="Sx5.SSx1.p1" class="ltx_para">
+<p id="Sx5.SSx1.p1.1" class="ltx_p"><span id="Sx5.SSx1.p1.1.1" class="ltx_text ltx_font_bold">Implementation Details.</span> For LongT2IExpert training, we employ an open-source MLLM, Qwen2.5-VL-7B-Instruct <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib2" title="" class="ltx_ref">Bai et al. 2023</a>)</cite>, and attach LoRA adapters (r=32, <math id="Sx5.SSx1.p1.m1" class="ltx_Math" alttext="\alpha" display="inline" intent=":literal"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>=64, dropout=0.05) for fine-tuning. The score head consists of three Linear layers. The learning rate is set to <math id="Sx5.SSx1.p1.m2" class="ltx_Math" alttext="5e^{-5}" display="inline" intent=":literal"><semantics><mrow><mn>5</mn><mo lspace="0em" rspace="0em">​</mo><msup><mi>e</mi><mrow><mo>−</mo><mn>5</mn></mrow></msup></mrow><annotation encoding="application/x-tex">5e^{-5}</annotation></semantics></math> for LoRA parameters and <math id="Sx5.SSx1.p1.m3" class="ltx_Math" alttext="2e^{-4}" display="inline" intent=":literal"><semantics><mrow><mn>2</mn><mo lspace="0em" rspace="0em">​</mo><msup><mi>e</mi><mrow><mo>−</mo><mn>4</mn></mrow></msup></mrow><annotation encoding="application/x-tex">2e^{-4}</annotation></semantics></math> for the score head. The hyperparameter <math id="Sx5.SSx1.p1.m4" class="ltx_Math" alttext="\lambda" display="inline" intent=":literal"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math> is set to 10, and the model is trained for 3 epochs on an A800 GPU. Details regarding LongT2IBench, including the annotation platforms and MLLM instructions for long prompt synthesis and textual graph transformations, as well as annotator information, are provided in the Appendix.</p>
+</div>
+<div id="Sx5.SSx1.p2" class="ltx_para">
+<p id="Sx5.SSx1.p2.1" class="ltx_p"><span id="Sx5.SSx1.p2.1.1" class="ltx_text ltx_font_bold">Evaluation Setting.</span> We employ a standard train-validation-test split on LongT2IBench, ensuring long prompts are evenly distributed across five word-count intervals. For alignment score, we compare LongT2IExpert against two categories of existing state-of-the-art T2I evaluators. The first category comprises VLM-based models: CLIPScore <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib7" title="" class="ltx_ref">Hessel et al. 2021</a>)</cite>, BLIP2Score <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib18" title="" class="ltx_ref">Li et al. 2023</a>)</cite>, PickScore <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib18" title="" class="ltx_ref">Li et al. 2023</a>)</cite>, ImageReward <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib31" title="" class="ltx_ref">Xu et al. 2023</a>)</cite>, and FGA-BLIP2 <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib6" title="" class="ltx_ref">Han et al. 2024</a>)</cite>. The second category encompasses MLLM-based models: HPSv2 <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib29" title="" class="ltx_ref">Wu et al. 2023</a>)</cite>, VQAScore <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib17" title="" class="ltx_ref">Li et al. 2024b</a>)</cite>, and Q-Eval-Score <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib36" title="" class="ltx_ref">Zhang et al. 2025</a>)</cite>. To measure correlation with human annotations, we report both SRCC and PLCC metrics. Few models can simultaneously predict both alignment score and interpretations. To evaluate interpretation quality, we benchmark LongT2IExpert against two categories of MLLMs. Proprietary models include Gemini-1.5-flash/pro <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib27" title="" class="ltx_ref">Team et al. 2023</a>)</cite>, GPT-4o, GPT-4-Turbo <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib1" title="" class="ltx_ref">Achiam et al. 2023</a>)</cite>, and Grok-3 <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib30" title="" class="ltx_ref">xAI 2025</a>)</cite>, while open-source models include Qwen2.5-vl-max <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib2" title="" class="ltx_ref">Bai et al. 2023</a>)</cite>, and LLava-v1.6 <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib19" title="" class="ltx_ref">Liu et al. 2023</a>)</cite>. We use Accuracy to evaluate interpretation quality in identifying aligned/misaligned elements.</p>
+</div>
+<figure id="Sx5.F6" class="ltx_figure"><img src="https://arxiv.org/html/2512.09271v1/Fig6.png" id="Sx5.F6.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:642/280;" width="642" height="280" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 6: </span>Visualization of long T2I alignment scoring and interpreting. Left: The predicted scores from LongT2IExpert demonstrate stronger correlation with human annotations compared to PickScore and FGA-BLIP2 (fine-tuned versions). Right: LongT2IExpert produces more accurate alignment interpretations than GPT-4o.</figcaption>
+</figure>
+</section>
+<section id="Sx5.SSx2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Performance Evaluation</h3>
+
+<div id="Sx5.SSx2.p1" class="ltx_para">
+<p id="Sx5.SSx2.p1.1" class="ltx_p"><span id="Sx5.SSx2.p1.1.1" class="ltx_text ltx_font_bold">Results on Long T2I Alignment Scoring.</span> Table <a href="#Sx4.T1" title="Table 1 ‣ Training MLLMs for Alignment Evaluation ‣ LongT2IExpert ‣ LongT2IBench: A Benchmark for Evaluating Long Text-to-Image Generation with Graph-structured Annotations" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a> summarizes the performance comparison between the proposed LongT2IExpert and existing T2I evaluators. To thoroughly examine these models’ scoring capabilities in long-prompt scenarios, we evaluated their performance across different word-count ranges. The results demonstrate that most models show significant performance degradation as prompt length increases. Particularly in the 110+ words evaluation scenario, VLM-based models perform poorly due to text encoder’s token length restrictions, while MLLM-based evaluators such as Q-Eval-Score <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib36" title="" class="ltx_ref">Zhang et al. 2025</a>)</cite> show notable performance advantages. Additionally, we fine-tuned open-source models using LongT2IBench training data for fair comparison. Our proposed LongT2IExpert demonstrates a clear advantage across all word-count intervals, suggesting its effectiveness in understanding long prompts and evaluating text-image alignment.</p>
+</div>
+<div id="Sx5.SSx2.p2" class="ltx_para">
+<p id="Sx5.SSx2.p2.1" class="ltx_p"><span id="Sx5.SSx2.p2.1.1" class="ltx_text ltx_font_bold">Results on Long T2I Alignment Interpreting.</span> Due to the lack of objective alignment interpretation benchmarks and the scarcity of T2I evaluators with both scoring and interpreting capabilities, we compared LongT2IExpert with advanced MLLMs on long T2I alignment interpretation. For fair comparison, we used identical prompting patterns and output formats, including our designed HA-CoT. Table <a href="#Sx4.T2" title="Table 2 ‣ Training MLLMs for Alignment Evaluation ‣ LongT2IExpert ‣ LongT2IBench: A Benchmark for Evaluating Long Text-to-Image Generation with Graph-structured Annotations" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> lists the comparative results, where we report the accuracy across entity, attribute and relation. The proposed LongT2IExpert achieves the best performance, with Gemini-1.5-pro <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib27" title="" class="ltx_ref">Team et al. 2023</a>)</cite> ranking second. The results indicate that models generally find relation alignment more challenging than entity and attribute. In long-prompt scenarios, accurate relation judgment places higher demands on long-context understanding capabilities. We also observe that accuracy for misaligned elements is consistently lower than for aligned elements. Identifying misalignments among numerous aligned elements requires more precise localization and discrimination abilities.</p>
+</div>
+<div id="Sx5.SSx2.p3" class="ltx_para">
+<p id="Sx5.SSx2.p3.1" class="ltx_p"><span id="Sx5.SSx2.p3.1.1" class="ltx_text ltx_font_bold">Qualitative Analysis.</span> In Figure <a href="#Sx5.F6" title="Figure 6 ‣ Experimental Settings ‣ Experiments ‣ LongT2IBench: A Benchmark for Evaluating Long Text-to-Image Generation with Graph-structured Annotations" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a>-left, we present the prediction scores of LongT2IExpert, PickScore and FGA-BLIP2 (fine-tuned versions) on long text-image pairs. LongT2IExpert produces scores that demonstrate greater consistency with human annotations. For alignment interpretation, as shown in Figure <a href="#Sx5.F6" title="Figure 6 ‣ Experimental Settings ‣ Experiments ‣ LongT2IBench: A Benchmark for Evaluating Long Text-to-Image Generation with Graph-structured Annotations" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a>-right, the proposed method generates high-accuracy alignment interpretations with superior misalignment detection capabilities. (Additional visual examples can be found in the Appendix)</p>
+</div>
+</section>
+<section id="Sx5.SSx3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Ablation Study</h3>
+
+<div id="Sx5.SSx3.p1" class="ltx_para">
+<p id="Sx5.SSx3.p1.1" class="ltx_p">To validate the effectiveness of each component in LongT2IExpert, we conduct comprehensive ablation experiments. As summarized in Table <a href="#Sx5.T3" title="Table 3 ‣ Ablation Study ‣ Experiments ‣ LongT2IBench: A Benchmark for Evaluating Long Text-to-Image Generation with Graph-structured Annotations" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a>, we systematically evaluate the contributions of different components through various model variants. We first examine the performance when LongT2IExpert is trained solely for interpreting (w/o Score) and scoring (w/o Interpretation). The comparative results demonstrate the significant advantages of multi-task training. We then evaluate performance without the Hierarchical Alignment Chain-of-Thought (HA-CoT). The results validate the effectiveness of HA-CoT in long T2I alignment, guiding MLLMs for structured alignment reasoning.</p>
+</div>
+<figure id="Sx5.T3" class="ltx_table">
+<table id="Sx5.T3.1" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="Sx5.T3.1.1" class="ltx_tr">
+<th id="Sx5.T3.1.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_border_r ltx_border_tt"><span id="Sx5.T3.1.1.1.1" class="ltx_text ltx_font_bold">Setting</span></th>
+<th id="Sx5.T3.1.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r ltx_border_tt"><span id="Sx5.T3.1.1.2.1" class="ltx_text ltx_font_bold">Align-S</span></th>
+<th id="Sx5.T3.1.1.3" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="Sx5.T3.1.1.3.1" class="ltx_text ltx_font_bold">Align-I</span></th></tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="Sx5.T3.1.2" class="ltx_tr">
+<td id="Sx5.T3.1.2.1" class="ltx_td ltx_align_left ltx_border_r ltx_border_t">LongT2IExpert (w/o Score)</td>
+<td id="Sx5.T3.1.2.2" class="ltx_td ltx_align_center ltx_border_r ltx_border_t">—</td>
+<td id="Sx5.T3.1.2.3" class="ltx_td ltx_align_center ltx_border_t">32.8%</td></tr>
+<tr id="Sx5.T3.1.3" class="ltx_tr">
+<td id="Sx5.T3.1.3.1" class="ltx_td ltx_align_left ltx_border_r">LongT2IExpert (w/o Interpretation)</td>
+<td id="Sx5.T3.1.3.2" class="ltx_td ltx_align_center ltx_border_r">0.474</td>
+<td id="Sx5.T3.1.3.3" class="ltx_td ltx_align_center">—</td></tr>
+<tr id="Sx5.T3.1.4" class="ltx_tr">
+<td id="Sx5.T3.1.4.1" class="ltx_td ltx_align_left ltx_border_r">LongT2IExpert (w/o HA-CoT)</td>
+<td id="Sx5.T3.1.4.2" class="ltx_td ltx_align_center ltx_border_r">0.516</td>
+<td id="Sx5.T3.1.4.3" class="ltx_td ltx_align_center">39.9%</td></tr>
+<tr id="Sx5.T3.1.5" class="ltx_tr">
+<td id="Sx5.T3.1.5.1" class="ltx_td ltx_align_left ltx_border_bb ltx_border_r">LongT2IExpert</td>
+<td id="Sx5.T3.1.5.2" class="ltx_td ltx_align_center ltx_border_bb ltx_border_r">0.557</td>
+<td id="Sx5.T3.1.5.3" class="ltx_td ltx_align_center ltx_border_bb">53.2%</td></tr>
+</tbody>
+</table>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 3: </span>Ablation study of LongT2IExpert components. The Avg. (SRCC+PLCC)/2 and Overall Acc for long T2I Alignment Scoring and Interpreting respectively, are reported.</figcaption>
+</figure>
+</section>
+</section>
+<section id="Sx6" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Conclusion</h2>
+
+<div id="Sx6.p1" class="ltx_para">
+<p id="Sx6.p1.1" class="ltx_p">In this paper, we have performed a comprehensive subjective and objective benchmark of long text-to-image (T2I) alignment. We contribute LongT2IBench, the first-of-its-kind benchmark by introducing graph-structured annotations. We have also proposed LongT2IExpert, which fine-tunes a multimodal large language model (MLLM) to output token-level alignment scores and structured alignment interpretations. Extensive experiments demonstrate that LongT2IExpert achieves promising performance. While encouraging results have been obtained in this work, long T2I alignment remains far from solved—a challenge even for human evaluators. We hope our contributions will inspire the community to rethink the problem with more technical approaches and broader perspectives.</p>
+</div>
+</section>
+<section id="Sx7" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Acknowledgments</h2>
+
+<div id="Sx7.p1" class="ltx_para">
+<p id="Sx7.p1.1" class="ltx_p">This work is supported by National Natural Science Foundation of China under Grants 62471349, 62171340 and 62301378, Fundamental Research Funds for the Central Universities under Grant QTZX25076, the China Postdoctoral Science Foundation under Grant 2024M762553, and partly supported by the Innovation Fund of Xidian University under GrantYISJ25004. We also sincerely thank all annotators for their dedicated efforts and significant contributions to the construction of the benchmark.</p>
+</div>
+</section>
+<section id="bib" class="ltx_bibliography">
+<h2 class="ltx_title ltx_title_bibliography">References</h2>
+
+<ul class="ltx_biblist">
+      
+<li id="bib.bib1" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Achiam et al. (2023)</span>
+<span class="ltx_bibblock">
+Achiam, J.; Adler, S.; Agarwal, S.; Ahmad, L.; Akkaya, I.; Aleman, F. L.; Almeida, D.; Altenschmidt, J.; Altman, S.; Anadkat, S.; et al. 2023.
+
+</span>
+<span class="ltx_bibblock">Gpt-4 technical report.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib1.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2303.08774</em>.
+
+</span></li>
+      
+<li id="bib.bib2" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Bai et al. (2023)</span>
+<span class="ltx_bibblock">
+Bai, J.; Bai, S.; Chu, Y.; Cui, Z.; Dang, K.; Deng, X.; Fan, Y.; Ge, W.; Han, Y.; Huang, F.; et al. 2023.
+
+</span>
+<span class="ltx_bibblock">Qwen technical report.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib2.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2309.16609</em>.
+
+</span></li>
+      
+<li id="bib.bib3" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Chen et al. (2024)</span>
+<span class="ltx_bibblock">
+Chen, J.; Jincheng, Y.; Chongjian, G.; Yao, L.; Xie, E.; Wang, Z.; Kwok, J.; Luo, P.; Lu, H.; and Li, Z. 2024.
+
+</span>
+<span class="ltx_bibblock">PixArt-alpha: Fast Training of Diffusion Transformer for Photorealistic Text-to-Image Synthesis.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib3.1" class="ltx_emph ltx_font_italic">The Twelfth International Conference on Learning Representations</em>.
+
+</span></li>
+      
+<li id="bib.bib4" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Esser et al. (2024)</span>
+<span class="ltx_bibblock">
+Esser, P.; Kulal, S.; Blattmann, A.; Entezari, R.; Müller, J.; Saini, H.; Levi, Y.; Lorenz, D.; Sauer, A.; Boesel, F.; et al. 2024.
+
+</span>
+<span class="ltx_bibblock">Scaling rectified flow transformers for high-resolution image synthesis.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib4.1" class="ltx_emph ltx_font_italic">Forty-first international conference on machine learning</em>.
+
+</span></li>
+      
+<li id="bib.bib5" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Hamilton (2020)</span>
+<span class="ltx_bibblock">
+Hamilton, W. L. 2020.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib5.1" class="ltx_emph ltx_font_italic">Graph representation learning</em>.
+
+</span>
+<span class="ltx_bibblock">Morgan &amp; Claypool Publishers.
+
+</span></li>
+      
+<li id="bib.bib6" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Han et al. (2024)</span>
+<span class="ltx_bibblock">
+Han, S.; Fan, H.; Fu, J.; Li, L.; Li, T.; Cui, J.; Wang, Y.; Tai, Y.; Sun, J.; Guo, C.; et al. 2024.
+
+</span>
+<span class="ltx_bibblock">Evalmuse-40k: A reliable and fine-grained benchmark with comprehensive human annotations for text-to-image generation model evaluation.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib6.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2412.18150</em>.
+
+</span></li>
+      
+<li id="bib.bib7" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Hessel et al. (2021)</span>
+<span class="ltx_bibblock">
+Hessel, J.; Holtzman, A.; Forbes, M.; Le Bras, R.; and Choi, Y. 2021.
+
+</span>
+<span class="ltx_bibblock">CLIPScore: A Reference-free Evaluation Metric for Image Captioning.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib7.1" class="ltx_emph ltx_font_italic">Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing</em>, 7514–7528.
+
+</span></li>
+      
+<li id="bib.bib8" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Holz (2023)</span>
+<span class="ltx_bibblock">
+Holz, D. 2023.
+
+</span>
+<span class="ltx_bibblock">Midjourney.
+
+</span>
+<span class="ltx_bibblock"><span class="ltx_ref ltx_nolink ltx_url ltx_ref_self">https://www.midjourney</span>.
+
+</span></li>
+      
+<li id="bib.bib9" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Hu et al. (2022)</span>
+<span class="ltx_bibblock">
+Hu, E. J.; Shen, Y.; Wallis, P.; Allen-Zhu, Z.; Li, Y.; Wang, S.; Wang, L.; Chen, W.; et al. 2022.
+
+</span>
+<span class="ltx_bibblock">Lora: Low-rank adaptation of large language models.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib9.1" class="ltx_emph ltx_font_italic">ICLR</em>, 1(2): 3.
+
+</span></li>
+      
+<li id="bib.bib10" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Hu et al. (2024)</span>
+<span class="ltx_bibblock">
+Hu, X.; Wang, R.; Fang, Y.; Fu, B.; Cheng, P.; and Yu, G. 2024.
+
+</span>
+<span class="ltx_bibblock">Ella: Equip diffusion models with llm for enhanced semantic alignment.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib10.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2403.05135</em>.
+
+</span></li>
+      
+<li id="bib.bib11" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Hu et al. (2023)</span>
+<span class="ltx_bibblock">
+Hu, Y.; Liu, B.; Kasai, J.; Wang, Y.; Ostendorf, M.; Krishna, R.; and Smith, N. A. 2023.
+
+</span>
+<span class="ltx_bibblock">Tifa: Accurate and interpretable text-to-image faithfulness evaluation with question answering.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib11.1" class="ltx_emph ltx_font_italic">Proceedings of the IEEE/CVF International Conference on Computer Vision</em>, 20406–20417.
+
+</span></li>
+      
+<li id="bib.bib12" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Huang et al. (2023)</span>
+<span class="ltx_bibblock">
+Huang, K.; Sun, K.; Xie, E.; Li, Z.; and Liu, X. 2023.
+
+</span>
+<span class="ltx_bibblock">T2i-compbench: A comprehensive benchmark for open-world compositional text-to-image generation.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib12.1" class="ltx_emph ltx_font_italic">Advances in Neural Information Processing Systems</em>, 36: 78723–78747.
+
+</span></li>
+      
+<li id="bib.bib13" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Kirstain et al. (2023)</span>
+<span class="ltx_bibblock">
+Kirstain, Y.; Polyak, A.; Singer, U.; Matiana, S.; Penna, J.; and Levy, O. 2023.
+
+</span>
+<span class="ltx_bibblock">Pick-a-pic: An open dataset of user preferences for text-to-image generation.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib13.1" class="ltx_emph ltx_font_italic">Advances in neural information processing systems</em>, 36: 36652–36663.
+
+</span></li>
+      
+<li id="bib.bib14" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Ko et al. (2023)</span>
+<span class="ltx_bibblock">
+Ko, H.-K.; Park, G.; Jeon, H.; Jo, J.; Kim, J.; and Seo, J. 2023.
+
+</span>
+<span class="ltx_bibblock">Large-scale text-to-image generation models for visual artists’ creative works.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib14.1" class="ltx_emph ltx_font_italic">Proceedings of the 28th international conference on intelligent user interfaces</em>, 919–933.
+
+</span></li>
+      
+<li id="bib.bib15" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Lai et al. (2024)</span>
+<span class="ltx_bibblock">
+Lai, X.; Tian, Z.; Chen, Y.; Li, Y.; Yuan, Y.; Liu, S.; and Jia, J. 2024.
+
+</span>
+<span class="ltx_bibblock">Lisa: Reasoning segmentation via large language model.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib15.1" class="ltx_emph ltx_font_italic">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition</em>, 9579–9589.
+
+</span></li>
+      
+<li id="bib.bib16" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Li et al. (2024a)</span>
+<span class="ltx_bibblock">
+Li, B.; Lin, Z.; Pathak, D.; Li, J.; Fei, Y.; Wu, K.; Ling, T.; Xia, X.; Zhang, P.; Neubig, G.; et al. 2024a.
+
+</span>
+<span class="ltx_bibblock">Genai-bench: Evaluating and improving compositional text-to-visual generation.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib16.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2406.13743</em>.
+
+</span></li>
+      
+<li id="bib.bib17" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Li et al. (2024b)</span>
+<span class="ltx_bibblock">
+Li, B.; Lin, Z.; Pathak, D.; Li, J.; Fei, Y.; Wu, K.; Xia, X.; Zhang, P.; Neubig, G.; and Ramanan, D. 2024b.
+
+</span>
+<span class="ltx_bibblock">Evaluating and improving compositional text-to-visual generation.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib17.1" class="ltx_emph ltx_font_italic">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition</em>, 5290–5301.
+
+</span></li>
+      
+<li id="bib.bib18" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Li et al. (2023)</span>
+<span class="ltx_bibblock">
+Li, J.; Li, D.; Savarese, S.; and Hoi, S. 2023.
+
+</span>
+<span class="ltx_bibblock">Blip-2: Bootstrapping language-image pre-training with frozen image encoders and large language models.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib18.1" class="ltx_emph ltx_font_italic">International conference on machine learning</em>, 19730–19742. PMLR.
+
+</span></li>
+      
+<li id="bib.bib19" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Liu et al. (2023)</span>
+<span class="ltx_bibblock">
+Liu, H.; Li, C.; Wu, Q.; and Lee, Y. J. 2023.
+
+</span>
+<span class="ltx_bibblock">Visual instruction tuning.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib19.1" class="ltx_emph ltx_font_italic">Advances in neural information processing systems</em>, 36: 34892–34916.
+
+</span></li>
+      
+<li id="bib.bib20" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Liu et al. (2024)</span>
+<span class="ltx_bibblock">
+Liu, L.; Du, C.; Pang, T.; Wang, Z.; Li, C.; and Xu, D. 2024.
+
+</span>
+<span class="ltx_bibblock">Improving long-text alignment for text-to-image diffusion models.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib20.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2410.11817</em>.
+
+</span></li>
+      
+<li id="bib.bib21" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Onoe et al. (2024)</span>
+<span class="ltx_bibblock">
+Onoe, Y.; Rane, S.; Berger, Z.; Bitton, Y.; Cho, J.; Garg, R.; Ku, A.; Parekh, Z.; Pont-Tuset, J.; Tanzer, G.; et al. 2024.
+
+</span>
+<span class="ltx_bibblock">Docci: Descriptions of connected and contrasting images.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib21.1" class="ltx_emph ltx_font_italic">European Conference on Computer Vision</em>, 291–309. Springer.
+
+</span></li>
+      
+<li id="bib.bib22" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">OpenAI (2023)</span>
+<span class="ltx_bibblock">
+OpenAI. 2023.
+
+</span>
+<span class="ltx_bibblock">Dall·e 3.
+
+</span>
+<span class="ltx_bibblock"><span class="ltx_ref ltx_nolink ltx_url ltx_ref_self">https://openai.com/dall-e-3</span>.
+
+</span></li>
+      
+<li id="bib.bib23" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Radford et al. (2021)</span>
+<span class="ltx_bibblock">
+Radford, A.; Kim, J. W.; Hallacy, C.; Ramesh, A.; Goh, G.; Agarwal, S.; Sastry, G.; Askell, A.; Mishkin, P.; Clark, J.; et al. 2021.
+
+</span>
+<span class="ltx_bibblock">Learning transferable visual models from natural language supervision.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib23.1" class="ltx_emph ltx_font_italic">International conference on machine learning</em>, 8748–8763. PMLR.
+
+</span></li>
+      
+<li id="bib.bib24" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Sheng et al. (2025a)</span>
+<span class="ltx_bibblock">
+Sheng, X.; Xie, P.; Zou, W.; Chen, P.; Zhu, T.; and Li, L. 2025a.
+
+</span>
+<span class="ltx_bibblock">InstructCrop: Teaching Multimodal Large Language Models to Crop Aesthetic Images.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib24.1" class="ltx_emph ltx_font_italic">Proceedings of the 33rd ACM International Conference on Multimedia</em>, 6830–6839.
+
+</span></li>
+      
+<li id="bib.bib25" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Sheng et al. (2025b)</span>
+<span class="ltx_bibblock">
+Sheng, X.; Zou, W.; Chen, P.; Cai, L.; He, C.; and Li, L. 2025b.
+
+</span>
+<span class="ltx_bibblock">Text-to-Image Diffusion Models are AI-Generated Image Quality Scorers.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib25.1" class="ltx_emph ltx_font_italic">Proceedings of the IEEE International Conference on Multimedia and Expo (ICME)</em>, 1–6.
+
+</span></li>
+      
+<li id="bib.bib26" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Tan et al. (2024)</span>
+<span class="ltx_bibblock">
+Tan, Z.; Yang, X.; Qin, L.; Yang, M.; Zhang, C.; and Li, H. 2024.
+
+</span>
+<span class="ltx_bibblock">EvalAlign: Evaluating Text-to-Image Models through Precision Alignment of Multimodal Large Models with Supervised Fine-Tuning to Human Annotations.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib26.1" class="ltx_emph ltx_font_italic">arXiv e-prints</em>, arXiv–2406.
+
+</span></li>
+      
+<li id="bib.bib27" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Team et al. (2023)</span>
+<span class="ltx_bibblock">
+Team, G.; Anil, R.; Borgeaud, S.; Alayrac, J.-B.; Yu, J.; Soricut, R.; Schalkwyk, J.; Dai, A. M.; Hauth, A.; Millican, K.; et al. 2023.
+
+</span>
+<span class="ltx_bibblock">Gemini: a family of highly capable multimodal models.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib27.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2312.11805</em>.
+
+</span></li>
+      
+<li id="bib.bib28" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Wang et al. (2023)</span>
+<span class="ltx_bibblock">
+Wang, Z. J.; Montoya, E.; Munechika, D.; Yang, H.; Hoover, B.; and Chau, D. H. 2023.
+
+</span>
+<span class="ltx_bibblock">DiffusionDB: A Large-scale Prompt Gallery Dataset for Text-to-Image Generative Models.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib28.1" class="ltx_emph ltx_font_italic">The 61st Annual Meeting Of The Association For Computational Linguistics</em>.
+
+</span></li>
+      
+<li id="bib.bib29" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Wu et al. (2023)</span>
+<span class="ltx_bibblock">
+Wu, X.; Hao, Y.; Sun, K.; Chen, Y.; Zhu, F.; Zhao, R.; and Li, H. 2023.
+
+</span>
+<span class="ltx_bibblock">Human preference score v2: A solid benchmark for evaluating human preferences of text-to-image synthesis.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib29.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2306.09341</em>.
+
+</span></li>
+      
+<li id="bib.bib30" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">xAI (2025)</span>
+<span class="ltx_bibblock">
+xAI. 2025.
+
+</span>
+<span class="ltx_bibblock">Grok 3 beta — the age of reasoning agents.
+
+</span>
+<span class="ltx_bibblock"><span class="ltx_ref ltx_nolink ltx_url ltx_ref_self">https://x.ai/blog/grok-3</span>.
+
+</span></li>
+      
+<li id="bib.bib31" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Xu et al. (2023)</span>
+<span class="ltx_bibblock">
+Xu, J.; Liu, X.; Wu, Y.; Tong, Y.; Li, Q.; Ding, M.; Tang, J.; and Dong, Y. 2023.
+
+</span>
+<span class="ltx_bibblock">Imagereward: Learning and evaluating human preferences for text-to-image generation.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib31.1" class="ltx_emph ltx_font_italic">Advances in Neural Information Processing Systems</em>, 36: 15903–15935.
+
+</span></li>
+      
+<li id="bib.bib32" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Yang et al. (2024a)</span>
+<span class="ltx_bibblock">
+Yang, Z.; Li, L.; Chen, P.; Wu, J.; and Dong, W. 2024a.
+
+</span>
+<span class="ltx_bibblock">Semantics-Aware Image Aesthetics Assessment using Tag Matching and Contrastive Ranking.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib32.1" class="ltx_emph ltx_font_italic">ACM International Conference on Multimedia</em>, 2632–2641.
+
+</span></li>
+      
+<li id="bib.bib33" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Yang et al. (2025)</span>
+<span class="ltx_bibblock">
+Yang, Z.; Li, L.; Chen, P.; Wu, J.; and Valenzise, G. 2025.
+
+</span>
+<span class="ltx_bibblock">Language-Guided Visual Perception Disentanglement for Image Quality Assessment and Conditional Image Generation.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib33.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2503.02206</em>.
+
+</span></li>
+      
+<li id="bib.bib34" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Yang et al. (2024b)</span>
+<span class="ltx_bibblock">
+Yang, Z.; Li, L.; Yang, Y.; Li, Y.; and Lin, W. 2024b.
+
+</span>
+<span class="ltx_bibblock">Multi-Level Transitional Contrast Learning for Personalized Image Aesthetics Assessment.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib34.1" class="ltx_emph ltx_font_italic">IEEE Transactions on Multimedia</em>, 26: 1944–1956.
+
+</span></li>
+      
+<li id="bib.bib35" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zhang et al. (2024)</span>
+<span class="ltx_bibblock">
+Zhang, B.; Zhang, P.; Dong, X.; Zang, Y.; and Wang, J. 2024.
+
+</span>
+<span class="ltx_bibblock">Long-clip: Unlocking the long-text capability of clip.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib35.1" class="ltx_emph ltx_font_italic">European conference on computer vision</em>, 310–325. Springer.
+
+</span></li>
+      
+<li id="bib.bib36" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zhang et al. (2025)</span>
+<span class="ltx_bibblock">
+Zhang, Z.; Kou, T.; Wang, S.; Li, C.; Sun, W.; Wang, W.; Li, X.; Wang, Z.; Cao, X.; Min, X.; et al. 2025.
+
+</span>
+<span class="ltx_bibblock">Q-eval-100k: Evaluating visual quality and alignment level for text-to-vision content.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib36.1" class="ltx_emph ltx_font_italic">Proceedings of the Computer Vision and Pattern Recognition Conference</em>, 10621–10631.
+
+</span></li>
+      
+<li id="bib.bib37" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zhao et al. (2024)</span>
+<span class="ltx_bibblock">
+Zhao, K.; Zhao, X.; Jin, Z.; Yang, Y.; Tao, W.; Han, C.; Li, S.; and Liu, L. 2024.
+
+</span>
+<span class="ltx_bibblock">Enhancing Baidu Multimodal Advertisement with Chinese Text-to-Image Generation via Bilingual Alignment and Caption Synthesis.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib37.1" class="ltx_emph ltx_font_italic">Proceedings of the 47th International ACM SIGIR Conference on Research and Development in Information Retrieval</em>, 2855–2859.
+
+</span></li>
+    
+</ul>
+</section>
+</article>
+    </div>
+  </section>
+  <section class="pane pane-zh">
+    <div class="pane-head">中文精读翻译</div>
+    <div class="pane-body" id="zhBody"><div class="md" id="mdRoot"></div></div>
+  </section>
+</main>
+<script type="text/markdown" id="zhSrc"># 《LongT2IBench: A Benchmark for Evaluating Long Text-to-Image Generation with Graph-structured Annotations》中文精读翻译
+
+## 论文信息
+
+- **英文标题**：LongT2IBench: A Benchmark for Evaluating Long Text-to-Image Generation with Graph-structured Annotations
+- **中文标题**：LongT2IBench：基于图结构标注的长文本文生图生成评测基准
+- **发表**：AAAI 2026（Oral）。Proceedings of the AAAI Conference on Artificial Intelligence, 40(14): 11820–11828。DOI: 10.1609/aaai.v40i14.38168
+- **arXiv 链接**：<https://arxiv.org/abs/2512.09271>（v1，2025-12-10 提交，注明 "accepted by AAAI 2026"）
+- **作者**：Zhichao Yang、Tianjiao Gu、Jianjie Wang、Feiyu Lin、Xiangfei Sheng、Pengfei Chen、Leida Li（李雷达，通讯作者）
+- **机构**：西安电子科技大学人工智能学院；西安电子科技大学高性能电子装备机电一体化制造国家重点实验室
+- **项目主页（数据与代码）**：<https://welldky.github.io/LongT2IBench-Homepage/>（官方代码库：<https://github.com/yzc-ippl/LongT2IBench>）
+- **提出的基准 / 模型**：LongT2IBench（长文本 T2I 对齐评测基准：3K 长提示 + 14K 图文对 + 图结构人工标注）；LongT2IExpert（长文本 T2I 对齐评测模型，基于 Qwen2.5-VL-7B 指令微调）
+
+## 一句话核心总结
+
+现有文生图（T2I）对齐基准几乎全部面向短提示、且只提供 MOS 或 Likert 量表式的整体分数，无法支撑长提示场景下"可解释"的对齐评测；本文将长提示解析为"实体-属性-关系"文本图，以 Generate-Refine-Qualify 协议完成人工图结构对齐标注，构建了同时提供定量对齐分数与细粒度可定位解释的 LongT2IBench（3K 长提示、14K 图文对），并在其上以层次化对齐思维链（HA-CoT）多任务微调 Qwen2.5-VL 得到评测模型 LongT2IExpert，可同时输出对齐分数与结构化解释，在全部词数区间上全面超越现有 T2I 评测器与先进 MLLM。
+
+---
+
+## 摘要
+
+长文本文生图（Long Text-to-Image, T2I）生成的日益流行，催生了对自动且可解释模型的迫切需求——这类模型应能评测长提示场景下的图文对齐（image-text alignment）。然而，现有的 T2I 对齐基准主要聚焦于短提示场景，且仅提供 MOS（Mean Opinion Score，平均意见分）或 Likert 量表标注。这一固有局限阻碍了长 T2I 评测器的发展，尤其是对齐的可解释性方面。在本研究中，我们贡献了 LongT2IBench，它包含 14K 长文本-图像对，并附带图结构人工标注。鉴于长提示细节密集（detail-intensive）的本质，我们首先设计了一套 Generate-Refine-Qualify（生成-精修-质检）标注协议，将长提示转换为涵盖实体（entities）、属性（attributes）与关系（relations）的文本图结构。通过这一转换，基于这些细粒度元素实现了细粒度的对齐标注。最终，图结构标注被转换为对齐分数与对齐解释，以便于 T2I 评测模型的设计。基于 LongT2IBench，我们进一步提出了 LongT2IExpert——一个长 T2I 评测器，通过带层次化对齐思维链（Hierarchical Alignment Chain-of-Thought, CoT）的指令微调过程，使多模态大语言模型（Multi-modal Large Language Models, MLLMs）能够同时提供定量分数与结构化解释。大量实验与对比表明，所提 LongT2IExpert 在对齐评测与对齐解释两方面均具有优越性。数据与代码已在 <https://welldky.github.io/LongT2IBench-Homepage/> 发布。
+
+---
+
+## 1 引言
+
+随着文生图（Text-to-Image, T2I）生成模型在艺术创作、广告设计等领域的广泛应用，用户对长 T2I 生成能力的需求显著增长（Ko et al., 2023; Zhao et al., 2024; Yang et al., 2024b; Sheng et al., 2025b; Yang et al., 2025）。这使研究重心从短提示拓展到日益复杂、冗长的输入（Hu et al., 2024; Liu et al., 2024）。长提示天然包含更多元素与更细致的描述，给对齐评测带来了重大挑战。鉴于人工评测成本高、效率低，发展自动且可解释的长 T2I 对齐评测方法已变得迫在眉睫。这类方法既能有效评估现有 T2I 模型的性能，也能指导未来模型的优化。而高质量、细粒度的长 T2I 对齐标注，正是开发此类评测方法不可或缺的基础。
+
+过去几年，大量 T2I 对齐基准及相应的评测算法被相继提出。早期基准如 Pick-a-pic（Kirstain et al., 2023）与 HPDv2（Wu et al., 2023）采用并排比较（side-by-side comparison）来评估生成图像与文本之间的对齐。其他基准如 ImageReward（Xu et al., 2023）与 EvalAlign（Tan et al., 2024）则使用 Likert 量表标注，由人工标注者基于整体的图文对应关系给出总分。近来，T2I-CompBench（Huang et al., 2023）与 GenAI-Bench（Li et al., 2024a）等基准引入了精心设计的提示，用于评估生成模型的特定能力，包括计数、空间关系等。面向细粒度评测，TIFA（Hu et al., 2023）与 EvalMuse-40K（Han et al., 2024）等基准将提示分解为多个简短的短语，构成相互独立的评估项，需要人工标注者逐元素（element-wise）给出对齐分数。
+
+尽管现有基准提供了有价值的洞见，但它们主要聚焦于短提示场景，且仅提供 MOS 或 Likert 量表式的人工标注（图 1 上）。这一固有局限阻碍了长 T2I 评测器的发展，尤其是在对齐的可解释性方面。长提示细节密集的本质给获取高质量、细粒度的对齐标注带来了两个本质性挑战：
+
+1. **细节过载（Detail Overload）**：让标注者直接给出一个总体对齐分数，既困难又不可靠；
+2. **对齐复杂性（Alignment Complexity）**：逐元素标注不足以捕捉长提示中错综复杂的对齐关系，例如相距较远的元素之间的关联。
+
+为应对这些挑战，我们贡献了 LongT2IBench——一个专为长 T2I 对齐设计的基准，通过引入图结构标注（graph-structured annotations）（图 1 下），同时提供定量对齐分数与细粒度解释。LongT2IBench 由 3K 条长提示与 14K 个图文对组成。为确保多样性，长提示取自三个来源：人类生成内容、AI 生成内容与长图像描述。这些提示首先被转换为涵盖实体、属性与关系的文本图结构；该转换遵循 Generate-Refine-Qualify 协议，以确保出色的结构保真度（structural fidelity）。通过这一转换，基于文本图的细粒度元素实现了细粒度的对齐标注。我们还实施了复核（re-verification）流程，以确保对齐标注的可靠性。最终，上述标注被转换为对齐分数与对齐解释。
+
+在 LongT2IBench 的基础上，我们进一步提出了 LongT2IExpert——一个长 T2I 评测器，使多模态大语言模型（MLLMs）能够同时提供定量分数与结构化解释。受 LongT2IBench 构建过程的启发，我们首先引入层次化对齐思维链（Hierarchical Alignment Chain-of-Thought, HA-CoT），引导 MLLM 模仿人类式的结构化对齐推理。HA-CoT 具有一个三跳（three-hop）推理过程，逐步引导模型从细粒度分析走向综合评估。随后，人工标注的对齐分数与解释被用作监督信号，以多任务的方式微调 MLLM。凭借这些设计，我们得到了一个与人类评测者高度一致的"打分-解释"一体化模型。
+
+> **图 1**：LongT2IBench 图结构标注示意图。与现有基准相比，我们聚焦长提示场景下的 T2I 对齐，同时提供定量分数与细粒度解释。
+
+**本文贡献**有三：
+
+1. 我们贡献了 LongT2IBench——一个长文生图生成基准，包含 14K 带图结构标注的长文本-图像对。它同时提供定量分数与细粒度解释，能够阐明文本元素与视觉成分之间错综复杂的对齐关系。
+2. 我们提出了 LongT2IExpert——一个新颖的长 T2I 评测器，赋予多模态大语言模型（MLLMs）结构化对齐推理能力，可同时执行对齐打分与对齐解释。
+3. 我们建立了一套考察长 T2I 对齐能力的系统性框架。它全面评估打分准确性与解释质量，并充分检验模型在不同文本长度与不同对齐维度（实体、属性、关系）下的表现。
+
+---
+
+## 2 相关工作
+
+**文生图对齐基准（Text-to-Image Alignment Benchmarks）**。学界已发展出许多评测生成模型图文对齐能力的基准。早期基准如 Pick-a-pic（Kirstain et al., 2023）与 HPDv2（Wu et al., 2023）通过模型间的并排比较来评估生成图像的质量。其他基准如 ImageReward（Xu et al., 2023）与 EvalAlign（Tan et al., 2024）利用 Likert 量表标注来收集整体对齐分数。面向细粒度评测，TIFA（Hu et al., 2023）与 EvalMuse-40K（Han et al., 2024）等基准从提示中抽取简短短语并收集逐元素标注。随着提示长度的增加，专门为长 T2I 对齐设计的基准仍然稀缺。本文贡献 LongT2IBench，为考察与开发长 T2I 对齐评测模型提供了基础。
+
+**文生图对齐评测器（Text-to-Image Alignment Evaluators）**。早期 T2I 评测器直接利用视觉-语言模型（Vision-Language Models, VLMs）进行对齐评测，如 CLIPScore（Hessel et al., 2021）与 BLIP2Score（Li et al., 2023）。随着对齐标注数据的大量积累，PickScore（Kirstain et al., 2023）与 ImageReward（Xu et al., 2023）通过微调 VLM 使其与人类评分对齐。随着 MLLM 的快速进步，VQAScore（Li et al., 2024b）与 Q-Eval-Score（Zhang et al., 2025）借助其强大的视觉-语言能力进行 T2I 对齐评测。尽管现有模型已取得显著进展，它们在长提示语境下的评测性能仍在很大程度上未被探索。本文填补这一空白，提出专门为长 T2I 对齐设计的 LongT2IExpert。
+
+**面向长提示的文生图模型（Text-to-Image Models for Long Prompt）**。传统基于 CLIP 的 T2I 生成模型受限于词元（token）长度限制，难以处理长提示（Radford et al., 2021）。为解决这一困境，近期研究采用大语言模型（LLMs）作为文本编码器来增强语义抽取，代表模型如 Stable Diffusion 3.5（Esser et al., 2024）。另一类思路则对 CLIP 架构进行改进以容纳更长的输入：LongCLIP（Zhang et al., 2024）提供了一个支持长文本处理的、即插即用的标准 CLIP 替代方案；LongAlign（Liu et al., 2024）将长提示分解为单独的句子分别编码，从而实现长 T2I 生成。长提示生成能力的快速进步，使得自动、可解释的长 T2I 对齐评测模型变得迫切需要。
+
+---
+
+## 3 LongT2IBench：基准构建
+
+本节详述 LongT2IBench——一个通过引入图结构标注来评测长文本-图像对齐的基准。LongT2IBench 构建流程的总览见图 2。在整个基准构建过程中，我们采用多重策略以确保多样性与可靠性。下面从数据准备、数据标注与标签生成三个方面详述构建过程，最后进行统计分析。
+
+> **图 2**：LongT2IBench 构建流程总览。流程由三个阶段组成：(a) 数据准备。长提示从三个来源收集，并输入多种 T2I 模型生成图像。(b) 数据标注。长提示被转换为文本图结构，并完成细粒度的图像-文本图对齐标注。(c) 标签生成。基于图结构人工标注，产生两类标签：定量对齐分数与对齐解释。
+
+### 3.1 数据准备（Data Preparation）
+
+**长提示收集（Long Prompt Collection）**。为确保提示多样性并对长 T2I 对齐能力进行全方位评测，我们从三个来源收集长提示，并控制了不同词数区间上的长度分布。具体而言，长提示采样自人类生成内容（Human-Gen）、AI 生成内容（AI-Gen）与长图像描述（Img-Cap）。Human-Gen 提示取自 DiffusionDB（Wang et al., 2023），其中包含大量由真实用户创作的提示；AI-Gen 提示使用 GPT-4（Achiam et al., 2023）按特定模板合成；Img-Cap 提示取自 DOCCI（Onoe et al., 2024），其中每张图像都配有一段包含细粒度视觉细节的长描述。同时，我们在五个词数区间（30–50、50–70、70–90、90–110、110+）上确保均衡采样，以系统性地评估 T2I 评测器在不同文本长度下的对齐能力。
+
+**文生图生成（Text-to-Image Generation）**。为确保生成图像的多样性，我们选取六种不同类型的文生图生成模型，划分为三组：(1) 基础的开源热门 T2I 模型，即 Stable Diffusion v3.5（Esser et al., 2024）与 PixArt-α（Chen et al., 2024）；(2) 强大的专有 T2I 模型，包括 DALL-E 3（OpenAI, 2023）与 Midjourney v6（Holz, 2023）；(3) 专门的长 T2I 模型，包括 LongCLIP-SD（Zhang et al., 2024）与 LongSD（Liu et al., 2024）。对每个长提示，我们使用这些模型的默认设置生成图像，从而为标注提供一个全面的候选数据集。
+
+### 3.2 数据标注（Data Annotation）
+
+**文本图转换（Textual Graph Transformation）**。图表示（graph representation）已在诸多领域被证明是建模复杂关系与结构信息的强大范式（Hamilton, 2020; Yang et al., 2024a）。鉴于长提示细节密集的本质，我们对收集到的提示执行文本图转换。这为更客观、更准确的图文对齐标注奠定了基础。此外，图结构能够精确定位对齐与未对齐的元素，使我们能够更好地评测长 T2I 对齐能力。
+
+为确保出色的图结构保真度，我们采用系统化的三阶段转换协议。**首先**，我们设计了特定的输入提示与输出格式，指导 GPT-4 生成文本图，将长提示转换为由实体、属性与关系构成的图结构。**其次**，受训的人工标注者对这些生成的图结构进行精修（refine）以确保准确性：精修过程包括移除不当的转换，并通过增、删、改对粗糙的转换结果进行细致调整。**第三**，我们对上一阶段精修后的转换进行双重检查（double-check）以确认其合格性，确保可靠性——只有获得一致认可的转换图才会被保留到最终数据集中。这一严格的多阶段流程保证了高质量的图结构转换，能够准确捕捉长提示的语义关系。在整个过程中，从最初收集的 4.5K 条长提示中最终保留了 3K 个精确转换。图 3 展示了 LongPrompt-3K 中转换后图结构内实体、属性与关系数量的统计分析。使用 GPT-4 进行图生成的指令、Refine 与 Qualify 阶段的操作界面以及标注培训指南详见附录。
+
+> **图 3**：LongPrompt-3K 的来源分布图。长提示采样自 Human-Gen、AI-Gen 与 Img-Cap 三个来源。这些提示在不同词数区间上均匀分布，图中同时统计呈现了各区间内实体、属性与关系的数量。
+
+**图像-文本图对齐（Image-textual graph Alignment）**。基于转换后的文本图，我们实施了"初始标注 + 复核"两步流程，以获得可靠的图像-文本图对齐标注。受训标注者执行初始标注，对转换得到的实体、属性、关系与相应图像之间的对齐情况做出二元判定（binary decision），分别记为 E-Align、A-Align 与 R-Align。为提高效率，我们在标注平台设计中引入了层次化标注逻辑（hierarchical annotation logic）：标注者先评估实体，平台自动过滤掉与未对齐实体相关联的属性与关系。此外，我们聘请三位独立标注者审查初始标注结果，剔除分歧显著的实例，仅保留取得多数共识（majority consensus）的对齐标注。标注完成后，从最初的 18K 个样本中保留了 14K 个图文对进入最终数据集。被丢弃的数据包括含 NSFW（Not Safe For Work，不适宜内容）的图像，以及存在严重生成畸变的实例。
+
+### 3.3 标签生成（Label Generation）
+
+**对齐分数（Alignment Score）**。我们期待未来的文生图生成模型能够对齐所有文本细节。因此，我们对文本图中的所有实体、属性与关系一视同仁（同等重要）。对齐分数被定义为**对齐元素数量占总元素数量的比例**。我们分析了五个词数区间上的平均对齐分数，如图 4(a) 所示。统计结果表明，随着提示长度的增加，对齐分数逐渐下降，这凸显了在长提示场景下评测图文对齐的重要性。此外，图 4(b) 展示了六种生成模型上对齐标注的分布，揭示了各模型长文本对齐能力的性能差异，其中专有模型（DALL-E 3 与 Midjourney v6）表现出相对优势。
+
+**对齐解释（Alignment Interpretation）**。在长提示场景下，对齐解释的需求更为关键，尤其是定位（localizing）未对齐的元素，从而为生成模型的优化提供指引。利用文本图转换与图像-文本图对齐标注，我们可以为每个图文对导出结构化的对齐解释，表示为对齐与未对齐的实体、属性与关系。我们分析了这三类元素中对齐与未对齐的占比，如图 4(c) 所示。结果显示，**关系未对齐（relation misalignment）的占比尤为显著**。在标注过程中，我们要求标注者将关系划分到不同类别，图 4(d) 展示了这些关系类型上对齐与未对齐的占比。
+
+> **图 4**：统计分析。(a) 五个词数区间的平均对齐分数。(b) 六种 T2I 生成模型的对齐标注分布。(c) 实体、属性与关系上的对齐率与未对齐率。(d) 六类关系（动作 Action、连接 Connection、描述 Description、从属 Possession、来去 From/to、空间关系 Spatial relation）上的对齐占比。
+
+---
+
+## 4 LongT2IExpert：评测模型
+
+在所提 LongT2IBench 的基础上，我们提出 LongT2IExpert——一个长 T2I 评测器，通过带层次化对齐思维链（HA-CoT）的指令微调过程，使多模态大语言模型（MLLMs）能够同时提供定量分数与结构化解释。整体流程见图 5。
+
+> **图 5**：所提 LongT2IExpert 的整体流程。设计了层次化对齐思维链（CoT）来指导 MLLM 进行结构化对齐推理；数值化的对齐分数与图结构解释被用于以多任务方式训练 MLLM，使其同时进行对齐打分与对齐解释。
+
+### 4.1 指导 MLLM 进行对齐推理（Instructing MLLMs for Alignment Reasoning）
+
+长 T2I 对齐的评测要求模型既具备分析长文本的能力，又具备实现多模态对齐的能力。这对模型的基础能力提出了很高要求，因此我们选择多模态大语言模型作为主干，即 Qwen2.5-VL-7B-Instruct（Bai et al., 2023）。然而，即便拥有这一先进架构，该任务固有的"细节过载"与"对齐复杂性"特点仍使对齐评测成为一项颇具挑战的工作。受 LongT2IBench 构建过程的启发，我们引入层次化对齐思维链（HA-CoT），引导 MLLM 模仿人类式的结构化对齐推理。
+
+HA-CoT 具有一个三跳推理过程。在初始阶段，MLLM 充当**实体对齐器（Entity Aligner）**，分析长文本中提及的所有实体，并判定它们与图像的对齐情况。在第二阶段，它充当**属性与关系对齐器（Attribute and Relation Aligner）**，逐一检查与每个已对齐实体相关联的属性与关系的对齐情况。最后，基于上述分析，它综合整体对齐状况并给出一个综合对齐分数。在整个结构化 CoT 推理过程中，MLLM 执行多方位的对齐评估，模拟人类评测者的斟酌（deliberation）过程。
+
+### 4.2 训练 MLLM 进行对齐评估（Training MLLMs for Alignment Evaluation）
+
+在结构化对齐推理过程的基础上，我们利用高质量的对齐分数与解释作为监督信号，训练 MLLM 进行对齐评估。受 LISA（Lai et al., 2024; Sheng et al., 2025a）使用特殊词元（special token）在 MLLM 中实现推理分割能力的启发，我们在原始 LLM 词表中扩展一个新词元 `$<$ Level $>$`，用于表示"请求输出数值分数"。同时，我们将基于图的人工标注转换为 JSON 格式——在保留原始结构信息的同时，便于 MLLM 解析。这些设计使我们能够利用 MLLM 强大的理解与推理能力，同时进行对齐打分与对齐解释。给定长提示 $x_{txt}$、生成图像 $x_{img}$ 与预定义的 CoT，将其输入 MLLM $\mathcal{F}$，后者输出文本响应 $\hat{y}_{txt}$：
+
+$$
+\hat{y}_{txt}=\mathcal{F}\left(x_{txt},x_{img},\text{CoT}\right), \tag{1}
+$$
+
+其中输出 $\hat{y}_{txt}$ 会包含一个 `$<$ Json $>$` 词元与一个 `$<$ Level $>$` 词元，分别对应预测的对齐解释与对齐分数。
+
+随后，我们提取 `$<$ Level $>$` 词元对应的 MLLM 最后一层嵌入 $\hat{\mathbf{h}}_{Level}$，并施加一个打分头（score head）$\mathcal{R}$，得到预测对齐分数 $\hat{y}_{s}$。分数损失 $\mathcal{L}_{S}$ 使用预测分数与人工标注分数 $y_{s}$ 之间的均方误差（Mean Squared Error, MSE）计算：
+
+$$
+\hat{y}_{s}=\mathcal{R}\left(\hat{\mathbf{h}}_{Level}\right),\quad \mathcal{L}_{S}=(\hat{y}_{s}-y_{s})^{2}. \tag{2}
+$$
+
+对于对齐解释，我们将 `$<$ Json $>$` 词元解码为图结构解释 $\hat{\mathbf{G}}\left(E,R,A\right)$，其中 $E,R,A$ 分别表示实体、关系与属性。解释损失 $\mathcal{L}_{I}$ 使用预测解释与真值（ground-truth）解释 $\mathbf{G}$ 之间的交叉熵（cross-entropy, CE）计算：
+
+$$
+\mathcal{L}_{I}=\mathbf{CE}\left(\hat{\mathbf{G}},\mathbf{G}\right). \tag{3}
+$$
+
+我们引入参数高效的 LoRA 模块（Hu et al., 2022）来微调 MLLM。模型使用分数预测损失 $\mathcal{L}_{S}$ 与解释生成损失 $\mathcal{L}_{I}$ 进行端到端训练。总体训练目标 $\mathcal{L}$ 是这两个损失的加权和：
+
+$$
+\mathcal{L}=\mathcal{L}_{I}+\lambda\cdot\mathcal{L}_{S}, \tag{4}
+$$
+
+其中超参数 $\lambda$ 用于平衡两个损失。
+
+---
+
+## 5 实验
+
+### 5.1 实验设置（Experimental Settings）
+
+**实现细节（Implementation Details）**。LongT2IExpert 的训练采用开源 MLLM Qwen2.5-VL-7B-Instruct（Bai et al., 2023），并附加 LoRA 适配器（$r=32$，$\alpha=64$，dropout=0.05）进行微调。打分头由三个 Linear 层组成。学习率设为：LoRA 参数 $5\times 10^{-5}$，打分头 $2\times 10^{-4}$。超参数 $\lambda$ 设为 10，模型在单张 A800 GPU 上训练 3 个 epoch。LongT2IBench 的更多细节——包括标注平台、用于长提示合成与文本图转换的 MLLM 指令，以及标注者信息——见附录。
+
+**评测设置（Evaluation Setting）**。我们在 LongT2IBench 上采用标准的训练/验证/测试划分，确保长提示在五个词数区间上均匀分布。对于对齐打分，我们将 LongT2IExpert 与两类现有最先进的 T2I 评测器进行比较。第一类为基于 VLM 的模型：CLIPScore（Hessel et al., 2021）、BLIP2Score（Li et al., 2023）、PickScore（Li et al., 2023）、ImageReward（Xu et al., 2023）与 FGA-BLIP2（Han et al., 2024）。第二类为基于 MLLM 的模型：HPSv2（Wu et al., 2023）、VQAScore（Li et al., 2024b）与 Q-Eval-Score（Zhang et al., 2025）。为衡量与人工标注的相关性，我们报告 SRCC（Spearman 秩相关系数）与 PLCC（Pearson 线性相关系数）两个指标。能够同时预测对齐分数与对齐解释的模型很少。为评估解释质量，我们将 LongT2IExpert 与两类 MLLM 进行基准对比：专有模型包括 Gemini-1.5-flash/pro（Team et al., 2023）、GPT-4o、GPT-4-Turbo（Achiam et al., 2023）与 Grok-3（xAI, 2025）；开源模型包括 Qwen2.5-vl-max（Bai et al., 2023）与 LLava-v1.6（Liu et al., 2023）。我们使用准确率（Accuracy）来评估模型在识别对齐/未对齐元素上的解释质量。
+
+### 5.2 性能评估（Performance Evaluation）
+
+**长 T2I 对齐打分结果（Results on Long T2I Alignment Scoring）**。表 1 总结了所提 LongT2IExpert 与现有 T2I 评测器的性能对比。为全面考察这些模型在长提示场景下的打分能力，我们评估了它们在不同词数区间上的表现。结果表明，**多数模型随提示长度的增加出现显著的性能退化**。尤其是在 110+ 词的评测场景中，基于 VLM 的模型因文本编码器的词元长度限制而表现糟糕，而 Q-Eval-Score（Zhang et al., 2025）等基于 MLLM 的评测器则展现出明显的性能优势。此外，为公平比较，我们使用 LongT2IBench 的训练数据对开源模型进行了微调。所提 LongT2IExpert 在所有词数区间上均展现出明显优势，表明其在理解长提示与评测图文对齐方面的有效性。
+
+**表 1**：所提 LongT2IExpert 与最先进方法在长 T2I 对齐打分上的性能比较。其中"*"表示使用 LongT2IBench 训练数据微调后的对应方法版本。报告五个词数区间上的 SRCC 与 PLCC。原文中最佳结果加粗、次佳下划线；此处最佳结果加粗。
+
+| 模型 | 30–50 SRCC | 30–50 PLCC | 50–70 SRCC | 50–70 PLCC | 70–90 SRCC | 70–90 PLCC | 90–110 SRCC | 90–110 PLCC | 110+ SRCC | 110+ PLCC | 总体 SRCC | 总体 PLCC | 平均 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| CLIPScore | 0.224 | 0.235 | 0.349 | 0.370 | 0.271 | 0.240 | 0.208 | 0.202 | 0.209 | 0.184 | 0.269 | 0.264 | 0.267 |
+| BLIP2Score | 0.384 | 0.231 | 0.342 | 0.358 | 0.190 | 0.155 | 0.215 | 0.191 | 0.149 | 0.061 | 0.266 | 0.223 | 0.245 |
+| PickScore | 0.437 | 0.550 | 0.368 | 0.359 | 0.313 | 0.328 | 0.352 | 0.373 | 0.153 | 0.165 | 0.327 | 0.344 | 0.336 |
+| ImageReward | 0.283 | 0.339 | 0.270 | 0.319 | 0.181 | 0.226 | 0.187 | 0.188 | -0.023 | 0.072 | 0.210 | 0.244 | 0.227 |
+| HPSv2 | 0.540 | 0.534 | 0.479 | 0.473 | 0.394 | 0.417 | 0.395 | 0.408 | 0.148 | 0.151 | 0.381 | 0.392 | 0.387 |
+| VQAScore | 0.504 | 0.385 | 0.333 | 0.360 | 0.270 | 0.389 | 0.195 | 0.200 | 0.242 | 0.225 | 0.298 | 0.291 | 0.295 |
+| FGA-BLIP2 | 0.414 | 0.399 | 0.308 | 0.330 | 0.193 | 0.299 | 0.160 | 0.171 | 0.130 | 0.155 | 0.230 | 0.262 | 0.246 |
+| Q-Eval-Score | 0.470 | 0.416 | 0.460 | 0.459 | 0.339 | 0.382 | 0.320 | 0.301 | 0.422 | 0.365 | 0.361 | 0.355 | 0.358 |
+| PickScore* | 0.387 | 0.510 | 0.530 | 0.521 | 0.393 | 0.432 | 0.419 | 0.372 | 0.250 | 0.264 | 0.438 | 0.439 | 0.438 |
+| ImageReward* | 0.538 | 0.584 | 0.546 | 0.574 | 0.384 | 0.398 | 0.399 | 0.396 | 0.167 | 0.195 | 0.438 | 0.439 | 0.439 |
+| FGA-BLIP2* | 0.570 | 0.568 | 0.514 | 0.527 | 0.371 | 0.475 | 0.327 | 0.355 | 0.126 | 0.144 | 0.406 | 0.444 | 0.425 |
+| **LongT2IExpert** | **0.781** | **0.789** | **0.605** | **0.626** | **0.548** | **0.558** | **0.435** | **0.443** | **0.431** | **0.375** | **0.558** | **0.557** | **0.557** |
+
+**长 T2I 对齐解释结果（Results on Long T2I Alignment Interpreting）**。由于缺乏客观的对齐解释基准、且兼具打分与解释能力的 T2I 评测器十分稀缺，我们在长 T2I 对齐解释任务上将 LongT2IExpert 与先进 MLLM 进行了比较。为公平比较，我们采用了完全相同的提示模式与输出格式，包括我们设计的 HA-CoT。表 2 列出了对比结果，我们报告实体、属性与关系三个维度上的准确率。所提 LongT2IExpert 取得最佳性能，Gemini-1.5-pro（Team et al., 2023）位居第二。结果表明，**模型普遍认为关系对齐比实体与属性更具挑战**——在长提示场景下，准确的关系判断对长上下文理解能力提出了更高要求。我们还观察到，**未对齐元素的识别准确率始终低于对齐元素**：在大量对齐元素之中识别出未对齐之处，需要更精确的定位与判别能力。
+
+**表 2**：所提 LongT2IExpert 与先进多模态大语言模型（MLLMs）在长 T2I 对齐解释上的比较。报告实体、属性与关系上的对齐（Align）识别准确率、未对齐（Mis.）识别准确率与总体（Overall）准确率。最佳结果加粗。
+
+| 模型 | 实体·对齐 | 实体·未对齐 | 实体·总体 | 属性·对齐 | 属性·未对齐 | 属性·总体 | 关系·对齐 | 关系·未对齐 | 关系·总体 | 全部·对齐 | 全部·未对齐 | 全部·总体 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Gemini-1.5-flash | 48.4% | 23.2% | 43.6% | 26.4% | 9.2% | 23.2% | 6.4% | 3.2% | 5.6% | 29.7% | 11.8% | 25.9% |
+| Gemini-1.5-pro | 49.2% | 36.1% | 46.7% | 31.6% | 16.6% | 28.8% | 13.6% | 12.8% | 13.4% | 33.6% | 21.9% | 31.1% |
+| GPT-4o | 44.2% | 30.7% | 41.6% | 27.6% | 13.9% | 25.0% | 10.0% | 11.0% | 10.2% | 29.3% | 18.6% | 27.0% |
+| GPT-4-Turbo | 43.1% | 27.1% | 40.1% | 24.9% | 11.9% | 22.5% | 5.6% | 5.0% | 5.4% | 26.8% | 14.6% | 24.2% |
+| Grok-3 | 42.9% | **44.0%** | 43.1% | 23.0% | 16.4% | 21.7% | 6.2% | 10.7% | 7.4% | 26.3% | 23.8% | 25.7% |
+| Qwen2.5-v1-max | 49.9% | 22.8% | 44.8% | 28.2% | 10.8% | 24.9% | 9.8% | 4.7% | 8.4% | 31.7% | 12.6% | 27.7% |
+| LLava-v1.6 | 33.6% | 6.5% | 28.4% | 11.4% | 1.9% | 9.6% | 1.9% | 0.3% | 1.5% | 17.6% | 2.9% | 14.5% |
+| **LongT2IExpert** | **80.2%** | 36.5% | **71.9%** | **53.8%** | **18.9%** | **47.3%** | **40.6%** | **20.8%** | **35.2%** | **60.7%** | **25.8%** | **53.2%** |
+
+**定性分析（Qualitative Analysis）**。在图 6 左侧，我们展示了 LongT2IExpert、PickScore 与 FGA-BLIP2（微调版本）在长文本-图像对上的预测分数。LongT2IExpert 给出的分数与人工标注表现出更高的一致性。对于对齐解释，如图 6 右侧所示，所提方法能够生成高准确率的对齐解释，并具有更优的未对齐检测能力。（更多可视化示例见附录。）
+
+> **图 6**：长 T2I 对齐打分与解释的可视化。左：与 PickScore 和 FGA-BLIP2（微调版本）相比，LongT2IExpert 的预测分数与人工标注表现出更强的相关性。右：LongT2IExpert 产生比 GPT-4o 更准确的对齐解释。
+
+### 5.3 消融研究（Ablation Study）
+
+为验证 LongT2IExpert 中各组件的有效性，我们进行了全面的消融实验。如表 3 所示，我们通过多种模型变体系统性地评估了不同组件的贡献。我们首先考察 LongT2IExpert 仅训练解释任务（w/o Score）与仅训练打分任务（w/o Interpretation）时的性能，对比结果证明了多任务训练的显著优势。随后，我们评估不使用层次化对齐思维链（HA-CoT）时的性能，结果验证了 HA-CoT 在长 T2I 对齐中的有效性——它引导 MLLM 进行结构化的对齐推理。
+
+**表 3**：LongT2IExpert 组件的消融研究。分别报告长 T2I 对齐打分的 Avg. (SRCC+PLCC)/2（Align-S）与长 T2I 对齐解释的总体准确率（Align-I）。
+
+| 设置 | Align-S（打分） | Align-I（解释） |
+|---|---|---|
+| LongT2IExpert（w/o Score，仅解释） | — | 32.8% |
+| LongT2IExpert（w/o Interpretation，仅打分） | 0.474 | — |
+| LongT2IExpert（w/o HA-CoT） | 0.516 | 39.9% |
+| **LongT2IExpert（完整模型）** | **0.557** | **53.2%** |
+
+---
+
+## 结论 + 精读小结
+
+### 结论（原文翻译）
+
+本文对长文本文生图（T2I）对齐进行了全面的主观与客观基准测试。我们贡献了 LongT2IBench——首个通过引入图结构标注而构建的此类基准。我们还提出了 LongT2IExpert，通过微调多模态大语言模型（MLLM），使其输出词元级别的对齐分数与结构化的对齐解释。大量实验表明，LongT2IExpert 取得了令人瞩目的性能。尽管本工作获得了可喜的成果，长 T2I 对齐问题仍远未解决——它甚至对人类评测者而言也是一项挑战。我们希望本文的贡献能够激励研究社区以更多样的技术途径与更广阔的视角来重新思考这一问题。
+
+### 致谢（原文翻译）
+
+本工作受国家自然科学基金（Grants 62471349、62171340、62301378）、中央高校基本科研业务费（Grant QTZX25076）以及中国博士后科学基金（Grant 2024M762553）资助，并部分受西安电子科技大学创新基金（Grant YISJ25004）资助。我们同时衷心感谢所有标注者为构建本基准所付出的辛勤努力与重要贡献。
+
+### 精读小结
+
+- **问题重构是全文最大的方法论亮点**：作者没有让标注者硬啃"给长文本-图像对整体打分"这一不可靠任务，而是把长提示解析为"实体-属性-关系"文本图，将对齐评测降维为图上节点/边的**二元判定**（E-Align / A-Align / R-Align）。这一重构同时解决了两端问题——标注端：人只需做局部二元判断，且平台按"先实体、后属性关系"的层次逻辑自动过滤，大幅降低"细节过载"；评测端：对齐分数可由图上对齐比例**自动导出**（而非另做整体打分），解释则天然**可定位**到具体未对齐元素，可解释性由数据结构本身保证。
+- **基准构建的质量控制层层递进**：提示侧三来源（人写 DiffusionDB / GPT-4 模板合成 / DOCCI 图像描述）× 五个词数区间均衡采样；图像侧六种生成模型分三档（开源 / 专有 / 长文本专用）；图转换侧 GPT-4 生成 → 人工精修 → 双重质检（4.5K → 3K，淘汰约 1/3）；对齐标注侧三人独立复核、多数决（18K → 14K，另剔除 NSFW 与严重畸变）。多重过滤解释了最终规模，也为"LLM 生成 + 人工把关"的数据范式提供了可复用模板。
+- **LongT2IExpert 的设计哲学是"让模型复现基准的构建过程"**：HA-CoT 的三跳推理（实体对齐 → 已对齐实体的属性/关系对齐 → 综合评分）与人类标注流程同构；`$<$ Level $>$` 词元嵌入 + 回归打分头提供数值分数通道，`$<$ Json $>$` 词元提供图结构解释通道，两路损失（MSE + CE）加权联合训练。消融表明两个任务**互相促进**：仅打分 0.474 → 多任务 0.557，仅解释 32.8% → 53.2%，说明结构化解释为打分提供了有用的中间表示，反之亦然。
+- **实验揭示的领域现状值得注意**：(a) 所有评测器都随提示变长而退化，110+ 词区间近乎断崖——ImageReward 的 SRCC 跌至 -0.023，印证 CLIP 类文本编码器的词元长度限制是 VLM 评测器的硬瓶颈，而 MLLM 类（Q-Eval-Score）相对占优；(b) **关系对齐是最难的维度**：最强 MLLM 基线 Gemini-1.5-pro 的关系总体准确率仅 13.4%，LongT2IExpert 也只有 35.2%；(c) **"找错"难于"找对"**：所有模型的未对齐识别准确率都显著低于对齐识别（LongT2IExpert 为 25.8% vs 60.7%），说明精确定位"错在哪"仍是长 T2I 对齐的核心难点，也呼应了作者"远未解决"的坦承。
+- **可留意的局限**：对齐判定是二值的，未刻画部分对齐/程度差异；对齐分数对所有元素等权，未区分语义重要性；解释质量以准确率衡量，未与人类解释文本直接对比；专有生成模型（DALL-E 3、Midjourney v6）在长文本对齐上相对占优的发现（图 4b）对开源长文本 T2I 模型的发展是有力的鞭策。
+
+---
+
+## 附录要点
+
+本次翻译所依据的 arXiv HTML 提取版**未包含附录正文**，以下为正文各处提及的附录内容要点（细节请参见原文附录）：
+
+- **GPT-4 图生成的具体指令**：将长提示转换为"实体-属性-关系"文本图所使用的输入提示与规定输出格式（§3.2）；
+- **Refine 与 Qualify 阶段的标注平台操作界面**：人工精修与双重检查的具体操作流程（§3.2）；
+- **标注者培训指南与标注者信息**（§3.1、§5.1）；
+- **长 T2I 对齐打分与解释的更多可视化示例**（§5.2）。
+
+---
+
+## 创新点提炼
+
+1. **首个面向长提示场景、以图结构标注为核心的 T2I 对齐基准**。将 3K 条长提示（自 4.5K 经人工质检保留）解析为涵盖实体、属性、关系的文本图，并为 14K 个图文对逐一标注 E-Align / A-Align / R-Align 二元对齐状态。相较既有基准（Pick-a-pic、HPDv2、ImageReward、EvalAlign、TIFA、EvalMuse-40K 等）只提供 MOS/Likert 整体分或短提示逐短语标注，LongT2IBench 首次在长提示场景下同时产出定量分数（对齐元素占比）与可定位到具体元素的解释，直接填补了长 T2I 评测器的训练数据空白。
+
+2. **Generate-Refine-Qualify 三阶段文本图转换协议，直击长提示标注的两大顽疾**。针对"细节过载"（整体打分不可靠）与"对齐复杂性"（逐元素标注丢失远距离关联），采用"GPT-4 按规定输入/输出格式生成文本图 → 受训标注者增删改精修 → 双重检查、仅保留一致认可的转换"的流水线（4.5K → 3K），辅以层次化标注逻辑（先判实体、自动过滤未对齐实体的属性与关系）与三人独立复核多数决（18K → 14K），在可行性、效率与可靠性之间取得工程化平衡，为"LLM 生成 + 人工把关"的数据构建范式提供了可复用模板。
+
+3. **层次化对齐思维链（HA-CoT）**。将人类评测者的斟酌过程显式结构化为"实体对齐 → 已对齐实体的属性/关系对齐 → 综合评分"的三跳推理，使 MLLM 的对齐评估从黑盒打分变为可解释的渐进式推理。消融实验证明其同时提升打分相关性（Avg. 0.516 → 0.557）与解释准确率（39.9% → 53.2%），且在与先进 MLLM 的对比中统一使用 HA-CoT 提示，保证了比较的公平性。
+
+4. **打分-解释一体的多任务评测模型 LongT2IExpert**。借鉴 LISA 的特殊词元机制，在 Qwen2.5-VL-7B 词表中扩展 `$<$ Level $>$` 词元，以其最后一层嵌入经三层 Linear 打分头回归对齐分数（MSE 损失），同时以 `$<$ Json $>$` 词元自回归输出图结构解释（交叉熵损失），两路损失以 $\lambda=10$ 加权、LoRA（r=32, α=64）端到端微调。多任务协同使两能力互相促进：仅打分 0.474 vs 多任务 0.557，仅解释 32.8% vs 53.2%——单一模型即可同时完成"打多准"与"错在哪"两类输出。
+
+5. **"词数区间 × 对齐维度"双轴系统评测框架与三重要实证发现**。框架按 30–50 至 110+ 五个词数区间与实体/属性/关系三类维度组织评测，全面覆盖打分准确性与解释质量；实证发现：(a) 现有评测器随提示长度显著退化，110+ 词时 VLM 类评测器因文本编码器词元长度限制近乎失效（ImageReward SRCC 为 -0.023），MLLM 类（Q-Eval-Score）相对占优；(b) 关系对齐是最难维度（最强 MLLM 基线 Gemini-1.5-pro 关系总体准确率仅 13.4%，LongT2IExpert 达 35.2%）；(c) 未对齐元素识别普遍难于对齐元素识别（LongT2IExpert：25.8% vs 60.7%），"错在哪"的精确定位是长 T2I 对齐的核心瓶颈，为后续研究指明了方向。
+
+---
+
+*注：本翻译基于 arXiv HTML（2512.09271v1）提取的全文 Markdown 版本；参考文献列表从略，正文引用保留 (作者, 年份) 格式；公式保留 LaTeX 原始形式；原文附录未包含在提取版本中，附录相关内容以正文提及为准。发表信息（AAAI 2026 Oral, 40(14): 11820–11828, DOI: 10.1609/aaai.v40i14.38168）已经 arXiv 页面、AAAI 官网及 ACM DL 交叉核实。*
+</script>
+<script src="../assets/app.js?v=5"></script>
+</body>
+</html>

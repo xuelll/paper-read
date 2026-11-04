@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>88 · TuningIQA 直播相机调优盲质量评估 — 中英对照精读</title>
+<link rel="stylesheet" href="../assets/style.css?v=6">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="back" href="../index.html">← 首页</a>
+  <div class="tb-title"><span class="num">88</span>TuningIQA 直播相机调优盲质量评估</div>
+  <div class="tb-controls">
+    <a class="tb-link" href="https://arxiv.org/abs/2508.17965" target="_blank" rel="noopener">arXiv</a>
+    <label class="sync"><input type="checkbox" id="syncToggle"> 滚动同步</label>
+  </div>
+</header>
+<main class="reader">
+  <section class="pane pane-en">
+    <div class="pane-head">ENGLISH 原文 (arXiv HTML)</div>
+    <div class="pane-body" id="enBody">
+<article class="ltx_document ltx_authors_1line">
+<h1 class="ltx_title ltx_title_document">TuningIQA: Fine-Grained Blind Image Quality Assessment for 
+<br class="ltx_break">Livestreaming Camera Tuning</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Xiangfei Sheng
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Zhichao Duan
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Xiaofeng Pan
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Yipo Huang
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Zhichao Yang
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Pengfei Chen
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Leida Li
+</span><span id="id1" class="ltx_note ltx_note_frontmatter ltx_thanks_correspondence ltx_role_thanks"><sup class="ltx_note_mark">†</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">†</sup><span class="ltx_note_type">thanks: </span>Corresponding author</span></span></span></span></div>
+
+<div id="abstract1" class="ltx_abstract"><h6 class="ltx_title ltx_title_abstract">Abstract</h6>
+    
+<p id="abstract1.1" class="ltx_p">Livestreaming has become increasingly prevalent in modern visual communication, where automatic camera quality tuning is essential for delivering superior user Quality of Experience (QoE). Such tuning requires accurate blind image quality assessment (BIQA) to guide parameter optimization decisions. Unfortunately, the existing BIQA models typically only predict an overall coarse-grained quality score, which cannot provide fine-grained perceptual guidance for precise camera parameter tuning. To bridge this gap, we first establish <span id="abstract1.1.1" class="ltx_text ltx_font_bold">FGLive-10K</span>, a comprehensive fine-grained BIQA database containing 10,185 high-resolution images captured under varying camera parameter configurations across diverse livestreaming scenarios. The dataset features 50,925 multi-attribute quality annotations and 19,234 fine-grained pairwise preference annotations. Based on FGLive-10K, we further develop <span id="abstract1.1.2" class="ltx_text ltx_font_bold">TuningIQA</span>, a fine-grained BIQA metric for livestreaming camera tuning, which integrates human-aware feature extraction and graph-based camera parameter fusion. Extensive experiments and comparisons demonstrate that TuningIQA significantly outperforms state-of-the-art BIQA methods in both score regression and fine-grained quality ranking, achieving superior performance when deployed for livestreaming camera tuning.</p>
+  
+</div>
+<div id="id2" class="ltx_logical-block ltx_align_bottom">
+    
+<div id="p1" class="ltx_para">
+<p id="p1.1" class="ltx_p ltx_align_center"><sup id="p1.1.1" class="ltx_sup">1</sup>School of Artificial Intelligence, Xidian University,<sup id="p1.1.2" class="ltx_sup">2</sup>School of Data Science and Artificial Intelligence, Chang’an University, <sup id="p1.1.3" class="ltx_sup">3</sup>State Key Laboratory of Electromechanical Integrated Manufacturing of High-Performance Electronic Equipments,</p>
+<p id="p1.2" class="ltx_p ltx_align_center">Xidian University</p>
+<p id="p1.3" class="ltx_p ltx_align_center">xiangfeisheng@gmail.com, zach@stu.xidian.edu.cn, panxf@stu.xidian.edu.cn, yphuang@chd.edu.cn, yangzhichao@stu.xidian.edu.cn, chenpengfei@stu.xidian.edu.cn, ldli@xidian.edu.cn</p>
+</div>
+  
+</div>
+<section id="Sx1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Introduction</h2>
+
+<div id="Sx1.p1" class="ltx_para">
+<p id="Sx1.p1.1" class="ltx_p">With the rapid expansion of mobile livestreaming across entertainment and e-commerce platforms (<span id="Sx1.p1.1.1" class="ltx_text ltx_font_italic">e.g.</span>, TikTok Live, YouTube Shorts), automatic camera parameter tuning has become increasingly important for delivering superior Quality of Experience (QoE) <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib6" title="" class="ltx_ref">Gilstrap and Gilstrap 2023</a>; <a href="#bib.bib8" title="" class="ltx_ref">Hamilton, Garretson, and Kerne 2014</a>)</cite>. Unlike traditional photography where post-capture editing can compensate for suboptimal settings, livestreaming demands real-time optimization during capture, making automated camera tuning essential for both professional streamers and casual users lacking photography expertise.</p>
+</div>
+<figure id="Sx1.F1" class="ltx_figure"><img src="https://arxiv.org/html/2508.17965v1/TuningIQA-fig1.png" id="Sx1.F1.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:684/442;" width="684" height="442" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 1: </span>Illustration of the fine-grained challenge in IQA. Coarse-grained quality difference (a) and fine-grained quality difference (b) caused by inappropriate camera parameters. State-of-the-art score-based methods LIQE <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib36" title="" class="ltx_ref">Zhang et al. 2023</a>)</cite> and MUSIQ <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib13" title="" class="ltx_ref">Ke et al. 2021</a>)</cite> fail to capture fine-grained quality differences.</figcaption>
+</figure>
+<figure id="Sx1.F2" class="ltx_figure"><img src="https://arxiv.org/html/2508.17965v1/TuningIQA-fig2_new.png" id="Sx1.F2.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:663/196;" width="663" height="196" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 2: </span>Statistics of the FGLive-10K dataset and representative samples covering diverse livestreaming scenarios.</figcaption>
+</figure>
+<div id="Sx1.p2" class="ltx_para">
+<p id="Sx1.p2.1" class="ltx_p">Image quality assessment (IQA) constitutes the core of effective camera tuning. In practice, automated camera tuning follows a common approach: algorithms perform parameter adjustments within consistent scenes, followed by an objective metric to predict the output image quality and provide feedback to the parameter tuning, producing the best quality image.
+Therefore, the fundamental challenge lies in precise blind image quality assessment (BIQA), particularly during the fine-grained parameter optimization process where quality variations are often subtle and may not dramatically change overall image appearance. In these scenarios, fine-grained quality assessment becomes essential for distinguishing between parameter configurations that produce visually similar but still <span id="Sx1.p2.1.1" class="ltx_text ltx_font_italic">noticeable</span> perceptual differences.</p>
+</div>
+<div id="Sx1.p3" class="ltx_para">
+<p id="Sx1.p3.1" class="ltx_p">State-of-the-art BIQA methods <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib36" title="" class="ltx_ref">Zhang et al. 2023</a>; <a href="#bib.bib13" title="" class="ltx_ref">Ke et al. 2021</a>; <a href="#bib.bib29" title="" class="ltx_ref">Wang, Chan, and Loy 2023</a>)</cite> designed for score-based evaluation, face fundamental limitations when applied to camera tuning scenarios. As illustrated in Figure <a href="#Sx1.F1" title="Figure 1 ‣ Introduction ‣ TuningIQA: Fine-Grained Blind Image Quality Assessment for Livestreaming Camera Tuning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>, while these methods demonstrate accuracy for coarse-grained quality discrimination, they struggle with fine-grained assessment, which is essential for parameter optimization. When parameter adjustments produce subtle quality changes, existing BIQA methods often fail to provide reliable guidance, restricting their practical utility in automated camera tuning systems.</p>
+</div>
+<div id="Sx1.p4" class="ltx_para">
+<p id="Sx1.p4.1" class="ltx_p">Livestreaming camera tuning also presents two specific requirements, which are inadequately addressed by general-purpose BIQA methods: (i) <span id="Sx1.p4.1.1" class="ltx_text ltx_font_bold">Human-region Priority</span>, emphasizing image quality evaluation on human-centric regions such as faces and bodies, reflecting the heightened sensitivity of the human visual system (HVS) <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib7" title="" class="ltx_ref">Grimson 1981</a>)</cite> towards these areas over background elements. (ii) <span id="Sx1.p4.1.2" class="ltx_text ltx_font_bold">Parameter Interdependency Modeling</span>, capturing complex physical relationships among camera settings that jointly influence image quality. Camera parameters exhibit intricate interdependencies rooted in photographic principles—adjusting one parameter often necessitates compensating changes in others to maintain desired quality. Current BIQA methods fail to model these parameter interactions and lack the specialized architectural designs needed for camera-guided quality optimization.</p>
+</div>
+<div id="Sx1.p5" class="ltx_para">
+<p id="Sx1.p5.1" class="ltx_p">To address the above limitations, we present multi-fold technical contributions spanning dataset construction, method development, and experimental analysis:</p>
+</div>
+<div id="Sx1.p6" class="ltx_para">
+<p id="Sx1.p6.1" class="ltx_p"><math id="Sx1.p6.m1" class="ltx_Math" alttext="\bullet" display="inline" intent=":literal"><semantics><mo>∙</mo><annotation encoding="application/x-tex">\bullet</annotation></semantics></math> <span id="Sx1.p6.1.1" class="ltx_text ltx_font_bold">Dataset.</span> We construct FGLive-10K, the first-of-its-kind fine-grained BIQA dataset specifically designed for livestreaming camera tuning. As shown in Figure <a href="#Sx1.F2" title="Figure 2 ‣ Introduction ‣ TuningIQA: Fine-Grained Blind Image Quality Assessment for Livestreaming Camera Tuning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a>, the dataset comprises 10,185 high-resolution images from 555 distinct scenes, each containing systematic camera parameter variations. Beyond conventional Mean Opinion Scores (MOS), we provide fine-grained pairwise preference annotations, enabling reliable discrimination of subtle quality differences essential for parameter optimization.</p>
+</div>
+<div id="Sx1.p7" class="ltx_para">
+<p id="Sx1.p7.1" class="ltx_p"><math id="Sx1.p7.m1" class="ltx_Math" alttext="\bullet" display="inline" intent=":literal"><semantics><mo>∙</mo><annotation encoding="application/x-tex">\bullet</annotation></semantics></math> <span id="Sx1.p7.1.1" class="ltx_text ltx_font_bold">Method.</span> We propose TuningIQA, a fine-grained BIQA framework with two key innovations. First, we design a Human-aware Feature Extraction (HFE) module that prioritizes human-centric regions through aesthetics-guided feature learning. Second, we introduce an optional Graph-based Camera Parameter Fusion (GCPF) module that models physical relationships among camera settings through graph attention networks. The framework unifies multi-attribute regression and fine-grained rank learning for comprehensive quality assessment and precise camera tuning guidance.</p>
+</div>
+<div id="Sx1.p8" class="ltx_para">
+<p id="Sx1.p8.1" class="ltx_p"><math id="Sx1.p8.m1" class="ltx_Math" alttext="\bullet" display="inline" intent=":literal"><semantics><mo>∙</mo><annotation encoding="application/x-tex">\bullet</annotation></semantics></math> <span id="Sx1.p8.1.1" class="ltx_text ltx_font_bold">Experimental Analysis.</span> Extensive experiments demonstrate TuningIQA’s superior performance over state-of-the-art methods in both coarse-grained quality score prediction and fine-grained quality ranking. Our analysis reveals fundamental limitations in existing score-based approaches for fine-grained assessment, while practical camera tuning experiments show 74-76% win rates against leading BIQA methods, confirming the effectiveness of our specialized design for camera tuning applications.</p>
+</div>
+<figure id="Sx1.T1" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 1: </span>Comparison of popular BIQA datasets with authentic distortions.</figcaption>
+<table id="Sx1.T1.1" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="Sx1.T1.1.1" class="ltx_tr">
+<th id="Sx1.T1.1.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_border_tt"><span id="Sx1.T1.1.1.1.1" class="ltx_text ltx_font_bold">Dataset</span></th>
+<th id="Sx1.T1.1.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="Sx1.T1.1.1.2.1" class="ltx_text ltx_font_bold">#Img</span></th>
+<th id="Sx1.T1.1.1.3" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="Sx1.T1.1.1.3.1" class="ltx_text ltx_font_bold">#Param</span></th>
+<th id="Sx1.T1.1.1.4" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="Sx1.T1.1.1.4.1" class="ltx_text ltx_font_bold">#Attr</span></th>
+<th id="Sx1.T1.1.1.5" class="ltx_td ltx_nopad_r ltx_align_left ltx_th ltx_th_column ltx_border_tt"><span id="Sx1.T1.1.1.5.1" class="ltx_text ltx_font_bold">Annotation</span></th></tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="Sx1.T1.1.2" class="ltx_tr">
+<td id="Sx1.T1.1.2.1" class="ltx_td ltx_align_left ltx_border_t">BID</td>
+<td id="Sx1.T1.1.2.2" class="ltx_td ltx_align_center ltx_border_t">585</td>
+<td id="Sx1.T1.1.2.3" class="ltx_td ltx_align_center ltx_border_t">0</td>
+<td id="Sx1.T1.1.2.4" class="ltx_td ltx_align_center ltx_border_t">0</td>
+<td id="Sx1.T1.1.2.5" class="ltx_td ltx_nopad_r ltx_align_left ltx_border_t">MOS</td></tr>
+<tr id="Sx1.T1.1.3" class="ltx_tr">
+<td id="Sx1.T1.1.3.1" class="ltx_td ltx_align_left">CID2013</td>
+<td id="Sx1.T1.1.3.2" class="ltx_td ltx_align_center">480</td>
+<td id="Sx1.T1.1.3.3" class="ltx_td ltx_align_center">0</td>
+<td id="Sx1.T1.1.3.4" class="ltx_td ltx_align_center">4</td>
+<td id="Sx1.T1.1.3.5" class="ltx_td ltx_nopad_r ltx_align_left">MOS</td></tr>
+<tr id="Sx1.T1.1.4" class="ltx_tr">
+<td id="Sx1.T1.1.4.1" class="ltx_td ltx_align_left">LIVE Challenge</td>
+<td id="Sx1.T1.1.4.2" class="ltx_td ltx_align_center">1,162</td>
+<td id="Sx1.T1.1.4.3" class="ltx_td ltx_align_center">0</td>
+<td id="Sx1.T1.1.4.4" class="ltx_td ltx_align_center">0</td>
+<td id="Sx1.T1.1.4.5" class="ltx_td ltx_nopad_r ltx_align_left">MOS</td></tr>
+<tr id="Sx1.T1.1.5" class="ltx_tr">
+<td id="Sx1.T1.1.5.1" class="ltx_td ltx_align_left">KonIQ-10K</td>
+<td id="Sx1.T1.1.5.2" class="ltx_td ltx_align_center">10,073</td>
+<td id="Sx1.T1.1.5.3" class="ltx_td ltx_align_center">0</td>
+<td id="Sx1.T1.1.5.4" class="ltx_td ltx_align_center">4</td>
+<td id="Sx1.T1.1.5.5" class="ltx_td ltx_nopad_r ltx_align_left">MOS</td></tr>
+<tr id="Sx1.T1.1.6" class="ltx_tr">
+<td id="Sx1.T1.1.6.1" class="ltx_td ltx_align_left">SPAQ</td>
+<td id="Sx1.T1.1.6.2" class="ltx_td ltx_align_center">11,125</td>
+<td id="Sx1.T1.1.6.3" class="ltx_td ltx_align_center">0</td>
+<td id="Sx1.T1.1.6.4" class="ltx_td ltx_align_center">5</td>
+<td id="Sx1.T1.1.6.5" class="ltx_td ltx_nopad_r ltx_align_left">MOS</td></tr>
+<tr id="Sx1.T1.1.7" class="ltx_tr" style="--ltx-bg-color:#F5F5F5;">
+<td id="Sx1.T1.1.7.1" class="ltx_td ltx_align_left ltx_border_bb ltx_border_t"><span id="Sx1.T1.1.7.1.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#F5F5F5;">FGLive-10K</span></td>
+<td id="Sx1.T1.1.7.2" class="ltx_td ltx_align_center ltx_border_bb ltx_border_t"><span id="Sx1.T1.1.7.2.1" class="ltx_text" style="--ltx-bg-color:#F5F5F5;">10,185</span></td>
+<td id="Sx1.T1.1.7.3" class="ltx_td ltx_align_center ltx_border_bb ltx_border_t"><span id="Sx1.T1.1.7.3.1" class="ltx_text" style="--ltx-bg-color:#F5F5F5;">7</span></td>
+<td id="Sx1.T1.1.7.4" class="ltx_td ltx_align_center ltx_border_bb ltx_border_t"><span id="Sx1.T1.1.7.4.1" class="ltx_text" style="--ltx-bg-color:#F5F5F5;">4</span></td>
+<td id="Sx1.T1.1.7.5" class="ltx_td ltx_nopad_r ltx_align_left ltx_border_bb ltx_border_t"><span id="Sx1.T1.1.7.5.1" class="ltx_text" style="--ltx-bg-color:#F5F5F5;">MOS+Rank</span></td></tr>
+</tbody>
+</table>
+</figure>
+</section>
+<section id="Sx2" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Related Work</h2>
+
+<section id="Sx2.SSx1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">IQA Benchmarks</h3>
+
+<div id="Sx2.SSx1.p1" class="ltx_para">
+<p id="Sx2.SSx1.p1.1" class="ltx_p">Benchmark datasets have driven significant progress in image quality assessment research. Early datasets focused on synthetic distortions like LIVE <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib25" title="" class="ltx_ref">Sheikh, Sabir, and Bovik 2006</a>)</cite>, TID2013 <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib21" title="" class="ltx_ref">Ponomarenko et al. 2013</a>)</cite>, and CSIQ <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib14" title="" class="ltx_ref">Larson and Chandler 2010</a>)</cite>, using simulated degradations on reference images to enable full-reference IQA development. However, obtaining pristine references proves impractical in real scenarios, motivating research toward authentic distortions. Pioneering efforts include BID <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib3" title="" class="ltx_ref">Ciancio et al. 2011</a>)</cite> with 585 DSLR-captured blur images, LIVE Challenge <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib5" title="" class="ltx_ref">Ghadiyaram and Bovik 2016</a>)</cite> featuring 1,162 mobile-captured images with crowdsourced annotations, and KonIQ-10k <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib10" title="" class="ltx_ref">Hosu et al. 2020</a>)</cite> expanding diversity with 10,000 multimedia images. SPAQ <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib4" title="" class="ltx_ref">Fang et al. 2020</a>)</cite> incorporated EXIF metadata and laboratory-controlled annotations for smartphone imaging scenarios. A brief comparison of authentic BIQA datasets is summarized in Table <a href="#Sx1.T1" title="Table 1 ‣ Introduction ‣ TuningIQA: Fine-Grained Blind Image Quality Assessment for Livestreaming Camera Tuning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>.</p>
+</div>
+</section>
+<section id="Sx2.SSx2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">IQA Method</h3>
+
+<div id="Sx2.SSx2.p1" class="ltx_para">
+<p id="Sx2.SSx2.p1.1" class="ltx_p">Early IQA methods relied on statistical priors <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib34" title="" class="ltx_ref">Zhang, Zhang, and Bovik 2015</a>; <a href="#bib.bib20" title="" class="ltx_ref">Mittal, Soundararajan, and Bovik 2013</a>)</cite> and handcrafted natural scene statistics <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib19" title="" class="ltx_ref">Mittal, Moorthy, and Bovik 2012</a>; <a href="#bib.bib32" title="" class="ltx_ref">Ye et al. 2012</a>; <a href="#bib.bib23" title="" class="ltx_ref">Saad, Bovik, and Charrier 2012</a>)</cite>, achieving reasonable success on synthetic distortions but struggling with authentic degradations <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib5" title="" class="ltx_ref">Ghadiyaram and Bovik 2016</a>)</cite>. The shift toward real-world assessment drove CNN-based approaches <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib2" title="" class="ltx_ref">Bosse et al. 2016</a>; <a href="#bib.bib35" title="" class="ltx_ref">Zhang et al. 2020</a>; <a href="#bib.bib1" title="" class="ltx_ref">Bosse et al. 2018</a>)</cite> that learned hierarchical quality representations directly from data. Recent advances include architectural innovations like HyperIQA’s semantic-quality disentanglement <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib26" title="" class="ltx_ref">Su et al. 2020</a>)</cite> and Transformer-based models with attention mechanisms <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib36" title="" class="ltx_ref">Zhang et al. 2023</a>; <a href="#bib.bib13" title="" class="ltx_ref">Ke et al. 2021</a>; <a href="#bib.bib29" title="" class="ltx_ref">Wang, Chan, and Loy 2023</a>; <a href="#bib.bib15" title="" class="ltx_ref">Li et al. 2021</a>; <a href="#bib.bib31" title="" class="ltx_ref">Yang et al. 2022</a>)</cite>. More recently, MLLM-based methods <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib30" title="" class="ltx_ref">Wu et al. 2023</a>; <a href="#bib.bib33" title="" class="ltx_ref">You et al. 2025</a>)</cite> have emerged, demonstrating superior generalization capabilities and interpretability.</p>
+</div>
+<div id="Sx2.SSx2.p2" class="ltx_para">
+<p id="Sx2.SSx2.p2.1" class="ltx_p">Despite considerable advancements, existing methods exhibit fundamental limitations when applied to livestreaming camera tuning. (1) Most methods target general-purpose quality evaluation, overlooking key characteristics of livestreaming environments such as human-centric visual focus and systematic camera parameter variations. (2) Existing methods typically produce single coarse-grained quality scores, which are inherently limited in identifying subtle differences essential for fine-grained perception. These limitations underscore the need for a specialized fine-grained BIQA framework tailored for livestreaming camera tuning, motivating the development of TuningIQA.</p>
+</div>
+<figure id="Sx2.F3" class="ltx_figure"><img src="https://arxiv.org/html/2508.17965v1/TuningIQA-fig3.png" id="Sx2.F3.g1" class="ltx_graphics ltx_centering ltx_img_square" style="aspect-ratio:698/587;" width="698" height="587" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 3: </span>Details of the FGLive-10K dataset construction. (a) Various distorted images are collected by adjusting the camera parameters. (b) Multi-attribute quality score annotation and pairwise comparison of fine-grained image pair.</figcaption>
+</figure>
+</section>
+</section>
+<section id="Sx3" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">FGLive-10K</h2>
+
+<section id="Sx3.SSx1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Dataset Construction</h3>
+
+<div id="Sx3.SSx1.p1" class="ltx_para">
+<p id="Sx3.SSx1.p1.1" class="ltx_p">We describe the image collection and annotation processes for FGLive-10K, designed specifically for livestreaming camera tuning scenarios. It should be noted that all depicted individuals provided consent for use in this research.</p>
+</div>
+<section id="Sx3.SSx1.SSSx1" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">Image Collection.</h4>
+
+<div id="Sx3.SSx1.SSSx1.p1" class="ltx_para">
+<p id="Sx3.SSx1.SSSx1.p1.1" class="ltx_p">To capture camera parameter-induced distortions, we employed three internally developed livestreaming cameras in authentic usage scenarios. Field Application Engineers first optimized reference parameters for each scenario, then generated distorted images by introducing systematic deviations to aperture, shutter speed, ISO, white balance, contrast, saturation, and sharpness. Figure <a href="#Sx2.F3" title="Figure 3 ‣ IQA Method ‣ Related Work ‣ TuningIQA: Fine-Grained Blind Image Quality Assessment for Livestreaming Camera Tuning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a>(a) demonstrates parameter-induced variations within a single scene. The collected images span typical livestreaming applications including e-commerce, entertainment, and creative content. After filtering images without human subjects, FGLive-10K comprises 10,185 high-resolution (1920×1080) images from 555 distinct scenes.</p>
+</div>
+<div id="Sx3.SSx1.SSSx1.p2" class="ltx_para">
+<p id="Sx3.SSx1.SSSx1.p2.1" class="ltx_p">To explore Parameter Interdependency Modeling, we preserved the complete 7-parameter metadata for a subset of images, creating <span id="Sx3.SSx1.SSSx1.p2.1.1" class="ltx_text ltx_font_bold">FineLive-p</span> with 5,559 training images and 1,148 test images. This subset follows the same annotation protocol as the main dataset.</p>
+</div>
+</section>
+<section id="Sx3.SSx1.SSSx2" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">Image Annotation.</h4>
+
+<div id="Sx3.SSx1.SSSx2.p1" class="ltx_para">
+<p id="Sx3.SSx1.SSSx2.p1.1" class="ltx_p">We invited 25 volunteers with diverse backgrounds (IQA researchers, photography enthusiasts, art students) to participate in subjective experiments following ITU-R BT.500-15 recommendations <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib24" title="" class="ltx_ref">Series 2023</a>)</cite>.</p>
+</div>
+<div id="Sx3.SSx1.SSSx2.p2" class="ltx_para">
+<p id="Sx3.SSx1.SSSx2.p2.1" class="ltx_p"><span id="Sx3.SSx1.SSSx2.p2.1.1" class="ltx_text ltx_font_bold">Multi-attribute MOS.</span> Annotators assigned discrete scores (1-5: bad to excellent) for overall quality and four critical attributes: <span id="Sx3.SSx1.SSSx2.p2.1.2" class="ltx_text ltx_font_italic">face quality</span> (visual quality of human facial regions), <span id="Sx3.SSx1.SSSx2.p2.1.3" class="ltx_text ltx_font_italic">sharpness</span> (image clarity and detail preservation), <span id="Sx3.SSx1.SSSx2.p2.1.4" class="ltx_text ltx_font_italic">exposure</span> (brightness and contrast appropriateness), and <span id="Sx3.SSx1.SSSx2.p2.1.5" class="ltx_text ltx_font_italic">noise</span> (absence of visual artifacts and grain). After post-screening based on Pearson correlation, each image received at least 16 annotations, yielding Mean Opinion Scores:</p>
+<table id="Sx3.E1" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx3.E1.m1" class="ltx_Math" alttext="s^{\text{attr}}=\frac{1}{N}\sum_{i=1}^{N}s_{i}^{\text{attr}}," display="block" intent=":literal"><semantics><mrow><mrow><msup><mi>s</mi><mtext>attr</mtext></msup><mo>=</mo><mrow><mfrac><mn>1</mn><mi>N</mi></mfrac><mo lspace="0em" rspace="0em">​</mo><mrow><munderover><mo movablelimits="false">∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><msubsup><mi>s</mi><mi>i</mi><mtext>attr</mtext></msubsup></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">s^{\text{attr}}=\frac{1}{N}\sum_{i=1}^{N}s_{i}^{\text{attr}},</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(1)</span></td></tr></tbody>
+</table>
+<p id="Sx3.SSx1.SSSx2.p2.2" class="ltx_p">where <math id="Sx3.SSx1.SSSx2.p2.m1" class="ltx_Math" alttext="s^{\text{attr}}" display="inline" intent=":literal"><semantics><msup><mi>s</mi><mtext>attr</mtext></msup><annotation encoding="application/x-tex">s^{\text{attr}}</annotation></semantics></math> denotes the MOS for a specific attribute, <math id="Sx3.SSx1.SSSx2.p2.m2" class="ltx_Math" alttext="N" display="inline" intent=":literal"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math> is the number of annotators.</p>
+</div>
+<div id="Sx3.SSx1.SSSx2.p3" class="ltx_para">
+<p id="Sx3.SSx1.SSSx2.p3.1" class="ltx_p"><span id="Sx3.SSx1.SSSx2.p3.1.1" class="ltx_text ltx_font_bold">Pairwise Comparison.</span> To address the limitation of MOS in fine-grained quality discrimination, we constructed image pairs with subtle differences within each scene and conducted pairwise comparisons. Initial preferences derived from MOS comparisons (<math id="Sx3.SSx1.SSSx2.p3.m1" class="ltx_Math" alttext="c_{pq}^{*}=\mathbb{I}(s_{p}&gt;s_{q})" display="inline" intent=":literal"><semantics><mrow><msubsup><mi>c</mi><mrow><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>q</mi></mrow><mo>∗</mo></msubsup><mo>=</mo><mrow><mi>𝕀</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mrow><msub><mi>s</mi><mi>p</mi></msub><mo>&gt;</mo><msub><mi>s</mi><mi>q</mi></msub></mrow><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">c_{pq}^{*}=\mathbb{I}(s_{p}&gt;s_{q})</annotation></semantics></math>) were refined for pairs with <math id="Sx3.SSx1.SSSx2.p3.m2" class="ltx_Math" alttext="\Delta s=|s_{p}-s_{q}|\leq 0.8" display="inline" intent=":literal"><semantics><mrow><mrow><mi mathvariant="normal">Δ</mi><mo lspace="0em" rspace="0em">​</mo><mi>s</mi></mrow><mo>=</mo><mrow><mo stretchy="false">|</mo><mrow><msub><mi>s</mi><mi>p</mi></msub><mo>−</mo><msub><mi>s</mi><mi>q</mi></msub></mrow><mo stretchy="false">|</mo></mrow><mo>≤</mo><mn>0.8</mn></mrow><annotation encoding="application/x-tex">\Delta s=|s_{p}-s_{q}|\leq 0.8</annotation></semantics></math>, as these exhibit significant annotation uncertainty <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib12" title="" class="ltx_ref">Katsigiannis et al. 2018</a>)</cite>. Fine-grained pairs underwent human verification where annotators selected preferred images or marked equivalence. The final preference was:</p>
+<table id="Sx3.E2" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx3.E2.m1" class="ltx_Math" alttext="c_{pq}=\begin{cases}c_{pq}^{*},&amp;\text{if }\Delta s&gt;0.8,\\
+\frac{1}{K}\sum_{k=1}^{K}\psi_{k}(I_{p},I_{q}),&amp;\text{if }\Delta s\leq 0.8,\end{cases}" display="block" intent=":literal"><semantics><mrow><msub><mi>c</mi><mrow><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>q</mi></mrow></msub><mo>=</mo><mrow><mo>{</mo><mtable columnspacing="5pt" displaystyle="true" rowspacing="0pt"><mtr><mtd class="ltx_align_left" columnalign="left"><mrow><msubsup><mi>c</mi><mrow><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>q</mi></mrow><mo>∗</mo></msubsup><mo>,</mo></mrow></mtd><mtd class="ltx_align_left" columnalign="left"><mrow><mrow><mrow><mtext>if </mtext><mo lspace="0em" rspace="0em">​</mo><mi mathvariant="normal">Δ</mi><mo lspace="0em" rspace="0em">​</mo><mi>s</mi></mrow><mo>&gt;</mo><mn>0.8</mn></mrow><mo>,</mo></mrow></mtd></mtr><mtr><mtd class="ltx_align_left" columnalign="left"><mrow><mrow><mstyle displaystyle="false"><mfrac><mn>1</mn><mi>K</mi></mfrac></mstyle><mo lspace="0em" rspace="0em">​</mo><mrow><mstyle displaystyle="false"><msubsup><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></msubsup></mstyle><mrow><msub><mi>ψ</mi><mi>k</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>I</mi><mi>p</mi></msub><mo>,</mo><msub><mi>I</mi><mi>q</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow><mo>,</mo></mrow></mtd><mtd class="ltx_align_left" columnalign="left"><mrow><mrow><mrow><mtext>if </mtext><mo lspace="0em" rspace="0em">​</mo><mi mathvariant="normal">Δ</mi><mo lspace="0em" rspace="0em">​</mo><mi>s</mi></mrow><mo>≤</mo><mn>0.8</mn></mrow><mo>,</mo></mrow></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">c_{pq}=\begin{cases}c_{pq}^{*},&amp;\text{if }\Delta s&gt;0.8,\\
+\frac{1}{K}\sum_{k=1}^{K}\psi_{k}(I_{p},I_{q}),&amp;\text{if }\Delta s\leq 0.8,\end{cases}</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(2)</span></td></tr></tbody>
+</table>
+<p id="Sx3.SSx1.SSSx2.p3.2" class="ltx_p">where <math id="Sx3.SSx1.SSSx2.p3.m3" class="ltx_Math" alttext="K" display="inline" intent=":literal"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math> denotes annotations per pair and <math id="Sx3.SSx1.SSSx2.p3.m4" class="ltx_Math" alttext="\psi_{k}\in\{0,0.5,1\}" display="inline" intent=":literal"><semantics><mrow><msub><mi>ψ</mi><mi>k</mi></msub><mo>∈</mo><mrow><mo stretchy="false">{</mo><mrow><mn>0</mn><mo>,</mo><mn>0.5</mn><mo>,</mo><mn>1</mn></mrow><mo stretchy="false">}</mo></mrow></mrow><annotation encoding="application/x-tex">\psi_{k}\in\{0,0.5,1\}</annotation></semantics></math> represents individual judgments (worse, equivalent, better quality of <math id="Sx3.SSx1.SSSx2.p3.m5" class="ltx_Math" alttext="I_{p}" display="inline" intent=":literal"><semantics><msub><mi>I</mi><mi>p</mi></msub><annotation encoding="application/x-tex">I_{p}</annotation></semantics></math> vs <math id="Sx3.SSx1.SSSx2.p3.m6" class="ltx_Math" alttext="I_{q}" display="inline" intent=":literal"><semantics><msub><mi>I</mi><mi>q</mi></msub><annotation encoding="application/x-tex">I_{q}</annotation></semantics></math>).
+This strategy produced 91,946 annotated pairs, with 21% (19,234 pairs) refined through pairwise comparison.</p>
+</div>
+<figure id="Sx3.F4" class="ltx_figure"><img src="https://arxiv.org/html/2508.17965v1/quality_dimensions_relationship_blue.png" id="Sx3.F4.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:663/519;" width="663" height="519" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 4: </span>Relationships among quality dimensions: scatterplot (bottom left), Pearson correlation (top right), annotation distribution (diagonal).</figcaption>
+</figure>
+<figure id="Sx3.F5" class="ltx_figure"><img src="https://arxiv.org/html/2508.17965v1/annotator_correlation_analysis.png" id="Sx3.F5.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:628/280;" width="628" height="280" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 5: </span>Correlation between Individual Annotation and MOS within specific quality tiers (MOS range).</figcaption>
+</figure>
+</section>
+</section>
+<section id="Sx3.SSx2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Statistics and Analysis</h3>
+
+<div id="Sx3.SSx2.p1" class="ltx_para">
+<p id="Sx3.SSx2.p1.1" class="ltx_p">FGLive-10K contains 555 scenes with 10,185 images annotated across five quality attributes. The dataset is split into 451 training scenes (8,148 images, 72,843 pairs) and 104 test scenes (2,037 images, 3,705 fine-grained pairs).</p>
+</div>
+<div id="Sx3.SSx2.p2" class="ltx_para">
+<p id="Sx3.SSx2.p2.1" class="ltx_p"><span id="Sx3.SSx2.p2.1.1" class="ltx_text ltx_font_bold">Annotation Distribution.</span> The FGLive-10K dataset features comprehensive multi-attribute quality annotations, where distributions are visualized along the diagonal in Figure <a href="#Sx3.F4" title="Figure 4 ‣ Image Annotation. ‣ Dataset Construction ‣ FGLive-10K ‣ TuningIQA: Fine-Grained Blind Image Quality Assessment for Livestreaming Camera Tuning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>. The inter-attribute variations reveal their distinct perceptual value. The uniform distribution of overall quality scores confirms our dataset’s balanced coverage of diverse quality levels across various scenarios.</p>
+</div>
+<div id="Sx3.SSx2.p3" class="ltx_para">
+<p id="Sx3.SSx2.p3.1" class="ltx_p"><span id="Sx3.SSx2.p3.1.1" class="ltx_text ltx_font_bold">Attribute Correlation.</span>
+To study FGLive-10K from the correlation perspective, we visualize the Pearson Linear Correlation Coefficient (PLCC) and scatterplot among each dimension in Figure <a href="#Sx3.F4" title="Figure 4 ‣ Image Annotation. ‣ Dataset Construction ‣ FGLive-10K ‣ TuningIQA: Fine-Grained Blind Image Quality Assessment for Livestreaming Camera Tuning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>. It can be observed that the correlation between overall and face is extremely high, which indicates that face quality can largely affect overall perception. Low correlations among sharpness, exposure, and noise dimensions suggest their complementary yet independent contributions. This divergence highlights the necessity of multi-attribute evaluation for precise distortion perception.</p>
+</div>
+<div id="Sx3.SSx2.p4" class="ltx_para">
+<p id="Sx3.SSx2.p4.1" class="ltx_p"><span id="Sx3.SSx2.p4.1.1" class="ltx_text ltx_font_bold">Individual Annotation Consistency.</span> We investigate annotator reliability through correlation analysis in Figure <a href="#Sx3.F5" title="Figure 5 ‣ Image Annotation. ‣ Dataset Construction ‣ FGLive-10K ‣ TuningIQA: Fine-Grained Blind Image Quality Assessment for Livestreaming Camera Tuning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a>. Post-screened annotators strongly agree with MOS (average PLCC=0.85), confirming annotation reliability at the coarse-grain level. However, when analyzing within smaller MOS tiers (<span id="Sx3.SSx2.p4.1.2" class="ltx_text ltx_font_italic">e.g.</span> Figure <a href="#Sx3.F5" title="Figure 5 ‣ Image Annotation. ‣ Dataset Construction ‣ FGLive-10K ‣ TuningIQA: Fine-Grained Blind Image Quality Assessment for Livestreaming Camera Tuning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a> rows 2-6), the correlations drop significantly (<span id="Sx3.SSx2.p4.1.3" class="ltx_text ltx_font_italic">i.e.</span> PLCC=0.24 in the 4.2-5.0 tier). Which highlights single-stimulus limitations in discriminating subtle quality differences. Such findings validate the necessity of pairwise comparison refinement for fine-grained image pairs.</p>
+</div>
+<figure id="Sx3.F6" class="ltx_figure"><img src="https://arxiv.org/html/2508.17965v1/TuningIQA-pipeline-final.png" id="Sx3.F6.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:628/310;" width="628" height="310" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 6: </span>Overview of the proposed TuningIQA framework.</figcaption>
+</figure>
+</section>
+</section>
+<section id="Sx4" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">TuningIQA Metric</h2>
+
+<div id="Sx4.p1" class="ltx_para">
+<p id="Sx4.p1.1" class="ltx_p">Based on insights from the FGLive-10K dataset, we further propose TuningIQA, a fine-grained quality assessment framework for livestreaming camera tuning. The framework supports two operational modes: <span id="Sx4.p1.1.1" class="ltx_text ltx_font_italic">single-image mode</span> for direct quality scoring and <span id="Sx4.p1.1.2" class="ltx_text ltx_font_italic">pairwise mode</span> for fine-grained comparison. The pipeline is illustrated in Figure <a href="#Sx3.F6" title="Figure 6 ‣ Statistics and Analysis ‣ FGLive-10K ‣ TuningIQA: Fine-Grained Blind Image Quality Assessment for Livestreaming Camera Tuning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a>.
+TuningIQA is built upon two core modules: <span id="Sx4.p1.1.3" class="ltx_text ltx_font_italic">human-centric feature extraction</span> which prioritizes perceptually critical regions, and <span id="Sx4.p1.1.4" class="ltx_text ltx_font_italic">graph-based camera parameter fusion</span> that models camera setting interdependencies.</p>
+</div>
+<section id="Sx4.SSx1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Human-aware Feature Extraction</h3>
+
+<div id="Sx4.SSx1.p1" class="ltx_para">
+<p id="Sx4.SSx1.p1.1" class="ltx_p">To address the human-region priority, we design a Human-aware Feature Extraction (HFE) module that emphasizes human-centric regions. Specifically, we first employ Faster R-CNN <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib22" title="" class="ltx_ref">Ren et al. 2016</a>)</cite> to detect human subjects in input images, obtaining human bounding boxes <math id="Sx4.SSx1.p1.m1" class="ltx_Math" alttext="\text{BBox}_{h}" display="inline" intent=":literal"><semantics><msub><mtext>BBox</mtext><mi>h</mi></msub><annotation encoding="application/x-tex">\text{BBox}_{h}</annotation></semantics></math> that guide subsequent feature extraction. To understand human-centric visual quality, we leverage a Human Aesthetics Network built upon the EfficientNetV2-M <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib27" title="" class="ltx_ref">Tan and Le 2021</a>)</cite> backbone, pre-trained on the human subset of the TAD66K dataset <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib9" title="" class="ltx_ref">He et al. 2022</a>)</cite>. This backbone extracts a multi-scale feature map <math id="Sx4.SSx1.p1.m2" class="ltx_Math" alttext="\mathbf{M}" display="inline" intent=":literal"><semantics><mi>𝐌</mi><annotation encoding="application/x-tex">\mathbf{M}</annotation></semantics></math> with <math id="Sx4.SSx1.p1.m3" class="ltx_Math" alttext="C" display="inline" intent=":literal"><semantics><mi>C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math> channels that captures aesthetic-aware representations.</p>
+</div>
+<div id="Sx4.SSx1.p2" class="ltx_para">
+<p id="Sx4.SSx1.p2.1" class="ltx_p">Given the detected human bounding boxes, we extract human region features <math id="Sx4.SSx1.p2.m1" class="ltx_Math" alttext="\mathbf{R}^{h}" display="inline" intent=":literal"><semantics><msup><mi>𝐑</mi><mi>h</mi></msup><annotation encoding="application/x-tex">\mathbf{R}^{h}</annotation></semantics></math> using ROI Align operations. The dimension of <math id="Sx4.SSx1.p2.m2" class="ltx_Math" alttext="\mathbf{R}^{h}" display="inline" intent=":literal"><semantics><msup><mi>𝐑</mi><mi>h</mi></msup><annotation encoding="application/x-tex">\mathbf{R}^{h}</annotation></semantics></math> is reduced to <math id="Sx4.SSx1.p2.m3" class="ltx_Math" alttext="\frac{C}{2}" display="inline" intent=":literal"><semantics><mfrac><mi>C</mi><mn>2</mn></mfrac><annotation encoding="application/x-tex">\frac{C}{2}</annotation></semantics></math> and then appended to each spatial location of <math id="Sx4.SSx1.p2.m4" class="ltx_Math" alttext="\mathbf{M}" display="inline" intent=":literal"><semantics><mi>𝐌</mi><annotation encoding="application/x-tex">\mathbf{M}</annotation></semantics></math>, creating an enhanced feature representation that integrates both global image context and human-centric information. We then partition the enhanced feature map into nine spatial regions <math id="Sx4.SSx1.p2.m5" class="ltx_Math" alttext="\{\hat{\mathbf{M}}_{k}\}_{k=1}^{9}" display="inline" intent=":literal"><semantics><msubsup><mrow><mo stretchy="false">{</mo><msub><mover accent="true"><mi>𝐌</mi><mo>^</mo></mover><mi>k</mi></msub><mo stretchy="false">}</mo></mrow><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mn>9</mn></msubsup><annotation encoding="application/x-tex">\{\hat{\mathbf{M}}_{k}\}_{k=1}^{9}</annotation></semantics></math> centered around the human subjects. To explicitly handle different partitions, we employ nine individual nonlinear transformations with residual learning:</p>
+<table id="Sx4.E3" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx4.E3.m1" class="ltx_Math" alttext="\mathbf{F}_{k}=\Phi_{k}(\hat{\mathbf{M}}_{k})+\hat{\mathbf{M}}_{k},\quad k\in\{1,2,\ldots,9\}," display="block" intent=":literal"><semantics><mrow><mrow><mrow><msub><mi>𝐅</mi><mi>k</mi></msub><mo>=</mo><mrow><mrow><msub><mi mathvariant="normal">Φ</mi><mi>k</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mover accent="true"><mi>𝐌</mi><mo>^</mo></mover><mi>k</mi></msub><mo stretchy="false">)</mo></mrow></mrow><mo>+</mo><msub><mover accent="true"><mi>𝐌</mi><mo>^</mo></mover><mi>k</mi></msub></mrow></mrow><mo rspace="1.167em">,</mo><mrow><mi>k</mi><mo>∈</mo><mrow><mo stretchy="false">{</mo><mrow><mn>1</mn><mo>,</mo><mn>2</mn><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><mn>9</mn></mrow><mo stretchy="false">}</mo></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">\mathbf{F}_{k}=\Phi_{k}(\hat{\mathbf{M}}_{k})+\hat{\mathbf{M}}_{k},\quad k\in\{1,2,\ldots,9\},</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(3)</span></td></tr></tbody>
+</table>
+<p id="Sx4.SSx1.p2.2" class="ltx_p">where <math id="Sx4.SSx1.p2.m6" class="ltx_Math" alttext="\Phi_{k}(\cdot)" display="inline" intent=":literal"><semantics><mrow><msub><mi mathvariant="normal">Φ</mi><mi>k</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mo lspace="0em" rspace="0em">⋅</mo><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\Phi_{k}(\cdot)</annotation></semantics></math> represents partition-specific transformations implemented as <math id="Sx4.SSx1.p2.m7" class="ltx_Math" alttext="3\times 3" display="inline" intent=":literal"><semantics><mrow><mn>3</mn><mo lspace="0.222em" rspace="0.222em">×</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">3\times 3</annotation></semantics></math> convolutional layers with <math id="Sx4.SSx1.p2.m8" class="ltx_Math" alttext="C" display="inline" intent=":literal"><semantics><mi>C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math> output channels.</p>
+</div>
+<div id="Sx4.SSx1.p3" class="ltx_para">
+<p id="Sx4.SSx1.p3.1" class="ltx_p">The updated partitions <math id="Sx4.SSx1.p3.m1" class="ltx_Math" alttext="\{\mathbf{F}_{k}\}_{k=1}^{9}" display="inline" intent=":literal"><semantics><msubsup><mrow><mo stretchy="false">{</mo><msub><mi>𝐅</mi><mi>k</mi></msub><mo stretchy="false">}</mo></mrow><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mn>9</mn></msubsup><annotation encoding="application/x-tex">\{\mathbf{F}_{k}\}_{k=1}^{9}</annotation></semantics></math> are combined to form the human-aware feature map. Then we employ a cross-attention mechanism that fuses human-aware features <math id="Sx4.SSx1.p3.m2" class="ltx_Math" alttext="\mathbf{F}_{h}" display="inline" intent=":literal"><semantics><msub><mi>𝐅</mi><mi>h</mi></msub><annotation encoding="application/x-tex">\mathbf{F}_{h}</annotation></semantics></math> (obtained through Global Average Pooling applied to the combined partitions) with basic backbone features <math id="Sx4.SSx1.p3.m3" class="ltx_Math" alttext="\mathbf{F}_{b}" display="inline" intent=":literal"><semantics><msub><mi>𝐅</mi><mi>b</mi></msub><annotation encoding="application/x-tex">\mathbf{F}_{b}</annotation></semantics></math>:</p>
+<table id="Sx4.E4" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx4.E4.m1" class="ltx_Math" alttext="\mathbf{F}_{q}=\text{CrossAttention}(\mathbf{Q},\mathbf{K},\mathbf{V})=\text{softmax}\left(\frac{\mathbf{Q}\mathbf{K}^{T}}{\sqrt{d_{k}}}\right)\mathbf{V}" display="block" intent=":literal"><semantics><mrow><msub><mi>𝐅</mi><mi>q</mi></msub><mo>=</mo><mrow><mtext>CrossAttention</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>𝐐</mi><mo>,</mo><mi>𝐊</mi><mo>,</mo><mi>𝐕</mi><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><mtext>softmax</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo>(</mo><mfrac><msup><mi>𝐐𝐊</mi><mi>T</mi></msup><msqrt><msub><mi>d</mi><mi>k</mi></msub></msqrt></mfrac><mo>)</mo></mrow><mo lspace="0em" rspace="0em">​</mo><mi>𝐕</mi></mrow></mrow><annotation encoding="application/x-tex">\mathbf{F}_{q}=\text{CrossAttention}(\mathbf{Q},\mathbf{K},\mathbf{V})=\text{softmax}\left(\frac{\mathbf{Q}\mathbf{K}^{T}}{\sqrt{d_{k}}}\right)\mathbf{V}</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(4)</span></td></tr></tbody>
+</table>
+<p id="Sx4.SSx1.p3.2" class="ltx_p">,
+where <math id="Sx4.SSx1.p3.m4" class="ltx_Math" alttext="\mathbf{Q}=\mathbf{F}_{h}\mathbf{W}_{Q}" display="inline" intent=":literal"><semantics><mrow><mi>𝐐</mi><mo>=</mo><mrow><msub><mi>𝐅</mi><mi>h</mi></msub><mo lspace="0em" rspace="0em">​</mo><msub><mi>𝐖</mi><mi>Q</mi></msub></mrow></mrow><annotation encoding="application/x-tex">\mathbf{Q}=\mathbf{F}_{h}\mathbf{W}_{Q}</annotation></semantics></math>, <math id="Sx4.SSx1.p3.m5" class="ltx_Math" alttext="\mathbf{K}=\mathbf{F}_{b}\mathbf{W}_{K}" display="inline" intent=":literal"><semantics><mrow><mi>𝐊</mi><mo>=</mo><mrow><msub><mi>𝐅</mi><mi>b</mi></msub><mo lspace="0em" rspace="0em">​</mo><msub><mi>𝐖</mi><mi>K</mi></msub></mrow></mrow><annotation encoding="application/x-tex">\mathbf{K}=\mathbf{F}_{b}\mathbf{W}_{K}</annotation></semantics></math>, <math id="Sx4.SSx1.p3.m6" class="ltx_Math" alttext="\mathbf{V}=\mathbf{F}_{b}\mathbf{W}_{V}" display="inline" intent=":literal"><semantics><mrow><mi>𝐕</mi><mo>=</mo><mrow><msub><mi>𝐅</mi><mi>b</mi></msub><mo lspace="0em" rspace="0em">​</mo><msub><mi>𝐖</mi><mi>V</mi></msub></mrow></mrow><annotation encoding="application/x-tex">\mathbf{V}=\mathbf{F}_{b}\mathbf{W}_{V}</annotation></semantics></math> are learned projections. The resulting quality-aware features <math id="Sx4.SSx1.p3.m7" class="ltx_Math" alttext="\mathbf{F}_{q}" display="inline" intent=":literal"><semantics><msub><mi>𝐅</mi><mi>q</mi></msub><annotation encoding="application/x-tex">\mathbf{F}_{q}</annotation></semantics></math> effectively integrate human-centric visual cues with global image context for comprehensive quality assessment.</p>
+</div>
+<figure id="Sx4.T2" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 2: </span>Performance of TuningIQA and the state-of-the-art BIQA methods in two tasks: quality score regression and fine-grained ranking on the FGLive-10K database.</figcaption>
+<table id="Sx4.T2.1" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<tbody class="ltx_tbody">
+<tr id="Sx4.T2.1.1" class="ltx_tr">
+<th id="Sx4.T2.1.1.1" class="ltx_td ltx_nopad_l ltx_th ltx_th_row ltx_border_tt"></th>
+<th id="Sx4.T2.1.1.2" class="ltx_td ltx_th ltx_th_row ltx_border_tt"></th>
+<th id="Sx4.T2.1.1.3" class="ltx_td ltx_th ltx_th_row ltx_border_tt"></th>
+<td id="Sx4.T2.1.1.4" class="ltx_td ltx_border_tt"></td>
+<td id="Sx4.T2.1.1.5" class="ltx_td ltx_align_center ltx_border_tt" colspan="2"><span id="Sx4.T2.1.1.5.1" class="ltx_text ltx_font_bold">Score Regression</span></td>
+<td id="Sx4.T2.1.1.6" class="ltx_td ltx_align_center ltx_border_tt"><span id="Sx4.T2.1.1.6.1" class="ltx_text ltx_font_bold">FG Ranking</span></td></tr>
+<tr id="Sx4.T2.1.2" class="ltx_tr">
+<th id="Sx4.T2.1.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row"><span id="Sx4.T2.1.2.1.1" class="ltx_text ltx_font_bold">Method</span></th>
+<th id="Sx4.T2.1.2.2" class="ltx_td ltx_align_left ltx_th ltx_th_row"><span id="Sx4.T2.1.2.2.1" class="ltx_text ltx_font_bold">Backbone</span></th>
+<th id="Sx4.T2.1.2.3" class="ltx_td ltx_align_left ltx_th ltx_th_row"><span id="Sx4.T2.1.2.3.1" class="ltx_text ltx_font_bold">#Param</span></th>
+<td id="Sx4.T2.1.2.4" class="ltx_td ltx_align_center"><span id="Sx4.T2.1.2.4.1" class="ltx_text ltx_font_bold">Input Size</span></td>
+<td id="Sx4.T2.1.2.5" class="ltx_td ltx_align_center ltx_border_t"><span id="Sx4.T2.1.2.5.1" class="ltx_text ltx_font_bold">SRCC↑</span></td>
+<td id="Sx4.T2.1.2.6" class="ltx_td ltx_align_center ltx_border_t"><span id="Sx4.T2.1.2.6.1" class="ltx_text ltx_font_bold">PLCC↑</span></td>
+<td id="Sx4.T2.1.2.7" class="ltx_td ltx_align_center ltx_border_t"><span id="Sx4.T2.1.2.7.1" class="ltx_text ltx_font_bold">FG-ACC↑</span></td></tr>
+<tr id="Sx4.T2.1.3" class="ltx_tr">
+<th id="Sx4.T2.1.3.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">NIQE <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib20" title="" class="ltx_ref">Mittal, Soundararajan, and Bovik 2013</a>)</cite></th>
+<th id="Sx4.T2.1.3.2" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">–</th>
+<th id="Sx4.T2.1.3.3" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">–</th>
+<td id="Sx4.T2.1.3.4" class="ltx_td ltx_align_center ltx_border_t">Full res.</td>
+<td id="Sx4.T2.1.3.5" class="ltx_td ltx_align_center ltx_border_t">0.4512</td>
+<td id="Sx4.T2.1.3.6" class="ltx_td ltx_align_center ltx_border_t">0.5065</td>
+<td id="Sx4.T2.1.3.7" class="ltx_td ltx_align_center ltx_border_t">0.4327</td></tr>
+<tr id="Sx4.T2.1.4" class="ltx_tr">
+<th id="Sx4.T2.1.4.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">ILNIQE <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib34" title="" class="ltx_ref">Zhang, Zhang, and Bovik 2015</a>)</cite></th>
+<th id="Sx4.T2.1.4.2" class="ltx_td ltx_align_left ltx_th ltx_th_row">–</th>
+<th id="Sx4.T2.1.4.3" class="ltx_td ltx_align_left ltx_th ltx_th_row">–</th>
+<td id="Sx4.T2.1.4.4" class="ltx_td ltx_align_center">Full res.</td>
+<td id="Sx4.T2.1.4.5" class="ltx_td ltx_align_center">0.5706</td>
+<td id="Sx4.T2.1.4.6" class="ltx_td ltx_align_center">0.5412</td>
+<td id="Sx4.T2.1.4.7" class="ltx_td ltx_align_center">0.4089</td></tr>
+<tr id="Sx4.T2.1.5" class="ltx_tr">
+<th id="Sx4.T2.1.5.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">BRISQUE <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib19" title="" class="ltx_ref">Mittal, Moorthy, and Bovik 2012</a>)</cite></th>
+<th id="Sx4.T2.1.5.2" class="ltx_td ltx_align_left ltx_th ltx_th_row">–</th>
+<th id="Sx4.T2.1.5.3" class="ltx_td ltx_align_left ltx_th ltx_th_row">–</th>
+<td id="Sx4.T2.1.5.4" class="ltx_td ltx_align_center">Full res.</td>
+<td id="Sx4.T2.1.5.5" class="ltx_td ltx_align_center">0.3411</td>
+<td id="Sx4.T2.1.5.6" class="ltx_td ltx_align_center">0.4280</td>
+<td id="Sx4.T2.1.5.7" class="ltx_td ltx_align_center">0.4583</td></tr>
+<tr id="Sx4.T2.1.6" class="ltx_tr">
+<th id="Sx4.T2.1.6.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">DBCNN <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib35" title="" class="ltx_ref">Zhang et al. 2020</a>)</cite></th>
+<th id="Sx4.T2.1.6.2" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">VGG16</th>
+<th id="Sx4.T2.1.6.3" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">15.31M</th>
+<td id="Sx4.T2.1.6.4" class="ltx_td ltx_align_center ltx_border_t">224×224</td>
+<td id="Sx4.T2.1.6.5" class="ltx_td ltx_align_center ltx_border_t">0.7507</td>
+<td id="Sx4.T2.1.6.6" class="ltx_td ltx_align_center ltx_border_t">0.7495</td>
+<td id="Sx4.T2.1.6.7" class="ltx_td ltx_align_center ltx_border_t">0.5667</td></tr>
+<tr id="Sx4.T2.1.7" class="ltx_tr">
+<th id="Sx4.T2.1.7.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">HyperIQA <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib26" title="" class="ltx_ref">Su et al. 2020</a>)</cite></th>
+<th id="Sx4.T2.1.7.2" class="ltx_td ltx_align_left ltx_th ltx_th_row">ResNet-50</th>
+<th id="Sx4.T2.1.7.3" class="ltx_td ltx_align_left ltx_th ltx_th_row">27.38M</th>
+<td id="Sx4.T2.1.7.4" class="ltx_td ltx_align_center">224×224</td>
+<td id="Sx4.T2.1.7.5" class="ltx_td ltx_align_center">0.8472</td>
+<td id="Sx4.T2.1.7.6" class="ltx_td ltx_align_center">0.8518</td>
+<td id="Sx4.T2.1.7.7" class="ltx_td ltx_align_center">0.5980</td></tr>
+<tr id="Sx4.T2.1.8" class="ltx_tr">
+<th id="Sx4.T2.1.8.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">MT-A <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib4" title="" class="ltx_ref">Fang et al. 2020</a>)</cite></th>
+<th id="Sx4.T2.1.8.2" class="ltx_td ltx_align_left ltx_th ltx_th_row">ResNet-50</th>
+<th id="Sx4.T2.1.8.3" class="ltx_td ltx_align_left ltx_th ltx_th_row">23.57M</th>
+<td id="Sx4.T2.1.8.4" class="ltx_td ltx_align_center">512×512</td>
+<td id="Sx4.T2.1.8.5" class="ltx_td ltx_align_center">0.8821</td>
+<td id="Sx4.T2.1.8.6" class="ltx_td ltx_align_center">0.8829</td>
+<td id="Sx4.T2.1.8.7" class="ltx_td ltx_align_center">0.6223</td></tr>
+<tr id="Sx4.T2.1.9" class="ltx_tr">
+<th id="Sx4.T2.1.9.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">CLIP-IQA+ <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib29" title="" class="ltx_ref">Wang, Chan, and Loy 2023</a>)</cite></th>
+<th id="Sx4.T2.1.9.2" class="ltx_td ltx_align_left ltx_th ltx_th_row">CLIP (ResNet-50)</th>
+<th id="Sx4.T2.1.9.3" class="ltx_td ltx_align_left ltx_th ltx_th_row">149.70M</th>
+<td id="Sx4.T2.1.9.4" class="ltx_td ltx_align_center">Full res.</td>
+<td id="Sx4.T2.1.9.5" class="ltx_td ltx_align_center">0.7056</td>
+<td id="Sx4.T2.1.9.6" class="ltx_td ltx_align_center">0.7039</td>
+<td id="Sx4.T2.1.9.7" class="ltx_td ltx_align_center">0.5570</td></tr>
+<tr id="Sx4.T2.1.10" class="ltx_tr">
+<th id="Sx4.T2.1.10.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">MUSIQ <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib13" title="" class="ltx_ref">Ke et al. 2021</a>)</cite></th>
+<th id="Sx4.T2.1.10.2" class="ltx_td ltx_align_left ltx_th ltx_th_row">Transformer</th>
+<th id="Sx4.T2.1.10.3" class="ltx_td ltx_align_left ltx_th ltx_th_row">157.23M</th>
+<td id="Sx4.T2.1.10.4" class="ltx_td ltx_align_center">Full res.</td>
+<td id="Sx4.T2.1.10.5" class="ltx_td ltx_align_center">0.8662</td>
+<td id="Sx4.T2.1.10.6" class="ltx_td ltx_align_center">0.8687</td>
+<td id="Sx4.T2.1.10.7" class="ltx_td ltx_align_center">0.6861</td></tr>
+<tr id="Sx4.T2.1.11" class="ltx_tr">
+<th id="Sx4.T2.1.11.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">SARQUE <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib11" title="" class="ltx_ref">Huang et al. 2023</a>)</cite></th>
+<th id="Sx4.T2.1.11.2" class="ltx_td ltx_align_left ltx_th ltx_th_row">MobileNetV3-S</th>
+<th id="Sx4.T2.1.11.3" class="ltx_td ltx_align_left ltx_th ltx_th_row">8.85M</th>
+<td id="Sx4.T2.1.11.4" class="ltx_td ltx_align_center">224×224</td>
+<td id="Sx4.T2.1.11.5" class="ltx_td ltx_align_center">0.8581</td>
+<td id="Sx4.T2.1.11.6" class="ltx_td ltx_align_center">0.8591</td>
+<td id="Sx4.T2.1.11.7" class="ltx_td ltx_align_center">0.6095</td></tr>
+<tr id="Sx4.T2.1.12" class="ltx_tr">
+<th id="Sx4.T2.1.12.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">LIQE <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib36" title="" class="ltx_ref">Zhang et al. 2023</a>)</cite></th>
+<th id="Sx4.T2.1.12.2" class="ltx_td ltx_align_left ltx_th ltx_th_row">CLIP (ViT-B/32)</th>
+<th id="Sx4.T2.1.12.3" class="ltx_td ltx_align_left ltx_th ltx_th_row">151.28M</th>
+<td id="Sx4.T2.1.12.4" class="ltx_td ltx_align_center">224×224</td>
+<td id="Sx4.T2.1.12.5" class="ltx_td ltx_align_center">0.9235</td>
+<td id="Sx4.T2.1.12.6" class="ltx_td ltx_align_center">0.9206</td>
+<td id="Sx4.T2.1.12.7" class="ltx_td ltx_align_center">0.6533</td></tr>
+<tr id="Sx4.T2.1.13" class="ltx_tr">
+<th id="Sx4.T2.1.13.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">Q-Align <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib30" title="" class="ltx_ref">Wu et al. 2023</a>)</cite></th>
+<th id="Sx4.T2.1.13.2" class="ltx_td ltx_align_left ltx_th ltx_th_row">mPLUG-Owl2-7B</th>
+<th id="Sx4.T2.1.13.3" class="ltx_td ltx_align_left ltx_th ltx_th_row">8197.86M</th>
+<td id="Sx4.T2.1.13.4" class="ltx_td ltx_align_center">448×448</td>
+<td id="Sx4.T2.1.13.5" class="ltx_td ltx_align_center">0.8721</td>
+<td id="Sx4.T2.1.13.6" class="ltx_td ltx_align_center">0.8315</td>
+<td id="Sx4.T2.1.13.7" class="ltx_td ltx_align_center">0.6311</td></tr>
+<tr id="Sx4.T2.1.14" class="ltx_tr">
+<th id="Sx4.T2.1.14.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">Compare2Score <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib37" title="" class="ltx_ref">Zhu et al. 2024</a>)</cite></th>
+<th id="Sx4.T2.1.14.2" class="ltx_td ltx_align_left ltx_th ltx_th_row">mPLUG-Owl2-7B</th>
+<th id="Sx4.T2.1.14.3" class="ltx_td ltx_align_left ltx_th ltx_th_row">8197.86M</th>
+<td id="Sx4.T2.1.14.4" class="ltx_td ltx_align_center">448×448</td>
+<td id="Sx4.T2.1.14.5" class="ltx_td ltx_align_center">0.8502</td>
+<td id="Sx4.T2.1.14.6" class="ltx_td ltx_align_center">0.8190</td>
+<td id="Sx4.T2.1.14.7" class="ltx_td ltx_align_center">0.6266</td></tr>
+<tr id="Sx4.T2.1.15" class="ltx_tr" style="--ltx-bg-color:#EFEFEF;">
+<th id="Sx4.T2.1.15.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t"><span id="Sx4.T2.1.15.1.1" class="ltx_text" style="--ltx-bg-color:#EFEFEF;">TuningIQA</span></th>
+<th id="Sx4.T2.1.15.2" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t"><span id="Sx4.T2.1.15.2.1" class="ltx_text" style="--ltx-bg-color:#EFEFEF;">MobileNetV3-S</span></th>
+<th id="Sx4.T2.1.15.3" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t"><span id="Sx4.T2.1.15.3.1" class="ltx_text" style="--ltx-bg-color:#EFEFEF;">58.29M</span></th>
+<td id="Sx4.T2.1.15.4" class="ltx_td ltx_align_center ltx_border_t"><span id="Sx4.T2.1.15.4.1" class="ltx_text" style="--ltx-bg-color:#EFEFEF;">224×224</span></td>
+<td id="Sx4.T2.1.15.5" class="ltx_td ltx_align_center ltx_border_t"><span id="Sx4.T2.1.15.5.1" class="ltx_text ltx_underline" style="--ltx-bg-color:#EFEFEF;">0.9308</span></td>
+<td id="Sx4.T2.1.15.6" class="ltx_td ltx_align_center ltx_border_t"><span id="Sx4.T2.1.15.6.1" class="ltx_text ltx_underline" style="--ltx-bg-color:#EFEFEF;">0.9302</span></td>
+<td id="Sx4.T2.1.15.7" class="ltx_td ltx_align_center ltx_border_t"><span id="Sx4.T2.1.15.7.1" class="ltx_text ltx_underline" style="--ltx-bg-color:#EFEFEF;">0.7065</span></td></tr>
+<tr id="Sx4.T2.1.16" class="ltx_tr" style="--ltx-bg-color:#EFEFEF;">
+<th id="Sx4.T2.1.16.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb"><span id="Sx4.T2.1.16.1.1" class="ltx_text" style="--ltx-bg-color:#EFEFEF;">TuningIQA</span></th>
+<th id="Sx4.T2.1.16.2" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb"><span id="Sx4.T2.1.16.2.1" class="ltx_text" style="--ltx-bg-color:#EFEFEF;">ResNet-50</span></th>
+<th id="Sx4.T2.1.16.3" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb"><span id="Sx4.T2.1.16.3.1" class="ltx_text" style="--ltx-bg-color:#EFEFEF;">84.62M</span></th>
+<td id="Sx4.T2.1.16.4" class="ltx_td ltx_align_center ltx_border_bb"><span id="Sx4.T2.1.16.4.1" class="ltx_text" style="--ltx-bg-color:#EFEFEF;">224×224</span></td>
+<td id="Sx4.T2.1.16.5" class="ltx_td ltx_align_center ltx_border_bb"><span id="Sx4.T2.1.16.5.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EFEFEF;">0.9385</span></td>
+<td id="Sx4.T2.1.16.6" class="ltx_td ltx_align_center ltx_border_bb"><span id="Sx4.T2.1.16.6.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EFEFEF;">0.9364</span></td>
+<td id="Sx4.T2.1.16.7" class="ltx_td ltx_align_center ltx_border_bb"><span id="Sx4.T2.1.16.7.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EFEFEF;">0.7284</span></td></tr>
+</tbody>
+</table>
+</figure>
+</section>
+<section id="Sx4.SSx2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Graph-based Camera Parameter Fusion</h3>
+
+<div id="Sx4.SSx2.p1" class="ltx_para">
+<p id="Sx4.SSx2.p1.1" class="ltx_p">For images with available camera metadata, we introduce an <span id="Sx4.SSx2.p1.1.1" class="ltx_text ltx_font_italic">optional</span> Graph-based Camera Parameter Fusion (GCPF) module that explicitly models these parameter interactions through graph neural networks.</p>
+</div>
+<div id="Sx4.SSx2.p2" class="ltx_para ltx_noindent">
+<p id="Sx4.SSx2.p2.1" class="ltx_p"><span id="Sx4.SSx2.p2.1.1" class="ltx_text ltx_font_bold">Graph Construction and Node Encoding.</span> We construct a heterogeneous graph <math id="Sx4.SSx2.p2.m1" class="ltx_Math" alttext="\mathcal{G}=(\mathcal{V},\mathcal{E})" display="inline" intent=":literal"><semantics><mrow><mi class="ltx_font_mathcaligraphic">𝒢</mi><mo>=</mo><mrow><mo stretchy="false">(</mo><mi class="ltx_font_mathcaligraphic">𝒱</mi><mo>,</mo><mi class="ltx_font_mathcaligraphic">ℰ</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathcal{G}=(\mathcal{V},\mathcal{E})</annotation></semantics></math> where nodes <math id="Sx4.SSx2.p2.m2" class="ltx_Math" alttext="\mathcal{V}" display="inline" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒱</mi><annotation encoding="application/x-tex">\mathcal{V}</annotation></semantics></math> represent both visual features and camera parameters. The visual node serves as the central hub that aggregates information from all parameter nodes, enabling rich cross-modal interactions. Specifically, we define eight nodes: one visual node encoding <math id="Sx4.SSx2.p2.m3" class="ltx_Math" alttext="\mathbf{F}_{q}" display="inline" intent=":literal"><semantics><msub><mi>𝐅</mi><mi>q</mi></msub><annotation encoding="application/x-tex">\mathbf{F}_{q}</annotation></semantics></math> and seven parameter nodes. Each parameter node is encoded through individual linear transformations:</p>
+<table id="Sx4.E5" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx4.E5.m1" class="ltx_Math" alttext="\mathbf{v}_{\text{visual}}=\mathbf{W}_{v}\mathbf{F}_{q},\quad\mathbf{v}_{i}=\mathbf{W}_{p}p_{i}," display="block" intent=":literal"><semantics><mrow><mrow><mrow><msub><mi>𝐯</mi><mtext>visual</mtext></msub><mo>=</mo><mrow><msub><mi>𝐖</mi><mi>v</mi></msub><mo lspace="0em" rspace="0em">​</mo><msub><mi>𝐅</mi><mi>q</mi></msub></mrow></mrow><mo rspace="1.167em">,</mo><mrow><msub><mi>𝐯</mi><mi>i</mi></msub><mo>=</mo><mrow><msub><mi>𝐖</mi><mi>p</mi></msub><mo lspace="0em" rspace="0em">​</mo><msub><mi>p</mi><mi>i</mi></msub></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">\mathbf{v}_{\text{visual}}=\mathbf{W}_{v}\mathbf{F}_{q},\quad\mathbf{v}_{i}=\mathbf{W}_{p}p_{i},</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(5)</span></td></tr></tbody>
+</table>
+<p id="Sx4.SSx2.p2.2" class="ltx_p">where <math id="Sx4.SSx2.p2.m4" class="ltx_Math" alttext="\mathbf{W}_{v}" display="inline" intent=":literal"><semantics><msub><mi>𝐖</mi><mi>v</mi></msub><annotation encoding="application/x-tex">\mathbf{W}_{v}</annotation></semantics></math> and <math id="Sx4.SSx2.p2.m5" class="ltx_Math" alttext="\mathbf{W}_{p}" display="inline" intent=":literal"><semantics><msub><mi>𝐖</mi><mi>p</mi></msub><annotation encoding="application/x-tex">\mathbf{W}_{p}</annotation></semantics></math> are learned projection matrices, and <math id="Sx4.SSx2.p2.m6" class="ltx_Math" alttext="p_{i}" display="inline" intent=":literal"><semantics><msub><mi>p</mi><mi>i</mi></msub><annotation encoding="application/x-tex">p_{i}</annotation></semantics></math> represents the <math id="Sx4.SSx2.p2.m7" class="ltx_Math" alttext="i" display="inline" intent=":literal"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>-th camera parameter value.</p>
+</div>
+<div id="Sx4.SSx2.p3" class="ltx_para ltx_noindent">
+<p id="Sx4.SSx2.p3.1" class="ltx_p"><span id="Sx4.SSx2.p3.1.1" class="ltx_text ltx_font_bold">Physical Relationship Modeling.</span> The edge set <math id="Sx4.SSx2.p3.m1" class="ltx_Math" alttext="\mathcal{E}" display="inline" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">ℰ</mi><annotation encoding="application/x-tex">\mathcal{E}</annotation></semantics></math> encodes both cross-modal connections and physical relationships based on photographic principles. We establish connections following relationships: (1) <span id="Sx4.SSx2.p3.1.2" class="ltx_text ltx_font_italic">Cross-modal connections</span>: the visual node connects to all parameter nodes, enabling parameter-visual feature interaction; (2) <span id="Sx4.SSx2.p3.1.3" class="ltx_text ltx_font_italic">Exposure Triangle</span>: ISO, shutter speed, and aperture form a strongly connected subgraph as they jointly determine exposure—increasing ISO compensates for faster shutter or smaller aperture; (3) <span id="Sx4.SSx2.p3.1.4" class="ltx_text ltx_font_italic">Post-processing Chain</span>: contrast, saturation, and sharpness exhibit mutual dependencies in image enhancement, where higher contrast often requires adjusted saturation; (4) <span id="Sx4.SSx2.p3.1.5" class="ltx_text ltx_font_italic">Color Correlation</span>: white balance directly influences saturation perception due to color temperature effects.</p>
+</div>
+<div id="Sx4.SSx2.p4" class="ltx_para ltx_noindent">
+<p id="Sx4.SSx2.p4.1" class="ltx_p"><span id="Sx4.SSx2.p4.1.1" class="ltx_text ltx_font_bold">Graph Reasoning.</span> The graph reasoning process employs two-layer Graph Attention Networks (GAT) <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib28" title="" class="ltx_ref">Velickovic et al. 2017</a>)</cite> to propagate information across the parameter-visual graph:</p>
+<table id="Sx4.E6" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx4.E6.m1" class="ltx_Math" alttext="\mathbf{H}^{(1)}=\text{GAT}_{1}(\mathbf{X},\mathcal{E}),\quad\mathbf{H}^{(2)}=\text{GAT}_{2}(\mathbf{H}^{(1)},\mathcal{E})," display="block" intent=":literal"><semantics><mrow><mrow><mrow><msup><mi>𝐇</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mrow><msub><mtext>GAT</mtext><mn>1</mn></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>𝐗</mi><mo>,</mo><mi class="ltx_font_mathcaligraphic">ℰ</mi><mo stretchy="false">)</mo></mrow></mrow></mrow><mo rspace="1.167em">,</mo><mrow><msup><mi>𝐇</mi><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mrow><msub><mtext>GAT</mtext><mn>2</mn></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msup><mi>𝐇</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mi class="ltx_font_mathcaligraphic">ℰ</mi><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">\mathbf{H}^{(1)}=\text{GAT}_{1}(\mathbf{X},\mathcal{E}),\quad\mathbf{H}^{(2)}=\text{GAT}_{2}(\mathbf{H}^{(1)},\mathcal{E}),</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(6)</span></td></tr></tbody>
+</table>
+<p id="Sx4.SSx2.p4.2" class="ltx_p">where <math id="Sx4.SSx2.p4.m1" class="ltx_Math" alttext="\mathbf{X}=[\mathbf{v}_{\text{visual}},\mathbf{v}_{1},\ldots,\mathbf{v}_{7}]" display="inline" intent=":literal"><semantics><mrow><mi>𝐗</mi><mo>=</mo><mrow><mo stretchy="false">[</mo><mrow><msub><mi>𝐯</mi><mtext>visual</mtext></msub><mo>,</mo><msub><mi>𝐯</mi><mn>1</mn></msub><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msub><mi>𝐯</mi><mn>7</mn></msub></mrow><mo stretchy="false">]</mo></mrow></mrow><annotation encoding="application/x-tex">\mathbf{X}=[\mathbf{v}_{\text{visual}},\mathbf{v}_{1},\ldots,\mathbf{v}_{7}]</annotation></semantics></math> contains all encoded node features. The first GAT layer employs 4 attention heads with concatenation to capture diverse relationship patterns, while the second layer uses single-head attention for feature integration. The final parameter-aware representation <math id="Sx4.SSx2.p4.m2" class="ltx_Math" alttext="\mathbf{F}_{GCN}" display="inline" intent=":literal"><semantics><msub><mi>𝐅</mi><mrow><mi>G</mi><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>N</mi></mrow></msub><annotation encoding="application/x-tex">\mathbf{F}_{GCN}</annotation></semantics></math> is extracted from the updated central visual node:</p>
+<table id="Sx4.E7" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx4.E7.m1" class="ltx_math_unparsed" alttext="\mathbf{F}_{gcn}=\mathbf{H}^{(2)}[0,:]." display="block" intent=":literal"><semantics><mrow><msub><mi>𝐅</mi><mrow><mi>g</mi><mo lspace="0em" rspace="0em">​</mo><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>n</mi></mrow></msub><mo>=</mo><msup><mi>𝐇</mi><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow></msup><mrow><mo stretchy="false">[</mo><mn>0</mn><mo>,</mo><mo rspace="0em">:</mo><mo stretchy="false">]</mo></mrow><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">\mathbf{F}_{gcn}=\mathbf{H}^{(2)}[0,:].</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(7)</span></td></tr></tbody>
+</table>
+<p id="Sx4.SSx2.p4.3" class="ltx_p">where <math id="Sx4.SSx2.p4.m3" class="ltx_math_unparsed" alttext="\mathbf{H}^{(2)}[0,:]" display="inline" intent=":literal"><semantics><mrow><msup><mi>𝐇</mi><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow></msup><mrow><mo stretchy="false">[</mo><mn>0</mn><mo>,</mo><mo rspace="0em">:</mo><mo stretchy="false">]</mo></mrow></mrow><annotation encoding="application/x-tex">\mathbf{H}^{(2)}[0,:]</annotation></semantics></math> denotes the first row of matrix <math id="Sx4.SSx2.p4.m4" class="ltx_Math" alttext="\mathbf{H}^{(2)}" display="inline" intent=":literal"><semantics><msup><mi>𝐇</mi><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow></msup><annotation encoding="application/x-tex">\mathbf{H}^{(2)}</annotation></semantics></math>.
+This approach enables the model to reason about parameter interactions and their combined effects on image quality, providing richer representations for subsequent quality prediction.</p>
+</div>
+</section>
+<section id="Sx4.SSx3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Multi-attribute Regression and Fine-grained Ranking</h3>
+
+<div id="Sx4.SSx3.p1" class="ltx_para ltx_noindent">
+<p id="Sx4.SSx3.p1.1" class="ltx_p"><span id="Sx4.SSx3.p1.1.1" class="ltx_text ltx_font_bold">Multi-attribute Regressor.</span> For comprehensive quality assessment, we implement five specialized prediction heads that estimate quality scores across different perceptual dimensions:</p>
+<table id="Sx4.E8" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx4.E8.m1" class="ltx_Math" alttext="\hat{s}^{\text{attr}}=\text{MLP}_{\theta^{\text{attr}}_{s}}(\mathbf{F}_{f})," display="block" intent=":literal"><semantics><mrow><mrow><msup><mover accent="true"><mi>s</mi><mo>^</mo></mover><mtext>attr</mtext></msup><mo>=</mo><mrow><msub><mtext>MLP</mtext><msubsup><mi>θ</mi><mi>s</mi><mtext>attr</mtext></msubsup></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>𝐅</mi><mi>f</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">\hat{s}^{\text{attr}}=\text{MLP}_{\theta^{\text{attr}}_{s}}(\mathbf{F}_{f}),</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(8)</span></td></tr></tbody>
+</table>
+<p id="Sx4.SSx3.p1.2" class="ltx_p">where <math id="Sx4.SSx3.p1.m1" class="ltx_Math" alttext="\mathbf{F}_{f}" display="inline" intent=":literal"><semantics><msub><mi>𝐅</mi><mi>f</mi></msub><annotation encoding="application/x-tex">\mathbf{F}_{f}</annotation></semantics></math> represents the fused features (either <math id="Sx4.SSx3.p1.m2" class="ltx_Math" alttext="\mathbf{F}_{q}" display="inline" intent=":literal"><semantics><msub><mi>𝐅</mi><mi>q</mi></msub><annotation encoding="application/x-tex">\mathbf{F}_{q}</annotation></semantics></math> or <math id="Sx4.SSx3.p1.m3" class="ltx_Math" alttext="\mathbf{F}_{gcn}" display="inline" intent=":literal"><semantics><msub><mi>𝐅</mi><mrow><mi>g</mi><mo lspace="0em" rspace="0em">​</mo><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>n</mi></mrow></msub><annotation encoding="application/x-tex">\mathbf{F}_{gcn}</annotation></semantics></math> when parameters are available), and <math id="Sx4.SSx3.p1.m4" class="ltx_Math" alttext="\text{attr}\in\{\text{overall},\text{face},\text{sharpness},\text{exposure},\text{noise}\}" display="inline" intent=":literal"><semantics><mrow><mtext>attr</mtext><mo>∈</mo><mrow><mo stretchy="false">{</mo><mrow><mtext>overall</mtext><mo>,</mo><mtext>face</mtext><mo>,</mo><mtext>sharpness</mtext><mo>,</mo><mtext>exposure</mtext><mo>,</mo><mtext>noise</mtext></mrow><mo stretchy="false">}</mo></mrow></mrow><annotation encoding="application/x-tex">\text{attr}\in\{\text{overall},\text{face},\text{sharpness},\text{exposure},\text{noise}\}</annotation></semantics></math>.</p>
+</div>
+<div id="Sx4.SSx3.p2" class="ltx_para ltx_noindent">
+<p id="Sx4.SSx3.p2.1" class="ltx_p"><span id="Sx4.SSx3.p2.1.1" class="ltx_text ltx_font_bold">Fine-grained Preference Classifier.</span> To capture subtle quality differences, we incorporate a pairwise comparison mechanism:</p>
+<table id="Sx4.E9" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx4.E9.m1" class="ltx_Math" alttext="\hat{c}^{\text{attr}}=\sigma\left(\text{MLP}_{\theta^{\text{attr}}_{c}}([\mathbf{F}_{a}\oplus\mathbf{F}_{b}\oplus\mathbf{F}_{a}-\mathbf{F}_{b}])\right)," display="block" intent=":literal"><semantics><mrow><mrow><msup><mover accent="true"><mi>c</mi><mo>^</mo></mover><mtext>attr</mtext></msup><mo>=</mo><mrow><mi>σ</mi><mo>⁡</mo><mrow><mo>(</mo><mrow><msub><mtext>MLP</mtext><msubsup><mi>θ</mi><mi>c</mi><mtext>attr</mtext></msubsup></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mo stretchy="false">[</mo><mrow><mrow><msub><mi>𝐅</mi><mi>a</mi></msub><mo>⊕</mo><msub><mi>𝐅</mi><mi>b</mi></msub><mo>⊕</mo><msub><mi>𝐅</mi><mi>a</mi></msub></mrow><mo>−</mo><msub><mi>𝐅</mi><mi>b</mi></msub></mrow><mo stretchy="false">]</mo></mrow><mo stretchy="false">)</mo></mrow></mrow><mo>)</mo></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">\hat{c}^{\text{attr}}=\sigma\left(\text{MLP}_{\theta^{\text{attr}}_{c}}([\mathbf{F}_{a}\oplus\mathbf{F}_{b}\oplus\mathbf{F}_{a}-\mathbf{F}_{b}])\right),</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(9)</span></td></tr></tbody>
+</table>
+<p id="Sx4.SSx3.p2.2" class="ltx_p">where <math id="Sx4.SSx3.p2.m1" class="ltx_Math" alttext="\oplus" display="inline" intent=":literal"><semantics><mo>⊕</mo><annotation encoding="application/x-tex">\oplus</annotation></semantics></math> denotes concatenation, <math id="Sx4.SSx3.p2.m2" class="ltx_Math" alttext="\sigma" display="inline" intent=":literal"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math> is the sigmoid function, and the difference term captures relative quality variations.</p>
+</div>
+</section>
+<section id="Sx4.SSx4" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Learning Objectives</h3>
+
+<div id="Sx4.SSx4.p1" class="ltx_para">
+<p id="Sx4.SSx4.p1.1" class="ltx_p">We optimize TuningIQA using a multi-task learning framework with carefully designed loss functions.</p>
+</div>
+<div id="Sx4.SSx4.p2" class="ltx_para ltx_noindent">
+<p id="Sx4.SSx4.p2.1" class="ltx_p"><span id="Sx4.SSx4.p2.1.1" class="ltx_text ltx_font_bold">Confidence-Weighted Regression Loss.</span> To handle annotation uncertainty in fine-grained assessment, we design variance-based confidence weighting:</p>
+<table id="Sx4.E10" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx4.E10.m1" class="ltx_Math" alttext="\mathcal{L}_{reg}=\frac{1}{|\mathcal{D}|}\sum_{(I_{i},s_{i})\in\mathcal{D}}\exp(-v_{i})\sum_{\text{attr}}|\hat{s}^{\text{attr}}_{i}-s^{\text{attr}}_{i}|," display="block" intent=":literal"><semantics><mrow><mrow><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mrow><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow></msub><mo>=</mo><mrow><mfrac><mn>1</mn><mrow><mo stretchy="false">|</mo><mi class="ltx_font_mathcaligraphic">𝒟</mi><mo stretchy="false">|</mo></mrow></mfrac><mo lspace="0em" rspace="0em">​</mo><mrow><munder><mo movablelimits="false">∑</mo><mrow><mrow><mo stretchy="false">(</mo><msub><mi>I</mi><mi>i</mi></msub><mo>,</mo><msub><mi>s</mi><mi>i</mi></msub><mo stretchy="false">)</mo></mrow><mo>∈</mo><mi class="ltx_font_mathcaligraphic">𝒟</mi></mrow></munder><mrow><mrow><mi>exp</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mrow><mo>−</mo><msub><mi>v</mi><mi>i</mi></msub></mrow><mo stretchy="false">)</mo></mrow></mrow><mo lspace="0em" rspace="0em">​</mo><mrow><munder><mo movablelimits="false" rspace="0em">∑</mo><mtext>attr</mtext></munder><mrow><mo stretchy="false">|</mo><mrow><msubsup><mover accent="true"><mi>s</mi><mo>^</mo></mover><mi>i</mi><mtext>attr</mtext></msubsup><mo>−</mo><msubsup><mi>s</mi><mi>i</mi><mtext>attr</mtext></msubsup></mrow><mo stretchy="false">|</mo></mrow></mrow></mrow></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">\mathcal{L}_{reg}=\frac{1}{|\mathcal{D}|}\sum_{(I_{i},s_{i})\in\mathcal{D}}\exp(-v_{i})\sum_{\text{attr}}|\hat{s}^{\text{attr}}_{i}-s^{\text{attr}}_{i}|,</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(10)</span></td></tr></tbody>
+</table>
+<p id="Sx4.SSx4.p2.2" class="ltx_p">where <math id="Sx4.SSx4.p2.m1" class="ltx_Math" alttext="v_{i}" display="inline" intent=":literal"><semantics><msub><mi>v</mi><mi>i</mi></msub><annotation encoding="application/x-tex">v_{i}</annotation></semantics></math> denotes the annotation variance, adaptively reducing the impact of unreliable quality scores.</p>
+</div>
+<div id="Sx4.SSx4.p3" class="ltx_para ltx_noindent">
+<p id="Sx4.SSx4.p3.1" class="ltx_p"><span id="Sx4.SSx4.p3.1.1" class="ltx_text ltx_font_bold">Fine-grained Ranking Loss.</span> For rank learning, we employ the binary cross-entropy:</p>
+<table id="Sx4.E11" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="Sx4.E11.m1" class="ltx_math_unparsed" alttext="\mathcal{L}_{rank}=-\frac{1}{|\mathcal{P}|}\sum_{(I_{p},I_{q})\in\mathcal{P}}\sum_{\text{attr}}{BCE}(c^{\text{attr}}_{pq},\hat{c}^{\text{attr}}_{pq})," display="block" intent=":literal"><semantics><mrow><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mrow><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>a</mi><mo lspace="0em" rspace="0em">​</mo><mi>n</mi><mo lspace="0em" rspace="0em">​</mo><mi>k</mi></mrow></msub><mo rspace="0em">=</mo><mo lspace="0em">−</mo><mfrac><mn>1</mn><mrow><mo stretchy="false">|</mo><mi class="ltx_font_mathcaligraphic">𝒫</mi><mo stretchy="false">|</mo></mrow></mfrac><munder><mo movablelimits="false" rspace="0em">∑</mo><mrow><mrow><mo stretchy="false">(</mo><msub><mi>I</mi><mi>p</mi></msub><mo>,</mo><msub><mi>I</mi><mi>q</mi></msub><mo stretchy="false">)</mo></mrow><mo>∈</mo><mi class="ltx_font_mathcaligraphic">𝒫</mi></mrow></munder><munder><mo movablelimits="false">∑</mo><mtext>attr</mtext></munder><mi>B</mi><mi>C</mi><mi>E</mi><mrow><mo stretchy="false">(</mo><msubsup><mi>c</mi><mrow><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>q</mi></mrow><mtext>attr</mtext></msubsup><mo>,</mo><msubsup><mover accent="true"><mi>c</mi><mo>^</mo></mover><mrow><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>q</mi></mrow><mtext>attr</mtext></msubsup><mo stretchy="false">)</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">\mathcal{L}_{rank}=-\frac{1}{|\mathcal{P}|}\sum_{(I_{p},I_{q})\in\mathcal{P}}\sum_{\text{attr}}{BCE}(c^{\text{attr}}_{pq},\hat{c}^{\text{attr}}_{pq}),</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(11)</span></td></tr></tbody>
+</table>
+<p id="Sx4.SSx4.p3.2" class="ltx_p">where <math id="Sx4.SSx4.p3.m1" class="ltx_Math" alttext="{BCE}(c,\hat{c})" display="inline" intent=":literal"><semantics><mrow><mi>B</mi><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>E</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>c</mi><mo>,</mo><mover accent="true"><mi>c</mi><mo>^</mo></mover><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">{BCE}(c,\hat{c})</annotation></semantics></math> denotes the binary cross-entropy function. The combined objective: <math id="Sx4.SSx4.p3.m2" class="ltx_Math" alttext="\mathcal{L}=\lambda_{reg}\mathcal{L}_{reg}+\lambda_{rank}\mathcal{L}_{rank}" display="inline" intent=":literal"><semantics><mrow><mi class="ltx_font_mathcaligraphic">ℒ</mi><mo>=</mo><mrow><mrow><msub><mi>λ</mi><mrow><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow></msub><mo lspace="0em" rspace="0em">​</mo><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mrow><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow></msub></mrow><mo>+</mo><mrow><msub><mi>λ</mi><mrow><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>a</mi><mo lspace="0em" rspace="0em">​</mo><mi>n</mi><mo lspace="0em" rspace="0em">​</mo><mi>k</mi></mrow></msub><mo lspace="0em" rspace="0em">​</mo><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mrow><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>a</mi><mo lspace="0em" rspace="0em">​</mo><mi>n</mi><mo lspace="0em" rspace="0em">​</mo><mi>k</mi></mrow></msub></mrow></mrow></mrow><annotation encoding="application/x-tex">\mathcal{L}=\lambda_{reg}\mathcal{L}_{reg}+\lambda_{rank}\mathcal{L}_{rank}</annotation></semantics></math> with empirically determined weights <math id="Sx4.SSx4.p3.m3" class="ltx_Math" alttext="\lambda_{reg}:\lambda_{rank}=1:2" display="inline" intent=":literal"><semantics><mrow><msub><mi>λ</mi><mrow><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow></msub><mo lspace="0.278em" rspace="0.278em">:</mo><mrow><msub><mi>λ</mi><mrow><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>a</mi><mo lspace="0em" rspace="0em">​</mo><mi>n</mi><mo lspace="0em" rspace="0em">​</mo><mi>k</mi></mrow></msub><mo>=</mo><mn>1</mn></mrow><mo lspace="0.278em" rspace="0.278em">:</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">\lambda_{reg}:\lambda_{rank}=1:2</annotation></semantics></math>.</p>
+</div>
+<figure id="Sx4.T3" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 3: </span>Multi-attribute performance comparison.</figcaption>
+<table id="Sx4.T3.1" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="Sx4.T3.1.1" class="ltx_tr">
+<th id="Sx4.T3.1.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt"><span id="Sx4.T3.1.1.1.1" class="ltx_text ltx_font_bold">Method</span></th>
+<th id="Sx4.T3.1.1.2" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt"><span id="Sx4.T3.1.1.2.1" class="ltx_text ltx_font_bold">Metric</span></th>
+<th id="Sx4.T3.1.1.3" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="Sx4.T3.1.1.3.1" class="ltx_text ltx_font_bold">Sharp.</span></th>
+<th id="Sx4.T3.1.1.4" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="Sx4.T3.1.1.4.1" class="ltx_text ltx_font_bold">Noise</span></th>
+<th id="Sx4.T3.1.1.5" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="Sx4.T3.1.1.5.1" class="ltx_text ltx_font_bold">Exp.</span></th>
+<th id="Sx4.T3.1.1.6" class="ltx_td ltx_nopad_r ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="Sx4.T3.1.1.6.1" class="ltx_text ltx_font_bold">Face</span></th></tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="Sx4.T3.1.2" class="ltx_tr">
+<th id="Sx4.T3.1.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">CLIP-IQA</th>
+<th id="Sx4.T3.1.2.2" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">SRCC</th>
+<td id="Sx4.T3.1.2.3" class="ltx_td ltx_align_center ltx_border_t">0.532</td>
+<td id="Sx4.T3.1.2.4" class="ltx_td ltx_align_center ltx_border_t">0.472</td>
+<td id="Sx4.T3.1.2.5" class="ltx_td ltx_align_center ltx_border_t">0.199</td>
+<td id="Sx4.T3.1.2.6" class="ltx_td ltx_nopad_r ltx_align_center ltx_border_t">0.510</td></tr>
+<tr id="Sx4.T3.1.3" class="ltx_tr">
+<th id="Sx4.T3.1.3.1" class="ltx_td ltx_nopad_l ltx_th ltx_th_row"></th>
+<th id="Sx4.T3.1.3.2" class="ltx_td ltx_align_left ltx_th ltx_th_row">PLCC</th>
+<td id="Sx4.T3.1.3.3" class="ltx_td ltx_align_center">0.528</td>
+<td id="Sx4.T3.1.3.4" class="ltx_td ltx_align_center">0.434</td>
+<td id="Sx4.T3.1.3.5" class="ltx_td ltx_align_center">0.208</td>
+<td id="Sx4.T3.1.3.6" class="ltx_td ltx_nopad_r ltx_align_center">0.512</td></tr>
+<tr id="Sx4.T3.1.4" class="ltx_tr">
+<th id="Sx4.T3.1.4.1" class="ltx_td ltx_nopad_l ltx_th ltx_th_row"></th>
+<th id="Sx4.T3.1.4.2" class="ltx_td ltx_align_left ltx_th ltx_th_row">FG-ACC</th>
+<td id="Sx4.T3.1.4.3" class="ltx_td ltx_align_center">0.649</td>
+<td id="Sx4.T3.1.4.4" class="ltx_td ltx_align_center">0.622</td>
+<td id="Sx4.T3.1.4.5" class="ltx_td ltx_align_center">0.571</td>
+<td id="Sx4.T3.1.4.6" class="ltx_td ltx_nopad_r ltx_align_center">0.518</td></tr>
+<tr id="Sx4.T3.1.5" class="ltx_tr">
+<th id="Sx4.T3.1.5.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">MT-A</th>
+<th id="Sx4.T3.1.5.2" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">SRCC</th>
+<td id="Sx4.T3.1.5.3" class="ltx_td ltx_align_center ltx_border_t">0.896</td>
+<td id="Sx4.T3.1.5.4" class="ltx_td ltx_align_center ltx_border_t">0.804</td>
+<td id="Sx4.T3.1.5.5" class="ltx_td ltx_align_center ltx_border_t">0.782</td>
+<td id="Sx4.T3.1.5.6" class="ltx_td ltx_nopad_r ltx_align_center ltx_border_t">0.807</td></tr>
+<tr id="Sx4.T3.1.6" class="ltx_tr">
+<th id="Sx4.T3.1.6.1" class="ltx_td ltx_nopad_l ltx_th ltx_th_row"></th>
+<th id="Sx4.T3.1.6.2" class="ltx_td ltx_align_left ltx_th ltx_th_row">PLCC</th>
+<td id="Sx4.T3.1.6.3" class="ltx_td ltx_align_center">0.943</td>
+<td id="Sx4.T3.1.6.4" class="ltx_td ltx_align_center">0.898</td>
+<td id="Sx4.T3.1.6.5" class="ltx_td ltx_align_center">0.863</td>
+<td id="Sx4.T3.1.6.6" class="ltx_td ltx_nopad_r ltx_align_center">0.802</td></tr>
+<tr id="Sx4.T3.1.7" class="ltx_tr">
+<th id="Sx4.T3.1.7.1" class="ltx_td ltx_nopad_l ltx_th ltx_th_row"></th>
+<th id="Sx4.T3.1.7.2" class="ltx_td ltx_align_left ltx_th ltx_th_row">FG-ACC</th>
+<td id="Sx4.T3.1.7.3" class="ltx_td ltx_align_center">0.688</td>
+<td id="Sx4.T3.1.7.4" class="ltx_td ltx_align_center">0.665</td>
+<td id="Sx4.T3.1.7.5" class="ltx_td ltx_align_center">0.621</td>
+<td id="Sx4.T3.1.7.6" class="ltx_td ltx_nopad_r ltx_align_center">0.582</td></tr>
+<tr id="Sx4.T3.1.8" class="ltx_tr">
+<th id="Sx4.T3.1.8.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">SARQUE</th>
+<th id="Sx4.T3.1.8.2" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">SRCC</th>
+<td id="Sx4.T3.1.8.3" class="ltx_td ltx_align_center ltx_border_t">0.868</td>
+<td id="Sx4.T3.1.8.4" class="ltx_td ltx_align_center ltx_border_t">0.743</td>
+<td id="Sx4.T3.1.8.5" class="ltx_td ltx_align_center ltx_border_t">0.700</td>
+<td id="Sx4.T3.1.8.6" class="ltx_td ltx_nopad_r ltx_align_center ltx_border_t">0.754</td></tr>
+<tr id="Sx4.T3.1.9" class="ltx_tr">
+<th id="Sx4.T3.1.9.1" class="ltx_td ltx_nopad_l ltx_th ltx_th_row"></th>
+<th id="Sx4.T3.1.9.2" class="ltx_td ltx_align_left ltx_th ltx_th_row">PLCC</th>
+<td id="Sx4.T3.1.9.3" class="ltx_td ltx_align_center">0.930</td>
+<td id="Sx4.T3.1.9.4" class="ltx_td ltx_align_center">0.876</td>
+<td id="Sx4.T3.1.9.5" class="ltx_td ltx_align_center">0.804</td>
+<td id="Sx4.T3.1.9.6" class="ltx_td ltx_nopad_r ltx_align_center">0.754</td></tr>
+<tr id="Sx4.T3.1.10" class="ltx_tr">
+<th id="Sx4.T3.1.10.1" class="ltx_td ltx_nopad_l ltx_th ltx_th_row"></th>
+<th id="Sx4.T3.1.10.2" class="ltx_td ltx_align_left ltx_th ltx_th_row">FG-ACC</th>
+<td id="Sx4.T3.1.10.3" class="ltx_td ltx_align_center">0.666</td>
+<td id="Sx4.T3.1.10.4" class="ltx_td ltx_align_center">0.645</td>
+<td id="Sx4.T3.1.10.5" class="ltx_td ltx_align_center">0.602</td>
+<td id="Sx4.T3.1.10.6" class="ltx_td ltx_nopad_r ltx_align_center">0.547</td></tr>
+<tr id="Sx4.T3.1.11" class="ltx_tr" style="--ltx-bg-color:#EFEFEF;">
+<th id="Sx4.T3.1.11.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t"><span id="Sx4.T3.1.11.1.1" class="ltx_text" style="--ltx-bg-color:#EFEFEF;">TuningIQA</span></th>
+<th id="Sx4.T3.1.11.2" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t"><span id="Sx4.T3.1.11.2.1" class="ltx_text" style="--ltx-bg-color:#EFEFEF;">SRCC</span></th>
+<td id="Sx4.T3.1.11.3" class="ltx_td ltx_align_center ltx_border_t"><span id="Sx4.T3.1.11.3.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EFEFEF;">0.935</span></td>
+<td id="Sx4.T3.1.11.4" class="ltx_td ltx_align_center ltx_border_t"><span id="Sx4.T3.1.11.4.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EFEFEF;">0.805</span></td>
+<td id="Sx4.T3.1.11.5" class="ltx_td ltx_align_center ltx_border_t"><span id="Sx4.T3.1.11.5.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EFEFEF;">0.897</span></td>
+<td id="Sx4.T3.1.11.6" class="ltx_td ltx_nopad_r ltx_align_center ltx_border_t"><span id="Sx4.T3.1.11.6.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EFEFEF;">0.885</span></td></tr>
+<tr id="Sx4.T3.1.12" class="ltx_tr">
+<th id="Sx4.T3.1.12.1" class="ltx_td ltx_nopad_l ltx_th ltx_th_row"></th>
+<th id="Sx4.T3.1.12.2" class="ltx_td ltx_align_left ltx_th ltx_th_row"><span id="Sx4.T3.1.12.2.1" class="ltx_text" style="--ltx-bg-color:#EFEFEF;">PLCC</span></th>
+<td id="Sx4.T3.1.12.3" class="ltx_td ltx_align_center"><span id="Sx4.T3.1.12.3.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EFEFEF;">0.963</span></td>
+<td id="Sx4.T3.1.12.4" class="ltx_td ltx_align_center"><span id="Sx4.T3.1.12.4.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EFEFEF;">0.905</span></td>
+<td id="Sx4.T3.1.12.5" class="ltx_td ltx_align_center"><span id="Sx4.T3.1.12.5.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EFEFEF;">0.949</span></td>
+<td id="Sx4.T3.1.12.6" class="ltx_td ltx_nopad_r ltx_align_center"><span id="Sx4.T3.1.12.6.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EFEFEF;">0.880</span></td></tr>
+<tr id="Sx4.T3.1.13" class="ltx_tr">
+<th id="Sx4.T3.1.13.1" class="ltx_td ltx_nopad_l ltx_th ltx_th_row ltx_border_bb"></th>
+<th id="Sx4.T3.1.13.2" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb"><span id="Sx4.T3.1.13.2.1" class="ltx_text" style="--ltx-bg-color:#EFEFEF;">FG-ACC</span></th>
+<td id="Sx4.T3.1.13.3" class="ltx_td ltx_align_center ltx_border_bb"><span id="Sx4.T3.1.13.3.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EFEFEF;">0.773</span></td>
+<td id="Sx4.T3.1.13.4" class="ltx_td ltx_align_center ltx_border_bb"><span id="Sx4.T3.1.13.4.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EFEFEF;">0.746</span></td>
+<td id="Sx4.T3.1.13.5" class="ltx_td ltx_align_center ltx_border_bb"><span id="Sx4.T3.1.13.5.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EFEFEF;">0.776</span></td>
+<td id="Sx4.T3.1.13.6" class="ltx_td ltx_nopad_r ltx_align_center ltx_border_bb"><span id="Sx4.T3.1.13.6.1" class="ltx_text ltx_font_bold" style="--ltx-bg-color:#EFEFEF;">0.725</span></td></tr>
+</tbody>
+</table>
+</figure>
+</section>
+</section>
+<section id="Sx5" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Experiments</h2>
+
+<section id="Sx5.SSx1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Performance Evaluation on FGLive-10K</h3>
+
+<div id="Sx5.SSx1.p1" class="ltx_para">
+<p id="Sx5.SSx1.p1.1" class="ltx_p"><span id="Sx5.SSx1.p1.1.1" class="ltx_text ltx_font_bold">Evaluation Protocol.</span> We compare the proposed TuningIQA model
+against handcrafted and state-of-the-art learning-based BIQA models. All learning-based models are trained on FGLive-10K following strict scene-level division. We evaluate using SRCC, PLCC for score prediction, and fine-grained accuracy for pairwise ranking.</p>
+</div>
+<div id="Sx5.SSx1.p2" class="ltx_para ltx_noindent">
+<p id="Sx5.SSx1.p2.1" class="ltx_p"><span id="Sx5.SSx1.p2.1.1" class="ltx_text ltx_font_bold">Implementation Details.</span> We implement TuningIQA using PyTorch and train on NVIDIA RTX4090 GPUs. The model is optimized end-to-end using AdamW <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib17" title="" class="ltx_ref">Loshchilov and Hutter 2019</a>)</cite> with cosine annealing <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib16" title="" class="ltx_ref">Loshchilov and Hutter 2017</a>)</cite> at a maximum learning rate of <math id="Sx5.SSx1.p2.m1" class="ltx_Math" alttext="1\times 10^{-5}" display="inline" intent=":literal"><semantics><mrow><mn>1</mn><mo lspace="0.222em" rspace="0.222em">×</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>5</mn></mrow></msup></mrow><annotation encoding="application/x-tex">1\times 10^{-5}</annotation></semantics></math> and batch size of 64. Input images are resized to <math id="Sx5.SSx1.p2.m2" class="ltx_Math" alttext="256\times 256" display="inline" intent=":literal"><semantics><mrow><mn>256</mn><mo lspace="0.222em" rspace="0.222em">×</mo><mn>256</mn></mrow><annotation encoding="application/x-tex">256\times 256</annotation></semantics></math> and randomly cropped to <math id="Sx5.SSx1.p2.m3" class="ltx_Math" alttext="224\times 224" display="inline" intent=":literal"><semantics><mrow><mn>224</mn><mo lspace="0.222em" rspace="0.222em">×</mo><mn>224</mn></mrow><annotation encoding="application/x-tex">224\times 224</annotation></semantics></math> during training. Standard augmentations (horizontal/vertical flipping) are applied while avoiding quality-distorting operations. The model is trained for 5 epochs on all image pairs from the training set. We implement TuningIQA based on lightweight backbones to ensure application efficiency.</p>
+</div>
+<div id="Sx5.SSx1.p3" class="ltx_para">
+<p id="Sx5.SSx1.p3.1" class="ltx_p"><span id="Sx5.SSx1.p3.1.1" class="ltx_text ltx_font_bold">Overall Performance.</span> Table <a href="#Sx4.T2" title="Table 2 ‣ Human-aware Feature Extraction ‣ TuningIQA Metric ‣ TuningIQA: Fine-Grained Blind Image Quality Assessment for Livestreaming Camera Tuning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> summarizes the performance comparison between TuningIQA and state-of-the-art BIQA methods on the FGLive-10K dataset. It is easily observed that while existing methods achieve reasonable score regression performance, they exhibit significantly poor fine-grained ranking capabilities, highlighting the inadequacy of score-based methods for subtle quality discrimination, which is essential in camera tuning. In contrast, TuningIQA achieves superior performance in both tasks, demonstrating the effectiveness of joint regression and ranking learning.</p>
+</div>
+<div id="Sx5.SSx1.p4" class="ltx_para">
+<p id="Sx5.SSx1.p4.1" class="ltx_p"><span id="Sx5.SSx1.p4.1.1" class="ltx_text ltx_font_bold">Multi-attribute Evaluation.</span> To evaluate multi-attribute assessment capabilities, we further compare TuningIQA with three SOTA methods that support quality attribute prediction: CLIP-IQA, MT-A, and SARQUE. As shown in Table <a href="#Sx4.T3" title="Table 3 ‣ Learning Objectives ‣ TuningIQA Metric ‣ TuningIQA: Fine-Grained Blind Image Quality Assessment for Livestreaming Camera Tuning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a>, face quality assessment proves particularly challenging for existing methods, where TuningIQA achieves superior performance through human-aware feature extraction across all attributes, demonstrating the effectiveness of our human-centric design.</p>
+</div>
+<div id="Sx5.SSx1.p5" class="ltx_para">
+<p id="Sx5.SSx1.p5.1" class="ltx_p"><span id="Sx5.SSx1.p5.1.1" class="ltx_text ltx_font_bold">Qualitative Analysis.</span> Figure <a href="#Sx5.F7" title="Figure 7 ‣ Performance Evaluation on FGLive-10K ‣ Experiments ‣ TuningIQA: Fine-Grained Blind Image Quality Assessment for Livestreaming Camera Tuning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">7</span></a> shows gMAD competition results <cite class="ltx_cite ltx_citemacro_citep">(<a href="#bib.bib18" title="" class="ltx_ref">Ma et al. 2020</a>)</cite>, exposing perceptual inconsistencies among models. LIQE and MUSIQ produce similar predictions for significantly different images or exaggerate minimal differences, while TuningIQA maintains correct discrimination, aligning better with human visual sensitivity.</p>
+</div>
+<figure id="Sx5.T4" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 4: </span>Ablation study. Results report average performance across overall score and attributes.</figcaption>
+<table id="Sx5.T4.1" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<tbody class="ltx_tbody">
+<tr id="Sx5.T4.1.1" class="ltx_tr">
+<th id="Sx5.T4.1.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_tt" style="padding-left:5.0pt;padding-right:5.0pt;"><span id="Sx5.T4.1.1.1.1" class="ltx_text ltx_font_bold">Dataset</span></th>
+<td id="Sx5.T4.1.1.2" class="ltx_td ltx_align_center ltx_border_tt" style="padding-left:5.0pt;padding-right:5.0pt;"><span id="Sx5.T4.1.1.2.1" class="ltx_text ltx_font_bold">Config.</span></td>
+<td id="Sx5.T4.1.1.3" class="ltx_td ltx_align_center ltx_border_tt" style="padding-left:5.0pt;padding-right:5.0pt;"><span id="Sx5.T4.1.1.3.1" class="ltx_text ltx_font_bold">SRCC↑</span></td>
+<td id="Sx5.T4.1.1.4" class="ltx_td ltx_align_center ltx_border_tt" style="padding-left:5.0pt;padding-right:5.0pt;"><span id="Sx5.T4.1.1.4.1" class="ltx_text ltx_font_bold">PLCC↑</span></td>
+<td id="Sx5.T4.1.1.5" class="ltx_td ltx_nopad_r ltx_align_center ltx_border_tt" style="padding-left:5.0pt;padding-right:5.0pt;"><span id="Sx5.T4.1.1.5.1" class="ltx_text ltx_font_bold">FG-ACC↑</span></td></tr>
+<tr id="Sx5.T4.1.2" class="ltx_tr">
+<th id="Sx5.T4.1.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" style="padding-left:5.0pt;padding-right:5.0pt;" rowspan="2"><span id="Sx5.T4.1.2.1.1" class="ltx_text">FGLive-10K</span></th>
+<td id="Sx5.T4.1.2.2" class="ltx_td ltx_align_center ltx_border_t" style="padding-left:5.0pt;padding-right:5.0pt;">Baseline</td>
+<td id="Sx5.T4.1.2.3" class="ltx_td ltx_align_center ltx_border_t" style="padding-left:5.0pt;padding-right:5.0pt;">0.8757</td>
+<td id="Sx5.T4.1.2.4" class="ltx_td ltx_align_center ltx_border_t" style="padding-left:5.0pt;padding-right:5.0pt;">0.9201</td>
+<td id="Sx5.T4.1.2.5" class="ltx_td ltx_nopad_r ltx_align_center ltx_border_t" style="padding-left:5.0pt;padding-right:5.0pt;">0.7258</td></tr>
+<tr id="Sx5.T4.1.3" class="ltx_tr">
+<td id="Sx5.T4.1.3.1" class="ltx_td ltx_align_center" style="padding-left:5.0pt;padding-right:5.0pt;">w/ HFE</td>
+<td id="Sx5.T4.1.3.2" class="ltx_td ltx_align_center" style="padding-left:5.0pt;padding-right:5.0pt;"><span id="Sx5.T4.1.3.2.1" class="ltx_text ltx_font_bold">0.8917</span></td>
+<td id="Sx5.T4.1.3.3" class="ltx_td ltx_align_center" style="padding-left:5.0pt;padding-right:5.0pt;"><span id="Sx5.T4.1.3.3.1" class="ltx_text ltx_font_bold">0.9267</span></td>
+<td id="Sx5.T4.1.3.4" class="ltx_td ltx_nopad_r ltx_align_center" style="padding-left:5.0pt;padding-right:5.0pt;"><span id="Sx5.T4.1.3.4.1" class="ltx_text ltx_font_bold">0.7496</span></td></tr>
+<tr id="Sx5.T4.1.4" class="ltx_tr">
+<th id="Sx5.T4.1.4.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb ltx_border_t" style="padding-left:5.0pt;padding-right:5.0pt;" rowspan="3"><span id="Sx5.T4.1.4.1.1" class="ltx_text">FGLive-p</span></th>
+<td id="Sx5.T4.1.4.2" class="ltx_td ltx_align_center ltx_border_t" style="padding-left:5.0pt;padding-right:5.0pt;">Baseline</td>
+<td id="Sx5.T4.1.4.3" class="ltx_td ltx_align_center ltx_border_t" style="padding-left:5.0pt;padding-right:5.0pt;">0.8206</td>
+<td id="Sx5.T4.1.4.4" class="ltx_td ltx_align_center ltx_border_t" style="padding-left:5.0pt;padding-right:5.0pt;">0.8768</td>
+<td id="Sx5.T4.1.4.5" class="ltx_td ltx_nopad_r ltx_align_center ltx_border_t" style="padding-left:5.0pt;padding-right:5.0pt;">0.7092</td></tr>
+<tr id="Sx5.T4.1.5" class="ltx_tr">
+<td id="Sx5.T4.1.5.1" class="ltx_td ltx_align_center" style="padding-left:5.0pt;padding-right:5.0pt;">w/ GCPF</td>
+<td id="Sx5.T4.1.5.2" class="ltx_td ltx_align_center" style="padding-left:5.0pt;padding-right:5.0pt;">0.8552</td>
+<td id="Sx5.T4.1.5.3" class="ltx_td ltx_align_center" style="padding-left:5.0pt;padding-right:5.0pt;">0.8963</td>
+<td id="Sx5.T4.1.5.4" class="ltx_td ltx_nopad_r ltx_align_center" style="padding-left:5.0pt;padding-right:5.0pt;">0.7308</td></tr>
+<tr id="Sx5.T4.1.6" class="ltx_tr">
+<td id="Sx5.T4.1.6.1" class="ltx_td ltx_align_center ltx_border_bb" style="padding-left:5.0pt;padding-right:5.0pt;">w/ GCPF+HFE</td>
+<td id="Sx5.T4.1.6.2" class="ltx_td ltx_align_center ltx_border_bb" style="padding-left:5.0pt;padding-right:5.0pt;"><span id="Sx5.T4.1.6.2.1" class="ltx_text ltx_font_bold">0.8613</span></td>
+<td id="Sx5.T4.1.6.3" class="ltx_td ltx_align_center ltx_border_bb" style="padding-left:5.0pt;padding-right:5.0pt;"><span id="Sx5.T4.1.6.3.1" class="ltx_text ltx_font_bold">0.9009</span></td>
+<td id="Sx5.T4.1.6.4" class="ltx_td ltx_nopad_r ltx_align_center ltx_border_bb" style="padding-left:5.0pt;padding-right:5.0pt;"><span id="Sx5.T4.1.6.4.1" class="ltx_text ltx_font_bold">0.7382</span></td></tr>
+</tbody>
+</table>
+</figure>
+<div id="Sx5.SSx1.p6" class="ltx_para">
+<p id="Sx5.SSx1.p6.1" class="ltx_p"><span id="Sx5.SSx1.p6.1.1" class="ltx_text ltx_font_bold">Ablation Study.</span> Table <a href="#Sx5.T4" title="Table 4 ‣ Performance Evaluation on FGLive-10K ‣ Experiments ‣ TuningIQA: Fine-Grained Blind Image Quality Assessment for Livestreaming Camera Tuning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a> presents ablation study results on two datasets: FGLive-10K and FGLive-p (subset with camera parameters). We systematically analyze the contribution of the Human-aware Feature Extraction (HFE) module and Graph-based Camera Parameter Fusion (GCPF) module. The results show that HFE consistently improves performance across all metrics on FGLive-10K, with notable gains in FG-ACC. On the FGLive-p subset, GCPF demonstrates substantial improvements, validating the importance of modeling parameter interdependencies. The combination of both modules achieves the best performance, confirming their complementary effectiveness.</p>
+</div>
+<figure id="Sx5.F7" class="ltx_figure"><img src="https://arxiv.org/html/2508.17965v1/gmad.png" id="Sx5.F7.g1" class="ltx_graphics ltx_centering ltx_img_landscape" style="aspect-ratio:591/439;" width="591" height="439" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 7: </span>gMAD competition results on the FGLive-10K against LIQE and MUSIQ.</figcaption>
+</figure>
+<figure id="Sx5.F8" class="ltx_figure"><img src="https://arxiv.org/html/2508.17965v1/TuningIQA-tuning.png" id="Sx5.F8.g1" class="ltx_graphics ltx_centering ltx_img_square" style="aspect-ratio:663/598;" width="663" height="598" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 8: </span>Qualitative comparison of IQA-guided livestreaming camera tuning results (best viewed zoomed in). </figcaption>
+</figure>
+</section>
+<section id="Sx5.SSx2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">Application for Camera Tuning</h3>
+
+<div id="Sx5.SSx2.p1" class="ltx_para">
+<p id="Sx5.SSx2.p1.1" class="ltx_p">To validate the practical effectiveness of IQA metrics in guiding livestreaming camera parameter tuning, we simulate fine-grained parameter adjustment scenarios by incrementally adjusting camera parameters with minimal step sizes. We capture images after each adjustment and employ different metrics to rank the quality of these images, thereby identifying optimal parameters. TuningIQA performs ranking based on pairwise comparisons, while other methods rely on score-based ranking. As illustrated in Figure <a href="#Sx5.F8" title="Figure 8 ‣ Performance Evaluation on FGLive-10K ‣ Experiments ‣ TuningIQA: Fine-Grained Blind Image Quality Assessment for Livestreaming Camera Tuning" class="ltx_ref"><span class="ltx_text ltx_ref_tag">8</span></a>, we demonstrate the fine-grained quality differences resulting from small adjustments to Exposure Value and ISO, along with the ranking results from different methods. The results reveal the inaccuracy of score-based methods in fine-grained evaluation and their insufficient sensitivity to facial region quality. Additionally, we conduct a subjective experiment to compare the top-1 image quality between TuningIQA and LIQE/MUSIQ ranking results. Evaluation across 44 diverse scenarios with 12 volunteers shows that TuningIQA achieves <span id="Sx5.SSx2.p1.1.1" class="ltx_text ltx_font_bold">76%</span> and <span id="Sx5.SSx2.p1.1.2" class="ltx_text ltx_font_bold">74%</span> win rates against LIQE and MUSIQ respectively. These significant improvements validate that fine-grained quality assessment capabilities are essential for practical camera tuning applications, where subtle parameter adjustments can substantially impact user experience despite minimal changes in overall image appearance.</p>
+</div>
+</section>
+</section>
+<section id="Sx6" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Conclusion</h2>
+
+<div id="Sx6.p1" class="ltx_para">
+<p id="Sx6.p1.1" class="ltx_p">This work presents FGLive-10K dataset and TuningIQA, advancing fine-grained BIQA for livestreaming camera tuning. Our findings reveal that existing score-based BIQA methods, while achieving reasonable score regression, fundamentally struggle with fine-grained discrimination essential for camera optimization. Through human-aware feature extraction and graph-based parameter fusion, TuningIQA jointly model multi-attribute regression and fine-grained ranking. Extensive experiments demonstrate TuningIQA’s superior performance over existing methods and its practical effectiveness in providing actionable guidance for automated camera parameter optimization.</p>
+</div>
+</section>
+<section id="bib" class="ltx_bibliography">
+<h2 class="ltx_title ltx_title_bibliography">References</h2>
+
+<ul class="ltx_biblist">
+      
+<li id="bib.bib1" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Bosse et al. (2018)</span>
+<span class="ltx_bibblock">
+Bosse, S.; Maniry, D.; Müller, K. R.; Wiegand, T.; and Samek, W. 2018.
+
+</span>
+<span class="ltx_bibblock">Deep Neural Networks for No-Reference and Full-Reference Image Quality Assessment.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib1.1" class="ltx_emph ltx_font_italic">IEEE Transactions on Image Processing</em>, 27(1): 206–219.
+
+</span></li>
+      
+<li id="bib.bib2" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Bosse et al. (2016)</span>
+<span class="ltx_bibblock">
+Bosse, S.; Maniry, D.; Wiegand, T.; and Samek, W. 2016.
+
+</span>
+<span class="ltx_bibblock">A deep neural network for image quality assessment.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib2.1" class="ltx_emph ltx_font_italic">Proc. IEEE Int. Conf. Image Process.</em>, 3773–3777.
+
+</span></li>
+      
+<li id="bib.bib3" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Ciancio et al. (2011)</span>
+<span class="ltx_bibblock">
+Ciancio, A.; Targino da Costa, A. L. N. T.; da Silva, E. A. B.; Said, A.; Samadani, R.; and Obrador, P. 2011.
+
+</span>
+<span class="ltx_bibblock">No-Reference Blur Assessment of Digital Pictures Based on Multifeature Classifiers.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib3.1" class="ltx_emph ltx_font_italic">IEEE Transactions on Image Processing</em>, 20(1): 64–75.
+
+</span></li>
+      
+<li id="bib.bib4" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Fang et al. (2020)</span>
+<span class="ltx_bibblock">
+Fang, Y.; Zhu, H.; Zeng, Y.; Ma, K.; and Wang, Z. 2020.
+
+</span>
+<span class="ltx_bibblock">Perceptual Quality Assessment of Smartphone Photography.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib4.1" class="ltx_emph ltx_font_italic">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition</em>, 3674–3683.
+
+</span></li>
+      
+<li id="bib.bib5" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Ghadiyaram and Bovik (2016)</span>
+<span class="ltx_bibblock">
+Ghadiyaram, D.; and Bovik, A. C. 2016.
+
+</span>
+<span class="ltx_bibblock">Massive Online Crowdsourced Study of Subjective and Objective Picture Quality.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib5.1" class="ltx_emph ltx_font_italic">IEEE Transactions on Image Processing</em>, 25(1): 372–387.
+
+</span></li>
+      
+<li id="bib.bib6" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Gilstrap and Gilstrap (2023)</span>
+<span class="ltx_bibblock">
+Gilstrap, C. A.; and Gilstrap, C. M. 2023.
+
+</span>
+<span class="ltx_bibblock">Mobile Technologies and Live Streaming Commerce: A Systematic Review and Lexical Analysis.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib6.1" class="ltx_emph ltx_font_italic">2023 46th MIPRO ICT and Electronics Convention (MIPRO)</em>, 36–44.
+
+</span></li>
+      
+<li id="bib.bib7" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Grimson (1981)</span>
+<span class="ltx_bibblock">
+Grimson, W. E. L. 1981.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib7.1" class="ltx_emph ltx_font_italic">Analysis And Development</em>, 63–100.
+
+</span></li>
+      
+<li id="bib.bib8" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Hamilton, Garretson, and Kerne (2014)</span>
+<span class="ltx_bibblock">
+Hamilton, W. A.; Garretson, O.; and Kerne, A. 2014.
+
+</span>
+<span class="ltx_bibblock">Streaming on twitch: fostering participatory communities of play within live mixed media.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib8.1" class="ltx_emph ltx_font_italic">Proceedings of the SIGCHI Conference on Human Factors in Computing Systems</em>, 1315–1324.
+
+</span></li>
+      
+<li id="bib.bib9" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">He et al. (2022)</span>
+<span class="ltx_bibblock">
+He, S.; Zhang, Y.; Xie, R.; Jiang, D.; and Ming, A. 2022.
+
+</span>
+<span class="ltx_bibblock">Rethinking Image Aesthetics Assessment: Models, Datasets and Benchmarks.
+
+</span>
+<span class="ltx_bibblock">In Raedt, L. D., ed., <em id="bib.bib9.1" class="ltx_emph ltx_font_italic">Proceedings of the International Joint Conference on Artificial Intelligence</em>, 942–948.
+
+</span></li>
+      
+<li id="bib.bib10" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Hosu et al. (2020)</span>
+<span class="ltx_bibblock">
+Hosu, V.; Lin, H.; Sziranyi, T.; and Saupe, D. 2020.
+
+</span>
+<span class="ltx_bibblock">KonIQ-10k: An Ecologically Valid Database for Deep Learning of Blind Image Quality Assessment.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib10.1" class="ltx_emph ltx_font_italic">IEEE Transactions on Image Processing</em>, 29: 4041–4056.
+
+</span></li>
+      
+<li id="bib.bib11" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Huang et al. (2023)</span>
+<span class="ltx_bibblock">
+Huang, Y.; Li, L.; Yang, Y.; Li, Y.; and Guo, Y. 2023.
+
+</span>
+<span class="ltx_bibblock">Explainable and Generalizable Blind Image Quality Assessment via Semantic Attribute Reasoning.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib11.1" class="ltx_emph ltx_font_italic">IEEE Transactions on Multimedia</em>, 25: 7672–7685.
+
+</span></li>
+      
+<li id="bib.bib12" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Katsigiannis et al. (2018)</span>
+<span class="ltx_bibblock">
+Katsigiannis, S.; Scovell, J.; Ramzan, N.; Janowski, L.; Corriveau, P.; Saad, M. A.; and Van Wallendael, G. 2018.
+
+</span>
+<span class="ltx_bibblock">Interpreting MOS scores, when can users see a difference? Understanding user experience differences for photo quality.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib12.1" class="ltx_emph ltx_font_italic">Quality and User Experience</em>, 3: 1–14.
+
+</span></li>
+      
+<li id="bib.bib13" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Ke et al. (2021)</span>
+<span class="ltx_bibblock">
+Ke, J.; Wang, Q.; Wang, Y.; Milanfar, P.; and Yang, F. 2021.
+
+</span>
+<span class="ltx_bibblock">Musiq: Multi-scale image quality transformer.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib13.1" class="ltx_emph ltx_font_italic">Proceedings of the IEEE/CVF International Conference on Computer Vision</em>, 5148–5157.
+
+</span></li>
+      
+<li id="bib.bib14" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Larson and Chandler (2010)</span>
+<span class="ltx_bibblock">
+Larson, E. C.; and Chandler, D. M. 2010.
+
+</span>
+<span class="ltx_bibblock">Most apparent distortion: full-reference image quality assessment and the role of strategy.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib14.1" class="ltx_emph ltx_font_italic">Journal of Electronic Imaging</em>, 19(1): 011006.
+
+</span></li>
+      
+<li id="bib.bib15" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Li et al. (2021)</span>
+<span class="ltx_bibblock">
+Li, L.; Song, T.; Wu, J.; Dong, W.; Qian, J.; and Shi, G. 2021.
+
+</span>
+<span class="ltx_bibblock">Blind Image Quality Index for Authentic Distortions With Local and Global Deep Feature Aggregation.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib15.1" class="ltx_emph ltx_font_italic">IEEE Transactions on Circuits and Systems for Video Technology</em>, 32(12): 8512–8523.
+
+</span></li>
+      
+<li id="bib.bib16" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Loshchilov and Hutter (2017)</span>
+<span class="ltx_bibblock">
+Loshchilov, I.; and Hutter, F. 2017.
+
+</span>
+<span class="ltx_bibblock">SGDR: Stochastic Gradient Descent with Warm Restarts.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib16.1" class="ltx_emph ltx_font_italic">International Conference on Learning Representations</em>.
+
+</span></li>
+      
+<li id="bib.bib17" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Loshchilov and Hutter (2019)</span>
+<span class="ltx_bibblock">
+Loshchilov, I.; and Hutter, F. 2019.
+
+</span>
+<span class="ltx_bibblock">Decoupled Weight Decay Regularization.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib17.1" class="ltx_emph ltx_font_italic">International Conference on Learning Representations</em>.
+
+</span></li>
+      
+<li id="bib.bib18" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Ma et al. (2020)</span>
+<span class="ltx_bibblock">
+Ma, K.; Duanmu, Z.; Wang, Z.; Wu, Q.; Liu, W.; Yong, H.; Li, H.; and Zhang, L. 2020.
+
+</span>
+<span class="ltx_bibblock">Group Maximum Differentiation Competition: Model Comparison with Few Samples.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib18.1" class="ltx_emph ltx_font_italic">IEEE Transactions on Pattern Analysis and Machine Intelligence</em>, 42(4): 851–864.
+
+</span></li>
+      
+<li id="bib.bib19" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Mittal, Moorthy, and Bovik (2012)</span>
+<span class="ltx_bibblock">
+Mittal, A.; Moorthy, A. K.; and Bovik, A. C. 2012.
+
+</span>
+<span class="ltx_bibblock">No-Reference Image Quality Assessment in the Spatial Domain.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib19.1" class="ltx_emph ltx_font_italic">IEEE Transactions on Image Processing</em>, 21(12): 4695–4708.
+
+</span></li>
+      
+<li id="bib.bib20" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Mittal, Soundararajan, and Bovik (2013)</span>
+<span class="ltx_bibblock">
+Mittal, A.; Soundararajan, R.; and Bovik, A. C. 2013.
+
+</span>
+<span class="ltx_bibblock">Making a “Completely Blind” Image Quality Analyzer.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib20.1" class="ltx_emph ltx_font_italic">IEEE Signal Processing Letters</em>, 20(3): 209–212.
+
+</span></li>
+      
+<li id="bib.bib21" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Ponomarenko et al. (2013)</span>
+<span class="ltx_bibblock">
+Ponomarenko, N.; Ieremeiev, O.; Lukin, V.; Egiazarian, K.; Jin, L.; Astola, J.; Vozel, B.; Chehdi, K.; Carli, M.; Battisti, F.; and Kuo, C. C. J. 2013.
+
+</span>
+<span class="ltx_bibblock">Color image database TID2013: Peculiarities and preliminary results.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib21.1" class="ltx_emph ltx_font_italic">Proc. Eur. Workshop Visual Inf. Process.</em>, 106–111.
+
+</span></li>
+      
+<li id="bib.bib22" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Ren et al. (2016)</span>
+<span class="ltx_bibblock">
+Ren, S.; He, K.; Girshick, R.; and Sun, J. 2016.
+
+</span>
+<span class="ltx_bibblock">Faster R-CNN: Towards real-time object detection with region proposal networks.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib22.1" class="ltx_emph ltx_font_italic">IEEE transactions on pattern analysis and machine intelligence</em>, 39(6): 1137–1149.
+
+</span></li>
+      
+<li id="bib.bib23" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Saad, Bovik, and Charrier (2012)</span>
+<span class="ltx_bibblock">
+Saad, M. A.; Bovik, A. C.; and Charrier, C. 2012.
+
+</span>
+<span class="ltx_bibblock">Blind Image Quality Assessment: A Natural Scene Statistics Approach in the DCT Domain.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib23.1" class="ltx_emph ltx_font_italic">IEEE Transactions on Image Processing</em>, 21(8): 3339–3352.
+
+</span></li>
+      
+<li id="bib.bib24" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Series (2023)</span>
+<span class="ltx_bibblock">
+Series, B. 2023.
+
+</span>
+<span class="ltx_bibblock">Methodology for the subjective assessment of the quality of television pictures.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib24.1" class="ltx_emph ltx_font_italic">Recommendation ITU-R BT</em>, 500(15).
+
+</span></li>
+      
+<li id="bib.bib25" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Sheikh, Sabir, and Bovik (2006)</span>
+<span class="ltx_bibblock">
+Sheikh, H.; Sabir, M.; and Bovik, A. 2006.
+
+</span>
+<span class="ltx_bibblock">A Statistical Evaluation of Recent Full Reference Image Quality Assessment Algorithms.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib25.1" class="ltx_emph ltx_font_italic">IEEE Transactions on Image Processing</em>, 15(11): 3440–3451.
+
+</span></li>
+      
+<li id="bib.bib26" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Su et al. (2020)</span>
+<span class="ltx_bibblock">
+Su, S.; Yan, Q.; Zhu, Y.; Zhang, C.; Ge, X.; Sun, J.; and Zhang, Y. 2020.
+
+</span>
+<span class="ltx_bibblock">Blindly Assess Image Quality in the Wild Guided by a Self-Adaptive Hyper Network.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib26.1" class="ltx_emph ltx_font_italic">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition</em>, 3664–3673.
+
+</span></li>
+      
+<li id="bib.bib27" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Tan and Le (2021)</span>
+<span class="ltx_bibblock">
+Tan, M.; and Le, Q. 2021.
+
+</span>
+<span class="ltx_bibblock">Efficientnetv2: Smaller models and faster training.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib27.1" class="ltx_emph ltx_font_italic">International conference on machine learning</em>, 10096–10106. PMLR.
+
+</span></li>
+      
+<li id="bib.bib28" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Velickovic et al. (2017)</span>
+<span class="ltx_bibblock">
+Velickovic, P.; Cucurull, G.; Casanova, A.; Romero, A.; Lio, P.; Bengio, Y.; et al. 2017.
+
+</span>
+<span class="ltx_bibblock">Graph attention networks.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib28.1" class="ltx_emph ltx_font_italic">stat</em>, 1050(20): 10–48550.
+
+</span></li>
+      
+<li id="bib.bib29" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Wang, Chan, and Loy (2023)</span>
+<span class="ltx_bibblock">
+Wang, J.; Chan, K. C.; and Loy, C. C. 2023.
+
+</span>
+<span class="ltx_bibblock">Exploring CLIP for assessing the look and feel of images.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib29.1" class="ltx_emph ltx_font_italic">Proceedings of the AAAI Conference on Artificial Intelligence</em>, volume 37, 2555–2563.
+
+</span></li>
+      
+<li id="bib.bib30" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Wu et al. (2023)</span>
+<span class="ltx_bibblock">
+Wu, H.; Zhang, Z.; Zhang, W.; Chen, C.; Li, C.; Liao, L.; Wang, A.; Zhang, E.; Sun, W.; Yan, Q.; Min, X.; Zhai, G.; and Lin, W. 2023.
+
+</span>
+<span class="ltx_bibblock">Q-Align: Teaching LMMs for Visual Scoring via Discrete Text-Defined Levels.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib30.1" class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2312.17090</em>.
+
+</span></li>
+      
+<li id="bib.bib31" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Yang et al. (2022)</span>
+<span class="ltx_bibblock">
+Yang, S.; Wu, T.; Shi, S.; Lao, S.; Gong, Y.; Cao, M.; Wang, J.; and Yang, Y. 2022.
+
+</span>
+<span class="ltx_bibblock">MANIQA: Multi-Dimension Attention Network for No-Reference Image Quality Assessment.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib31.1" class="ltx_emph ltx_font_italic">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) Workshops</em>, 1191–1200.
+
+</span></li>
+      
+<li id="bib.bib32" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Ye et al. (2012)</span>
+<span class="ltx_bibblock">
+Ye, P.; Kumar, J.; Kang, L.; and Doermann, D. 2012.
+
+</span>
+<span class="ltx_bibblock">Unsupervised feature learning framework for no-reference image quality assessment.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib32.1" class="ltx_emph ltx_font_italic">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition</em>, 1098–1105.
+
+</span></li>
+      
+<li id="bib.bib33" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">You et al. (2025)</span>
+<span class="ltx_bibblock">
+You, Z.; Cai, X.; Gu, J.; Xue, T.; and Dong, C. 2025.
+
+</span>
+<span class="ltx_bibblock">Teaching Large Language Models to Regress Accurate Image Quality Scores using Score Distribution.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib33.1" class="ltx_emph ltx_font_italic">IEEE Conference on Computer Vision and Pattern Recognition</em>.
+
+</span></li>
+      
+<li id="bib.bib34" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zhang, Zhang, and Bovik (2015)</span>
+<span class="ltx_bibblock">
+Zhang, L.; Zhang, L.; and Bovik, A. C. 2015.
+
+</span>
+<span class="ltx_bibblock">A Feature-Enriched Completely Blind Image Quality Evaluator.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib34.1" class="ltx_emph ltx_font_italic">IEEE Transactions on Image Processing</em>, 24(8): 2579–2591.
+
+</span></li>
+      
+<li id="bib.bib35" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zhang et al. (2020)</span>
+<span class="ltx_bibblock">
+Zhang, W.; Ma, K.; Yan, J.; Deng, D.; and Wang, Z. 2020.
+
+</span>
+<span class="ltx_bibblock">Blind Image Quality Assessment Using a Deep Bilinear Convolutional Neural Network.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib35.1" class="ltx_emph ltx_font_italic">IEEE Transactions on Circuits and Systems for Video Technology</em>, 30(1): 36–47.
+
+</span></li>
+      
+<li id="bib.bib36" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zhang et al. (2023)</span>
+<span class="ltx_bibblock">
+Zhang, W.; Zhai, G.; Wei, Y.; Yang, X.; and Ma, K. 2023.
+
+</span>
+<span class="ltx_bibblock">Blind Image Quality Assessment via Vision-Language Correspondence: A Multitask Learning Perspective.
+
+</span>
+<span class="ltx_bibblock">In <em id="bib.bib36.1" class="ltx_emph ltx_font_italic">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition</em>, 14071–14081.
+
+</span></li>
+      
+<li id="bib.bib37" class="ltx_bibitem"><span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zhu et al. (2024)</span>
+<span class="ltx_bibblock">
+Zhu, H.; Wu, H.; Li, Y.; Zhang, Z.; Chen, B.; Zhu, L.; Fang, Y.; Zhai, G.; Lin, W.; and Wang, S. 2024.
+
+</span>
+<span class="ltx_bibblock">Adaptive image quality assessment via teaching large multimodal model to compare.
+
+</span>
+<span class="ltx_bibblock"><em id="bib.bib37.1" class="ltx_emph ltx_font_italic">Advances in Neural Information Processing Systems</em>, 37: 32611–32629.
+
+</span></li>
+    
+</ul>
+</section>
+</article>
+    </div>
+  </section>
+  <section class="pane pane-zh">
+    <div class="pane-head">中文精读翻译</div>
+    <div class="pane-body" id="zhBody"><div class="md" id="mdRoot"></div></div>
+  </section>
+</main>
+<script type="text/markdown" id="zhSrc"># 《TuningIQA: Fine-Grained Blind Image Quality Assessment for Livestreaming Camera Tuning》中文精读翻译
+
+## 论文信息
+
+- **英文标题**：TuningIQA: Fine-Grained Blind Image Quality Assessment for Livestreaming Camera Tuning
+- **中文标题**：TuningIQA：面向直播相机调优的细粒度盲图像质量评估
+- **作者**：Xiangfei Sheng、Zhichao Duan（共同一作）、Xiaofeng Pan、Yipo Huang、Zhichao Yang、Pengfei Chen、Leida Li（通讯作者）
+- **机构**：西安电子科技大学人工智能学院；长安大学数据科学与人工智能学院；西安电子科技大学高性能电子装备机电集成制造国家重点实验室
+- **发表**：AAAI 2026（Proc. AAAI 40(21): 17679–17687, DOI: 10.1609/aaai.v40i21.38824）
+- **arXiv 链接**：<https://arxiv.org/abs/2508.17965>（v1, 2025-08）
+- **提出的框架**：TuningIQA；**提出的数据集**：FGLive-10K
+
+## 一句话核心总结
+
+本文面向"直播相机调优需要感知参数微调引起的细微质量差异"这一需求，构建了首个直播场景细粒度 BIQA 数据集 FGLive-10K（10,185 张高分辨率图像、555 个场景、7 个相机参数受控扰动、"MOS + 成对偏好"双重新标注），并提出 TuningIQA 框架：以人类感知特征提取（HFE）凸显人区域质量、以基于图的相机参数融合（GCPF）编码"曝光三角"等参数间物理关系，联合学习多属性回归与细粒度排序，在真实相机调优闭环中对 LIQE/MUSIQ 取得 74–76% 的主观胜率。
+
+---
+
+## 摘要
+
+直播（Livestreaming）在现代视觉传播中日益普及，其中自动的相机质量调优对于交付卓越的用户体验质量（Quality of Experience, QoE）至关重要。此类调优需要准确的盲图像质量评估（blind image quality assessment, BIQA）来引导参数优化决策。遗憾的是，现有 BIQA 模型通常只预测一个整体性的粗粒度质量分数，无法为精确的相机参数调优提供细粒度的感知引导。为弥合这一差距，我们首先建立了 FGLive-10K——一个全面的细粒度 BIQA 数据库，包含在不同相机参数配置下、于多样直播场景中采集的 10,185 张高分辨率图像。该数据集提供 50,925 条多属性质量标注和 19,234 条细粒度成对偏好标注。基于 FGLive-10K，我们进一步开发了 TuningIQA——一个面向直播相机调优的细粒度 BIQA 度量，它集成了人类感知特征提取（human-aware feature extraction）与基于图的相机参数融合（graph-based camera parameter fusion）。大量实验与对比表明，TuningIQA 在分数回归与细粒度质量排序两项任务上均显著优于最先进的 BIQA 方法，并在部署于直播相机调优时取得卓越性能。
+
+---
+
+## 1 引言
+
+随着移动直播在娱乐与电商平台（如 TikTok Live、YouTube Shorts）上的迅猛扩张，自动相机参数调优对于交付卓越的体验质量（QoE）变得愈发重要（Gilstrap and Gilstrap, 2023; Hamilton, Garretson, and Kerne, 2014）。与传统摄影可通过拍摄后编辑来弥补欠佳的设置不同，直播要求在拍摄过程中进行实时优化，这使得自动化相机调优对专业主播以及缺乏摄影专业知识的普通用户而言都不可或缺。
+
+> **图 1**：IQA 细粒度挑战示意。不当相机参数引起的 (a) 粗粒度质量差异与 (b) 细粒度质量差异。最先进的基于分数的方法 LIQE（Zhang et al., 2023）与 MUSIQ（Ke et al., 2021）未能捕捉细粒度质量差异。
+
+> **图 2**：FGLive-10K 数据集的统计信息与覆盖多样直播场景的代表性样本。
+
+图像质量评估（Image Quality Assessment, IQA）构成有效相机调优的核心。实践中，自动化相机调优遵循一条常见路径：算法在保持场景一致的条件下进行参数调整，随后由一个客观度量预测输出图像的质量并反馈给参数调优过程，最终产出质量最佳的图像。因此，根本性的挑战在于精确的盲图像质量评估（BIQA），尤其是在细粒度的参数优化过程中——此时的质量变化往往十分细微，可能不会显著改变整体图像外观。在这些场景中，细粒度质量评估对于区分那些产生视觉上相似、但仍可察觉的感知差异的参数配置而言不可或缺。
+
+为基于分数的评估而设计的最先进 BIQA 方法（Zhang et al., 2023; Ke et al., 2021; Wang, Chan, and Loy, 2023）在应用于相机调优场景时面临根本性局限。如图 1 所示，这些方法在粗粒度质量判别上表现出准确性，但在参数优化所必需的细粒度评估上却举步维艰。当参数调整产生细微的质量变化时，现有 BIQA 方法常常无法提供可靠的引导，限制了它们在自动化相机调优系统中的实用价值。
+
+直播相机调优还提出了两个特殊需求，而通用 BIQA 方法对此应对不足：(i) **人区域优先（Human-region Priority）**，强调对人脸、人体等以人为中心的区域的图像质量评估，反映人类视觉系统（Human Visual System, HVS）对这些区域相对于背景要素的高度敏感性（Grimson, 1981）；(ii) **参数相互依赖建模（Parameter Interdependency Modeling）**，捕捉共同影响图像质量的相机设置之间的复杂物理关系。相机参数之间呈现出植根于摄影原理的精巧相互依赖——调整某一个参数往往需要其他参数的补偿性改变才能维持期望的质量。现有 BIQA 方法既未建模这些参数交互，也缺乏面向相机引导质量优化所需的专门架构设计。
+
+为解决上述局限，我们提出了涵盖数据集构建、方法开发与实验分析的多重技术贡献：
+
+- **数据集**。我们构建了 FGLive-10K——首个专为直播相机调优设计的细粒度 BIQA 数据集。如图 2 所示，该数据集包含来自 555 个不同场景的 10,185 张高分辨率图像，每个场景内含系统性的相机参数变化。除常规的平均主观得分（Mean Opinion Score, MOS）外，我们还提供细粒度的成对偏好标注，从而对参数优化所必需的细微质量差异实现可靠判别。
+- **方法**。我们提出 TuningIQA——一个包含两项关键创新的细粒度 BIQA 框架。其一，我们设计了人类感知特征提取（Human-aware Feature Extraction, HFE）模块，通过美学引导的特征学习优先处理以人为中心的区域。其二，我们引入了可选的基于图的相机参数融合（Graph-based Camera Parameter Fusion, GCPF）模块，通过图注意力网络建模相机设置间的物理关系。该框架统一了多属性回归与细粒度排序学习，以实现全面的质量评估与精确的相机调优引导。
+- **实验分析**。大量实验表明，TuningIQA 在粗粒度质量分数预测与细粒度质量排序上均优于最先进方法。我们的分析揭示了现有基于分数的方法在细粒度评估上的根本局限；实际相机调优实验显示其对领先 BIQA 方法取得 74–76% 的胜率，证实了面向相机调优应用的专门设计的有效性。
+
+---
+
+## 2 相关工作
+
+### 2.1 IQA 基准
+
+基准数据集推动了图像质量评估研究的显著进展。早期数据集聚焦于合成失真，如 LIVE（Sheikh, Sabir, and Bovik, 2006）、TID2013（Ponomarenko et al., 2013）与 CSIQ（Larson and Chandler, 2010），它们通过在参考图像上施加模拟退化来支持全参考 IQA 的发展。然而，在真实场景中获取无失真的参考图像并不现实，这促使研究转向真实失真（authentic distortions）。先驱性工作包括：BID（Ciancio et al., 2011）包含 585 张单反相机（DSLR）采集的模糊图像；LIVE Challenge（Ghadiyaram and Bovik, 2016）以 1,162 张移动设备采集的图像与众包标注为特色；KonIQ-10k（Hosu et al., 2020）以 10,000 张多媒体图像扩展了多样性。SPAQ（Fang et al., 2020）则面向智能手机成像场景，纳入了 EXIF 元数据与实验室受控标注。表 1 简要比较了具有真实失真的 BIQA 数据集。
+
+**表 1**：具有真实失真的主流 BIQA 数据集对比。
+
+| 数据集 | 图像数 | 相机参数数 | 属性数 | 标注类型 |
+|---|---|---|---|---|
+| BID | 585 | 0 | 0 | MOS |
+| CID2013 | 480 | 0 | 4 | MOS |
+| LIVE Challenge | 1,162 | 0 | 0 | MOS |
+| KonIQ-10K | 10,073 | 0 | 4 | MOS |
+| SPAQ | 11,125 | 0 | 5 | MOS |
+| **FGLive-10K** | **10,185** | **7** | **4** | **MOS + Rank** |
+
+### 2.2 IQA 方法
+
+早期 IQA 方法依赖统计先验（Zhang, Zhang, and Bovik, 2015; Mittal, Soundararajan, and Bovik, 2013）与手工设计的自然场景统计（Mittal, Moorthy, and Bovik, 2012; Ye et al., 2012; Saad, Bovik, and Charrier, 2012），在合成失真上取得了合理的成功，但难以应对真实退化（Ghadiyaram and Bovik, 2016）。面向真实世界评估的需求推动了基于 CNN 的方法（Bosse et al., 2016; Zhang et al., 2020; Bosse et al., 2018），它们直接从数据中学习层次化的质量表示。近期的进展包括架构创新，如 HyperIQA 的语义-质量解耦（Su et al., 2020），以及采用注意力机制的基于 Transformer 的模型（Zhang et al., 2023; Ke et al., 2021; Wang, Chan, and Loy, 2023; Li et al., 2021; Yang et al., 2022）。最近，基于多模态大语言模型（MLLM）的方法（Wu et al., 2023; You et al., 2025）开始出现，展现出更强的泛化能力与可解释性。
+
+尽管进展可观，现有方法应用于直播相机调优时仍存在根本性局限。(1) 大多数方法面向通用质量评估，忽视了直播环境的关键特性，如以人为中心的视觉焦点与系统性的相机参数变化。(2) 现有方法通常输出单一的粗粒度质量分数，这在识别细粒度感知所必需的细微差异方面存在固有不足。这些局限凸显了对一个专为直播相机调优定制的细粒度 BIQA 框架的需求，也促成了 TuningIQA 的开发。
+
+---
+
+## 3 FGLive-10K 数据集
+
+### 3.1 数据集构建
+
+我们描述专为直播相机调优场景设计的 FGLive-10K 图像采集与标注过程。需要说明的是，所有出镜人员均已同意其影像被用于本研究。
+
+> **图 3**：FGLive-10K 数据集构建细节。(a) 通过调整相机参数采集的各种失真图像。(b) 多属性质量分数标注与细粒度图像对的成对比较。
+
+#### 3.1.1 图像采集
+
+为捕捉由相机参数引起的失真，我们在真实使用场景中采用了三台内部研发的直播相机。现场应用工程师首先为每个场景优化出参考参数，随后通过对光圈、快门速度、ISO、白平衡、对比度、饱和度与锐度引入系统性偏差来生成失真图像。图 3(a) 展示了单个场景内由参数引起的变化。采集的图像覆盖典型直播应用，包括电商、娱乐与创意内容。在过滤掉不含人物主体的图像后，FGLive-10K 由来自 555 个不同场景的 10,185 张高分辨率（1920×1080）图像组成。
+
+为探索参数相互依赖建模，我们为一小部分图像保留了完整的 7 参数元数据，构建了 FGLive-p 子集，含 5,559 张训练图像与 1,148 张测试图像。该子集遵循与主数据集相同的标注协议。
+
+#### 3.1.2 图像标注
+
+我们邀请了 25 名背景多样的志愿者（IQA 研究者、摄影爱好者、艺术专业学生）参与主观实验，实验遵循 ITU-R BT.500-15 建议（Series, 2023）。
+
+**多属性 MOS**。标注者对整体质量与四个关键属性给出离散分数（1–5：从差到优）：人脸质量（人物面部区域的视觉质量）、清晰度（图像清晰程度与细节保持）、曝光（亮度与对比度的恰当性）、噪声（无明显视觉伪影与颗粒感）。经过基于 Pearson 相关的后期筛选后，每张图像获得至少 16 个标注，进而得到平均主观得分：
+
+$$
+s^{\text{attr}}=\frac{1}{N}\sum_{i=1}^{N}s_{i}^{\text{attr}}, \tag{1}
+$$
+
+其中 $s^{\text{attr}}$ 表示特定属性的 MOS，$N$ 为标注者数量。
+
+**成对比较（Pairwise Comparison）**。为弥补 MOS 在细粒度质量判别上的局限，我们在每个场景内构建具有细微差异的图像对并开展成对比较。由 MOS 比较导出的初始偏好（$c_{pq}^{*}=\mathbb{I}(s_{p}>s_{q})$）会在满足 $\Delta s=|s_{p}-s_{q}|\leq 0.8$ 的图像对上加以精化，因为此类图像对表现出显著的标注不确定性（Katsigiannis et al., 2018）。细粒度图像对经人工复核：标注者选出更偏好的图像，或标记二者等价。最终偏好为：
+
+$$
+c_{pq}=\begin{cases}c_{pq}^{*},&\text{if }\Delta s>0.8,\\
+\frac{1}{K}\sum_{k=1}^{K}\psi_{k}(I_{p},I_{q}),&\text{if }\Delta s\leq 0.8,\end{cases} \tag{2}
+$$
+
+其中 $K$ 表示每个图像对获得的标注次数，$\psi_{k}\in\{0,0.5,1\}$ 表示单次判断（$I_{p}$ 相对于 $I_{q}$ 的质量更差、等价、更好）。该策略共产生 91,946 个标注图像对，其中 21%（19,234 对）经成对比较精化。
+
+> **图 4**：各质量维度间的关系：散点图（左下）、Pearson 相关（右上）、标注分布（对角线）。
+
+> **图 5**：特定质量层级（MOS 区间）内个体标注与 MOS 的相关性。
+
+### 3.2 统计与分析
+
+FGLive-10K 包含 555 个场景、10,185 张图像，全部标注了五个质量属性。数据集划分为 451 个训练场景（8,148 张图像、72,843 个图像对）与 104 个测试场景（2,037 张图像、3,705 个细粒度图像对）。
+
+**标注分布**。FGLive-10K 数据集具备全面的多属性质量标注，其分布沿图 4 的对角线可视化。属性间的分布差异揭示了它们各异的感知价值。整体质量分数的均匀分布证实了该数据集在不同场景、不同质量层级上的均衡覆盖。
+
+**属性相关性**。为从相关性视角研究 FGLive-10K，我们在图 4 中可视化了各维度间的 Pearson 线性相关系数（PLCC）与散点图。可以观察到，整体质量与人脸质量之间的相关性极高，表明人脸质量能在很大程度上影响整体感知。清晰度、曝光与噪声三个维度之间的低相关性则表明它们的贡献互补且相互独立。这种分化凸显了多属性评估对于精确失真感知的必要性。
+
+**个体标注一致性**。我们通过图 5 中的相关性分析考察标注者的可靠性。经后期筛选的标注者与 MOS 高度一致（平均 PLCC = 0.85），证实了粗粒度层面标注的可靠性。然而，在更小的 MOS 层级内部进行分析时（如图 5 第 2–6 行），相关性显著下降（例如 4.2–5.0 层级内 PLCC = 0.24），凸显了单刺激（single-stimulus）方法在判别细微质量差异上的局限。这些发现验证了对细粒度图像对进行成对比较精化的必要性。
+
+---
+
+## 4 TuningIQA 度量
+
+> **图 6**：所提 TuningIQA 框架总览。
+
+基于从 FGLive-10K 数据集获得的洞察，我们进一步提出 TuningIQA——一个面向直播相机调优的细粒度质量评估框架。该框架支持两种工作模式：用于直接质量打分的**单图模式**与用于细粒度比较的**成对模式**。整体流程如图 6 所示。TuningIQA 构建于两个核心模块之上：优先处理感知关键区域的以人为中心的特征提取，以及建模相机设置间相互依赖的基于图的相机参数融合。
+
+### 4.1 人类感知特征提取（Human-aware Feature Extraction, HFE）
+
+为实现人区域优先，我们设计了强调以人为中心区域的人类感知特征提取（HFE）模块。具体而言，我们首先使用 Faster R-CNN（Ren et al., 2016）检测输入图像中的人物主体，得到人物边界框 $\text{BBox}_{h}$，用于引导后续的特征提取。为了理解以人为中心的视觉质量，我们利用构建于 EfficientNetV2-M（Tan and Le, 2021）主干之上的人类美学网络（Human Aesthetics Network），该主干在 TAD66K 数据集（He et al., 2022）的人物子集上预训练。该主干提取具有 $C$ 个通道的多尺度特征图 $\mathbf{M}$，用于捕获美学感知表示。
+
+给定检测到的人物边界框，我们使用 ROI Align 操作提取人物区域特征 $\mathbf{R}^{h}$。$\mathbf{R}^{h}$ 的维度被降至 $\frac{C}{2}$，随后被拼接（附加）到 $\mathbf{M}$ 的每个空间位置上，形成同时整合全局图像上下文与以人为中心信息的增强特征表示。接着，我们将增强后的特征图划分为以人物主体为中心的九个空间区域 $\{\hat{\mathbf{M}}_{k}\}_{k=1}^{9}$。为显式处理不同分区，我们采用九个独立的非线性变换并辅以残差学习：
+
+$$
+\mathbf{F}_{k}=\Phi_{k}(\hat{\mathbf{M}}_{k})+\hat{\mathbf{M}}_{k},\quad k\in\{1,2,\ldots,9\}, \tag{3}
+$$
+
+其中 $\Phi_{k}(\cdot)$ 表示分区专属的变换，由输出通道数为 $C$ 的 $3\times 3$ 卷积层实现。
+
+更新后的分区 $\{\mathbf{F}_{k}\}_{k=1}^{9}$ 被合并形成人类感知特征图。随后，我们采用交叉注意力机制，将人类感知特征 $\mathbf{F}_{h}$（对合并后的分区施加全局平均池化得到）与基础主干特征 $\mathbf{F}_{b}$ 相融合：
+
+$$
+\mathbf{F}_{q}=\text{CrossAttention}(\mathbf{Q},\mathbf{K},\mathbf{V})=\text{softmax}\left(\frac{\mathbf{Q}\mathbf{K}^{T}}{\sqrt{d_{k}}}\right)\mathbf{V}, \tag{4}
+$$
+
+其中 $\mathbf{Q}=\mathbf{F}_{h}\mathbf{W}_{Q}$、$\mathbf{K}=\mathbf{F}_{b}\mathbf{W}_{K}$、$\mathbf{V}=\mathbf{F}_{b}\mathbf{W}_{V}$ 为可学习的投影。所得的质量感知特征 $\mathbf{F}_{q}$ 有效整合了以人为中心的视觉线索与全局图像上下文，可用于全面的质量评估。
+
+### 4.2 基于图的相机参数融合（Graph-based Camera Parameter Fusion, GCPF）
+
+对于具有可用相机元数据的图像，我们引入一个可选的基于图的相机参数融合（GCPF）模块，通过图神经网络显式建模这些参数间的交互。
+
+**图构建与节点编码**。我们构建异构图 $\mathcal{G}=(\mathcal{V},\mathcal{E})$，其中节点 $\mathcal{V}$ 同时表示视觉特征与相机参数。视觉节点作为中心枢纽（central hub），汇聚来自所有参数节点的信息，从而实现丰富的跨模态交互。具体地，我们定义八个节点：一个编码 $\mathbf{F}_{q}$ 的视觉节点与七个参数节点。每个参数节点通过各自的线性变换进行编码：
+
+$$
+\mathbf{v}_{\text{visual}}=\mathbf{W}_{v}\mathbf{F}_{q},\quad\mathbf{v}_{i}=\mathbf{W}_{p}p_{i}, \tag{5}
+$$
+
+其中 $\mathbf{W}_{v}$ 与 $\mathbf{W}_{p}$ 为可学习的投影矩阵，$p_{i}$ 表示第 $i$ 个相机参数的取值。
+
+**物理关系建模**。边集 $\mathcal{E}$ 同时编码跨模态连接与基于摄影原理的物理关系。我们按如下关系建立连接：(1) 跨模态连接：视觉节点与所有参数节点相连，实现参数-视觉特征交互；(2) 曝光三角（Exposure Triangle）：ISO、快门速度与光圈构成一个强连通子图，因为它们共同决定曝光——提高 ISO 可以补偿更快的快门或更小的光圈；(3) 后处理链（Post-processing Chain）：对比度、饱和度与锐度在图像增强中表现出相互依赖，较高的对比度往往需要相应调整饱和度；(4) 颜色相关性（Color Correlation）：由于色温效应，白平衡会直接影响饱和度的感知。
+
+**图推理**。图推理过程采用两层图注意力网络（Graph Attention Networks, GAT）（Velickovic et al., 2017）在参数-视觉图上传播信息：
+
+$$
+\mathbf{H}^{(1)}=\text{GAT}_{1}(\mathbf{X},\mathcal{E}),\quad\mathbf{H}^{(2)}=\text{GAT}_{2}(\mathbf{H}^{(1)},\mathcal{E}), \tag{6}
+$$
+
+其中 $\mathbf{X}=[\mathbf{v}_{\text{visual}},\mathbf{v}_{1},\ldots,\mathbf{v}_{7}]$ 包含全部编码后的节点特征。第一层 GAT 使用 4 个注意力头并做拼接以捕获多样化的关系模式，第二层则使用单头注意力完成特征整合。最终的参数感知表示 $\mathbf{F}_{gcn}$ 从更新后的中心视觉节点中提取：
+
+$$
+\mathbf{F}_{gcn}=\mathbf{H}^{(2)}[0,:], \tag{7}
+$$
+
+其中 $\mathbf{H}^{(2)}[0,:]$ 表示矩阵 $\mathbf{H}^{(2)}$ 的第一行。这一方法使模型能够推理参数间的交互及其对图像质量的综合影响，为后续的质量预测提供更丰富的表示。
+
+### 4.3 多属性回归与细粒度排序
+
+**多属性回归器**。为实现全面的质量评估，我们实现了五个专用预测头，分别估计不同感知维度的质量分数：
+
+$$
+\hat{s}^{\text{attr}}=\text{MLP}_{\theta^{\text{attr}}_{s}}(\mathbf{F}_{f}), \tag{8}
+$$
+
+其中 $\mathbf{F}_{f}$ 表示融合特征（为 $\mathbf{F}_{q}$，或在参数可用时为 $\mathbf{F}_{gcn}$），且 $\text{attr}\in\{\text{overall},\text{face},\text{sharpness},\text{exposure},\text{noise}\}$。
+
+**细粒度偏好分类器**。为捕捉细微的质量差异，我们引入成对比较机制：
+
+$$
+\hat{c}^{\text{attr}}=\sigma\left(\text{MLP}_{\theta^{\text{attr}}_{c}}([\mathbf{F}_{a}\oplus\mathbf{F}_{b}\oplus\mathbf{F}_{a}-\mathbf{F}_{b}])\right), \tag{9}
+$$
+
+其中 $\oplus$ 表示拼接，$\sigma$ 为 sigmoid 函数，差值项用于捕获相对的质量变化。
+
+### 4.4 学习目标
+
+我们使用带有精心设计损失函数的多任务学习框架来优化 TuningIQA。
+
+**置信度加权回归损失**。为处理细粒度评估中的标注不确定性，我们设计了基于方差的置信度加权：
+
+$$
+\mathcal{L}_{reg}=\frac{1}{|\mathcal{D}|}\sum_{(I_{i},s_{i})\in\mathcal{D}}\exp(-v_{i})\sum_{\text{attr}}|\hat{s}^{\text{attr}}_{i}-s^{\text{attr}}_{i}|, \tag{10}
+$$
+
+其中 $v_{i}$ 表示标注方差，可自适应地降低不可靠质量分数的影响。
+
+**细粒度排序损失**。对于排序学习，我们采用二元交叉熵：
+
+$$
+\mathcal{L}_{rank}=-\frac{1}{|\mathcal{P}|}\sum_{(I_{p},I_{q})\in\mathcal{P}}\sum_{\text{attr}}{BCE}(c^{\text{attr}}_{pq},\hat{c}^{\text{attr}}_{pq}), \tag{11}
+$$
+
+其中 ${BCE}(c,\hat{c})$ 表示二元交叉熵函数。组合目标为 $\mathcal{L}=\lambda_{reg}\mathcal{L}_{reg}+\lambda_{rank}\mathcal{L}_{rank}$，其权重由经验确定为 $\lambda_{reg}:\lambda_{rank}=1:2$。
+
+---
+
+## 5 实验
+
+### 5.1 在 FGLive-10K 上的性能评估
+
+**评测协议**。我们将提出的 TuningIQA 模型与手工特征方法以及最先进的基于学习的 BIQA 模型进行比较。所有基于学习的模型均在 FGLive-10K 上按严格的场景级划分进行训练。我们采用 SRCC、PLCC 评价分数预测，采用细粒度精度（fine-grained accuracy）评价成对排序。
+
+**实现细节**。我们使用 PyTorch 实现 TuningIQA，并在 NVIDIA RTX 4090 GPU 上训练。模型采用 AdamW（Loshchilov and Hutter, 2019）与余弦退火（Loshchilov and Hutter, 2017）进行端到端优化，最大学习率为 $1\times 10^{-5}$，批大小为 64。训练时，输入图像先被缩放至 $256\times 256$，再随机裁剪到 $224\times 224$。我们施加标准数据增强（水平/垂直翻转），同时避免会破坏质量的操作。模型在训练集的全部图像对上训练 5 个 epoch。TuningIQA 基于轻量主干实现，以确保应用效率。
+
+**总体性能**。表 2 总结了 TuningIQA 与最先进 BIQA 方法在 FGLive-10K 数据集上的性能比较。容易看出，现有方法虽然取得了合理的分数回归性能，但其细粒度排序能力明显不足，凸显了基于分数的方法在细微质量判别上的欠缺——而这正是相机调优所需要的。相比之下，TuningIQA 在两项任务上均取得领先性能，证明了回归与排序联合学习的有效性。
+
+**表 2**：TuningIQA 与最先进 BIQA 方法在两项任务上的性能：在 FGLive-10K 数据库上的质量分数回归（SRCC/PLCC）与细粒度排序（FG-ACC）。
+
+| 方法 | 主干网络 | 参数量 | 输入尺寸 | SRCC↑ | PLCC↑ | FG-ACC↑ |
+|---|---|---|---|---|---|---|
+| NIQE (Mittal, Soundararajan, and Bovik, 2013) | – | – | 全分辨率 | 0.4512 | 0.5065 | 0.4327 |
+| ILNIQE (Zhang, Zhang, and Bovik, 2015) | – | – | 全分辨率 | 0.5706 | 0.5412 | 0.4089 |
+| BRISQUE (Mittal, Moorthy, and Bovik, 2012) | – | – | 全分辨率 | 0.3411 | 0.4280 | 0.4583 |
+| DBCNN (Zhang et al., 2020) | VGG16 | 15.31M | 224×224 | 0.7507 | 0.7495 | 0.5667 |
+| HyperIQA (Su et al., 2020) | ResNet-50 | 27.38M | 224×224 | 0.8472 | 0.8518 | 0.5980 |
+| MT-A (Fang et al., 2020) | ResNet-50 | 23.57M | 512×512 | 0.8821 | 0.8829 | 0.6223 |
+| CLIP-IQA+ (Wang, Chan, and Loy, 2023) | CLIP (ResNet-50) | 149.70M | 全分辨率 | 0.7056 | 0.7039 | 0.5570 |
+| MUSIQ (Ke et al., 2021) | Transformer | 157.23M | 全分辨率 | 0.8662 | 0.8687 | 0.6861 |
+| SARQUE (Huang et al., 2023) | MobileNetV3-S | 8.85M | 224×224 | 0.8581 | 0.8591 | 0.6095 |
+| LIQE (Zhang et al., 2023) | CLIP (ViT-B/32) | 151.28M | 224×224 | 0.9235 | 0.9206 | 0.6533 |
+| Q-Align (Wu et al., 2023) | mPLUG-Owl2-7B | 8197.86M | 448×448 | 0.8721 | 0.8315 | 0.6311 |
+| Compare2Score (Zhu et al., 2024) | mPLUG-Owl2-7B | 8197.86M | 448×448 | 0.8502 | 0.8190 | 0.6266 |
+| **TuningIQA** | MobileNetV3-S | 58.29M | 224×224 | **0.9308** | **0.9302** | **0.7065** |
+| **TuningIQA** | ResNet-50 | 84.62M | 224×224 | **0.9385** | **0.9364** | **0.7284** |
+
+**多属性评估**。为评估多属性评估能力，我们进一步将 TuningIQA 与三个支持质量属性预测的 SOTA 方法进行比较：CLIP-IQA、MT-A 与 SARQUE。如表 3 所示，人脸质量评估对现有方法而言尤其困难，而 TuningIQA 凭借人类感知特征提取在所有属性上均取得领先性能，印证了其以人为中心设计的有效性。
+
+**表 3**：多属性性能比较。
+
+| 方法 | 指标 | 清晰度 | 噪声 | 曝光 | 人脸 |
+|---|---|---|---|---|---|
+| CLIP-IQA | SRCC | 0.532 | 0.472 | 0.199 | 0.510 |
+| | PLCC | 0.528 | 0.434 | 0.208 | 0.512 |
+| | FG-ACC | 0.649 | 0.622 | 0.571 | 0.518 |
+| MT-A | SRCC | 0.896 | 0.804 | 0.782 | 0.807 |
+| | PLCC | 0.943 | 0.898 | 0.863 | 0.802 |
+| | FG-ACC | 0.688 | 0.665 | 0.621 | 0.582 |
+| SARQUE | SRCC | 0.868 | 0.743 | 0.700 | 0.754 |
+| | PLCC | 0.930 | 0.876 | 0.804 | 0.754 |
+| | FG-ACC | 0.666 | 0.645 | 0.602 | 0.547 |
+| **TuningIQA** | SRCC | **0.935** | **0.805** | **0.897** | **0.885** |
+| | PLCC | **0.963** | **0.905** | **0.949** | **0.880** |
+| | FG-ACC | **0.773** | **0.746** | **0.776** | **0.725** |
+
+**定性分析**。图 7 展示了 gMAD 竞争（group Maximum Differentiation competition，组最大差分竞争）（Ma et al., 2020）的结果，揭示了各模型之间的感知不一致。LIQE 与 MUSIQ 对差异显著的图像给出相近的预测，或对极细微的差异过度放大；而 TuningIQA 保持了正确的判别，与人眼的视觉敏感性更为一致。
+
+> **图 7**：在 FGLive-10K 上与 LIQE 和 MUSIQ 的 gMAD 竞争结果。
+
+**消融研究**。表 4 给出了在两个数据集上的消融研究结果：FGLive-10K 与 FGLive-p（含相机参数的子集）。我们系统分析了人类感知特征提取（HFE）模块与基于图的相机参数融合（GCPF）模块的贡献。结果表明：HFE 在 FGLive-10K 上一致地提升了所有指标的性能，其中 FG-ACC 的提升尤为明显；在 FGLive-p 子集上，GCPF 带来了显著提升，验证了参数相互依赖建模的重要性；两个模块的组合取得了最佳性能，证实了二者互补的有效性。
+
+**表 4**：消融研究。结果为整体分数与各属性上的平均性能。
+
+| 数据集 | 配置 | SRCC↑ | PLCC↑ | FG-ACC↑ |
+|---|---|---|---|---|
+| FGLive-10K | Baseline | 0.8757 | 0.9201 | 0.7258 |
+| FGLive-10K | w/ HFE | 0.8917 | 0.9267 | 0.7496 |
+| FGLive-p | Baseline | 0.8206 | 0.8768 | 0.7092 |
+| FGLive-p | w/ GCPF | 0.8552 | 0.8963 | 0.7308 |
+| FGLive-p | w/ GCPF+HFE | 0.8613 | 0.9009 | 0.7382 |
+
+> **图 8**：IQA 引导的直播相机调优结果定性比较（放大查看效果更佳）。
+
+### 5.2 相机调优应用
+
+为验证 IQA 度量在指导直播相机参数调优中的实际有效性，我们通过以最小步长增量式地调整相机参数来模拟细粒度参数调整场景。每次调整后采集一张图像，并使用不同度量对这些图像的质量进行排序，从而识别最优参数。TuningIQA 基于成对比较进行排序，而其他方法依赖基于分数的排序。如图 8 所示，我们展示了曝光值（Exposure Value, EV）与 ISO 微小调整所引起的细粒度质量差异，以及不同方法给出的排序结果。结果揭示了基于分数的方法在细粒度评估中的不准确性，以及它们对面部区域质量敏感度的不足。此外，我们进行了一项主观实验，比较 TuningIQA 与 LIQE/MUSIQ 排序结果中 top-1 图像的质量。在 44 个多样场景、12 名志愿者上的评估表明：TuningIQA 对 LIQE 和 MUSIQ 分别取得 76% 与 74% 的胜率。这些显著提升验证了：细粒度质量评估能力对实际相机调优应用至关重要——即使整体图像外观的变化极小，细微的参数调整也可能对用户体验产生实质性影响。
+
+---
+
+## 6 结论
+
+本文提出了 FGLive-10K 数据集与 TuningIQA 方法，推动了面向直播相机调优的细粒度 BIQA 的发展。我们的研究发现：现有基于分数的 BIQA 方法虽然能取得合理的分数回归性能，但在相机优化所必需的细粒度判别上存在根本性困难。TuningIQA 通过人类感知特征提取与基于图的参数融合，联合建模多属性回归与细粒度排序。大量实验表明，TuningIQA 的性能显著优于现有方法，并且能够在自动化相机参数优化中提供切实可用的指导，具备实际有效性。
+
+### 精读小结
+
+- **问题定位**：论文的核心命题是"单刺激打分在细粒度失效"，并给出了双向论证——模型侧，图 1 展示 LIQE/MUSIQ 对参数微调引起的细微差异不敏感；标注侧，图 5 定量揭示在 MOS 层级内部个体标注与 MOS 的相关性骤降（4.2–5.0 层级内 PLCC 仅 0.24）。这一论证链条是全文立论的基石，也直接决定了数据集与方法的设计取向。
+- **数据集设计**：FGLive-10K 的价值不在规模（10,185 张与 KonIQ-10K/SPAQ 相当），而在"同场景 + 系统性 7 参数扰动 + 完整参数元数据"的受控设计：同一场景消除了内容混淆，使质量差异可归因于相机参数；91,946 个图像对中仅对 $\Delta s\leq 0.8$ 的 21%（19,234 对）做人工成对复核，兼顾了标注成本与细粒度可靠性，是一个务实的两段式标注协议。
+- **方法设计**：HFE 将"人区域优先"落实为"检测框引导的 ROI 特征（降至 $C/2$ 后逐位置拼接）+ 九分区残差变换 + 交叉注意力融合"的具体架构；GCPF 将摄影先验（曝光三角、后处理链、颜色相关）编码为图结构，经两层 GAT 传播后从中心视觉节点取出参数感知表示。二者本质上是"把领域先验结构化地嵌入通用网络"，而非全新架构；多任务部分用 $\exp(-v_i)$ 对高方差标注降权、用 BCE 做成对排序，权重比 1:2。
+- **实验结论**：说服力主要来自三个维度——FG-ACC 上的明显差距（ResNet-50 版 0.7284 vs LIQE 0.6533、MUSIQ 0.6861）；真实调优闭环中 44 场景、12 人主观实验的 76%/74% 胜率；消融中 HFE 与 GCPF 各自有效且互补（FGLive-p 上组合最优 0.7382）。
+- **局限与思考**：(1) HFE 依赖 Faster R-CNN 的检测质量，漏检/误检时人区域引导失效；(2) GCPF 需要完整 7 参数元数据，仅在 FGLive-p 子集（6,707 张）上验证，实际部署中元数据未必可得（故被设计为可选模块，无元数据时退化为 HFE）；(3) 训练与评测均在自建数据集内完成（严格的场景级划分），缺乏跨数据集泛化实验；(4) 图结构（曝光三角等边）为手工先验而非学习所得；(5) 与 8B 级 MLLM 方法（Q-Align 等）相比，轻量主干（MobileNetV3-S，58.29M）在 SRCC 上反超且推理开销低，但 MLLM 路线的上限尚未充分释放。此外，原文存在子集命名不一致（FineLive-p / FGLive-p）与记号不一致（$\mathbf{F}_{GCN}$ / $\mathbf{F}_{gcn}$）等小瑕疵，译文已统一为 FGLive-p 与 $\mathbf{F}_{gcn}$。
+
+---
+
+## 创新点提炼
+
+1. **首个面向直播相机调优的细粒度 BIQA 数据集 FGLive-10K**：10,185 张 1920×1080 图像、555 个场景，由三台内部研发直播相机在真实场景中对光圈、快门速度、ISO、白平衡、对比度、饱和度、锐度 7 个参数做系统性扰动采集。与既有真实失真数据集（KonIQ-10K、SPAQ 等）的本质区别在于"同场景受控参数变化 + 完整参数元数据"（表 1 中 #Param = 7 独此一家），使质量差异可被归因于相机设置，也为参数交互建模提供了数据基础。
+
+2. **"MOS + 条件性成对精化"的两段式标注协议**：先用单刺激得到 5 属性 MOS 并导出初始偏好 $c_{pq}^{*}=\mathbb{I}(s_{p}>s_{q})$，再仅对 $\Delta s\leq 0.8$（标注不确定性显著）的 21% 图像对进行人工成对复核，最终得到 19,234 个细粒度偏好对。该协议直击"单刺激方法在质量层级内部失效"（层内 PLCC 低至 0.24，图 5 定量揭示）这一根本问题，以最小标注成本换取细粒度可靠性，是数据集侧最关键的方法论贡献。
+
+3. **HFE 模块将"人区域优先"结构化**：Faster R-CNN 检测人物 → ROI Align 提取人物区域特征（降维至 $C/2$ 后拼接到主干特征图每个空间位置）→ 以人物为中心的九分区各自做残差变换（$3\times 3$ 卷积）→ 交叉注意力（人感知特征作 $\mathbf{Q}$、主干特征作 $\mathbf{K}/\mathbf{V}$）融合。它使"人脸质量主导整体感知"（图 4 中 overall 与 face 相关性极高）这一数据洞察被显式架构化——人脸属性 SRCC 达 0.885，显著高于最强基线 MT-A 的 0.807。
+
+4. **GCPF 模块将摄影先验编码为图结构**：构建 8 节点异构图（1 个视觉节点 + 7 个参数节点），边集显式编码跨模态连接、曝光三角（ISO-快门-光圈强连通）、后处理链（对比度-饱和度-锐度互依赖）与颜色相关（白平衡-饱和度）四类物理关系，经两层 GAT（首层 4 头拼接捕获多样关系模式、次层单头整合）后从中心视觉节点提取参数感知表示 $\mathbf{F}_{gcn}$。可选即插即用（无元数据时退化为 HFE），在 FGLive-p 上带来 SRCC +0.035（0.8206→0.8552）的提升。
+
+5. **多属性回归与细粒度排序的联合优化，并落地为调优闭环验证**：5 个属性预测头 + 成对偏好头（拼接 $\mathbf{F}_{a}\oplus\mathbf{F}_{b}\oplus\mathbf{F}_{a}-\mathbf{F}_{b}$ 显式保留差分信息），回归损失用 $\exp(-v_{i})$ 按标注方差自适应降权、排序损失用 BCE，权重比 $\lambda_{reg}:\lambda_{rank}=1:2$。同一模型同时支持单图打分与成对排序两种工作模式，FG-ACC 领先 LIQE 7.5 个百分点（0.7284 vs 0.6533），并在 44 个场景的真实相机调优闭环中以成对排序指引参数搜索，对 LIQE/MUSIQ 取得 76%/74% 的主观胜率——完成了从"基准指标"到"实际调优收益"的完整证据链。
+
+---
+
+*注：本翻译基于 arXiv HTML 提取的 Markdown 全文；参考文献列表从略，正文引用保留 (作者, 年份) 格式。原文中个别不一致之处已在"精读小结"中标明：含相机参数的子集在原文中先写作 FineLive-p、后文与表格中作 FGLive-p（译文统一为 FGLive-p）；参数感知表示在原文行文中作 $\mathbf{F}_{GCN}$、公式中作 $\mathbf{F}_{gcn}$（译文统一为 $\mathbf{F}_{gcn}$）。*
+</script>
+<script src="../assets/app.js?v=5"></script>
+</body>
+</html>
