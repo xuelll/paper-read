@@ -17,7 +17,7 @@
 | 目录 / 文件 | 内容 |
 |---|---|
 | `web/` | 站点本体：88 个论文页 + 首页 + 创新点总结页 + arXiv 原文 HTML（`web/en_src/`） |
-| `translations/` | 88 篇中 85 篇中文精读翻译 Markdown（79 AesGI-Bench / 82 ContextAes / 84 AesMind 三篇 OpenReview 论文 PDF 获取受阻，页面暂以官方跳转收录） |
+| `translations/` | 88 篇中 87 篇中文精读翻译 Markdown（79 AesGI-Bench 因 OpenReview 需登录获取 PDF 暂缓，页面以官方跳转收录） |
 | `创新点总结.md` | 跨论文创新点汇总（总结页的源文件） |
 | `web/build_web.ps1` | 站点构建脚本 |
 | `index.html` | 仓库根跳转页（重定向到 `web/index.html`） |
